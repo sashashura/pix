@@ -2,6 +2,7 @@ const { AlreadyRegisteredEmailError, InvalidRecaptchaTokenError, EntityValidatio
 const User = require('../models/User');
 
 const userValidator = require('../validators/user-validator');
+const { getCampaignUrl } = require('../../infrastructure/utils/url-builder');
 
 function  _manageEmailAvailabilityError(error) {
   return _manageError(error, AlreadyRegisteredEmailError, 'email', 'Cette adresse e-mail est déjà enregistrée, connectez-vous.');
@@ -21,53 +22,58 @@ function _manageError(error, errorType, attribute, message) {
   throw error;
 }
 
-function _validateData(user, reCaptchaToken, userRepository, userValidator, reCaptchaValidator) {
+async function _validateData(user, reCaptchaToken, userRepository, userValidator, reCaptchaValidator) {
   let userValidatorError;
   try {
     userValidator.validate({ user });
   } catch (err) {
     userValidatorError = err;
   }
-  return Promise.all([
-    userRepository.isEmailAvailable(user.email).catch(_manageEmailAvailabilityError),
-    reCaptchaValidator.verify(reCaptchaToken).catch(_manageReCaptchaTokenError),
-  ]).then((validationErrors) => {
-    validationErrors.push(userValidatorError);
-    // Promise.all returns the return value of all promises, even if the return value is undefined
-    const relevantErrors = validationErrors.filter((error) => error instanceof Error);
-    if (relevantErrors.length > 0) {
-      throw EntityValidationError.fromMultipleEntityValidationErrors(relevantErrors);
-    }
-  });
-}
-
-function _checkEncryptedPassword(userPassword, encryptedPassword) {
-  if (encryptedPassword === userPassword) {
-    throw new Error('Erreur lors de l‘encryption du mot passe de l‘utilisateur');
+  const promises = [reCaptchaValidator.verify(reCaptchaToken).catch(_manageReCaptchaTokenError)];
+  if (user.email) {
+    promises.push(userRepository.isEmailAvailable(user.email).catch(_manageEmailAvailabilityError));
   }
 
-  return encryptedPassword;
+  const validationErrors = await Promise.all(promises);
+  validationErrors.push(userValidatorError);
+
+  if (validationErrors.some((error) => error instanceof Error)) {
+    const relevantErrors = validationErrors.filter((error) => error instanceof Error);
+    throw EntityValidationError.fromMultipleEntityValidationErrors(relevantErrors);
+  }
+
+  return true;
 }
 
 module.exports = async function createUser({
   user,
+  campaignCode,
   reCaptchaToken,
+  locale,
   userRepository,
+  campaignRepository,
   reCaptchaValidator,
   encryptionService,
   mailService,
 }) {
-  return _validateData(user, reCaptchaToken, userRepository, userValidator, reCaptchaValidator)
-    .then(() => encryptionService.hashPassword(user.password))
-    .then((encryptedPassword) => _checkEncryptedPassword(user.password, encryptedPassword))
-    .then((encryptedPassword) => {
-      const userWithEncryptedPassword = new User(user);
-      userWithEncryptedPassword.password = encryptedPassword;
-      return userWithEncryptedPassword;
-    })
-    .then(userRepository.create)
-    .then((savedUser) => {
-      mailService.sendAccountCreationEmail(savedUser.email);
-      return savedUser;
-    });
+  const isValid = await _validateData(user, reCaptchaToken, userRepository, userValidator, reCaptchaValidator);
+
+  if (isValid) {
+    const encryptedPassword = await encryptionService.hashPassword(user.password);
+
+    const userWithEncryptedPassword = new User({ ... user, password: encryptedPassword });
+    const savedUser = await userRepository.create(userWithEncryptedPassword);
+
+    let redirectionUrl = null;
+
+    if (campaignCode) {
+      const campaign = await campaignRepository.getByCode(campaignCode);
+      if (campaign && campaign.organizationId) {
+        redirectionUrl = getCampaignUrl(locale, campaignCode);
+      }
+    }
+
+    await mailService.sendAccountCreationEmail(savedUser.email, locale, redirectionUrl);
+    return savedUser;
+  }
 };

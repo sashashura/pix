@@ -1,45 +1,60 @@
-import Component from '@ember/component';
-import { computed } from '@ember/object';
+/* eslint ember/no-classic-components: 0 */
+/* eslint ember/require-tagless-components: 0 */
+
+import { action, computed } from '@ember/object';
 import { inject } from '@ember/service';
+import Component from '@ember/component';
+import classic from 'ember-classic-decorator';
 
-export default Component.extend({
+@classic
+export default class LoginForm extends Component {
+  @inject()
+  session;
 
-  session: inject(),
-  store: inject(),
+  @inject()
+  store;
 
-  login: null,
-  password: null,
-  isLoading: false,
-  isPasswordVisible: false,
-  passwordInputType: computed('isPasswordVisible', function() {
+  @inject()
+  router;
+
+  login = null;
+  password = null;
+  isLoading = false;
+  isPasswordVisible = false;
+
+  @computed('isPasswordVisible')
+  get passwordInputType() {
     return this.isPasswordVisible ? 'text' : 'password';
-  }),
+  }
 
-  isErrorMessagePresent: false,
+  isErrorMessagePresent = false;
 
-  actions: {
-    authenticate() {
-      this.set('isLoading', true);
-      const login = this.login;
-      const password = this.password;
+  @action
+  authenticate() {
+    this.set('isLoading', true);
+    const login = this.login;
+    const password = this.password;
 
-      this._authenticate(password, login);
-    },
+    this._authenticate(password, login);
+  }
 
-    togglePasswordVisibility() {
-      this.toggleProperty('isPasswordVisible');
-    }
-
-  },
+  @action
+  togglePasswordVisibility() {
+    this.toggleProperty('isPasswordVisible');
+  }
 
   async _authenticate(password, login) {
     const scope = 'mon-pix';
     try {
       await this.session.authenticate('authenticator:oauth2', { login, password, scope });
-    } catch (e) {
+    } catch (err) {
+      const title = ('errors' in err) ? err.errors.get('firstObject').title : null;
+      if (title === 'PasswordShouldChange') {
+        this.store.createRecord('user', { username: this.login, password: this.password });
+        return this.router.replaceWith('update-expired-password');
+      }
       this.set('isErrorMessagePresent', true);
     }
     this.set('isLoading', false);
   }
-
-});
+}

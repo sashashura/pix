@@ -1,5 +1,7 @@
 const Joi = require('@hapi/joi');
+const { statuses } = require('../models/Session');
 const { EntityValidationError } = require('../errors');
+const { idSpecification } = require('./id-specification');
 
 const validationConfiguration = { abortEarly: false, allowUnknown: true };
 
@@ -40,6 +42,15 @@ const sessionValidationJoiSchema = Joi.object({
 
 });
 
+const sessionFiltersValidationSchema = Joi.object({
+  id: idSpecification.optional(),
+  status: Joi.string().trim()
+    .valid(statuses.CREATED, statuses.FINALIZED, statuses.IN_PROCESS, statuses.PROCESSED).optional(),
+  resultsSentToPrescriberAt: Joi.boolean().optional(),
+  assignedToSelfOnly: Joi.boolean().optional(),
+  certificationCenterName: Joi.string().trim().optional(),
+});
+
 module.exports = {
 
   validate(session) {
@@ -47,5 +58,21 @@ module.exports = {
     if (error) {
       throw EntityValidationError.fromJoiErrors(error.details);
     }
+  },
+
+  validateAndNormalizeFilters(filters, assignedCertificationOfficerId) {
+    const { value, error } = sessionFiltersValidationSchema.validate(filters, validationConfiguration);
+
+    if (error) {
+      throw EntityValidationError.fromJoiErrors(error.details);
+    }
+
+    if (value.assignedToSelfOnly) {
+      value.assignedCertificationOfficerId = assignedCertificationOfficerId;
+    }
+
+    delete value.assignedToSelfOnly;
+
+    return value;
   }
 };

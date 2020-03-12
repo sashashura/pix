@@ -39,4 +39,5 @@ describe('Unit | Model | Campaign-Participation-Result', function() {
       expect(maxTotalSkillsCountInCompetences).to.equal(11);
     });
   });
+
 });

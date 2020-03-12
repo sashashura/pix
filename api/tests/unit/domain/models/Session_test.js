@@ -7,17 +7,18 @@ const SESSION_PROPS = [
   'accessCode',
   'address',
   'certificationCenter',
-  'certificationCenterId',
   'date',
   'description',
   'examiner',
   'room',
   'time',
-  'status',
   'examinerGlobalComment',
   'finalizedAt',
   'resultsSentToPrescriberAt',
+  'publishedAt',
   'certificationCandidates',
+  'certificationCenterId',
+  'assignedCertificationOfficerId',
 ];
 
 describe('Unit | Domain | Models | Session', () => {
@@ -29,18 +30,20 @@ describe('Unit | Domain | Models | Session', () => {
       accessCode: '',
       address: '',
       certificationCenter: '',
-      certificationCenterId: '',
       date: '',
       description: '',
       examiner: '',
       room: '',
       time: '',
-      status: '',
       examinerGlobalComment: '',
       finalizedAt: '',
       resultsSentToPrescriberAt: '',
+      publishedAt: '',
       // includes
       certificationCandidates: [],
+      // references
+      certificationCenterId: '',
+      assignedCertificationOfficerId: '',
     });
   });
 
@@ -77,6 +80,68 @@ describe('Unit | Domain | Models | Session', () => {
 
         // then
         expect(areResultsFlaggedAsSent).to.be.false;
+      });
+    });
+  });
+
+  context('#get status', () => {
+
+    context('when session publishedAt timestamp is defined', () => {
+
+      it('should return PROCESSED', () => {
+        // given
+        session.publishedAt = new Date();
+
+        // when
+        const status = session.status;
+
+        // then
+        expect(status).to.equal(Session.statuses.PROCESSED);
+      });
+    });
+
+    context('when session publishedAt timestamp is not defined', () => {
+
+      context('when session assignedCertificationOfficerId is defined', () => {
+
+        it('should return IN_PROCESS', () => {
+          // given
+          session.assignedCertificationOfficerId = 123;
+
+          // when
+          const status = session.status;
+
+          // then
+          expect(status).to.equal(Session.statuses.IN_PROCESS);
+        });
+      });
+
+      context('when session assignedCertificationOfficerId is not defined', () => {
+      
+        context('when session finalizedAt timestamp is defined', () => {
+
+          it('should return FINALIZED', () => {
+            // given
+            session.finalizedAt = new Date();
+
+            // when
+            const status = session.status;
+
+            // then
+            expect(status).to.equal(Session.statuses.FINALIZED);
+          });
+        });
+
+        context('when session finalizedAt timestamp is not defined', () => {
+
+          it('should return CREATED', () => {
+            // when
+            const status = session.status;
+
+            // then
+            expect(status).to.equal(Session.statuses.CREATED);
+          });
+        });
       });
     });
   });

@@ -35,10 +35,12 @@ describe('Acceptance | Controller | users-controller-get-current-user', () => {
             'last-name': user.lastName,
             email: user.email.toLowerCase(),
             username: user.username,
-            cgu: true,
-            'pix-orga-terms-of-service-accepted': false,
-            'pix-certif-terms-of-service-accepted': false,
-            'has-seen-assessment-instructions': false,
+            cgu: user.cgu,
+            'last-terms-of-service-validated-at': user.lastTermsOfServiceValidatedAt,
+            'must-validate-terms-of-service': user.mustValidateTermsOfService,
+            'pix-orga-terms-of-service-accepted': user.pixOrgaTermsOfServiceAccepted,
+            'pix-certif-terms-of-service-accepted': user.pixCertifTermsOfServiceAccepted,
+            'has-seen-assessment-instructions': user.hasSeenAssessmentInstructions,
           },
           relationships: {
             memberships: {

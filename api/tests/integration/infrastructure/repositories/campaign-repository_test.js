@@ -4,7 +4,6 @@ const Campaign = require('../../../../lib/domain/models/Campaign');
 const CampaignReport = require('../../../../lib/domain/models/CampaignReport');
 const BookshelfCampaign = require('../../../../lib/infrastructure/data/campaign');
 const { NotFoundError } = require('../../../../lib/domain/errors');
-const User = require('../../../../lib/domain/models/User');
 const _ = require('lodash');
 
 describe('Integration | Repository | Campaign', () => {
@@ -75,9 +74,8 @@ describe('Integration | Repository | Campaign', () => {
   });
 
   describe('#save', () => {
-
     let creatorId, organizationId, targetProfileId;
-    let savedCampaign, campaignToSave;
+    let savedCampaign, campaignToSave, domainCreator, campaignAttributes;
 
     beforeEach(async () => {
       // given
@@ -88,38 +86,55 @@ describe('Integration | Repository | Campaign', () => {
       targetProfileId = databaseBuilder.factory.buildTargetProfile({}).id;
       await databaseBuilder.commit();
 
-      const domainCreator = new User(creator);
-      campaignToSave = domainBuilder.buildCampaign({
+      domainCreator = domainBuilder.buildUser(creator);
+
+      campaignAttributes = {
         name: 'Evaluation niveau 1 recherche internet',
         code: 'BCTERD153',
-        title: 'Parcours recherche internet',
         customLandingPageText: 'Parcours évaluatif concernant la recherche internet',
         creatorId,
         creator: domainCreator,
         organizationId,
-        targetProfileId,
-      });
-      campaignToSave.id = undefined;
-      // when
-      savedCampaign = await campaignRepository.save(campaignToSave);
+      };
     });
 
     afterEach(() => {
       return knex('campaigns').delete();
     });
 
-    it('should save the given campaign', async () => {
+    it('should save the given campaign with type ASSESSMENT', async () => {
+      // given
+      campaignToSave = domainBuilder.buildCampaign.ofTypeAssessment({
+        ...campaignAttributes,
+        targetProfileId,
+        title: 'Parcours recherche internet',
+      });
+      campaignToSave.id = undefined;
+
+      // when
+      savedCampaign = await campaignRepository.create(campaignToSave);
+
       // then
       expect(savedCampaign).to.be.instanceof(Campaign);
       expect(savedCampaign.id).to.exist;
-      expect(savedCampaign.name).to.equal(campaignToSave.name);
-      expect(savedCampaign.code).to.equal(campaignToSave.code);
-      expect(savedCampaign.title).to.equal(campaignToSave.title);
-      expect(savedCampaign.customLandingPageText).to.equal(campaignToSave.customLandingPageText);
-      expect(savedCampaign.creatorId).to.equal(campaignToSave.creatorId);
-      expect(savedCampaign.organizationId).to.equal(campaignToSave.organizationId);
+
+      expect(savedCampaign).to.deep.include(_.pick(campaignToSave, ['name', 'code', 'title', 'type', 'customLandingPageText', 'creatorId', 'organizationId']));
     });
 
+    it('should save the given campaign with type PROFILES_COLLECTION', async () => {
+      // given
+      campaignToSave = domainBuilder.buildCampaign.ofTypeProfilesCollection(campaignAttributes);
+      campaignToSave.id = undefined;
+
+      // when
+      savedCampaign = await campaignRepository.create(campaignToSave);
+
+      // then
+      expect(savedCampaign).to.be.instanceof(Campaign);
+      expect(savedCampaign.id).to.exist;
+
+      expect(savedCampaign).to.deep.include(_.pick(campaignToSave, ['name', 'code', 'title', 'type', 'customLandingPageText', 'creatorId', 'organizationId']));
+    });
   });
 
   describe('#findPaginatedFilteredByOrganizationIdWithCampaignReports', () => {
@@ -171,10 +186,11 @@ describe('Integration | Repository | Campaign', () => {
         await databaseBuilder.commit();
 
         // when
-        const { models: campaignsWithReports } = await campaignRepository.findPaginatedFilteredByOrganizationIdWithCampaignReports({ organizationId: otherOrganizationId, filter, page });
+        const { models: campaignsWithReports, meta } = await campaignRepository.findPaginatedFilteredByOrganizationIdWithCampaignReports({ organizationId: otherOrganizationId, filter, page });
 
         // then
         expect(campaignsWithReports).to.deep.equal([]);
+        expect(meta.hasCampaigns).to.equal(false);
       });
     });
 
@@ -196,15 +212,30 @@ describe('Integration | Repository | Campaign', () => {
 
         // then
         expect(campaignsWithReports[0]).to.be.instanceof(Campaign);
-        expect(campaignsWithReports[0].id).to.equal(campaign.id);
-        expect(campaignsWithReports[0].name).to.equal(campaign.name);
-        expect(campaignsWithReports[0].code).to.equal(campaign.code);
-        expect(campaignsWithReports[0].createdAt).to.exist;
-        expect(campaignsWithReports[0].targetProfileId).to.exist;
-        expect(campaignsWithReports[0].customLandingPageText).to.exist;
-        expect(campaignsWithReports[0].idPixLabel).to.exist;
-        expect(campaignsWithReports[0].title).to.exist;
-        expect(campaignsWithReports[0].organizationId).to.equal(campaign.organizationId);
+
+        expect(campaignsWithReports[0]).to.deep.include(_.pick(campaign, ['id', 'name', 'code', 'createdAt', 'targetProfileId', 'idPixLabel', 'title', 'type', 'customLandingPageText', 'organizationId']));
+      });
+
+      it('should return hasCampaign to true if the organization has one campaign at least', async () => {
+        // given
+        const organizationId2 = databaseBuilder.factory.buildOrganization({}).id;
+        databaseBuilder.factory.buildCampaign({
+          organizationId: organizationId2,
+          targetProfileId,
+          creatorId,
+        });
+        databaseBuilder.factory.buildCampaign({
+          organizationId,
+          targetProfileId,
+          creatorId,
+        });
+        await databaseBuilder.commit();
+
+        // when
+        const { meta } = await campaignRepository.findPaginatedFilteredByOrganizationIdWithCampaignReports({ organizationId, filter, page });
+
+        // then
+        expect(meta.hasCampaigns).to.equal(true);
       });
 
       it('should sort campaigns by descending creation date', async () => {
@@ -406,11 +437,11 @@ describe('Integration | Repository | Campaign', () => {
 
         it('should return page size number of campaigns', async () => {
           // when
-          const { models: campaignsWithReports, pagination } = await campaignRepository.findPaginatedFilteredByOrganizationIdWithCampaignReports({ organizationId, filter, page });
+          const { models: campaignsWithReports, meta: pagination } = await campaignRepository.findPaginatedFilteredByOrganizationIdWithCampaignReports({ organizationId, filter, page });
 
           // then
           expect(campaignsWithReports).to.have.lengthOf(3);
-          expect(pagination).to.deep.equal(expectedPagination);
+          expect(pagination).to.include(expectedPagination);
         });
       });
     });
@@ -501,7 +532,7 @@ describe('Integration | Repository | Campaign', () => {
   });
 
   describe('#checkIfUserOrganizationHasAccessToCampaign', () => {
-    let userId, ownerId, organizationId, forbiddenUserId, forbiddenOrganizationId, campaignId;
+    let userId, ownerId, organizationId, userWithDisabledMembershipId, forbiddenUserId, forbiddenOrganizationId, campaignId;
     beforeEach(async () => {
 
       // given
@@ -513,6 +544,9 @@ describe('Integration | Repository | Campaign', () => {
       forbiddenUserId = databaseBuilder.factory.buildUser().id;
       forbiddenOrganizationId = databaseBuilder.factory.buildOrganization().id;
       databaseBuilder.factory.buildMembership({ userId: forbiddenUserId, organizationId: forbiddenOrganizationId });
+
+      userWithDisabledMembershipId = databaseBuilder.factory.buildUser().id;
+      databaseBuilder.factory.buildMembership({ userId: userWithDisabledMembershipId, organizationId, disabledAt: new Date('2020-01-01') });
 
       campaignId = databaseBuilder.factory.buildCampaign({ organizationId }).id;
 
@@ -530,6 +564,14 @@ describe('Integration | Repository | Campaign', () => {
     it('should return false when the user is not a member of an organization that owns campaign', async () => {
       //when
       const access = await campaignRepository.checkIfUserOrganizationHasAccessToCampaign(campaignId, forbiddenUserId);
+
+      //then
+      expect(access).to.be.false;
+    });
+
+    it('should return false when the user is a disabled membership of the organization that owns campaign', async () => {
+      //when
+      const access = await campaignRepository.checkIfUserOrganizationHasAccessToCampaign(campaignId, userWithDisabledMembershipId);
 
       //then
       expect(access).to.be.false;

@@ -1,3 +1,5 @@
+/* eslint ember/no-computed-properties-in-native-classes: 0 */
+
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 import { equal, and } from '@ember/object/computed';
 import { computed } from '@ember/object';
@@ -14,6 +16,7 @@ export default class Scorecard extends Model {
   @attr('string') name;
   @attr('number') pixScoreAheadOfNextLevel;
   @attr('number') remainingDaysBeforeReset;
+  @attr('number') remainingDaysBeforeImproving;
   @attr('string') status;
 
   // references

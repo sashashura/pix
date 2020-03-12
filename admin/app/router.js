@@ -1,18 +1,17 @@
 import EmberRouter from '@ember/routing/router';
 import config from './config/environment';
 
-const Router = EmberRouter.extend({
-  location: config.locationType,
-  rootURL: config.rootURL,
+class Router extends EmberRouter {
+  location = config.locationType;
+  rootURL = config.rootURL;
 
   init() {
-    this._super(...arguments);
+    super.init(...arguments);
     this.on('routeDidChange', () => {
       window.scrollTo(0, 0);
     });
-  },
-
-});
+  }
+}
 
 Router.map(function() {
   // authentication
@@ -29,26 +28,36 @@ Router.map(function() {
     this.route('organizations', function() {
       this.route('new');
       this.route('list');
-      this.route('get', { path: '/:organization_id' });
+      this.route('get', { path: '/:organization_id' }, function() {
+        this.route('members');
+        this.route('target-profiles');
+      });
     });
+
+    this.route('users', function() {
+      this.route('list');
+      this.route('get', { path: '/:user_id' });
+    });
+
     this.route('certification-centers', function() {
       this.route('list');
     });
-    this.route('certifications', function() {
-      //TODO: find a better routes settings between info and details
-      this.route('single', function() {
-        this.route('info', { path: '/:certification_id' });
-        this.route('details', { path: '/:certification_id/details' });
-      });
-      this.route('sessions', function() {
-        this.route('info', { path: '/:session_id' }, function() {
-          this.route('list');
-        });
-      });
-    });
-    this.route('users', function() {
+
+    this.route('sessions', function() {
       this.route('list');
+      this.route('session', { path: '/:session_id' }, function() {
+        this.route('informations', { path: '/' });
+        this.route('certifications');
+      });
     });
+
+    this.route('certifications', function() {
+      this.route('certification', { path: '/:certification_id' }, function() {
+        this.route('informations', { path: '/' });
+        this.route('details');
+      });
+    });
+
     this.route('tools');
   });
 });

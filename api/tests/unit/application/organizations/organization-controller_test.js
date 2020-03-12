@@ -11,6 +11,8 @@ const organizationSerializer = require('../../../../lib/infrastructure/serialize
 const campaignSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/campaign-serializer');
 const targetProfileSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/target-profile-serializer');
 const studentSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/student-serializer');
+const userWithSchoolingRegistrationSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/user-with-schooling-registration-serializer');
+
 const organizationInvitationSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/organization-invitation-serializer');
 
 const queryParamsUtils = require('../../../../lib/infrastructure/utils/query-params-utils');
@@ -119,10 +121,11 @@ describe('Unit | Application | Organizations | organization-controller', () => {
             id: organization.id,
             attributes: {
               name: 'Acme',
-              type: 'PRO',
+              type: 'SCO',
               'logo-url': 'logo',
               'external-id': '02A2145V',
-              'province-code': '02A'
+              'province-code': '02A',
+              email: 'sco.generic.newaccount@example.net'
             }
           }
         }
@@ -146,7 +149,7 @@ describe('Unit | Application | Organizations | organization-controller', () => {
 
         // then
         expect(usecases.updateOrganizationInformation).to.have.been.calledOnce;
-        expect(usecases.updateOrganizationInformation).to.have.been.calledWithMatch({ id: organization.id, name: 'Acme', type: 'PRO', logoUrl: 'logo', externalId: '02A2145V', provinceCode: '02A' });
+        expect(usecases.updateOrganizationInformation).to.have.been.calledWithMatch({ id: organization.id, name: 'Acme', type: 'SCO', logoUrl: 'logo', externalId: '02A2145V', provinceCode: '02A', email: 'sco.generic.newaccount@example.net' });
       });
 
       it('should serialized organization into JSON:API', async () => {
@@ -323,14 +326,14 @@ describe('Unit | Application | Organizations | organization-controller', () => {
       expect(response).to.deep.equal(expectedResponse);
     });
 
-    it('should return a JSON API response with pagination information', async () => {
+    it('should return a JSON API response with meta information', async () => {
       // given
       request.query = {};
       const expectedResults = [campaign];
-      const expectedPagination = { page: 2, pageSize: 25, itemsCount: 100, pagesCount: 4 };
+      const expectedPagination = { page: 2, pageSize: 25, itemsCount: 100, pagesCount: 4, hasCampaigns: true };
       const expectedConfig = { ignoreCampaignReportRelationshipData: false };
       queryParamsUtils.extractParameters.withArgs({}).returns({ filter: {} });
-      usecases.findPaginatedFilteredOrganizationCampaigns.resolves({ models: expectedResults, pagination: expectedPagination });
+      usecases.findPaginatedFilteredOrganizationCampaigns.resolves({ models: expectedResults, meta: expectedPagination });
 
       // when
       await organizationController.findPaginatedFilteredCampaigns(request, hFake);
@@ -372,13 +375,50 @@ describe('Unit | Application | Organizations | organization-controller', () => {
     });
   });
 
-  describe('#findStudents', () => {
+  describe('#attachTargetProfiles', () => {
+    const userId = 1;
+    const targetProfile = domainBuilder.buildTargetProfile();
+
+    const organizationId = targetProfile.organizationId;
+    const targetProfileId = targetProfile.id.toString();
+    const targetProfilesToAttachAsArray = [targetProfileId];
+
+    beforeEach(() => {
+      request = {
+        auth: { credentials: { userId } },
+        params: { id: organizationId },
+        payload: {
+          data: {
+            type: 'target-profile-share',
+            attributes: {
+              'target-profiles-to-attach': [targetProfileId],
+            },
+          }
+        }
+      };
+
+      sinon.stub(usecases, 'attachTargetProfilesToOrganization');
+    });
+
+    it('should call the usecase to attach targetProfiles to organization with organizationId and targetProfilesToAttach', async () => {
+      // given
+      usecases.attachTargetProfilesToOrganization.withArgs({ organizationId, targetProfilesToAttach: targetProfilesToAttachAsArray }).resolves();
+
+      // when
+      const result = await organizationController.attachTargetProfiles(request, hFake);
+
+      // then
+      expect(result.statusCode).to.equal(204);
+    });
+  });
+
+  describe('#findPaginatedFilteredSchoolingRegistrations', () => {
 
     const connectedUserId = 1;
     const organizationId = 145;
 
-    let student;
-    let serializedStudents;
+    let studentWithUserInfo;
+    let serializedStudentsWithUsersInfos;
 
     beforeEach(() => {
       request = {
@@ -386,44 +426,71 @@ describe('Unit | Application | Organizations | organization-controller', () => {
         params: { id: organizationId.toString() }
       };
 
-      sinon.stub(usecases, 'findOrganizationStudents');
-      sinon.stub(studentSerializer, 'serialize');
+      sinon.stub(usecases, 'findPaginatedFilteredSchoolingRegistrations');
+      sinon.stub(userWithSchoolingRegistrationSerializer, 'serialize');
 
-      student = domainBuilder.buildStudent();
-      serializedStudents = {
+      studentWithUserInfo = domainBuilder.buildUserWithSchoolingRegistration();
+      serializedStudentsWithUsersInfos = {
         data: [{
-          lastName: student.lastName,
-          firstName: student.firstName,
-          birthdate: student.birthdate
+          ...studentWithUserInfo,
+          isAuthenticatedFromGAR: false,
         }]
       };
     });
 
-    it('should call the usecase to find students with the organization id', async () => {
+    it('should call the usecase to find students with users infos related to the organization id', async () => {
       // given
-      usecases.findOrganizationStudents.resolves();
+      usecases.findPaginatedFilteredSchoolingRegistrations.resolves({});
 
       // when
-      await organizationController.findStudents(request, hFake);
+      await organizationController.findPaginatedFilteredSchoolingRegistrations(request, hFake);
 
       // then
-      expect(usecases.findOrganizationStudents).to.have.been.calledWith({ organizationId });
+      expect(usecases.findPaginatedFilteredSchoolingRegistrations).to.have.been.calledWith({ organizationId, filter: {}, page: {} });
+    });
+
+    it('should call the usecase to find students with users infos related to filters', async () => {
+      // given
+      request = { ...request, query: { 'filter[lastName]': 'Bob', 'filter[firstName]': 'Tom', 'filter[connexionType]': 'email' } };
+      usecases.findPaginatedFilteredSchoolingRegistrations.resolves({});
+
+      // when
+      await organizationController.findPaginatedFilteredSchoolingRegistrations(request, hFake);
+
+      // then
+      expect(usecases.findPaginatedFilteredSchoolingRegistrations).to.have.been.calledWith({
+        organizationId,
+        filter: { lastName: 'Bob', firstName: 'Tom', connexionType: 'email' },
+        page: {}
+      });
+    });
+
+    it('should call the usecase to find students with users infos related to pagination', async () => {
+      // given
+      request = { ...request, query: { 'page[size]': 10, 'page[number]': 1 } };
+      usecases.findPaginatedFilteredSchoolingRegistrations.resolves({});
+
+      // when
+      await organizationController.findPaginatedFilteredSchoolingRegistrations(request, hFake);
+
+      // then
+      expect(usecases.findPaginatedFilteredSchoolingRegistrations).to.have.been.calledWith({ organizationId, filter: {}, page: { size: 10, number: 1 } });
     });
 
     it('should return the serialized students belonging to the organization', async () => {
       // given
-      usecases.findOrganizationStudents.resolves([student]);
-      studentSerializer.serialize.returns(serializedStudents);
+      usecases.findPaginatedFilteredSchoolingRegistrations.resolves({ data: [studentWithUserInfo] });
+      userWithSchoolingRegistrationSerializer.serialize.returns(serializedStudentsWithUsersInfos);
 
       // when
-      const response = await organizationController.findStudents(request, hFake);
+      const response = await organizationController.findPaginatedFilteredSchoolingRegistrations(request, hFake);
 
       // then
-      expect(response).to.deep.equal(serializedStudents);
+      expect(response).to.deep.equal(serializedStudentsWithUsersInfos);
     });
   });
 
-  describe('#importStudentsFromSIECLE', () => {
+  describe('#importSchoolingRegistrationsFromSIECLE', () => {
 
     const connectedUserId = 1;
     const organizationId = 145;
@@ -436,19 +503,19 @@ describe('Unit | Application | Organizations | organization-controller', () => {
         payload: buffer
       };
 
-      sinon.stub(usecases, 'importStudentsFromSIECLE');
+      sinon.stub(usecases, 'importSchoolingRegistrationsFromSIECLE');
       sinon.stub(studentSerializer, 'serialize');
     });
 
-    it('should call the usecase to import students', async () => {
+    it('should call the usecase to import schoolingRegistrations', async () => {
       // given
-      usecases.importStudentsFromSIECLE.resolves();
+      usecases.importSchoolingRegistrationsFromSIECLE.resolves();
 
       // when
-      await organizationController.importStudentsFromSIECLE(request);
+      await organizationController.importSchoolingRegistrationsFromSIECLE(request);
 
       // then
-      expect(usecases.importStudentsFromSIECLE).to.have.been.calledWith({ organizationId, buffer });
+      expect(usecases.importSchoolingRegistrationsFromSIECLE).to.have.been.calledWith({ organizationId, buffer });
     });
   });
 
@@ -459,6 +526,7 @@ describe('Unit | Application | Organizations | organization-controller', () => {
 
     const organizationId = invitation.organizationId;
     const emails = [invitation.email];
+    const locale = 'fr-fr';
 
     beforeEach(() => {
       request = {
@@ -477,12 +545,12 @@ describe('Unit | Application | Organizations | organization-controller', () => {
       sinon.stub(usecases, 'createOrganizationInvitations').resolves([{ id: 1 }]);
     });
 
-    it('should call the usecase to create invitation with organizationId and email', async () => {
+    it('should call the usecase to create invitation with organizationId, email and locale', async () => {
       // when
       await organizationController.sendInvitations(request, hFake);
 
       // then
-      expect(usecases.createOrganizationInvitations).to.have.been.calledWith({ organizationId, emails });
+      expect(usecases.createOrganizationInvitations).to.have.been.calledWith({ organizationId, emails, locale });
     });
   });
 

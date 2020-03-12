@@ -9,11 +9,14 @@ module.exports = {
     return new Serializer('campaign-participation',
       {
         transform: (campaignParticipation) => {
+          if (!campaignParticipation.user) {
+            delete campaignParticipation.user;
+          }
           const campaignParticipationForSerialization = Object.assign({}, campaignParticipation);
 
           if (campaignParticipation.lastAssessment) {
             campaignParticipationForSerialization.assessment = { id: campaignParticipation.lastAssessment.id };
-          } else {
+          } else if (campaignParticipation.assessmentId) {
             // FIXME: This ugly hack must me removed once all usage of this magical assessmentId property is deprecated
             // FIXME: in favor of the lastAssessment getter. Currently, the repository adds this prop in a very brittle way.
             campaignParticipationForSerialization.assessment = { id: campaignParticipation.assessmentId };
@@ -21,10 +24,10 @@ module.exports = {
           return campaignParticipationForSerialization;
         },
 
-        attributes: ['isShared', 'sharedAt', 'createdAt', 'participantExternalId',  'campaign', 'user', 'campaignParticipationResult', 'assessment'],
+        attributes: ['isShared', 'sharedAt', 'createdAt', 'participantExternalId',  'campaign', 'user', 'campaignParticipationResult', 'assessment', 'campaignAnalysis'],
         campaign: {
           ref: 'id',
-          attributes: ['code', 'title']
+          attributes: ['code', 'title', 'type']
         },
         user: {
           ref: 'id',
@@ -47,7 +50,49 @@ module.exports = {
               return `/api/campaign-participations/${parent.id}/campaign-participation-result`;
             }
           },
-          attributes: ['id', 'isCompleted', 'areaColor', 'totalSkillsCount', 'testedSkillsCount', 'validatedSkillsCount', 'competenceResults'],
+          attributes: [
+            'id',
+            'isCompleted',
+            'areaColor',
+            'masteryPercentage',
+            'totalSkillsCount',
+            'testedSkillsCount',
+            'validatedSkillsCount',
+            'competenceResults',
+            'campaignParticipationBadges',
+            'progress',
+          ],
+          competenceResults: {
+            ref: 'id',
+            attributes: [
+              'name',
+              'index',
+              'areaColor',
+              'masteryPercentage',
+              'totalSkillsCount',
+              'testedSkillsCount',
+              'validatedSkillsCount'
+            ],
+          },
+          campaignParticipationBadges: {
+            ref: 'id',
+            attributes: [
+              'altMessage',
+              'message',
+              'imageUrl',
+              'key',
+              'isAcquired',
+            ],
+          },
+        },
+        campaignAnalysis: {
+          ref: 'id',
+          ignoreRelationshipData: true,
+          relationshipLinks: {
+            related(record, current, parent) {
+              return `/api/campaign-participations/${parent.id}/analyses`;
+            }
+          }
         },
         meta
       }).serialize(campaignParticipation);

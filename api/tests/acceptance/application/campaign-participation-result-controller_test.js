@@ -17,10 +17,9 @@ describe('Acceptance | API | Campaign Participation Result', () => {
     targetProfileSkills,
     skills,
     areas,
-    badge,
     competences;
 
-  let server;
+  let server, badge, badgePartnerCompetence;
 
   beforeEach(async () => {
     server = await createServer();
@@ -43,16 +42,8 @@ describe('Acceptance | API | Campaign Participation Result', () => {
     assessment = databaseBuilder.factory.buildAssessment({
       campaignParticipationId: campaignParticipation.id,
       userId: user.id,
-      type: 'SMART_PLACEMENT',
+      type: 'CAMPAIGN',
       state: 'completed',
-    });
-
-    badge = new databaseBuilder.factory.buildBadge({
-      id: 1,
-      altMessage: 'Banana',
-      imageUrl: '/img/banana.svg',
-      message: 'You won a Banana Badge',
-      targetProfileId: targetProfile.id
     });
 
     targetProfileSkills = _.times(8, () => {
@@ -60,10 +51,30 @@ describe('Acceptance | API | Campaign Participation Result', () => {
         targetProfileId: targetProfile.id,
       });
     });
+
     skills = _.map(targetProfileSkills, (targetProfileSkill) => {
       return airtableBuilder.factory.buildSkill({
         id: targetProfileSkill.skillId
       });
+    });
+    const skillIds = _.map(skills, (skill) => skill.id);
+
+    badge = databaseBuilder.factory.buildBadge({
+      id: 1,
+      altMessage: 'Banana',
+      imageUrl: '/img/banana.svg',
+      message: 'You won a Banana Badge',
+      title: 'Banana',
+      key: 'PIX_BANANA',
+      targetProfileId: targetProfile.id
+    });
+
+    badgePartnerCompetence = databaseBuilder.factory.buildBadgePartnerCompetence({
+      id: 1,
+      badgeId: 1,
+      name: 'Pix Emploi',
+      color: 'emerald',
+      skillIds
     });
 
     targetProfileSkills.slice(2).forEach((targetProfileSkill, index) => {
@@ -161,18 +172,18 @@ describe('Acceptance | API | Campaign Participation Result', () => {
           id: campaignParticipation.id.toString(),
           attributes: {
             'mastery-percentage': 38,
+            'progress': 1,
             'total-skills-count': 8,
             'tested-skills-count': 5,
             'validated-skills-count': 3,
             'is-completed': true,
-            'are-badge-criteria-fulfilled': false,
           },
           relationships: {
-            badge: {
-              data: {
+            'campaign-participation-badges': {
+              data: [{
                 id: `${badge.id}`,
-                type: 'badges',
-              }
+                type: 'campaignParticipationBadges',
+              }]
             },
             'competence-results': {
               data: [{
@@ -189,19 +200,45 @@ describe('Acceptance | API | Campaign Participation Result', () => {
           },
         },
         included: [{
-          type: 'badges',
-          id: '1',
+          attributes: {
+            'area-color': 'emerald',
+            index: undefined,
+            'mastery-percentage': 38,
+            name: 'Pix Emploi',
+            'tested-skills-count': 5,
+            'total-skills-count': 8,
+            'validated-skills-count': 3,
+          },
+          id: badgePartnerCompetence.id.toString(),
+          type: 'partnerCompetenceResults'
+        }, {
           attributes: {
             'alt-message': 'Banana',
             'image-url': '/img/banana.svg',
-            message: 'You won a Banana Badge',
+            'is-acquired': false,
+            key: 'PIX_BANANA',
+            title: 'Banana',
+            message: 'You won a Banana Badge'
           },
+          id: '1',
+          type: 'campaignParticipationBadges',
+          relationships: {
+            'partner-competence-results': {
+              data: [
+                {
+                  id: '1',
+                  type: 'partnerCompetenceResults'
+                }
+              ]
+            }
+          }
         }, {
           type: 'competenceResults',
           id: competences[0].id.toString(),
           attributes: {
             name: 'Agir collectivement',
             index: '1.2',
+            'mastery-percentage': 0,
             'total-skills-count': 1,
             'tested-skills-count': 0,
             'validated-skills-count': 0,
@@ -213,6 +250,7 @@ describe('Acceptance | API | Campaign Participation Result', () => {
           attributes: {
             name: 'Nécessité de la pensée radicale',
             index: '2.1',
+            'mastery-percentage': 67,
             'total-skills-count': 3,
             'tested-skills-count': 2,
             'validated-skills-count': 2,
@@ -224,6 +262,7 @@ describe('Acceptance | API | Campaign Participation Result', () => {
           attributes: {
             name: 'Changer efficacement le monde',
             index: '2.2',
+            'mastery-percentage': 25,
             'total-skills-count': 4,
             'tested-skills-count': 3,
             'validated-skills-count': 1,

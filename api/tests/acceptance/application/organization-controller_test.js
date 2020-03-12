@@ -179,6 +179,7 @@ describe('Acceptance | Application | organization-controller', () => {
           attributes: {
             'external-id': '0446758F',
             'province-code': '044',
+            'email': 'sco.generic.newaccount@example.net',
           }
         }
       };
@@ -245,8 +246,8 @@ describe('Acceptance | Application | organization-controller', () => {
 
       const userPixMaster = databaseBuilder.factory.buildUser.withPixRolePixMaster();
 
-      databaseBuilder.factory.buildOrganization({ name: 'The name of the organization', type: 'SUP' });
-      databaseBuilder.factory.buildOrganization({ name: 'Organization of the night', type: 'PRO' });
+      databaseBuilder.factory.buildOrganization({ name: 'The name of the organization', type: 'SUP', externalId: '1234567A' });
+      databaseBuilder.factory.buildOrganization({ name: 'Organization of the night', type: 'PRO', externalId: '1234568A' });
 
       options = {
         method: 'GET',
@@ -309,7 +310,7 @@ describe('Acceptance | Application | organization-controller', () => {
 
       it('should return a 200 status code with paginated and filtered data', async () => {
         // given
-        options.url = '/api/organizations?filter[name]=orga&page[number]=2&page[size]=1';
+        options.url = '/api/organizations?filter[name]=orga&filter[externalId]=A&page[number]=2&page[size]=1';
         const expectedMetaData = { page: 2, pageSize: 1, rowCount: 2, pageCount: 2 };
 
         // when
@@ -324,7 +325,7 @@ describe('Acceptance | Application | organization-controller', () => {
 
       it('should return a 200 status code with empty result', async () => {
         // given
-        options.url = '/api/organizations?filter[name]=orga&filter[type]=sco&page[number]=1&page[size]=1';
+        options.url = '/api/organizations?filter[name]=orga&filter[type]=sco&filter[externalId]=B&page[number]=1&page[size]=1';
         const expectedMetaData = { page: 1, pageSize: 1, rowCount: 0, pageCount: 0 };
 
         // when
@@ -422,7 +423,7 @@ describe('Acceptance | Application | organization-controller', () => {
       it('should return archived campaigns', async () => {
         // given
         options.url = `/api/organizations/${organizationId}/campaigns?page[number]=1&page[size]=2&filter[status]=archived`;
-        const expectedMetaData = { page: 1, pageSize: 2, rowCount: 2, pageCount: 1 };
+        const expectedMetaData = { page: 1, pageSize: 2, rowCount: 2, pageCount: 1, hasCampaigns: true };
 
         // when
         const response = await server.inject(options);
@@ -452,7 +453,7 @@ describe('Acceptance | Application | organization-controller', () => {
 
       it('should return default pagination meta data', async () => {
         // given
-        const expectedMetaData = { page: 1, pageSize: 10, rowCount: 2, pageCount: 1 };
+        const expectedMetaData = { page: 1, pageSize: 10, rowCount: 2, pageCount: 1, hasCampaigns: true };
 
         // when
         const response = await server.inject(options);
@@ -464,7 +465,7 @@ describe('Acceptance | Application | organization-controller', () => {
       it('should return a 200 status code with paginated data', async () => {
         // given
         options.url = `/api/organizations/${organizationId}/campaigns?&page[number]=2&page[size]=1`;
-        const expectedMetaData = { page: 2, pageSize: 1, rowCount: 2, pageCount: 2 };
+        const expectedMetaData = { page: 2, pageSize: 1, rowCount: 2, pageCount: 2, hasCampaigns: true };
 
         // when
         const response = await server.inject(options);
@@ -479,7 +480,7 @@ describe('Acceptance | Application | organization-controller', () => {
       it('should return a 200 status code with paginated and filtered data', async () => {
         // given
         options.url = `/api/organizations/${organizationId}/campaigns?filter[name]=Two&page[number]=1&page[size]=1`;
-        const expectedMetaData = { page: 1, pageSize: 1, rowCount: 1, pageCount: 1 };
+        const expectedMetaData = { page: 1, pageSize: 1, rowCount: 1, pageCount: 1, hasCampaigns: true };
 
         // when
         const response = await server.inject(options);
@@ -494,7 +495,7 @@ describe('Acceptance | Application | organization-controller', () => {
       it('should return a 200 status code with empty result', async () => {
         // given
         options.url = `/api/organizations/${organizationId}/campaigns?&page[number]=3&page[size]=1`;
-        const expectedMetaData = { page: 3, pageSize: 1, rowCount: 2, pageCount: 2 };
+        const expectedMetaData = { page: 3, pageSize: 1, rowCount: 2, pageCount: 2, hasCampaigns: true };
 
         // when
         const response = await server.inject(options);
@@ -516,7 +517,16 @@ describe('Acceptance | Application | organization-controller', () => {
 
       beforeEach(async () => {
         const userPixMaster = databaseBuilder.factory.buildUser.withPixRolePixMaster();
-        organization = databaseBuilder.factory.buildOrganization();
+        organization = databaseBuilder.factory.buildOrganization({
+          type: 'SCO',
+          name: 'Organization catalina',
+          logoUrl: 'some logo url',
+          externalId: 'ABC123',
+          provinceCode: '45',
+          isManagingStudents: true,
+          credit: 666,
+          email: 'sco.generic.account@example.net'
+        });
 
         await databaseBuilder.commit();
 
@@ -539,6 +549,9 @@ describe('Acceptance | Application | organization-controller', () => {
               'external-id': organization.externalId,
               'province-code': organization.provinceCode,
               'is-managing-students': organization.isManagingStudents,
+              'can-collect-profiles': organization.canCollectProfiles,
+              'credit': organization.credit,
+              'email': organization.email,
             },
             'id': organization.id.toString(),
             'relationships': {
@@ -550,6 +563,11 @@ describe('Acceptance | Application | organization-controller', () => {
               'students': {
                 'links': {
                   'related': `/api/organizations/${organization.id}/students`
+                }
+              },
+              'target-profiles': {
+                'links': {
+                  'related': `/api/organizations/${organization.id}/target-profiles`
                 }
               }
             },
@@ -646,7 +664,7 @@ describe('Acceptance | Application | organization-controller', () => {
         await databaseBuilder.commit();
       });
 
-      it('should return the matching organization as JSON API', async () => {
+      it('should return the matching membership as JSON API', async () => {
         // given
         const expectedResult = {
           'data': [
@@ -656,9 +674,6 @@ describe('Acceptance | Application | organization-controller', () => {
               },
               'id': membershipId.toString(),
               'relationships': {
-                'organization': {
-                  'data': null
-                },
                 'user': {
                   'data': {
                     'id': user.id.toString(),
@@ -679,7 +694,13 @@ describe('Acceptance | Application | organization-controller', () => {
               'id': user.id.toString(),
               'type': 'users'
             }
-          ]
+          ],
+          'meta': {
+            'page': 1,
+            'pageCount': 1,
+            'pageSize': 10,
+            'rowCount': 1
+          }
         };
 
         // when
@@ -704,20 +725,19 @@ describe('Acceptance | Application | organization-controller', () => {
         expect(response.statusCode).to.equal(401);
       });
 
-      it('should respond with a 403 - forbidden access - if user is not ADMIN in organization nor PIX_MASTER', async () => {
+      it('should respond with a 403 - forbidden access - if user is not in organization nor is PIXMASTER', async () => {
         // given
-        const nonPixMasterUserId = 9999;
-        options.headers.authorization = generateValidRequestAuthorizationHeader(nonPixMasterUserId);
-        databaseBuilder.factory.buildUser({
-          id: nonPixMasterUserId,
-        });
+        const otherOrganizationId = databaseBuilder.factory.buildOrganization().id;
+        const userId = databaseBuilder.factory.buildUser().id;
         databaseBuilder.factory.buildMembership({
           organizationRole : Membership.roles.MEMBER,
-          organizationId : organization.id,
-          userId : nonPixMasterUserId,
+          organizationId : otherOrganizationId,
+          userId,
         });
 
         await databaseBuilder.commit();
+
+        options.headers.authorization = generateValidRequestAuthorizationHeader(userId);
 
         // when
         const response = await server.inject(options);
@@ -749,10 +769,10 @@ describe('Acceptance | Application | organization-controller', () => {
 
     context('Expected output', () => {
 
-      let student;
+      let schoolingRegistration;
 
       beforeEach(async () => {
-        student = databaseBuilder.factory.buildStudent({
+        schoolingRegistration = databaseBuilder.factory.buildSchoolingRegistration({
           organizationId: organization.id,
           userId: user.id
         });
@@ -760,20 +780,21 @@ describe('Acceptance | Application | organization-controller', () => {
         await databaseBuilder.commit();
       });
 
-      it('should return the matching students as JSON API', async () => {
+      it('should return the matching schoolingRegistrations as JSON API', async () => {
         // given
         const expectedResult = {
           'data': [
             {
               'attributes': {
-                'last-name': student.lastName,
-                'first-name': student.firstName,
-                'birthdate': student.birthdate,
+                'last-name': schoolingRegistration.lastName,
+                'first-name': schoolingRegistration.firstName,
+                'birthdate': schoolingRegistration.birthdate,
+                'user-id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'is-authenticated-from-gar': true,
               },
-              'id': student.id.toString(),
+              'id': schoolingRegistration.id.toString(),
               'type': 'students'
             }
           ],
@@ -830,7 +851,7 @@ describe('Acceptance | Application | organization-controller', () => {
         expect(response.statusCode).to.equal(403);
       });
 
-      it('should respond with a 403 - Forbidden access - if Organization does not manage students', async () => {
+      it('should respond with a 403 - Forbidden access - if Organization does not manage schoolingRegistrations', async () => {
         // given
         const organizationId = databaseBuilder.factory.buildOrganization({ type: 'SCO', isManagingStudents: false }).id;
         const userId = databaseBuilder.factory.buildUser.withMembership({ organizationId }).id;
@@ -897,7 +918,7 @@ describe('Acceptance | Application | organization-controller', () => {
           {
             type: 'organization-invitations',
             attributes: {
-              'organization-id': organization.id.toString(),
+              'organization-id': organization.id,
               email: user1.email,
               status
             }
@@ -905,7 +926,7 @@ describe('Acceptance | Application | organization-controller', () => {
           {
             type: 'organization-invitations',
             attributes: {
-              'organization-id': organization.id.toString(),
+              'organization-id': organization.id,
               email: user2.email,
               status
             }
@@ -918,9 +939,9 @@ describe('Acceptance | Application | organization-controller', () => {
         // then
         expect(response.statusCode).to.equal(201);
         expect(response.result.data.length).equal(2);
-        expect(_.omit(response.result.data[0], 'id', 'attributes.created-at', 'attributes.organization-name'))
+        expect(_.omit(response.result.data[0], 'id', 'attributes.updated-at', 'attributes.organization-name'))
           .to.deep.equal(expectedResults[0]);
-        expect(_.omit(response.result.data[1], 'id', 'attributes.created-at', 'attributes.organization-name'))
+        expect(_.omit(response.result.data[1], 'id', 'attributes.updated-at', 'attributes.organization-name'))
           .to.deep.equal(expectedResults[1]);
       });
     });
@@ -1000,40 +1021,39 @@ describe('Acceptance | Application | organization-controller', () => {
 
   describe('GET /api/organizations/{id}/invitations', () => {
 
-    let organization;
+    let organizationId;
     let options;
+    let firstOrganizationInvitation;
+    let secondOrganizationInvitation;
 
     beforeEach(async () => {
       const adminUserId = databaseBuilder.factory.buildUser().id;
-      organization = databaseBuilder.factory.buildOrganization();
+      organizationId = databaseBuilder.factory.buildOrganization().id;
 
       databaseBuilder.factory.buildMembership({
         userId: adminUserId,
-        organizationId: organization.id,
+        organizationId,
         organizationRole: Membership.roles.ADMIN,
       });
 
-      databaseBuilder.factory.buildOrganizationInvitation({
-        organizationId: organization.id,
-        email: 'jojo@business.company',
+      firstOrganizationInvitation = databaseBuilder.factory.buildOrganizationInvitation({
+        organizationId,
+        status: OrganizationInvitation.StatusType.PENDING,
+      });
+
+      secondOrganizationInvitation = databaseBuilder.factory.buildOrganizationInvitation({
+        organizationId,
         status: OrganizationInvitation.StatusType.PENDING,
       });
 
       databaseBuilder.factory.buildOrganizationInvitation({
-        organizationId: organization.id,
-        email: 'jojo@tech.company',
-        status: OrganizationInvitation.StatusType.PENDING,
-      });
-
-      databaseBuilder.factory.buildOrganizationInvitation({
-        organizationId: organization.id,
-        email: 'jojo@medical.company',
+        organizationId,
         status: OrganizationInvitation.StatusType.ACCEPTED,
       });
 
       options = {
         method: 'GET',
-        url: `/api/organizations/${organization.id}/invitations`,
+        url: `/api/organizations/${organizationId}/invitations`,
         headers: { authorization: generateValidRequestAuthorizationHeader(adminUserId) },
       };
 
@@ -1054,17 +1074,19 @@ describe('Acceptance | Application | organization-controller', () => {
             {
               type: 'organization-invitations',
               attributes: {
-                'organization-id': organization.id,
-                email: 'jojo@tech.company',
+                'organization-id': organizationId,
+                email: firstOrganizationInvitation.email,
                 status: OrganizationInvitation.StatusType.PENDING,
+                'updated-at': firstOrganizationInvitation.updatedAt,
               },
             },
             {
               type: 'organization-invitations',
               attributes: {
-                'organization-id': organization.id,
-                email: 'jojo@business.company',
+                'organization-id': organizationId,
+                email: secondOrganizationInvitation.email,
                 status: OrganizationInvitation.StatusType.PENDING,
+                'updated-at': secondOrganizationInvitation.updatedAt,
               },
             },
           ],
@@ -1075,8 +1097,8 @@ describe('Acceptance | Application | organization-controller', () => {
 
         // then
         expect(response.statusCode).to.equal(200);
-        const omittedResult = _.omit(response.result, 'data[0].id', 'data[0].attributes.created-at', 'data[0].attributes.organization-name',
-          'data[1].id', 'data[1].attributes.created-at', 'data[1].attributes.organization-name');
+        const omittedResult = _.omit(response.result, 'data[0].id', 'data[0].attributes.organization-name',
+          'data[1].id', 'data[1].attributes.organization-name');
         expect(omittedResult.data).to.deep.have.members(expectedResult.data);
       });
     });
@@ -1109,4 +1131,66 @@ describe('Acceptance | Application | organization-controller', () => {
     });
   });
 
+  describe('POST /api/organizations/{id}/target-profiles', () => {
+    let payload;
+    let options;
+
+    let userId;
+    let organizationId;
+    let targetProfileId1;
+    let targetProfileId2;
+
+    beforeEach(async () => {
+      userId = databaseBuilder.factory.buildUser.withPixRolePixMaster().id;
+      organizationId = databaseBuilder.factory.buildOrganization().id;
+      targetProfileId1 = databaseBuilder.factory.buildTargetProfile().id;
+      targetProfileId2 = databaseBuilder.factory.buildTargetProfile().id;
+
+      await databaseBuilder.commit();
+
+      payload = {
+        data: {
+          type: 'target-profile-share',
+          attributes: {
+            'target-profiles-to-attach': [targetProfileId1, targetProfileId2],
+          }
+        }
+      };
+      options = {
+        method: 'POST',
+        url: `/api/organizations/${organizationId}/target-profiles`,
+        payload,
+        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
+      };
+    });
+
+    afterEach(async () => {
+      await knex('target-profile-shares').delete();
+    });
+
+    it('should create target profile share related to organization', async () => {
+      // when
+      const response = await server.inject(options);
+
+      // then
+      expect(response.statusCode).to.equal(204);
+      const targetProfileShares = await knex('target-profile-shares').where({ organizationId });
+      expect(targetProfileShares).to.have.lengthOf(2);
+      expect(_.map(targetProfileShares, 'targetProfileId')).to.have.members([targetProfileId1, targetProfileId2]);
+    });
+
+    it('should return a 404 error and insert none of the target profiles', async function() {
+      // given
+      payload.data.attributes['target-profiles-to-attach'] = [targetProfileId1, targetProfileId2, '999'];
+      options.payload = payload;
+
+      // when
+      const response = await server.inject(options);
+
+      // then
+      expect(response.statusCode).to.equal(404);
+      const targetProfileShares = await knex('target-profile-shares').where({ organizationId });
+      expect(targetProfileShares).to.have.lengthOf(0);
+    });
+  });
 });

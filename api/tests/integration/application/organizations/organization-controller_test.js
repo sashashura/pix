@@ -1,7 +1,7 @@
 const { expect, sinon, domainBuilder, HttpTestServer } = require('../../../test-helper');
 const _ = require('lodash');
 
-const securityController = require('../../../../lib/interfaces/controllers/security-controller');
+const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
 const usecases = require('../../../../lib/domain/usecases');
 const OrganizationInvitation = require('../../../../lib/domain/models/OrganizationInvitation');
 
@@ -17,16 +17,18 @@ describe('Integration | Application | Organizations | organization-controller', 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     sandbox.stub(usecases, 'updateOrganizationInformation');
-    sandbox.stub(usecases, 'getOrganizationMemberships');
-    sandbox.stub(usecases, 'findOrganizationStudents');
+    sandbox.stub(usecases, 'findPaginatedFilteredOrganizationMemberships');
+    sandbox.stub(usecases, 'findPaginatedFilteredSchoolingRegistrations');
     sandbox.stub(usecases, 'createOrganizationInvitations');
     sandbox.stub(usecases, 'answerToOrganizationInvitation');
     sandbox.stub(usecases, 'findPendingOrganizationInvitations');
+    sandbox.stub(usecases, 'attachTargetProfilesToOrganization');
 
-    sandbox.stub(securityController, 'checkUserHasRolePixMaster');
-    sandbox.stub(securityController, 'checkUserIsAdminInOrganization');
-    sandbox.stub(securityController, 'checkUserIsAdminInOrganizationOrHasRolePixMaster');
-    sandbox.stub(securityController, 'checkUserBelongsToScoOrganizationAndManagesStudents');
+    sandbox.stub(securityPreHandlers, 'checkUserHasRolePixMaster');
+    sandbox.stub(securityPreHandlers, 'checkUserIsAdminInOrganization');
+    sandbox.stub(securityPreHandlers, 'checkUserIsAdminInOrganizationOrHasRolePixMaster');
+    sandbox.stub(securityPreHandlers, 'checkUserBelongsToScoOrganizationAndManagesStudents');
+    sandbox.stub(securityPreHandlers, 'checkUserBelongsToOrganizationOrHasRolePixMaster');
     httpTestServer = new HttpTestServer(moduleUnderTest);
   });
 
@@ -47,6 +49,7 @@ describe('Integration | Application | Organizations | organization-controller', 
           'logo-url': 'http://log.url',
           'external-id': '02A2145V',
           'province-code': '02A',
+          'email': 'sco.generic.newaccount@example.net'
         }
       }
     };
@@ -54,7 +57,7 @@ describe('Integration | Application | Organizations | organization-controller', 
     context('Success cases', () => {
 
       beforeEach(() => {
-        securityController.checkUserHasRolePixMaster.callsFake((request, h) => h.response(true));
+        securityPreHandlers.checkUserHasRolePixMaster.callsFake((request, h) => h.response(true));
       });
 
       it('should resolve a 200 HTTP response', async () => {
@@ -82,10 +85,10 @@ describe('Integration | Application | Organizations | organization-controller', 
 
     context('Error cases', () => {
 
-      context('when user is allowed to access resource', () => {
+      context('when user is not allowed to access resource', () => {
 
         beforeEach(() => {
-          securityController.checkUserHasRolePixMaster.callsFake((request, h) => {
+          securityPreHandlers.checkUserHasRolePixMaster.callsFake((request, h) => {
             return Promise.resolve(h.response().code(403).takeover());
           });
         });
@@ -101,19 +104,19 @@ describe('Integration | Application | Organizations | organization-controller', 
     });
   });
 
-  describe('#getOrganizationMemberships', () => {
+  describe('#findPaginatedFilteredOrganizationMemberships', () => {
 
     context('Success cases', () => {
 
       beforeEach(() => {
-        securityController.checkUserIsAdminInOrganizationOrHasRolePixMaster.returns(true);
+        securityPreHandlers.checkUserBelongsToOrganizationOrHasRolePixMaster.returns(true);
       });
 
       const membership = domainBuilder.buildMembership();
 
       it('should return an HTTP response with status code 200', async () => {
         // given
-        usecases.getOrganizationMemberships.resolves([membership]);
+        usecases.findPaginatedFilteredOrganizationMemberships.resolves({ models: [membership], pagination: {} });
 
         // when
         const response = await httpTestServer.request('GET', '/api/organizations/1234/memberships');
@@ -124,7 +127,7 @@ describe('Integration | Application | Organizations | organization-controller', 
 
       it('should return an HTTP response formatted as JSON:API', async () => {
         // given
-        usecases.getOrganizationMemberships.resolves([membership]);
+        usecases.findPaginatedFilteredOrganizationMemberships.resolves({ models: [membership], pagination: {} });
 
         // when
         const response = await httpTestServer.request('GET', '/api/organizations/1234/memberships');
@@ -136,7 +139,7 @@ describe('Integration | Application | Organizations | organization-controller', 
 
       it('should return a JSON:API response including organization, organization role & user information', async () => {
         // given
-        usecases.getOrganizationMemberships.resolves([membership]);
+        usecases.findPaginatedFilteredOrganizationMemberships.resolves(({ models: [membership], pagination: {} }));
 
         // when
         const response = await httpTestServer.request('GET', '/api/organizations/1234/memberships');
@@ -150,19 +153,19 @@ describe('Integration | Application | Organizations | organization-controller', 
     });
   });
 
-  describe('#findStudents', () => {
+  describe('#findOrganizationsStudentsWithUserInfo', () => {
 
     beforeEach(() => {
-      securityController.checkUserBelongsToScoOrganizationAndManagesStudents.returns(true);
+      securityPreHandlers.checkUserBelongsToScoOrganizationAndManagesStudents.returns(true);
     });
 
     context('Success cases', () => {
 
-      const student = domainBuilder.buildStudent();
+      const studentWithUserInfo = domainBuilder.buildUserWithSchoolingRegistration();
 
       it('should return an HTTP response with status code 200', async () => {
         // given
-        usecases.findOrganizationStudents.resolves([student]);
+        usecases.findPaginatedFilteredSchoolingRegistrations.resolves({ data: [studentWithUserInfo] });
 
         // when
         const response = await httpTestServer.request('GET', '/api/organizations/1234/students');
@@ -173,14 +176,13 @@ describe('Integration | Application | Organizations | organization-controller', 
 
       it('should return an HTTP response formatted as JSON:API', async () => {
         // given
-        usecases.findOrganizationStudents.resolves([student]);
+        usecases.findPaginatedFilteredSchoolingRegistrations.resolves({ data: [studentWithUserInfo] });
 
         // when
         const response = await httpTestServer.request('GET', '/api/organizations/1234/students');
 
         // then
         expect(response.result.data[0].type).to.equal('students');
-        expect(response.result.data[0].id).to.equal(student.id.toString());
       });
     });
 
@@ -189,7 +191,7 @@ describe('Integration | Application | Organizations | organization-controller', 
       context('when user is not allowed to access resource', () => {
 
         beforeEach(() => {
-          securityController.checkUserBelongsToScoOrganizationAndManagesStudents.callsFake((request, h) => {
+          securityPreHandlers.checkUserBelongsToScoOrganizationAndManagesStudents.callsFake((request, h) => {
             return Promise.resolve(h.response().code(403).takeover());
           });
         });
@@ -222,7 +224,7 @@ describe('Integration | Application | Organizations | organization-controller', 
       };
 
       beforeEach(() => {
-        securityController.checkUserIsAdminInOrganizationOrHasRolePixMaster.returns(true);
+        securityPreHandlers.checkUserIsAdminInOrganizationOrHasRolePixMaster.returns(true);
       });
 
       it('should return an HTTP response with status code 201', async () => {
@@ -244,7 +246,7 @@ describe('Integration | Application | Organizations | organization-controller', 
             'organization-id': invitation.organizationId,
             email: invitation.email,
             status,
-            'created-at': invitation.createdAt
+            'updated-at': invitation.updatedAt
           }
         };
         usecases.createOrganizationInvitations.resolves([invitation]);
@@ -268,7 +270,7 @@ describe('Integration | Application | Organizations | organization-controller', 
       });
 
       beforeEach(() => {
-        securityController.checkUserIsAdminInOrganization.returns(true);
+        securityPreHandlers.checkUserIsAdminInOrganization.returns(true);
       });
 
       it('should return an HTTP response with status code 200', async () => {
@@ -284,4 +286,35 @@ describe('Integration | Application | Organizations | organization-controller', 
     });
   });
 
+  describe('#attachTargetProfilesToOrganization', () => {
+
+    const payload = {
+      data: {
+        type: 'target-profiles-shares',
+        attributes: {
+          'target-profiles-to-attach': [1, 2],
+        },
+      }
+    };
+
+    context('Error cases', () => {
+
+      context('when user is not Pix Master', () => {
+
+        beforeEach(() => {
+          securityPreHandlers.checkUserHasRolePixMaster.callsFake((request, h) => {
+            return Promise.resolve(h.response().code(403).takeover());
+          });
+        });
+
+        it('should return a 403 HTTP response', async () => {
+          // when
+          const response = await httpTestServer.request('POST', '/api/organizations/1234/target-profiles', payload);
+
+          // then
+          expect(response.statusCode).to.equal(403);
+        });
+      });
+    });
+  });
 });

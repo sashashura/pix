@@ -20,8 +20,9 @@
 @import 'globals/text';
 @import 'globals/titles';
 /* components */
-@import 'components/background-banner';
 @import 'components/assessment-banner';
+@import 'components/background-banner';
+@import 'components/badge-acquired-card';
 @import 'components/certification-starter';
 @import 'components/certification-joiner';
 @import 'components/certification-banner';
@@ -73,15 +74,15 @@
 @import 'components/signup-form';
 @import 'components/timeout-jauge';
 @import 'components/tutorial-item';
-@import 'components/tutorial-item-on-scorecard';
 @import 'components/tutorial-panel';
-@import 'components/user-certifications-detail-area';
+@import 'components/user-certifications-detail-competences-list';
 @import 'components/user-certifications-detail-competence';
 @import 'components/user-certifications-detail-header';
-@import 'components/user-certifications-detail-profile';
+@import 'components/user-certification-hexagon-score';
 @import 'components/user-certifications-detail-result';
+@import 'components/user-certifications-detail-banner';
 @import 'components/user-logged-menu';
-@import 'components/warning-banner';
+@import 'components/communication-banner';
 @import 'components/warning-timing-page';
 @import 'components/pix-toggle';
 
@@ -100,8 +101,11 @@
 @import 'pages/login-or-register-to-access-restricted-campaign';
 @import 'pages/not-connected';
 @import 'pages/profile';
+@import 'pages/send-profile';
 @import 'pages/sign-form';
 @import 'pages/skill-review';
+@import 'pages/terms-of-service';
+@import 'pages/update-expired-password-form';
 @import 'pages/user-certifications';
 @import 'pages/user-certifications-get';
 @import 'pages/user-tutorials';
@@ -110,13 +114,9 @@
   box-sizing: border-box;
 }
 
-html {
-  font-size: 10px;
-}
-
 body {
   font-family: $font-roboto;
-  background-color: $porcelain-grey;
+  background-color: $grey-10;
   margin: 0;
 }
 
@@ -133,7 +133,7 @@ input:invalid {
 }
 
 input {
-  font-size: 1.4rem;
+  font-size: 0.875rem;
   font-family: $font-roboto;
 }
 

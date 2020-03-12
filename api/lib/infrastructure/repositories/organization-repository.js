@@ -17,6 +17,9 @@ function _toDomain(bookshelfOrganization) {
     externalId: rawOrganization.externalId,
     provinceCode: rawOrganization.provinceCode,
     isManagingStudents: Boolean(rawOrganization.isManagingStudents),
+    credit: rawOrganization.credit,
+    canCollectProfiles: Boolean(rawOrganization.canCollectProfiles),
+    email: rawOrganization.email
   });
 
   let members = [];
@@ -38,12 +41,15 @@ function _toDomain(bookshelfOrganization) {
 }
 
 function _setSearchFiltersForQueryBuilder(filter, qb) {
-  const { name, type } = filter;
+  const { name, type, externalId } = filter;
   if (name) {
     qb.whereRaw('LOWER("name") LIKE ?', `%${name.toLowerCase()}%`);
   }
   if (type) {
     qb.whereRaw('LOWER("type") LIKE ?', `%${type.toLowerCase()}%`);
+  }
+  if (externalId) {
+    qb.whereRaw('LOWER("externalId") LIKE ?', `%${externalId.toLowerCase()}%`);
   }
 }
 
@@ -60,7 +66,7 @@ module.exports = {
 
   update(organization) {
 
-    const organizationRawData = _.pick(organization, ['name', 'type', 'logoUrl', 'externalId', 'provinceCode', 'isManagingStudents']);
+    const organizationRawData = _.pick(organization, ['name', 'type', 'logoUrl', 'externalId', 'provinceCode', 'isManagingStudents', 'email']);
 
     return new BookshelfOrganization({ id: organization.id })
       .save(organizationRawData, { patch: true })
@@ -74,6 +80,7 @@ module.exports = {
       .fetch({
         require: true,
         withRelated: [
+          { 'memberships': (qb) => qb.where({ disabledAt: null }) },
           'memberships.user',
           'targetProfileShares.targetProfile',
         ],

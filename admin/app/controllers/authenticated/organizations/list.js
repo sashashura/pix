@@ -1,30 +1,34 @@
 import Controller from '@ember/controller';
-import { debounce } from '@ember/runloop';
+import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
+import { task, timeout } from 'ember-concurrency';
+import config from 'pix-admin/config/environment';
 
 const DEFAULT_PAGE_NUMBER = 1;
 
-export default Controller.extend({
-  queryParams: ['pageNumber', 'pageSize', 'name', 'type'],
-  pageNumber: DEFAULT_PAGE_NUMBER,
-  pageSize: 10,
-  name: null,
-  type: null,
+export default class ListController extends Controller {
 
-  searchFilter: null,
+  queryParams = ['pageNumber', 'pageSize', 'name', 'type', 'externalId'];
+  DEBOUNCE_MS = config.pagination.debounce;
 
-  setFieldName() {
-    this.set(this.searchFilter.fieldName, this.searchFilter.value);
-    this.set('pageNumber', DEFAULT_PAGE_NUMBER);
-  },
+  @tracked pageNumber = DEFAULT_PAGE_NUMBER;
+  @tracked pageSize = 10;
+  @tracked name = null;
+  @tracked type = null;
+  @tracked externalId = null;
+  pendingFilters = {};
 
-  actions: {
-    triggerFiltering(fieldName, value) {
-      this.set('searchFilter', { fieldName, value });
-      debounce(this, this.setFieldName, 500);
-    },
+  @(task(function * (fieldName, event) {
+    const value = event.target.value;
+    this.pendingFilters[fieldName] = value;
+    yield timeout(this.DEBOUNCE_MS);
+    this.setProperties(this.pendingFilters);
+    this.pendingFilters = {};
+    this.pageNumber = DEFAULT_PAGE_NUMBER;
+  }).restartable()) triggerFiltering;
 
-    goToOrganizationPage(organizationId) {
-      this.transitionToRoute('authenticated.organizations.get', organizationId);
-    }
+  @action
+  goToOrganizationPage(organizationId) {
+    this.transitionToRoute('authenticated.organizations.get', organizationId);
   }
-});
+}

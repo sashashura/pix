@@ -1,14 +1,15 @@
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
-import Route from '@ember/routing/route';
+import classic from 'ember-classic-decorator';
 import { inject as service } from '@ember/service';
+import SecuredRouteMixin from 'mon-pix/mixins/secured-route-mixin';
+import Route from '@ember/routing/route';
 
-export default Route.extend(AuthenticatedRouteMixin, {
-
-  currentUser: service(),
+@classic
+export default class ProfileRoute extends Route.extend(SecuredRouteMixin) {
+  @service currentUser;
 
   model() {
     return this.currentUser.user;
-  },
+  }
 
   async afterModel(user) {
     // This reloads are necessary to keep the ui in sync when the
@@ -16,5 +17,5 @@ export default Route.extend(AuthenticatedRouteMixin, {
     user.belongsTo('pixScore').reload();
     user.hasMany('scorecards').reload();
     user.hasMany('campaignParticipations').reload();
-  },
-});
+  }
+}

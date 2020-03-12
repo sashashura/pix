@@ -3,11 +3,11 @@ import ApplicationSerializer from './application';
 export default ApplicationSerializer.extend({
 
   links(session) {
-    return {
-      'certifications': {
-        related: `/api/sessions/${session.id}/certifications`
-      }
+    const links = {
+      'juryCertificationSummaries': {
+        related: `/api/jury/sessions/${session.id}/jury-certification-summaries`,
+      },
     };
+    return links;
   }
-
 });

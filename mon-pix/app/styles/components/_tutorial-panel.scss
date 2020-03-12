@@ -29,17 +29,17 @@
 }
 
 .tutorial-panel__tutorial-info {
-  color: $raven-grey;
-  font-size: 1.3rem;
-  line-height: 2rem;
+  color: $grey-40;
+  font-size: 0.813rem;
+  line-height: 1.25rem;
   margin: -5px 5px 0;
 }
 
 .tutorial-panel__hint-title {
   font-family: $font-open-sans;
-  font-size: 2.2rem;
+  font-size: 1.375rem;
   text-align: center;
-  color: $charcoal-grey;
+  color: $grey-80;
   font-weight: $font-semi-bold;
   margin-bottom: 20px;
 
@@ -58,18 +58,18 @@
   }
 
   span {
-    background: $porcelain-grey;
+    background: $grey-10;
     padding: 0 15px;
   }
 
   @include device-is('desktop') {
-    font-size: 2.2rem;
+    font-size: 1.375rem;
     line-height: 26px;
   }
 }
 
 .tutorial-panel__hint-content {
-  font-size: 1.8rem;
+  font-size: 1.125rem;
   font-family: $font-open-sans;
 
   & p {

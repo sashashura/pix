@@ -1,7 +1,7 @@
 @import "certifications-list";
 
 .certifications-list-item {
-  border-bottom: 1px solid $alto-grey;
+  border-bottom: 1px solid $grey-20;
   text-align: center;
   padding: 5px;
 }
@@ -25,7 +25,7 @@
 }
 
 .certifications-list-item__clickable:hover {
-  background-color: $porcelain-grey;
+  background-color: $grey-10;
   color: inherit;
 }
 
@@ -43,7 +43,7 @@
 
   @include device-is('tablet') {
     height: 60px;
-    font-size: 16px;
+    font-size: 1rem;
   }
 }
 
@@ -66,10 +66,10 @@
   @extend .certifications-list-item__cell;
 
   padding: 10px 0;
-  border-top: 1px solid $alto-grey;
+  border-top: 1px solid $grey-20;
 
-  font-size: 16px;
-  color: $dove-gray;
+  font-size: 1rem;
+  color: $grey-60;
   text-align: left;
 }
 
@@ -84,11 +84,11 @@
 }
 
 .certifications-list-item__unpublished-item {
-  color: $gray;
+  color: $grey-35;
 }
 
 .certifications-list-item__published-item {
-  color: $grayish-grey;
+  color: $grey-80;
 }
 
 .certifications-list-item__cell-pix-score {
@@ -118,13 +118,13 @@
     line-height: normal;
 
     letter-spacing: -1px;
-    color: $tundora-grey;
+    color: $grey-70;
 
-    font-size: 8px;
+    font-size: 0.5rem;
     font-weight: 300;
 
     @include device-is('tablet') {
-      font-size: 14px;
+      font-size: 0.875rem;
       font-weight: 500;
     }
   }
@@ -143,15 +143,15 @@
   justify-content: left;
 
   .certifications-list-item__cell-detail-button {
-    font-size: 13px;
-    color: $pix-blue;
+    font-size: 0.813rem;
+    color: $blue;
     border: none;
     background: none;
   }
 
   .certifications-list-item__cell-detail-link {
-    font-size: 13px;
-    color: $pix-blue;
+    font-size: 0.813rem;
+    color: $blue;
     border: none;
     background: none;
   }

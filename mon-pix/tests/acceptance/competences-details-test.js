@@ -1,11 +1,11 @@
 import { find, click, currentURL, findAll } from '@ember/test-helpers';
 import { beforeEach, describe, it } from 'mocha';
 import { expect } from 'chai';
-import { authenticateByEmail } from '../helpers/authentification';
-import visitWithAbortedTransition from '../helpers/visit';
-import defaultScenario from '../../mirage/scenarios/default';
+import { authenticateByEmail } from '../helpers/authentication';
+import visit from '../helpers/visit';
 import { setupApplicationTest } from 'ember-mocha';
 import { setupMirage } from 'ember-cli-mirage/test-support';
+import config from 'mon-pix/config/environment';
 
 describe('Acceptance | Competence details | Afficher la page de détails d\'une compétence', () => {
   setupApplicationTest();
@@ -15,7 +15,6 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
   beforeEach(function() {
     server = this.server;
-    defaultScenario(this.server);
     user = server.create('user', 'withEmail');
   });
 
@@ -24,6 +23,8 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
     let scorecardWithRemainingDaysBeforeReset;
     let scorecardWithoutPoints;
     let scorecardWithMaxLevel;
+    let scorecardWithRemainingDaysBeforeImproving;
+    let scorecardWithoutRemainingDaysBeforeImproving;
 
     beforeEach(async () => {
       await authenticateByEmail(user);
@@ -31,11 +32,13 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
       scorecardWithRemainingDaysBeforeReset = user.scorecards.models[1];
       scorecardWithoutPoints = user.scorecards.models[2];
       scorecardWithMaxLevel = user.scorecards.models[3];
+      scorecardWithRemainingDaysBeforeImproving = user.scorecards.models[4];
+      scorecardWithoutRemainingDaysBeforeImproving = user.scorecards.models[5];
     });
 
     it('should be able to visit URL of competence details page', async () => {
       // when
-      await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+      await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
 
       // then
       expect(currentURL()).to.equal(`/competences/${scorecardWithPoints.competenceId}/details`);
@@ -43,7 +46,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
     it('should display the competence details', async () => {
       // when
-      await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+      await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
 
       // then
       expect(find('.scorecard-details-content-left__area').textContent).to.contain(scorecardWithPoints.area.title);
@@ -54,7 +57,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
     it('should transition to /profil when the user clicks on return', async () => {
       // given
-      await visitWithAbortedTransition(`/competences/${scorecardWithPoints.description}/details`);
+      await visit(`/competences/${scorecardWithPoints.description}/details`);
 
       // when
       await click('.link__return-to');
@@ -68,7 +71,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
       it('should not display level or score', async () => {
         // given
         // when
-        await visitWithAbortedTransition(`/competences/${scorecardWithoutPoints.competenceId}/details`);
+        await visit(`/competences/${scorecardWithoutPoints.competenceId}/details`);
 
         // then
         expect(findAll('.competence-card__level .score-value')).to.have.lengthOf(0);
@@ -78,7 +81,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
       it('should not display reset button nor reset sentence', async () => {
         // when
-        await visitWithAbortedTransition(`/competences/${scorecardWithoutPoints.competenceId}/details`);
+        await visit(`/competences/${scorecardWithoutPoints.competenceId}/details`);
 
         // then
         expect(findAll('.scorecard-details__reset-button')).to.have.lengthOf(0);
@@ -90,7 +93,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
       it('should display level and score', async () => {
         // when
-        await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+        await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
 
         // then
         expect(find('.competence-card__level .score-value').textContent).to.equal(scorecardWithPoints.level.toString());
@@ -100,27 +103,28 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
       it('should not display pixScoreAheadOfNextLevel when next level is over the max level', async () => {
         // when
-        await visitWithAbortedTransition(`/competence/${scorecardWithMaxLevel.competenceId}/details`);
+        await visit(`/competence/${scorecardWithMaxLevel.competenceId}/details`);
 
         // then
         expect(findAll('.scorecard-details-content-right__level-info')).to.have.lengthOf(0);
       });
 
       it('should display tutorials if any', async () => {
+        // given
+        const nbTutos = scorecardWithPoints.tutorials.models.length;
+
         // when
-        await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+        await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
 
         // then
-        const nbTuto = scorecardWithPoints.tutorials.models.length;
-        expect(findAll('.tube')).to.have.lengthOf(nbTuto);
-        expect(findAll('.tutorial')).to.have.lengthOf(nbTuto);
+        expect(findAll('.tutorial-item')).to.have.lengthOf(nbTutos);
       });
 
-      context('when it is remaining some days before reset', () => {
+      context('when it has remaining some days before reset', () => {
 
         it('should display remaining days before reset', async () => {
           // when
-          await visitWithAbortedTransition(`/competences/${scorecardWithRemainingDaysBeforeReset.competenceId}/details`);
+          await visit(`/competences/${scorecardWithRemainingDaysBeforeReset.competenceId}/details`);
 
           // then
           expect(find('.scorecard-details-content-right__reset-message').textContent).to.contain(`Remise à zéro disponible dans ${scorecardWithRemainingDaysBeforeReset.remainingDaysBeforeReset} jours`);
@@ -132,7 +136,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
         it('should display reset button', async () => {
           // when
-          await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+          await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
 
           // then
           expect(find('.scorecard-details__reset-button').textContent).to.contain('Remettre à zéro');
@@ -141,7 +145,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
         it('should display popup to validate reset', async () => {
           // given
-          await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+          await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
 
           // when
           await click('.scorecard-details__reset-button');
@@ -152,7 +156,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
         it('should reset competence when user clicks on reset', async () => {
           // given
-          await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+          await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
           await click('.scorecard-details__reset-button');
 
           // when
@@ -166,7 +170,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
 
         it('should reset competence when user clicks on reset from results page', async () => {
           // given
-          await visitWithAbortedTransition(`/competences/${scorecardWithPoints.competenceId}/details`);
+          await visit(`/competences/${scorecardWithPoints.competenceId}/details`);
           await click('.scorecard-details__reset-button');
 
           // when
@@ -179,6 +183,55 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
         });
 
       });
+
+      context('when it has remaining some days before improving', () => {
+        let configurationForImprovingCompetence;
+
+        before(() => {
+          configurationForImprovingCompetence = config.APP.FT_IMPROVE_COMPETENCE_EVALUATION;
+        });
+
+        after(function() {
+          config.APP.FT_IMPROVE_COMPETENCE_EVALUATION = configurationForImprovingCompetence;
+        });
+
+        it('should display remaining days before improving', async () => {
+          // given
+          config.APP.FT_IMPROVE_COMPETENCE_EVALUATION = true;
+
+          // when
+          await visit(`/competences/${scorecardWithRemainingDaysBeforeImproving.competenceId}/details`);
+
+          // then
+          expect(find('.scorecard-details__improvement-countdown').textContent)
+            .to.contain(`${scorecardWithRemainingDaysBeforeImproving.remainingDaysBeforeImproving} jours`);
+          expect(find('.scorecard-details__improve-button')).to.not.exist;
+        });
+      });
+
+      context('when it has no remaining days before improving', () => {
+        let configurationForImprovingCompetence;
+
+        before(() => {
+          configurationForImprovingCompetence = config.APP.FT_IMPROVE_COMPETENCE_EVALUATION;
+        });
+
+        after(function() {
+          config.APP.FT_IMPROVE_COMPETENCE_EVALUATION = configurationForImprovingCompetence;
+        });
+
+        it('should display improving button', async () => {
+          // given
+          config.APP.FT_IMPROVE_COMPETENCE_EVALUATION = true;
+
+          // when
+          await visit(`/competences/${scorecardWithoutRemainingDaysBeforeImproving.competenceId}/details`);
+
+          // then
+          expect(findAll('.scorecard-details__improve-button')).to.exist;
+        });
+
+      });
     });
 
   });
@@ -186,7 +239,7 @@ describe('Acceptance | Competence details | Afficher la page de détails d\'une
   describe('Not authenticated cases', () => {
     it('should redirect to home, when user is not authenticated', async () => {
       // when
-      await visitWithAbortedTransition('/competences/1/details');
+      await visit('/competences/1/details');
 
       // then
       expect(currentURL()).to.equal('/connexion');

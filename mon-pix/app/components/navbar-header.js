@@ -1,7 +1,10 @@
-import Component from '@ember/component';
+import { inject as service } from '@ember/service';
+import Component from '@glimmer/component';
 
-export default Component.extend({
-  classNames: ['navbar-header'],
+export default class NavbarHeader extends Component {
+  @service url;
 
-  burger: null,
-});
+  get isFrenchDomainExtension() {
+    return this.url.isFrenchDomainExtension;
+  }
+}

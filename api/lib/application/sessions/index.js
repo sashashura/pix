@@ -1,24 +1,42 @@
 const Joi = require('@hapi/joi');
-const securityController = require('../../interfaces/controllers/security-controller');
+const securityPreHandlers = require('../security-pre-handlers');
 const sessionController = require('./session-controller');
 const sessionAuthorization = require('../preHandlers/session-authorization');
+const { idSpecification } = require('../../domain/validators/id-specification');
 
 exports.register = async (server) => {
   server.route([
     {
       method: 'GET',
-      path: '/api/sessions',
+      path: '/api/jury/sessions',
       config: {
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
-        handler: sessionController.find,
+        handler: sessionController.findPaginatedFilteredJurySessions,
         tags: ['api', 'sessions'],
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés avec le rôle Pix Master**\n' +
-          '- Elle permet de consulter la liste de toutes les sessions (retourne un tableau avec n éléments)',
+          '- Elle permet de consulter la liste de toutes les sessions avec filtre et pagination (retourne un tableau avec n éléments)',
         ]
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/jury/sessions/{id}',
+      config: {
+        validate: {
+          params: Joi.object({
+            id: idSpecification
+          }),
+        },
+        pre: [{
+          method: securityPreHandlers.checkUserHasRolePixMaster,
+          assign: 'hasRolePixMaster'
+        }],
+        handler: sessionController.getJurySession,
+        tags: ['api', 'sessions']
       }
     },
     {
@@ -27,7 +45,7 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required()
+            id: idSpecification
           }),
         },
         pre: [{
@@ -43,6 +61,11 @@ exports.register = async (server) => {
       path: '/api/sessions/{id}/attendance-sheet',
       config: {
         auth: false,
+        validate: {
+          params: Joi.object({
+            id: idSpecification
+          }),
+        },
         handler: sessionController.getAttendanceSheet,
         tags: ['api', 'sessions'],
         notes: [
@@ -69,7 +92,7 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required()
+            id: idSpecification
           }),
         },
         pre: [{
@@ -90,10 +113,11 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required()
+            id: idSpecification
           }),
         },
         payload: {
+          multipart: true,
           allow: 'multipart/form-data',
           maxBytes: 1048576 * 10, // 10MB
         },
@@ -115,7 +139,7 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required()
+            id: idSpecification
           }),
         },
         pre: [{
@@ -137,7 +161,7 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required()
+            id: idSpecification
           }),
         },
         pre: [{
@@ -158,7 +182,7 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required()
+            id: idSpecification
           }),
         },
         pre: [{
@@ -179,8 +203,8 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required(),
-            certificationCandidateId: Joi.number().required(),
+            id: idSpecification,
+            certificationCandidateId: idSpecification,
           }),
         },
         pre: [{
@@ -197,17 +221,22 @@ exports.register = async (server) => {
     },
     {
       method: 'GET',
-      path: '/api/sessions/{id}/certifications',
+      path: '/api/jury/sessions/{id}/jury-certification-summaries',
       config: {
+        validate: {
+          params: Joi.object({
+            id: idSpecification
+          }),
+        },
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
-        handler: sessionController.getCertifications,
-        tags: ['api', 'sessions', 'certifications'],
+        handler: sessionController.getJuryCertificationSummaries,
+        tags: ['api', 'sessions', 'jury-certification-summary'],
         notes: [
           'Cette route est restreinte aux utilisateurs ayant le rôle PIXMASTER',
-          'Elle retourne les certifications d\'une session',
+          'Elle retourne les résumés de certifications d\'une session',
         ]
       }
     },
@@ -217,7 +246,7 @@ exports.register = async (server) => {
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required()
+            id: idSpecification
           }),
         },
         pre: [{
@@ -237,6 +266,11 @@ exports.register = async (server) => {
       method: 'POST',
       path: '/api/sessions/{id}/candidate-participation',
       config: {
+        validate: {
+          params: Joi.object({
+            id: idSpecification
+          }),
+        },
         handler: sessionController.createCandidateParticipation,
         tags: ['api', 'sessions', 'certification-candidates'],
         notes: [
@@ -247,38 +281,40 @@ exports.register = async (server) => {
       }
     },
     {
-      method: 'PUT',
-      path: '/api/sessions/{id}/certifications/attendance-sheet-analysis',
+      method: 'PATCH',
+      path: '/api/jury/sessions/{id}/publication',
       config: {
         validate: {
           params: Joi.object({
-            id: Joi.number().required(),
+            id: idSpecification
           }),
         },
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster',
         }],
-        payload: {
-          allow: 'multipart/form-data',
-          maxBytes: 1048576 * 10, // 10MB
-        },
-        handler: sessionController.analyzeAttendanceSheet,
-        tags: ['api', 'certifications'],
+        handler: sessionController.updatePublication,
         notes: [
-          '- **Cette route est restreinte aux utilisateurs authentifiés avec le rôle Pix Master**\n' +
-          '- Elle permet de lire et de retourner des données sur les certifications présentes dans le PV de session transmis en buffer',
-        ]
+          '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
+          '- Publie ou dépublie toutes les certifications courses d\'une session'
+        ],
+        tags: ['api', 'session', 'publication']
       }
     },
     {
       method: 'PUT',
-      path: '/api/sessions/{id}/results-sent-to-prescriber',
+      path: '/api/jury/sessions/{id}/results-sent-to-prescriber',
       config: {
+        validate: {
+          params: Joi.object({
+            id: idSpecification
+          }),
+        },
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster',
         }],
+
         handler: sessionController.flagResultsAsSentToPrescriber,
         tags: ['api', 'sessions'],
         notes: [
@@ -286,6 +322,27 @@ exports.register = async (server) => {
           '- Elle permet de marquer le fait que les résultats de la session ont été envoyés au prescripteur,\n',
           '- par le biais de la sauvegarde de la date courante.',
         ]
+      }
+    },
+    {
+      method: 'PATCH',
+      path: '/api/jury/sessions/{id}/certification-officer-assignment',
+      config: {
+        validate: {
+          params: Joi.object({
+            id: idSpecification
+          }),
+        },
+        pre: [{
+          method: securityPreHandlers.checkUserHasRolePixMaster,
+          assign: 'hasRolePixMaster',
+        }],
+        handler: sessionController.assignCertificationOfficer,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés avec le rôle PixMaster**\n' +
+          '- Assigne la session à un membre du pôle certifification (certification-officer)'
+        ],
+        tags: ['api', 'session', 'assignment']
       }
     },
   ]);

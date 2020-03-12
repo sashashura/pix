@@ -1,15 +1,11 @@
+import { click, currentURL, find } from '@ember/test-helpers';
 import { beforeEach, describe, it } from 'mocha';
 import { expect } from 'chai';
-import defaultScenario from '../../mirage/scenarios/default';
-import { authenticateByEmail } from '../helpers/authentification';
-import {
-  completeCampaignAndSeeResultsByCode,
-  resumeCampaignByCode
-} from '../helpers/campaign';
-import { setupApplicationTest } from 'ember-mocha';
 import { setupMirage } from 'ember-cli-mirage/test-support';
-import visitWithAbortedTransition from '../helpers/visit';
-import { click, currentURL, find } from '@ember/test-helpers';
+import { setupApplicationTest } from 'ember-mocha';
+import { authenticateByEmail } from '../helpers/authentication';
+import { resumeCampaignOfTypeAssessmentByCode } from '../helpers/campaign';
+import visit from '../helpers/visit';
 
 describe('Acceptance | Navbar', function() {
   setupApplicationTest();
@@ -17,7 +13,6 @@ describe('Acceptance | Navbar', function() {
   let user;
 
   beforeEach(function() {
-    defaultScenario(this.server);
     user = server.create('user', 'withEmail');
   });
 
@@ -28,21 +23,17 @@ describe('Acceptance | Navbar', function() {
 
     [
       {
-        initialRoute: '/certifications', initialNavigationItem: '.navbar-desktop-header-menu__item:nth-child(3)',
+        initialRoute: '/certifications', initialNavigationItem: '.navbar-desktop-header-menu__item:nth-child(2)',
         expectedRoute: '/profil', targetedNavigationItem: '.navbar-desktop-header-menu__item:nth-child(1)',
       },
       {
         initialRoute: '/profil', initialNavigationItem: '.navbar-desktop-header-menu__item:nth-child(1)',
-        expectedRoute: '/campagnes', targetedNavigationItem: '.navbar-desktop-header-menu__item:nth-child(2)'
-      },
-      {
-        initialRoute: '/campagnes', initialNavigationItem: '.navbar-desktop-header-menu__item:nth-child(2)',
-        expectedRoute: '/certifications', targetedNavigationItem: '.navbar-desktop-header-menu__item:nth-child(3)'
+        expectedRoute: '/certifications', targetedNavigationItem: '.navbar-desktop-header-menu__item:nth-child(2)'
       },
     ].forEach((usecase) => {
       it(`should redirect from "${usecase.initialRoute}" to "${usecase.expectedRoute}"`, async function() {
         // given
-        await visitWithAbortedTransition(usecase.initialRoute);
+        await visit(usecase.initialRoute);
         expect(find(usecase.initialNavigationItem).getAttribute('class')).to.contain('active');
 
         // when
@@ -54,10 +45,12 @@ describe('Acceptance | Navbar', function() {
       });
     });
 
-    it('should not display in skill review page', async function() {
+    it('should not display while in campaign', async function() {
+      // given
+      const campaign = server.create('campaign', 'withOneChallenge');
+
       // when
-      await resumeCampaignByCode('AZERTY2');
-      await completeCampaignAndSeeResultsByCode('AZERTY2');
+      await resumeCampaignOfTypeAssessmentByCode(campaign.code, false);
 
       // then
       expect(find('.navbar-desktop-header')).to.not.exist;
@@ -66,10 +59,10 @@ describe('Acceptance | Navbar', function() {
 
     it('should contain link to pix.fr/aide', async function() {
       // when
-      await visitWithAbortedTransition('/profil');
+      await visit('/profil');
 
       // then
-      expect(find('.navbar-desktop-header-menu__item:nth-child(4)').getAttribute('href')).to.equal('https://pix.fr/aide');
+      expect(find('.navbar-desktop-header-menu__item:nth-child(3)').getAttribute('href')).to.equal('https://pix.fr/aide');
     });
   });
 });

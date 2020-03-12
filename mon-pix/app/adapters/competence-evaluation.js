@@ -1,15 +1,20 @@
+import classic from 'ember-classic-decorator';
 import ApplicationAdapter from './application';
 
-export default ApplicationAdapter.extend({
-
+@classic
+export default class CompetenceEvaluation extends ApplicationAdapter {
   urlForQueryRecord(query) {
     if (query.startOrResume) {
       delete query.startOrResume;
-      return `${this._super(...arguments)}/start-or-resume`;
+      return `${super.urlForQueryRecord(...arguments)}/start-or-resume`;
+    }
+    if (query.improve) {
+      delete query.improve;
+      return `${super.urlForQueryRecord(...arguments)}/improve`;
     }
 
-    return this._super(...arguments);
-  },
+    return super.urlForQueryRecord(...arguments);
+  }
 
   queryRecord(store, type, query) {
     if (query.startOrResume) {
@@ -17,8 +22,12 @@ export default ApplicationAdapter.extend({
 
       return this.ajax(url, 'POST', { data: { competenceId: query.competenceId } });
     }
+    if (query.improve) {
+      const url = this.buildURL(type.modelName, null, null, 'queryRecord', query);
 
-    return this._super(...arguments);
-  },
+      return this.ajax(url, 'POST', { data: { userId: query.userId, competenceId: query.competenceId } });
+    }
 
-});
+    return super.queryRecord(...arguments);
+  }
+}

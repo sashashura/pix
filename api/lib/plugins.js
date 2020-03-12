@@ -1,5 +1,4 @@
 const Pack = require('../package');
-const Metrics = require('./infrastructure/plugins/metrics');
 const settings = require('./config');
 const Blipp = require('blipp');
 const Inert = require('@hapi/inert');
@@ -52,7 +51,6 @@ if (settings.logging.enabled) {
 }
 
 const plugins = [
-  Metrics,
   Inert,
   Vision,
   Blipp,
@@ -78,6 +76,7 @@ const plugins = [
           release: `v${Pack.version}`,
           maxBreadcrumbs: settings.sentry.maxBreadcrumbs,
           debug: settings.sentry.debug,
+          maxValueLength: settings.sentry.maxValueLength
         },
         scope: {
           tags: [

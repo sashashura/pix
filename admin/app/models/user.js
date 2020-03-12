@@ -1,14 +1,21 @@
-import DS from 'ember-data';
-const { attr, hasMany, Model } = DS;
+import Model, { hasMany, attr } from '@ember-data/model';
+import { computed } from '@ember/object';
 
-export default Model.extend({
+export default class User extends Model {
 
-  // Attributes
-  firstName: attr(),
-  lastName: attr(),
-  email: attr(),
+  @attr() firstName;
+  @attr() lastName;
+  @attr() email;
+  @attr() username;
+  @attr('boolean') cgu;
+  @attr('boolean') pixOrgaTermsOfServiceAccepted;
+  @attr('boolean') pixCertifTermsOfServiceAccepted;
+  @attr('boolean') isAuthenticatedFromGAR;
 
-  // Relationships
-  memberships: hasMany('membership'),
+  @hasMany('membership') memberships;
 
-});
+  @computed('firstName', 'lastName')
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}

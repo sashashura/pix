@@ -17,6 +17,12 @@ describe('Unit | Serializer | JSONAPI | user-orga-settings-serializer', () => {
           code: 'WASABI666',
           externalId: 'EXTID'
         },
+        user: {
+          id: 123,
+          firstName: 'firstName',
+          lastName: 'lastName',
+          email: 'email',
+        }
       });
 
       const expectedSerializedUserOrgaSettings = {
@@ -32,7 +38,10 @@ describe('Unit | Serializer | JSONAPI | user-orga-settings-serializer', () => {
                 },
             },
             user: {
-              'data': null
+              data: {
+                id: '123',
+                type: 'users'
+              }
             }
           }
         },
@@ -72,6 +81,15 @@ describe('Unit | Serializer | JSONAPI | user-orga-settings-serializer', () => {
               },
             },
           }
+        },
+        {
+          id: '123',
+          type: 'users',
+          attributes: {
+            'first-name': 'firstName',
+            'last-name': 'lastName',
+            email: 'email',
+          }
         }]
       };
 
@@ -97,7 +115,8 @@ describe('Unit | Serializer | JSONAPI | user-orga-settings-serializer', () => {
         'name': 'ACME',
         'type': 'PRO',
         'external-id': 'EXTID',
-        'is-managing-students': false
+        'is-managing-students': false,
+        'can-collect-profiles': false,
       });
     });
 
@@ -129,6 +148,20 @@ describe('Unit | Serializer | JSONAPI | user-orga-settings-serializer', () => {
 
       // then
       expect(json.data.relationships.organization.data).to.be.null;
+    });
+
+    it('should not force the add of user relation link if user is undefined', () => {
+      // given
+      const userOrgaSettings = domainBuilder.buildUserOrgaSettings();
+      userOrgaSettings.user = undefined;
+
+      // when
+      const json = serializer.serialize(userOrgaSettings);
+
+      // then
+      expect(json.data.relationships.user).to.be.undefined;
+      expect(json.included.length).to.equal(1);
+      expect(json.included[0].type).to.not.equal('users');
     });
   });
 });

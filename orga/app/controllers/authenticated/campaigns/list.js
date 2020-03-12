@@ -1,50 +1,64 @@
 import { action, computed } from '@ember/object';
-import { empty } from '@ember/object/computed';
-import { isEmpty } from '@ember/utils';
+import { equal } from '@ember/object/computed';
 import Controller from '@ember/controller';
 import { debounce } from '@ember/runloop';
 import { inject as service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
+import config from 'pix-orga/config/environment';
+import get from 'lodash/get';
+
+const DEFAULT_PAGE_NUMBER = 1;
 
 export default class ListController extends Controller {
   queryParams = ['pageNumber', 'pageSize', 'name', 'status', 'creatorId'];
-  pageNumber = 1;
+  DEBOUNCE_MS = config.pagination.debounce;
+  @tracked pageNumber = DEFAULT_PAGE_NUMBER;
   pageSize = 25;
   name = null;
-  searchFilter = null;
-  campaignName = null;
+  @tracked creatorId = null;
+  @tracked status = null;
+  pendingFilters = {};
+
   @service currentUser;
 
-  @empty('model')
-  hasNoCampaign;
-
-  @computed('name', 'hasNoCampaign')
+  @computed('model')
   get displayNoCampaignPanel() {
-    return this.hasNoCampaign && isEmpty(this.name) && isEmpty(this.status) && isEmpty(this.creatorId);
+    return !this.model.meta.hasCampaigns;
   }
 
-  @computed('status')
-  get isArchived() {
-    return this.status === 'archived';
+  @computed('currentUser.organization.memberships')
+  get membersOptions() {
+    const members = get(this.currentUser,'organization.memberships', []);
+    const options = members.map(({ user }) => ({
+      value: user.get('id'),
+      label: `${user.get('firstName')} ${user.get('lastName')}`,
+    }));
+    return [{ value: '', label: 'Tous' }, ...options];
   }
 
-  setFieldName() {
-    this.set(this.searchFilter.fieldName, this.searchFilter.value);
+  @equal('status', 'archived') isArchived;
+
+  updateFilters() {
+    this.setProperties(this.pendingFilters);
+    this.pendingFilters = {};
+    this.pageNumber = DEFAULT_PAGE_NUMBER;
   }
 
   @action
-  triggerFiltering(fieldName, value) {
-    this.set('searchFilter', { fieldName, value });
-    debounce(this, this.setFieldName, 500);
+  triggerFiltering(fieldName, event) {
+    const value = event.target.value;
+    this.pendingFilters[fieldName] = value;
+    debounce(this, this.updateFilters, this.DEBOUNCE_MS);
   }
 
   @action
   updateCampaignStatus(newStatus) {
-    this.set('status', newStatus);
+    this.status = newStatus;
   }
 
   @action
   updateCampaignCreator(creatorId) {
-    this.set('creatorId', creatorId);
+    this.creatorId = creatorId;
   }
 
   @action

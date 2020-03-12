@@ -1,10 +1,8 @@
-const _ = require('lodash');
-
 const { ObjectValidationError } = require('../errors');
 
 const courseIdMessage = {
   COMPETENCE_EVALUATION: '[NOT USED] CompetenceId is in Competence Evaluation.',
-  SMART_PLACEMENT: 'Smart Placement Tests CourseId Not Used',
+  CAMPAIGN: '[NOT USED] Campaign Assessment CourseId Not Used',
 };
 
 const states = {
@@ -18,13 +16,13 @@ const types = {
   COMPETENCE_EVALUATION: 'COMPETENCE_EVALUATION',
   DEMO: 'DEMO',
   PREVIEW: 'PREVIEW',
-  SMARTPLACEMENT: 'SMART_PLACEMENT',
+  CAMPAIGN: 'CAMPAIGN',
 };
 
 const TYPES_OF_ASSESSMENT_NEEDING_USER = [
   types.CERTIFICATION,
   types.COMPETENCE_EVALUATION,
-  types.SMARTPLACEMENT,
+  types.CAMPAIGN,
 ];
 
 class Assessment {
@@ -38,12 +36,12 @@ class Assessment {
     isImproving,
     // includes
     answers = [],
-    assessmentResults = [],
     campaignParticipation,
     course,
     targetProfile,
     // references
     courseId,
+    certificationCourseId,
     userId,
     competenceId,
     campaignParticipationId,
@@ -57,53 +55,19 @@ class Assessment {
     this.isImproving = isImproving;
     // includes
     this.answers = answers;
-    this.assessmentResults = assessmentResults;
     this.campaignParticipation = campaignParticipation;
     this.course = course;
     this.targetProfile = targetProfile;
     // references
     this.courseId = courseId;
-    this.certificationCourseId = null;
+    this.certificationCourseId = certificationCourseId;
     this.userId = userId;
     this.competenceId = competenceId;
     this.campaignParticipationId = campaignParticipationId;
-
-    if (this.type === types.CERTIFICATION) {
-      this.certificationCourseId = parseInt(this.courseId);
-    }
-  }
-
-  /**
-   * @deprecated
-   */
-  static fromAttributes(attributes) {
-    const assessment = new Assessment();
-    return Object.assign(assessment, attributes);
   }
 
   isCompleted() {
     return this.state === Assessment.states.COMPLETED;
-  }
-
-  getLastAssessmentResult() {
-    if (this.assessmentResults && this.assessmentResults.length > 0) {
-      return _(this.assessmentResults).sortBy(['createdAt']).last();
-    }
-    return null;
-  }
-
-  getPixScore() {
-    if (this.getLastAssessmentResult()) {
-      return this.getLastAssessmentResult().pixScore;
-    }
-    return null;
-  }
-
-  getLevel() {
-    if (this.getLastAssessmentResult()) {
-      return this.getLastAssessmentResult().level;
-    }
-    return null;
   }
 
   setCompleted() {
@@ -129,8 +93,8 @@ class Assessment {
     return this.type === types.DEMO;
   }
 
-  isSmartPlacement() {
-    return this.type === types.SMARTPLACEMENT;
+  isForCampaign() {
+    return this.type === types.CAMPAIGN;
   }
 
   isCertification() {
@@ -142,11 +106,7 @@ class Assessment {
   }
 
   hasKnowledgeElements() {
-    return this.isCompetenceEvaluation() || this.isSmartPlacement();
-  }
-
-  isCertifiable() {
-    return this.getLastAssessmentResult().level >= 1;
+    return this.isCompetenceEvaluation() || this.isForCampaign();
   }
 }
 

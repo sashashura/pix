@@ -18,6 +18,12 @@ describe('Unit | Serializer | JSONAPI | membership-serializer', () => {
           externalId: 'EXTID'
         },
         organizationRole: Membership.roles.ADMIN,
+        user: {
+          id: 123,
+          firstName: 'firstName',
+          lastName: 'lastName',
+          email: 'email',
+        }
       });
 
       const expectedSerializedMembership = {
@@ -35,7 +41,10 @@ describe('Unit | Serializer | JSONAPI | membership-serializer', () => {
                 },
             },
             user: {
-              'data': null
+              'data': {
+                id: '123',
+                type: 'users'
+              }
             }
           }
         },
@@ -75,6 +84,15 @@ describe('Unit | Serializer | JSONAPI | membership-serializer', () => {
               },
             },
           }
+        },
+        {
+          type: 'users',
+          id: '123',
+          attributes: {
+            'first-name': 'firstName',
+            'last-name': 'lastName',
+            email: 'email',
+          },
         }]
       };
 
@@ -100,7 +118,8 @@ describe('Unit | Serializer | JSONAPI | membership-serializer', () => {
         'name': 'ACME',
         'type': 'PRO',
         'external-id': 'EXTID',
-        'is-managing-students': false
+        'is-managing-students': false,
+        'can-collect-profiles': false,
       });
     });
 
@@ -131,7 +150,51 @@ describe('Unit | Serializer | JSONAPI | membership-serializer', () => {
       const json = serializer.serialize(membership);
 
       // then
-      expect(json.data.relationships.organization.data).to.be.null;
+      expect(json.data.relationships.organization).to.be.undefined;
+      expect(json.included.length).to.equal(1);
+      expect(json.included[0].type).to.not.equal('organization');
+
+    });
+
+    it('should not force the add of user relation link if the user is undefined', () => {
+      // given
+      const membership = domainBuilder.buildMembership();
+      membership.user = undefined;
+
+      // when
+      const json = serializer.serialize(membership);
+
+      // then
+      expect(json.data.relationships.user).to.be.undefined;
+      expect(json.included.length).to.equal(1);
+      expect(json.included[0].type).to.not.equal('users');
+    });
+  });
+
+  describe('#deserialize()', () => {
+
+    let jsonMembership = null;
+
+    beforeEach(() => {
+      jsonMembership = {
+        data: {
+          type: 'memberships',
+          id: '12345',
+          attributes: {
+            'organization-role': 'ADMIN',
+          },
+        }
+      };
+    });
+
+    it('should convert JSON API data into a map object that contain attribute to patch', () => {
+      // when
+      const membershipAttributes = serializer.deserialize(jsonMembership);
+
+      // then
+      expect(membershipAttributes.organizationRole).to.equal('ADMIN');
+      expect(membershipAttributes.id).to.equal('12345');
+
     });
   });
 });

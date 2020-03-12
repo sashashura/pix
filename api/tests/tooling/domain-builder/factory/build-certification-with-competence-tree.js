@@ -11,6 +11,7 @@ module.exports = function buildCertification({
   certificationCenter = 'L’univeristé du Pix',
   date = new Date('2018-12-01T01:02:03Z'),
   firstName = 'Jean',
+  deliveredAt = new Date('2018-10-03T01:02:03Z'),
   isPublished = true,
   lastName = 'Bon',
   userId = 1,
@@ -18,6 +19,7 @@ module.exports = function buildCertification({
   commentForCandidate,
   pixScore,
   status,
+  cleaCertificationStatus = 'acquired',
 
   // the id of the ResultCompetenceTree should be with the most recent assessment result.
   resultCompetenceTree = buildResultCompetenceTree({ id: `${id}-${assessmentResults[0].id}` }),
@@ -32,10 +34,12 @@ module.exports = function buildCertification({
     certificationCenter,
     date,
     firstName,
+    deliveredAt,
     isPublished,
     lastName,
     userId,
     resultCompetenceTree,
+    cleaCertificationStatus
   });
 
   if (pixScore !== undefined) {

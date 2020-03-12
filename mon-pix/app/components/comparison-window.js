@@ -1,7 +1,5 @@
-import { equal } from '@ember/object/computed';
-import Component from '@ember/component';
-import { computed } from '@ember/object';
 import resultIconUrl from 'mon-pix/utils/result-icon-url';
+import Component from '@glimmer/component';
 
 const TEXT_FOR_RESULT = {
   ok: {
@@ -12,13 +10,13 @@ const TEXT_FOR_RESULT = {
 
   ko: {
     status: 'ko',
-    title: 'Vous n\'avez pas la bonne réponse',
+    title: 'Vous n’avez pas la bonne réponse',
     tooltip: 'Réponse incorrecte'
   },
 
   aband: {
     status: 'aband',
-    title: 'Vous n\'avez pas donné de réponse',
+    title: 'Vous n’avez pas donné de réponse',
     tooltip: 'Sans réponse'
   },
 
@@ -34,6 +32,24 @@ const TEXT_FOR_RESULT = {
     tooltip: 'Temps dépassé'
   },
 
+  okAutoReply: {
+    status: 'ok',
+    title: 'Vous avez réussi l’épreuve',
+    tooltip: 'Épreuve réussie'
+  },
+
+  koAutoReply: {
+    status: 'ko',
+    title: 'Vous n’avez pas réussi l’épreuve',
+    tooltip: 'Épreuve non réussie'
+  },
+
+  abandAutoReply: {
+    status: 'aband',
+    title: 'Vous avez passé l’épreuve',
+    tooltip: 'Épreuve passée'
+  },
+
   default: {
     status: 'default',
     title: '',
@@ -41,29 +57,51 @@ const TEXT_FOR_RESULT = {
   }
 };
 
-export default Component.extend({
+export default class ComparisonWindow extends Component {
+  get isAssessmentChallengeTypeQroc() {
+    return this.args.answer.challenge.get('type') === 'QROC';
+  }
 
-  answer: null,
-  index: null,
+  get isAssessmentChallengeTypeQcm() {
+    return this.args.answer.challenge.get('type') === 'QCM';
+  }
 
-  isAssessmentChallengeTypeQroc: equal('answer.challenge.type', 'QROC'),
-  isAssessmentChallengeTypeQcm: equal('answer.challenge.type', 'QCM'),
-  isAssessmentChallengeTypeQcu: equal('answer.challenge.type', 'QCU'),
-  isAssessmentChallengeTypeQrocm: equal('answer.challenge.type', 'QROCM'),
-  isAssessmentChallengeTypeQrocmInd: equal('answer.challenge.type', 'QROCM-ind'),
-  isAssessmentChallengeTypeQrocmDep: equal('answer.challenge.type', 'QROCM-dep'),
+  get isAssessmentChallengeTypeQcu() {
+    return this.args.answer.challenge.get('type') === 'QCU';
+  }
 
-  resultItem: computed('answer.result', function() {
+  get isAssessmentChallengeTypeQrocm() {
+    return this.args.answer.challenge.get('type') === 'QROCM';
+  }
+
+  get isAssessmentChallengeTypeQrocmInd() {
+    return this.args.answer.challenge.get('type') === 'QROCM-ind';
+  }
+
+  get isAssessmentChallengeTypeQrocmDep() {
+    return this.args.answer.challenge.get('type') === 'QROCM-dep';
+  }
+
+  get isAutoReply() {
+    return this.args.answer.challenge.get('autoReply');
+  }
+
+  get answerSuffix() {
+    return this.isAutoReply ? 'AutoReply' : '';
+  }
+
+  get resultItem() {
     let resultItem = TEXT_FOR_RESULT['default'];
-    const answerStatus = this.get('answer.result');
+    const answerStatus = `${this.args.answer.result}${this.answerSuffix}`;
 
     if (answerStatus && (answerStatus in TEXT_FOR_RESULT)) {
       resultItem = TEXT_FOR_RESULT[answerStatus];
     }
     return resultItem;
-  }),
+  }
 
-  resultItemIcon: computed('resultItem', function() {
-    return resultIconUrl(this.get('resultItem.status'));
-  }),
-});
+  get resultItemIcon() {
+    return resultIconUrl(this.resultItem.status);
+  }
+}
+

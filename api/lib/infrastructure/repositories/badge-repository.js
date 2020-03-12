@@ -3,11 +3,16 @@ const BookshelfBadge = require('../../infrastructure/data/badge');
 
 module.exports = {
 
-  findOneByTargetProfileId(targetProfileId) {
+  findByTargetProfileId(targetProfileId) {
     return BookshelfBadge
       .where({ targetProfileId })
-      .fetch({ require: false })
-      .then((results) => bookshelfToDomainConverter.buildDomainObject(BookshelfBadge, results));
+      .fetchAll({
+        require: false,
+        withRelated: ['badgeCriteria','badgePartnerCompetences']
+      })
+      .then((results) =>
+        results.map((result) => bookshelfToDomainConverter.buildDomainObject(BookshelfBadge, result))
+      );
   },
 
 };

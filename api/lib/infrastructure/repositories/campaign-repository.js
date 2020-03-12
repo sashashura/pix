@@ -12,6 +12,7 @@ function _toDomain(bookshelfCampaign) {
     'id',
     'name',
     'code',
+    'type',
     'organizationId',
     'creatorId',
     'createdAt',
@@ -19,6 +20,7 @@ function _toDomain(bookshelfCampaign) {
     'customLandingPageText',
     'idPixLabel',
     'title',
+    'type',
     'archivedAt',
   ]));
 }
@@ -37,6 +39,7 @@ function _fromBookshelfCampaignWithReportDataToDomain(campaignWithReportData) {
     'customLandingPageText',
     'idPixLabel',
     'title',
+    'type',
     'archivedAt',
   ]);
 
@@ -86,6 +89,17 @@ function _setSearchFiltersForQueryBuilder(qb, { name, ongoing = true, creatorId 
   }
 }
 
+async function _hasCampaignsInOrganization({ organizationId }) {
+  const result = await BookshelfCampaign
+    .query((qb) => {
+      qb.select('id')
+        .where('campaigns.organizationId', organizationId)
+        .limit(1);
+    }).fetch();
+
+  return Boolean(result);
+}
+
 module.exports = {
 
   isCodeAvailable(code) {
@@ -116,25 +130,36 @@ module.exports = {
     return queryBuilder.get(BookshelfCampaign, id, options);
   },
 
-  save(domainCampaign) {
-    const repositoryCampaign = _.omit(domainCampaign, ['createdAt', 'archivedAt', 'organizationLogoUrl', 'organizationName', 'targetProfile', 'campaignReport', 'campaignCollectiveResult', 'isRestricted', 'creator' ]);
-    return new BookshelfCampaign(repositoryCampaign)
-      .save()
-      .then(_toDomain);
+  async create(campaign) {
+    const campaignAttributes = _.pick(campaign, [
+      'name',
+      'code',
+      'title',
+      'type',
+      'idPixLabel',
+      'customLandingPageText',
+      'creatorId',
+      'organizationId',
+      'targetProfileId'
+    ]);
+    const createdCampaign = await (new BookshelfCampaign(campaignAttributes).save());
+    return _toDomain(createdCampaign);
   },
 
-  update(campaign) {
-
-    const campaignRawData = _.pick(campaign, ['name', 'title', 'customLandingPageText', 'archivedAt']);
-
-    return new BookshelfCampaign({ id: campaign.id })
-      .save(campaignRawData, { patch: true })
-      .then((model) => model.refresh())
-      .then(_toDomain);
+  async update(campaign) {
+    const editedAttributes = _.pick(campaign, [
+      'name',
+      'title',
+      'customLandingPageText',
+      'archivedAt',
+    ]);
+    const bookshelfCampaign = await BookshelfCampaign.where({ id: campaign.id }).fetch();
+    await bookshelfCampaign.save(editedAttributes, { method: 'update', patch: true });
+    return _toDomain(bookshelfCampaign);
   },
 
-  findPaginatedFilteredByOrganizationIdWithCampaignReports({ organizationId, filter, page }) {
-    return BookshelfCampaign
+  async findPaginatedFilteredByOrganizationIdWithCampaignReports({ organizationId, filter, page }) {
+    const { models, pagination } = await BookshelfCampaign
       .query((qb) => {
         qb.select('campaigns.*', 'participations.participationsCount', 'isShared.sharedParticipationsCount')
           .where('campaigns.organizationId', organizationId)
@@ -147,25 +172,27 @@ module.exports = {
         page: page.number,
         pageSize: page.size,
         withRelated: ['creator']
-      })
-      .then(({ models, pagination }) => {
-        const campaignsWithReports = models.map(_fromBookshelfCampaignWithReportDataToDomain);
-        return { models: campaignsWithReports, pagination };
       });
+
+    const hasCampaigns = await _hasCampaignsInOrganization({ organizationId });
+    
+    const campaignsWithReports = models.map(_fromBookshelfCampaignWithReportDataToDomain);
+    return { models: campaignsWithReports, meta: { ...pagination, hasCampaigns } };
   },
 
-  checkIfUserOrganizationHasAccessToCampaign(campaignId, userId) {
-    return BookshelfCampaign
-      .query((qb) => {
-        qb.where({ 'campaigns.id': campaignId, 'memberships.userId': userId });
-        qb.innerJoin('memberships', 'memberships.organizationId', 'campaigns.organizationId');
-        qb.innerJoin('organizations', 'organizations.id', 'campaigns.organizationId');
-      })
-      .fetch({
-        require: true,
-      })
-      .then(() => true)
-      .catch(() => false);
+  async checkIfUserOrganizationHasAccessToCampaign(campaignId, userId) {
+    try {
+      await BookshelfCampaign
+        .query((qb) => {
+          qb.where({ 'campaigns.id': campaignId, 'memberships.userId': userId, 'memberships.disabledAt': null });
+          qb.innerJoin('memberships', 'memberships.organizationId', 'campaigns.organizationId');
+          qb.innerJoin('organizations', 'organizations.id', 'campaigns.organizationId');
+        })
+        .fetch({ require: true });
+    } catch (e) {
+      return false;
+    }
+    return true;
   },
 
   async checkIfCampaignIsArchived(campaignId) {

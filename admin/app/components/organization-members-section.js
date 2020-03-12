@@ -1,40 +1,10 @@
 import Component from '@ember/component';
-import BootstrapTheme from 'ember-models-table/themes/bootstrap4';
+import { action } from '@ember/object';
 
-const columns = [
-  {
-    propertyName: 'id',
-    title: 'Numéro du membre',
-    disableFiltering: true,
-  },
-  {
-    propertyName: 'user.firstName',
-    title: 'Prénom',
-  },
-  {
-    propertyName: 'user.lastName',
-    title: 'Nom',
-  },
-  {
-    propertyName: 'user.email',
-    title: 'Courriel',
-  },
-  {
-    propertyName: 'displayedOrganizationRole',
-    title: 'Rôle',
-  },
-];
+export default class OrganizationMembersSection extends Component {
 
-export default Component.extend({
-
-  init() {
-    this._super(...arguments);
-    this.columns = columns;
-    this.themeInstance = BootstrapTheme.create({
-      messages: {
-        noDataToShow: 'Cette organisation ne contient pas de membre.'
-      }
-    });
-  },
-
-});
+  @action
+  selectRole(event) {
+    return this.selectRoleForSearch(event.target.value || null);
+  }
+}

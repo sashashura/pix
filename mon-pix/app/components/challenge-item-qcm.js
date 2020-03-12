@@ -1,26 +1,30 @@
+/* eslint ember/classic-decorator-no-classic-methods: 0 */
+
+import { action } from '@ember/object';
 import ChallengeItemGeneric from './challenge-item-generic';
 
-const ChallengeItemQcm = ChallengeItemGeneric.extend({
+export default class ChallengeItemQcm extends ChallengeItemGeneric {
+  checkedValues = new Set();
 
-  _hasError: function() {
-    return this._getAnswerValue().length < 1;
-  },
+  _hasError() {
+    return this.checkedValues.size < 1;
+  }
 
-  // FIXME refactor that
   _getAnswerValue() {
-    return this.$('input[type=checkbox][id^=checkbox_]:checked').map(function() {return this.name; }).get().join(',');
-  },
+    return Array.from(this.checkedValues).join(',');
+  }
 
   _getErrorMessage() {
     return 'Pour valider, sélectionner au moins une réponse. Sinon, passer.';
-  },
-
-  actions: {
-    answerChanged: function() {
-      this.set('errorMessage', null);
-    }
   }
 
-});
-
-export default ChallengeItemQcm;
+  @action
+  answerChanged(checkboxName) {
+    if (this.checkedValues.has(checkboxName)) {
+      this.checkedValues.delete(checkboxName);
+    } else {
+      this.checkedValues.add(checkboxName);
+    }
+    this.set('errorMessage', null);
+  }
+}

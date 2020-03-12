@@ -1,3 +1,5 @@
+/* eslint ember/no-computed-properties-in-native-classes: 0 */
+
 import Model, { belongsTo, attr } from '@ember-data/model';
 import { computed } from '@ember/object';
 import { notEmpty, equal, gt } from '@ember/object/computed';
@@ -18,6 +20,7 @@ export default class Challenge extends Model {
   @attr('string') proposals;
   @attr('number') timer;
   @attr('string') type;
+  @attr('boolean') autoReply;
 
   // includes
   @belongsTo('answer') answer;

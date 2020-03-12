@@ -1,37 +1,47 @@
 const _ = require('lodash');
+const bluebird = require('bluebird');
 
 const KnowledgeElement = require('../../../lib/domain/models/KnowledgeElement');
 const UserCompetence = require('../../../lib/domain/models/UserCompetence');
 const Challenge = require('../models/Challenge');
-const Scorecard = require('../models/Scorecard');
 const CertificationProfile = require('../models/CertificationProfile');
 const assessmentRepository = require('../../../lib/infrastructure/repositories/assessment-repository');
+const assessmentResultRepository = require('../../../lib/infrastructure/repositories/assessment-result-repository');
 const challengeRepository = require('../../../lib/infrastructure/repositories/challenge-repository');
 const answerRepository = require('../../../lib/infrastructure/repositories/answer-repository');
-const competenceRepository = require('../../../lib/infrastructure/repositories/competence-repository');
 const knowledgeElementRepository = require('../../../lib/infrastructure/repositories/knowledge-element-repository');
+const scoringService = require('../../../lib/domain/services/scoring/scoring-service');
 
-async function getCertificationProfile({ userId, limitDate, isV2Certification = true }) {
+async function getCertificationProfile({ userId, limitDate, competences, isV2Certification = true, allowExcessPixAndLevels = true }) {
   const certificationProfile = new CertificationProfile({
     userId,
     profileDate: limitDate,
   });
   if (isV2Certification) {
-    return _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV2(certificationProfile);
+    return _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV2({ certificationProfile, competences, allowExcessPixAndLevels });
   }
-  return _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV1(certificationProfile);
+  return _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV1({ certificationProfile, competences });
 }
 
-async function fillCertificationProfileWithCertificationChallenges(certificationProfile) {
+async function fillCertificationProfileWithChallenges(certificationProfile) {
+  const certificationProfileClone = _.clone(certificationProfile);
+  const knowledgeElementsByCompetence = await knowledgeElementRepository
+    .findUniqByUserIdGroupedByCompetenceId({ userId: certificationProfile.userId, limitDate: certificationProfile.profileDate });
+
+  const knowledgeElements = KnowledgeElement.findDirectlyValidatedFromGroups(knowledgeElementsByCompetence);
+  const answerIds = _.map(knowledgeElements, 'answerId');
+
+  const challengeIdsCorrectlyAnswered = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
+
   const allChallenges = await challengeRepository.list();
-  const challengesAlreadyAnswered = certificationProfile.challengeIdsCorrectlyAnswered.map((challengeId) => Challenge.findById(allChallenges, challengeId));
+  const challengesAlreadyAnswered = challengeIdsCorrectlyAnswered.map((challengeId) => Challenge.findById(allChallenges, challengeId));
 
   challengesAlreadyAnswered.forEach((challenge) => {
     if (!challenge) {
       return;
     }
 
-    const userCompetence = _getUserCompetenceByChallengeCompetenceId(certificationProfile.userCompetences, challenge);
+    const userCompetence = _getUserCompetenceByChallengeCompetenceId(certificationProfileClone.userCompetences, challenge);
 
     if (!userCompetence || !userCompetence.isCertifiable()) {
       return;
@@ -42,9 +52,9 @@ async function fillCertificationProfileWithCertificationChallenges(certification
       .forEach((publishedSkill) => userCompetence.addSkill(publishedSkill));
   });
 
-  certificationProfile.userCompetences = UserCompetence.orderSkillsOfCompetenceByDifficulty(certificationProfile.userCompetences);
+  certificationProfileClone.userCompetences = UserCompetence.orderSkillsOfCompetenceByDifficulty(certificationProfileClone.userCompetences);
 
-  certificationProfile.userCompetences.forEach((userCompetence) => {
+  certificationProfileClone.userCompetences.forEach((userCompetence) => {
     const testedSkills = [];
     userCompetence.skills.forEach((skill) => {
       if (!userCompetence.hasEnoughChallenges()) {
@@ -54,8 +64,7 @@ async function fillCertificationProfileWithCertificationChallenges(certification
         const challengesPoolToPickChallengeFrom = (_.isEmpty(challengesLeftToAnswer)) ? challengesToValidateCurrentSkill : challengesLeftToAnswer;
         const challenge = _.sample(challengesPoolToPickChallengeFrom);
 
-        //TODO : Mettre le skill en entier (Skill{id, name})
-        challenge.testedSkill = skill.name;
+        challenge.testedSkill = skill;
         testedSkills.push(skill);
 
         userCompetence.addChallenge(challenge);
@@ -64,16 +73,7 @@ async function fillCertificationProfileWithCertificationChallenges(certification
     userCompetence.skills = testedSkills;
   });
 
-  return certificationProfile;
-}
-
-async function _findCorrectAnswersByAssessments(assessments) {
-  const answersByAssessmentsPromises = assessments.map((assessment) =>
-    answerRepository.findCorrectAnswersByAssessmentId(assessment.id));
-
-  const answersByAssessments = await Promise.all(answersByAssessmentsPromises);
-
-  return _.flatten(answersByAssessments);
+  return certificationProfileClone;
 }
 
 function _getUserCompetenceByChallengeCompetenceId(userCompetences, challenge) {
@@ -85,62 +85,74 @@ function _skillHasAtLeastOneChallengeInTheReferentiel(skill, challenges) {
   return challengesBySkill.length > 0;
 }
 
-function _createUserCompetencesV1({ allCompetences, userLastAssessments }) {
-  return allCompetences.map((competence) => {
-    const userCompetence = new UserCompetence(competence);
-    const assessment = _.find(userLastAssessments, { competenceId: userCompetence.id });
-    userCompetence.pixScore = assessment && assessment.getPixScore() || 0;
-    userCompetence.estimatedLevel = assessment && assessment.getLevel() || 0;
-    return userCompetence;
+async function _createUserCompetencesV1({ allCompetences, userLastAssessments, limitDate }) {
+  return bluebird.mapSeries(allCompetences, async (competence) => {
+    const assessment = _.find(userLastAssessments, { competenceId: competence.id });
+    let estimatedLevel = 0;
+    let pixScore = 0;
+    if (assessment) {
+      const assessmentResultLevelAndPixScore = await assessmentResultRepository.findLatestLevelAndPixScoreByAssessmentId({ assessmentId: assessment.id, limitDate });
+      estimatedLevel = assessmentResultLevelAndPixScore.level;
+      pixScore = assessmentResultLevelAndPixScore.pixScore;
+    }
+    return new UserCompetence({
+      id: competence.id,
+      area: competence.area,
+      index: competence.index,
+      name: competence.name,
+      estimatedLevel,
+      pixScore,
+    });
   });
 }
 
-async function _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV1(certificationProfile) {
+async function _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV1({ certificationProfile, competences }) {
   const certificationProfileToFill = _.clone(certificationProfile);
-  const allCompetences = await competenceRepository.listPixCompetencesOnly();
   const userLastAssessments = await assessmentRepository
     .findLastCompletedAssessmentsForEachCompetenceByUser(certificationProfile.userId, certificationProfile.profileDate);
-  certificationProfileToFill.userCompetences = _createUserCompetencesV1({ allCompetences, userLastAssessments });
-  const correctAnswers = await _findCorrectAnswersByAssessments(userLastAssessments);
-  certificationProfileToFill.challengeIdsCorrectlyAnswered = _.map(correctAnswers, 'challengeId');
+  certificationProfileToFill.userCompetences = await _createUserCompetencesV1({ allCompetences: competences, userLastAssessments, limitDate: certificationProfile.profileDate });
 
   return certificationProfileToFill;
 }
 
-function _createUserCompetencesV2({ userId, knowledgeElementsByCompetence, allCompetences }) {
+function _createUserCompetencesV2({ knowledgeElementsByCompetence, allCompetences, allowExcessPixAndLevels = true }) {
   return allCompetences.map((competence) => {
-    const userCompetence = new UserCompetence(competence);
-
-    const scorecard = Scorecard.buildFrom({
-      userId,
+    const {
+      pixScoreForCompetence,
+      currentLevel,
+    } = scoringService.calculateScoringInformationForCompetence({
       knowledgeElements: knowledgeElementsByCompetence[competence.id],
-      competence
+      allowExcessPix: allowExcessPixAndLevels,
+      allowExcessLevel: allowExcessPixAndLevels
     });
 
-    userCompetence.estimatedLevel = scorecard.level;
-    userCompetence.pixScore = scorecard.earnedPix;
-
-    return userCompetence;
+    return new UserCompetence({
+      id: competence.id,
+      area: competence.area,
+      index: competence.index,
+      name: competence.name,
+      estimatedLevel: currentLevel,
+      pixScore: pixScoreForCompetence,
+    });
   });
 }
 
-async function _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV2(certificationProfile) {
+async function _fillCertificationProfileWithUserCompetencesAndCorrectlyAnsweredChallengeIdsV2({ certificationProfile, competences, allowExcessPixAndLevels }) {
   const certificationProfileToFill = _.clone(certificationProfile);
-  const allCompetences = await competenceRepository.listPixCompetencesOnly();
 
   const knowledgeElementsByCompetence = await knowledgeElementRepository
     .findUniqByUserIdGroupedByCompetenceId({ userId: certificationProfile.userId, limitDate: certificationProfile.profileDate });
-  certificationProfileToFill.userCompetences = _createUserCompetencesV2({ userId: certificationProfile.userId, knowledgeElementsByCompetence, allCompetences });
 
-  const knowledgeElements = KnowledgeElement.findDirectlyValidatedFromGroups(knowledgeElementsByCompetence);
-  const answerIds = _.map(knowledgeElements, 'answerId');
-
-  certificationProfileToFill.challengeIdsCorrectlyAnswered = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
+  certificationProfileToFill.userCompetences = _createUserCompetencesV2({
+    knowledgeElementsByCompetence,
+    allCompetences: competences,
+    allowExcessPixAndLevels,
+  });
 
   return certificationProfileToFill;
 }
 
 module.exports = {
   getCertificationProfile,
-  fillCertificationProfileWithCertificationChallenges,
+  fillCertificationProfileWithChallenges,
 };

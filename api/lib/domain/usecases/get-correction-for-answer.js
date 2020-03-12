@@ -16,14 +16,15 @@ module.exports = async function getCorrectionForAnswer({
 
   _validateCorrectionIsAccessible(assessment, userId, integerAnswerId);
 
-  return correctionRepository.getByChallengeId(answer.challengeId);
+  return correctionRepository.getByChallengeId({ challengeId: answer.challengeId, userId });
+
 };
 
 function _validateCorrectionIsAccessible(assessment, userId, answerId) {
   if (assessment.userId !== userId) {
     throw new NotFoundError(`Not found correction for answer of ID ${answerId}`);
   }
-  if (!assessment.isCompleted() && !assessment.isSmartPlacement() && !assessment.isCompetenceEvaluation()) {
+  if (!assessment.isCompleted() && !assessment.isForCampaign() && !assessment.isCompetenceEvaluation()) {
     throw new AssessmentNotCompletedError();
   }
 }

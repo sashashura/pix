@@ -1,8 +1,11 @@
+const _ = require('lodash');
+
 const { sinon, expect, domainBuilder, hFake, catchErr } = require('../../../test-helper');
 
 const campaignController = require('../../../../lib/application/campaigns/campaign-controller');
 
 const campaignSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/campaign-serializer');
+const campaignAnalysisSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/campaign-analysis-serializer');
 const campaignReportSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/campaign-report-serializer');
 const campaignCollectiveResultSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/campaign-collective-result-serializer');
 
@@ -36,10 +39,11 @@ describe('Unit | Application | Controller | Campaign', () => {
 
       // then
       expect(usecases.createCampaign).to.have.been.calledOnce;
-      const createCampaignArgs = usecases.createCampaign.firstCall.args[0];
-      expect(createCampaignArgs.campaign).to.have.property('name', deserializedCampaign.name);
-      expect(createCampaignArgs.campaign).to.have.property('creatorId', connectedUserId);
-      expect(createCampaignArgs.campaign).to.have.property('organizationId', deserializedCampaign.organizationId);
+      const { campaign } = usecases.createCampaign.firstCall.args[0];
+      expect(campaign).to.include({
+        ..._.pick(deserializedCampaign, ['name', 'type', 'organizationId']),
+        creatorId: connectedUserId,
+      });
     });
 
     it('should return a serialized campaign when the campaign has been successfully created', async () => {
@@ -63,7 +67,7 @@ describe('Unit | Application | Controller | Campaign', () => {
     });
   });
 
-  describe('#getCsvResult', () => {
+  describe('#getCsvAssessmentResults', () => {
     const userId = 1;
     const campaignId = 2;
     const request = {
@@ -76,30 +80,30 @@ describe('Unit | Application | Controller | Campaign', () => {
     };
 
     beforeEach(() => {
-      sinon.stub(usecases, 'startWritingCampaignResultsToStream');
+      sinon.stub(usecases, 'startWritingCampaignAssessmentResultsToStream');
       sinon.stub(tokenService, 'extractUserIdForCampaignResults').resolves(userId);
     });
 
     it('should call the use case to get result campaign in csv', async () => {
       // given
-      usecases.startWritingCampaignResultsToStream.resolves({ fileName: 'any file name' });
+      usecases.startWritingCampaignAssessmentResultsToStream.resolves({ fileName: 'any file name' });
 
       // when
-      await campaignController.getCsvResults(request);
+      await campaignController.getCsvAssessmentResults(request);
 
       // then
-      expect(usecases.startWritingCampaignResultsToStream).to.have.been.calledOnce;
-      const getResultsCampaignArgs = usecases.startWritingCampaignResultsToStream.firstCall.args[0];
+      expect(usecases.startWritingCampaignAssessmentResultsToStream).to.have.been.calledOnce;
+      const getResultsCampaignArgs = usecases.startWritingCampaignAssessmentResultsToStream.firstCall.args[0];
       expect(getResultsCampaignArgs).to.have.property('userId');
       expect(getResultsCampaignArgs).to.have.property('campaignId');
     });
 
     it('should return a response with correct headers', async () => {
       // given
-      usecases.startWritingCampaignResultsToStream.resolves({ fileName: 'expected file name' });
+      usecases.startWritingCampaignAssessmentResultsToStream.resolves({ fileName: 'expected file name' });
 
       // when
-      const response = await campaignController.getCsvResults(request);
+      const response = await campaignController.getCsvAssessmentResults(request);
 
       // then
       expect(response.headers['content-type']).to.equal('text/csv;charset=utf-8');
@@ -109,10 +113,66 @@ describe('Unit | Application | Controller | Campaign', () => {
 
     it('should fix invalid header chars in filename', async () => {
       // given
-      usecases.startWritingCampaignResultsToStream.resolves({ fileName: 'file-name with invalid_chars •’<>:"/\\|?*"\n.csv' });
+      usecases.startWritingCampaignAssessmentResultsToStream.resolves({ fileName: 'file-name with invalid_chars •’<>:"/\\|?*"\n.csv' });
 
       // when
-      const response = await campaignController.getCsvResults(request);
+      const response = await campaignController.getCsvAssessmentResults(request);
+
+      // then
+      expect(response.headers['content-disposition']).to.equal('attachment; filename="file-name with invalid_chars _____________.csv"');
+    });
+  });
+
+  describe('#getCsvProfilesCollectionResult', () => {
+    const userId = 1;
+    const campaignId = 2;
+    const request = {
+      query: {
+        accessToken: 'token'
+      },
+      params: {
+        id: campaignId
+      }
+    };
+
+    beforeEach(() => {
+      sinon.stub(usecases, 'startWritingCampaignProfilesCollectionResultsToStream');
+      sinon.stub(tokenService, 'extractUserIdForCampaignResults').resolves(userId);
+    });
+
+    it('should call the use case to get result campaign in csv', async () => {
+      // given
+      usecases.startWritingCampaignProfilesCollectionResultsToStream.resolves({ fileName: 'any file name' });
+
+      // when
+      await campaignController.getCsvProfilesCollectionResults(request);
+
+      // then
+      expect(usecases.startWritingCampaignProfilesCollectionResultsToStream).to.have.been.calledOnce;
+      const getResultsCampaignArgs = usecases.startWritingCampaignProfilesCollectionResultsToStream.firstCall.args[0];
+      expect(getResultsCampaignArgs).to.have.property('userId');
+      expect(getResultsCampaignArgs).to.have.property('campaignId');
+    });
+
+    it('should return a response with correct headers', async () => {
+      // given
+      usecases.startWritingCampaignProfilesCollectionResultsToStream.resolves({ fileName: 'expected file name' });
+
+      // when
+      const response = await campaignController.getCsvProfilesCollectionResults(request);
+
+      // then
+      expect(response.headers['content-type']).to.equal('text/csv;charset=utf-8');
+      expect(response.headers['content-disposition']).to.equal('attachment; filename="expected file name"');
+      expect(response.headers['content-encoding']).to.equal('identity');
+    });
+
+    it('should fix invalid header chars in filename', async () => {
+      // given
+      usecases.startWritingCampaignProfilesCollectionResultsToStream.resolves({ fileName: 'file-name with invalid_chars •’<>:"/\\|?*"\n.csv' });
+
+      // when
+      const response = await campaignController.getCsvProfilesCollectionResults(request);
 
       // then
       expect(response.headers['content-disposition']).to.equal('attachment; filename="file-name with invalid_chars _____________.csv"');
@@ -330,6 +390,35 @@ describe('Unit | Application | Controller | Campaign', () => {
 
   });
 
+  describe('#getAnalysis', () => {
+
+    const campaignId = 1;
+    const userId = 1;
+
+    beforeEach(() => {
+      sinon.stub(usecases, 'computeCampaignAnalysis');
+      sinon.stub(campaignAnalysisSerializer, 'serialize');
+    });
+
+    it('should return an unauthorized error', async () => {
+      // given
+      const error = new UserNotAuthorizedToAccessEntity('User does not have access to this campaign');
+      const request = {
+        params: { id: campaignId },
+        auth: {
+          credentials: { userId }
+        }
+      };
+      usecases.computeCampaignAnalysis.rejects(error);
+
+      // when
+      const errorCatched = await catchErr(campaignController.getAnalysis)(request);
+
+      // then
+      expect(errorCatched).to.be.instanceof(UserNotAuthorizedToAccessEntity);
+    });
+  });
+
   describe('archiveCampaign', async () => {
     let updatedCampaign;
     let serializedCampaign;
@@ -362,6 +451,7 @@ describe('Unit | Application | Controller | Campaign', () => {
     });
 
   });
+
   describe('unarchiveCampaign', async () => {
     let updatedCampaign;
     let serializedCampaign;

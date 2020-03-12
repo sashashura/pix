@@ -9,6 +9,9 @@ class Organization {
     externalId,
     provinceCode,
     isManagingStudents,
+    credit,
+    canCollectProfiles,
+    email,
     // includes
     memberships = [],
     targetProfileShares = [],
@@ -24,6 +27,9 @@ class Organization {
     this.externalId = externalId;
     this.provinceCode = provinceCode;
     this.isManagingStudents = isManagingStudents;
+    this.credit = credit;
+    this.canCollectProfiles = canCollectProfiles;
+    this.email = email;
     // includes
     this.memberships = memberships;
     this.targetProfileShares = targetProfileShares;

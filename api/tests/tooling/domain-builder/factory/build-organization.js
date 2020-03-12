@@ -1,7 +1,7 @@
 const faker = require('faker');
 const Organization = require('../../../../lib/domain/models/Organization');
 const User = require('../../../../lib/domain/models/User');
-const Student = require('../../../../lib/domain/models/Student');
+const SchoolingRegistration = require('../../../../lib/domain/models/SchoolingRegistration');
 
 function _buildMember(
   {
@@ -14,7 +14,7 @@ function _buildMember(
   return new User({ id, firstName, lastName, email });
 }
 
-function _buildStudent(
+function _buildSchoolingRegistration(
   {
     id = 1,
     lastName = 'Bono',
@@ -23,7 +23,7 @@ function _buildStudent(
     organization = null,
   } = {}) {
 
-  return new Student({ id, lastName, firstName, birthdate, organization });
+  return new SchoolingRegistration({ id, lastName, firstName, birthdate, organization });
 }
 
 function buildOrganization(
@@ -35,11 +35,14 @@ function buildOrganization(
     externalId = 'OrganizationIdLinksToExternalSource',
     provinceCode = '2A',
     isManagingStudents = false,
+    credit = 500,
+    canCollectProfiles = false,
+    email = faker.internet.exampleEmail(),
     createdAt = new Date('2018-01-12T01:02:03Z'),
     memberships = [],
     targetProfileShares = []
   } = {}) {
-  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, createdAt, memberships, targetProfileShares });
+  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, email, canCollectProfiles, createdAt, memberships, targetProfileShares });
 }
 
 buildOrganization.withMembers = function(
@@ -51,6 +54,8 @@ buildOrganization.withMembers = function(
     externalId = 'OrganizationIdLinksToExternalSource',
     provinceCode = '2A',
     isManagingStudents = false,
+    credit = 500,
+    canCollectProfiles = false,
     createdAt = new Date('2018-01-12T01:02:03Z'),
     members = [
       _buildMember({ id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com' }),
@@ -58,10 +63,10 @@ buildOrganization.withMembers = function(
     ]
   } = {}
 ) {
-  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, createdAt, members });
+  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, canCollectProfiles, createdAt, members });
 };
 
-buildOrganization.withStudents = function(
+buildOrganization.withSchoolingRegistrations = function(
   {
     id = faker.random.number(),
     name = 'Lycée Luke Skywalker',
@@ -70,15 +75,17 @@ buildOrganization.withStudents = function(
     externalId = 'OrganizationIdLinksToExternalSource',
     provinceCode = '2A',
     isManagingStudents = true,
+    credit = 500,
+    canCollectProfiles = false,
     createdAt = new Date('2018-01-12T01:02:03Z'),
     students = []
   } = {}
 ) {
-  const organization = new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, createdAt, students });
+  const organization = new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, canCollectProfiles, createdAt, students });
 
   organization.students = [
-    _buildStudent({ id: 1, lastName: 'Doe', firstName: 'John', organization }),
-    _buildStudent({ id: 2, lastName: 'Smith', firstName: 'Jane', organization })
+    _buildSchoolingRegistration({ id: 1, lastName: 'Doe', firstName: 'John', organization }),
+    _buildSchoolingRegistration({ id: 2, lastName: 'Smith', firstName: 'Jane', organization })
   ];
 
   return organization;

@@ -1,7 +1,8 @@
+import { inject as service } from '@ember/service';
 import Controller from '@ember/controller';
 
-export default Controller.extend({
+export default class InscriptionController extends Controller {
+  @service intl;
 
-  pageTitle: 'Inscription',
-
-});
+  pageTitle = this.intl.t('page-title.signup');
+}

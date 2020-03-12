@@ -11,7 +11,7 @@
   background-color: $white;
 
   &:nth-child(odd) {
-    background: $porcelain-grey;
+    background: $grey-10;
   }
 
   @include device-is('tablet') {
@@ -22,7 +22,7 @@
 
 .result-item__instruction {
   width: 82%;
-  font-size: 1.6rem;
+  font-size: 1rem;
   margin-left: 10px;
   overflow: hidden;
 
@@ -33,7 +33,7 @@
 }
 
 .result-item__correction {
-  font-size: 1.2rem;
+  font-size: 0.75rem;
   margin-right: 26px;
   margin-left: 35px;
 
@@ -44,8 +44,8 @@
 
 .result-item__correction-button {
   font-weight: $font-normal;
-  font-size: 1.4rem;
-  color: $pix-blue;
+  font-size: 0.875rem;
+  color: $blue;
   border: none;
   outline: none;
   background-color: transparent;
@@ -53,7 +53,7 @@
   &:hover,
   &:focus,
   &:active {
-    color: $pix-blue-hover;
+    color: $blue-hover;
     cursor: pointer;
     text-decoration: underline;
   }
@@ -61,25 +61,25 @@
 
 .result-item__icon {
   margin-left: 10px;
-  font-size: 2.2rem;
+  font-size: 1.375rem;
 
   @include device-is('tablet') {
     margin-left: 30px;
   }
 
   &--green {
-    color: $mountain-meadow;
+    color: $green;
   }
 
   &--orange {
-    color: $dark-orange;
+    color: $information-light;
   }
 
   &--red {
-    color: $vermilion;
+    color: $error;
   }
 
   &--grey {
-    color: $dove-gray;
+    color: $grey-60;
   }
 }

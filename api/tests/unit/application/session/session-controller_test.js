@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const { expect, sinon, hFake } = require('../../../test-helper');
 
 const sessionController = require('../../../../lib/application/sessions/session-controller');
@@ -5,10 +6,15 @@ const usecases = require('../../../../lib/domain/usecases');
 const Session = require('../../../../lib/domain/models/Session');
 
 const sessionSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/session-serializer');
+const jurySessionSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/jury-session-serializer');
 const certificationCandidateSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/certification-candidate-serializer');
-const certificationResultSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/certification-result-serializer');
 const certificationReportSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/certification-report-serializer');
-const _ = require('lodash');
+const juryCertificationSummarySerializer = require('../../../../lib/infrastructure/serializers/jsonapi/jury-certification-summary-serializer');
+const queryParamsUtils = require('../../../../lib/infrastructure/utils/query-params-utils');
+const requestResponseUtils = require('../../../../lib/infrastructure/utils/request-response-utils');
+const sessionValidator = require('../../../../lib/domain/validators/session-validator');
+const juryCertificationSummaryRepository = require('../../../../lib/infrastructure/repositories/jury-certification-summary-repository');
+const jurySessionRepository = require('../../../../lib/infrastructure/repositories/jury-session-repository');
 
 describe('Unit | Controller | sessionController', () => {
 
@@ -88,6 +94,39 @@ describe('Unit | Controller | sessionController', () => {
       // then
       expect(response).to.deep.equal(jsonApiSession);
       expect(sessionSerializer.serialize).to.have.been.calledWith(savedSession);
+    });
+  });
+
+  describe('#getJurySession', function() {
+    const sessionId = 123;
+
+    beforeEach(() => {
+      sinon.stub(usecases, 'getJurySession');
+      sinon.stub(jurySessionSerializer, 'serialize');
+      request = {
+        auth: { credentials: { userId } },
+        params: {
+          id: sessionId.toString(),
+        }
+      };
+    });
+
+    context('when session exists', () => {
+
+      it('should reply serialized session informations', async function() {
+        // given
+        const foundJurySession = Symbol('foundSession');
+        const serializedJurySession = Symbol('serializedSession');
+        usecases.getJurySession.withArgs({ sessionId }).resolves(foundJurySession);
+        jurySessionSerializer.serialize.withArgs(foundJurySession).resolves(serializedJurySession);
+
+        // when
+        const response = await sessionController.getJurySession(request, hFake);
+
+        // then
+        expect(response).to.deep.equal(serializedJurySession);
+      });
+
     });
   });
 
@@ -307,11 +346,11 @@ describe('Unit | Controller | sessionController', () => {
 
   });
 
-  describe('#getCertifications ', () => {
+  describe('#getJuryCertificationSummaries ', () => {
     let request;
     const sessionId = 1;
-    const certifications = 'certifications';
-    const certificationsJsonApi = 'certificationsJSONAPI';
+    const juryCertificationSummaries = 'someSummaries';
+    const juryCertificationSummariesJSONAPI = 'someSummariesJSONApi';
 
     beforeEach(() => {
       // given
@@ -323,16 +362,16 @@ describe('Unit | Controller | sessionController', () => {
           }
         },
       };
-      sinon.stub(usecases, 'getSessionCertifications').withArgs({ sessionId }).resolves(certifications);
-      sinon.stub(certificationResultSerializer, 'serialize').withArgs(certifications).returns(certificationsJsonApi);
+      sinon.stub(juryCertificationSummaryRepository, 'findBySessionId').withArgs(sessionId).resolves(juryCertificationSummaries);
+      sinon.stub(juryCertificationSummarySerializer, 'serialize').withArgs(juryCertificationSummaries).returns(juryCertificationSummariesJSONAPI);
     });
 
-    it('should return certifications', async () => {
+    it('should return jury certification summaries', async () => {
       // when
-      const response = await sessionController.getCertifications(request, hFake);
+      const response = await sessionController.getJuryCertificationSummaries(request, hFake);
 
       // then
-      expect(response).to.deep.equal(certificationsJsonApi);
+      expect(response).to.deep.equal(juryCertificationSummariesJSONAPI);
     });
 
   });
@@ -482,33 +521,57 @@ describe('Unit | Controller | sessionController', () => {
     });
   });
 
-  describe('#analyzeAttendanceSheet', () => {
-    const sessionId = 3;
+  describe('#updatePublication', () => {
+    const sessionId = 123;
+    const session = Symbol('session');
+    const serializedSession = Symbol('serializedSession');
 
-    let request;
-    const odsBuffer = 'File Buffer';
     beforeEach(() => {
-      // given
       request = {
         params: {
           id: sessionId,
         },
-        payload: { file: odsBuffer },
+        payload: {
+          data: { attributes : {} }
+        }
       };
-
-      sinon.stub(usecases, 'analyzeAttendanceSheet').resolves();
     });
 
-    it('should return certifications data for PV analysis', async () => {
-      // given
-      const analyzeResult = Symbol('attendance sheet analyze result');
-      usecases.analyzeAttendanceSheet.resolves(analyzeResult);
+    context('when publishing', () => {
 
-      // when
-      const result = await sessionController.analyzeAttendanceSheet(request);
+      beforeEach(() => {
+        request.payload.data.attributes.toPublish = true;
+        const usecaseResult = session;
+        sinon.stub(usecases, 'updatePublicationSession').withArgs({ sessionId, toPublish: true }).resolves(usecaseResult);
+        sinon.stub(sessionSerializer, 'serialize').withArgs(session).resolves(serializedSession);
+      });
 
-      // then
-      expect(result).to.equal(analyzeResult);
+      it('should return the serialized session', async () => {
+        // when
+        const response = await sessionController.updatePublication(request);
+
+        // then
+        expect(response).to.equal(serializedSession);
+      });
+
+    });
+
+    context('when unpublishing', () => {
+
+      beforeEach(() => {
+        request.payload.data.attributes.toPublish = false;
+        const usecaseResult = session;
+        sinon.stub(usecases, 'updatePublicationSession').withArgs({ sessionId, toPublish: false }).resolves(usecaseResult);
+        sinon.stub(sessionSerializer, 'serialize').withArgs(session).resolves(serializedSession);
+      });
+
+      it('should return the serialized session', async () => {
+        // when
+        const response = await sessionController.updatePublication(request);
+
+        // then
+        expect(response).to.equal(serializedSession);
+      });
     });
   });
 
@@ -533,7 +596,7 @@ describe('Unit | Controller | sessionController', () => {
         sinon.stub(sessionSerializer, 'serialize').withArgs(session).resolves(serializedSession);
       });
 
-      it('should return the serialized session with code 200', async () => {
+      it('should return the serialized session', async () => {
         // when
         const response = await sessionController.flagResultsAsSentToPrescriber(request, hFake);
 
@@ -562,4 +625,69 @@ describe('Unit | Controller | sessionController', () => {
     });
   });
 
+  describe('#findPaginatedFilteredJurySessions', () => {
+
+    beforeEach(() => {
+      sinon.stub(queryParamsUtils, 'extractParameters');
+      sinon.stub(sessionValidator, 'validateAndNormalizeFilters');
+      sinon.stub(jurySessionRepository, 'findPaginatedFiltered');
+      sinon.stub(jurySessionSerializer, 'serializeForPaginatedList');
+      sinon.stub(requestResponseUtils, 'extractUserIdFromRequest');
+    });
+
+    it('should return the serialized jurySessions', async () => {
+      // given
+      const currentUserId = 5;
+      const request = { query: {} };
+      const filter = { filter1: ' filter1ToTrim', filter2: 'filter2' };
+      const normalizedFilters = 'normalizedFilters';
+      const page = 'somePageConfiguration';
+      const jurySessionsForPaginatedList = Symbol('jurySessionsForPaginatedList');
+      const serializedJurySessionsForPaginatedList = Symbol('serializedJurySessionsForPaginatedList');
+      queryParamsUtils.extractParameters.withArgs(request.query).returns({ filter, page });
+      sessionValidator.validateAndNormalizeFilters.withArgs(filter, currentUserId)
+        .returns(normalizedFilters);
+      jurySessionRepository.findPaginatedFiltered.withArgs({ filters: normalizedFilters, page })
+        .resolves(jurySessionsForPaginatedList);
+      jurySessionSerializer.serializeForPaginatedList.withArgs(jurySessionsForPaginatedList).returns(serializedJurySessionsForPaginatedList);
+      requestResponseUtils.extractUserIdFromRequest.withArgs(request).returns(currentUserId);
+
+      // when
+      const result = await sessionController.findPaginatedFilteredJurySessions(request, hFake);
+
+      // then
+      expect(result).to.equal(serializedJurySessionsForPaginatedList);
+    });
+  });
+
+  describe('#assignCertificationOfficer', () => {
+    let request;
+    const sessionId = 1;
+    const session = Symbol('session');
+    const sessionJsonApi = Symbol('someSessionSerialized');
+
+    beforeEach(() => {
+      // given
+      request = {
+        params: { id : sessionId },
+        auth: {
+          credentials : {
+            userId,
+          }
+        },
+      };
+      sinon.stub(usecases, 'assignCertificationOfficerToJurySession').withArgs({ sessionId, certificationOfficerId: userId }).resolves(session);
+      sinon.stub(jurySessionSerializer, 'serialize').withArgs(session).returns(sessionJsonApi);
+    });
+
+    it('should return updated session', async () => {
+      // when
+      const response = await sessionController.assignCertificationOfficer(request, hFake);
+
+      // then
+      expect(usecases.assignCertificationOfficerToJurySession).to.have.been.calledWithExactly({ sessionId, certificationOfficerId: userId });
+      expect(response).to.deep.equal(sessionJsonApi);
+    });
+
+  });
 });

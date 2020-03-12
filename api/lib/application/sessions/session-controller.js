@@ -1,18 +1,38 @@
 const { BadRequestError } = require('../http-errors');
 const usecases = require('../../domain/usecases');
 const tokenService = require('../../domain/services/token-service');
+const sessionValidator = require('../../domain/validators/session-validator');
 const { CertificationCandidateAlreadyLinkedToUserError } = require('../../domain/errors');
 const sessionSerializer = require('../../infrastructure/serializers/jsonapi/session-serializer');
+const jurySessionSerializer = require('../../infrastructure/serializers/jsonapi/jury-session-serializer');
 const certificationCandidateSerializer = require('../../infrastructure/serializers/jsonapi/certification-candidate-serializer');
 const certificationReportSerializer = require('../../infrastructure/serializers/jsonapi/certification-report-serializer');
-const certificationResultSerializer = require('../../infrastructure/serializers/jsonapi/certification-result-serializer');
+const juryCertificationSummarySerializer = require('../../infrastructure/serializers/jsonapi/jury-certification-summary-serializer');
+const juryCertificationSummaryRepository = require('../../infrastructure/repositories/jury-certification-summary-repository');
+const jurySessionRepository = require('../../infrastructure/repositories/jury-session-repository');
+const queryParamsUtils = require('../../infrastructure/utils/query-params-utils');
+const requestResponseUtils = require('../../infrastructure/utils/request-response-utils');
 
 module.exports = {
 
-  async find() {
-    const session = await usecases.findSessions();
+  async findPaginatedFilteredJurySessions(request) {
+    const currentUserId = requestResponseUtils.extractUserIdFromRequest(request);
+    const { filter, page } = queryParamsUtils.extractParameters(request.query);
+    const normalizedFilters
+      = sessionValidator.validateAndNormalizeFilters(filter, currentUserId);
+    const jurySessionsForPaginatedList = await jurySessionRepository.findPaginatedFiltered({
+      filters: normalizedFilters,
+      page
+    });
 
-    return sessionSerializer.serialize(session);
+    return jurySessionSerializer.serializeForPaginatedList(jurySessionsForPaginatedList);
+  },
+
+  async getJurySession(request) {
+    const sessionId = parseInt(request.params.id);
+    const jurySession = await usecases.getJurySession({ sessionId });
+
+    return jurySessionSerializer.serialize(jurySession);
   },
 
   async get(request) {
@@ -62,7 +82,10 @@ module.exports = {
   async addCertificationCandidate(request, h) {
     const sessionId = parseInt(request.params.id);
     const certificationCandidate = await certificationCandidateSerializer.deserialize(request.payload);
-    const addedCertificationCandidate = await usecases.addCertificationCandidateToSession({ sessionId, certificationCandidate });
+    const addedCertificationCandidate = await usecases.addCertificationCandidateToSession({
+      sessionId,
+      certificationCandidate
+    });
 
     return h.response(certificationCandidateSerializer.serialize(addedCertificationCandidate)).created();
   },
@@ -75,11 +98,12 @@ module.exports = {
     return null;
   },
 
-  async getCertifications(request) {
+  async getJuryCertificationSummaries(request) {
     const sessionId = request.params.id;
 
-    const sessionCertifications = await usecases.getSessionCertifications({ sessionId });
-    return certificationResultSerializer.serialize(sessionCertifications);
+    const juryCertificationSummaries = await juryCertificationSummaryRepository.findBySessionId(sessionId);
+
+    return juryCertificationSummarySerializer.serialize(juryCertificationSummaries);
   },
 
   async getCertificationReports(request) {
@@ -95,8 +119,7 @@ module.exports = {
 
     try {
       await usecases.importCertificationCandidatesFromAttendanceSheet({ sessionId, odsBuffer });
-    }
-    catch (err) {
+    } catch (err) {
       if (err instanceof CertificationCandidateAlreadyLinkedToUserError) {
         throw new BadRequestError(err.message);
       }
@@ -136,10 +159,11 @@ module.exports = {
     return sessionSerializer.serializeForFinalization(session);
   },
 
-  async analyzeAttendanceSheet(request) {
+  async updatePublication(request) {
     const sessionId = request.params.id;
-    const odsBuffer = request.payload.file;
-    return usecases.analyzeAttendanceSheet({ sessionId, odsBuffer });
+    const toPublish = request.payload.data.attributes.toPublish;
+    const session = await usecases.updatePublicationSession({ sessionId, toPublish });
+    return sessionSerializer.serialize(session);
   },
 
   async flagResultsAsSentToPrescriber(request, h) {
@@ -147,6 +171,13 @@ module.exports = {
     const { resultsFlaggedAsSent, session } = await usecases.flagSessionResultsAsSentToPrescriber({ sessionId });
     const serializedSession = await sessionSerializer.serialize(session);
     return resultsFlaggedAsSent ? h.response(serializedSession).created() : serializedSession;
+  },
+
+  async assignCertificationOfficer(request) {
+    const sessionId = request.params.id;
+    const certificationOfficerId = request.auth.credentials.userId;
+    const jurySession = await usecases.assignCertificationOfficerToJurySession({ sessionId, certificationOfficerId });
+    return jurySessionSerializer.serialize(jurySession);
   },
 
 };

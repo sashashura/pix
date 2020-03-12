@@ -1,24 +1,60 @@
 const settings = require('../../config');
 const mailer = require('../../infrastructure/mailers/mailer');
 
-function sendAccountCreationEmail(email) {
+const EMAIL_ADDRESS_NO_RESPONSE = 'ne-pas-repondre@pix.fr';
+const PIX_NAME = 'PIX - Ne pas répondre';
+const PIX_ORGA_NAME = 'Pix Orga - Ne pas répondre';
+
+function sendAccountCreationEmail(email, locale, redirectionUrl) {
+  let variables = {
+    homeName: `pix${settings.domain.tldFr}`,
+    homeUrl: `${settings.domain.pix + settings.domain.tldFr}`,
+    redirectionUrl: redirectionUrl || `${settings.domain.pixApp + settings.domain.tldFr}/connexion`,
+    locale
+  };
+  if (locale === 'fr') {
+    variables = {
+      homeName: `pix${settings.domain.tldOrg}`,
+      homeUrl: `${settings.domain.pix + settings.domain.tldOrg}`,
+      redirectionUrl: redirectionUrl || `${settings.domain.pixApp + settings.domain.tldOrg}/connexion`,
+      locale
+    };
+  }
+
   return mailer.sendEmail({
-    template: mailer.accountCreationTemplateId,
+    from: EMAIL_ADDRESS_NO_RESPONSE,
+    fromName: PIX_NAME,
     to: email,
-    from: 'ne-pas-repondre@pix.fr',
-    fromName: 'PIX - Ne pas répondre',
-    subject: 'Création de votre compte PIX'
+    subject: 'Création de votre compte PIX',
+    template: mailer.accountCreationTemplateId,
+    variables
   });
 }
 
-function sendResetPasswordDemandEmail(email, baseUrl, temporaryKey) {
+function sendResetPasswordDemandEmail(email, locale, temporaryKey) {
+  let variables = {
+    homeName: `pix${settings.domain.tldFr}`,
+    homeUrl: `${settings.domain.pix + settings.domain.tldFr}`,
+    resetUrl: `${settings.domain.pixApp + settings.domain.tldFr}/changer-mot-de-passe/${temporaryKey}`,
+    locale
+  };
+
+  if (locale === 'fr') {
+    variables = {
+      homeName: `pix${settings.domain.tldOrg}`,
+      homeUrl: `${settings.domain.pix + settings.domain.tldOrg}`,
+      resetUrl: `${settings.domain.pixApp + settings.domain.tldOrg}/changer-mot-de-passe/${temporaryKey}`,
+      locale
+    };
+  }
+
   return mailer.sendEmail({
-    template: mailer.passwordResetTemplateId,
+    from: EMAIL_ADDRESS_NO_RESPONSE,
+    fromName: PIX_NAME,
     to: email,
-    from: 'ne-pas-repondre@pix.fr',
-    fromName: 'PIX - Ne pas répondre',
     subject: 'Demande de réinitialisation de mot de passe PIX',
-    variables: { resetUrl: `${baseUrl}/changer-mot-de-passe/${temporaryKey}` }
+    template: mailer.passwordResetTemplateId,
+    variables
   });
 }
 
@@ -26,19 +62,39 @@ function sendOrganizationInvitationEmail({
   email,
   organizationName,
   organizationInvitationId,
-  code
+  code,
+  locale,
+  tags
 }) {
-  const pixOrgaBaseUrl = settings.pixOrgaUrl;
-  return mailer.sendEmail({
-    template: mailer.organizationInvitationTemplateId,
-    to: email,
-    from: 'ne-pas-repondre@pix.fr',
-    fromName: 'Pix Orga - Ne pas répondre',
-    subject: 'Invitation à rejoindre Pix Orga',
-    variables: {
+  locale = locale ? locale : 'fr-fr';
+
+  let variables = {
+    organizationName,
+    pixHomeName: `pix${settings.domain.tldFr}`,
+    pixHomeUrl: `${settings.domain.pix + settings.domain.tldFr}`,
+    pixOrgaHomeUrl: `${settings.domain.pixOrga + settings.domain.tldFr}`,
+    redirectionUrl: `${settings.domain.pixOrga + settings.domain.tldFr}/rejoindre?invitationId=${organizationInvitationId}&code=${code}`,
+    locale
+  };
+  if (locale === 'fr') {
+    variables = {
       organizationName,
-      responseUrl: `${pixOrgaBaseUrl}/rejoindre?invitationId=${organizationInvitationId}&code=${code}`,
-    }
+      pixHomeName: `pix${settings.domain.tldOrg}`,
+      pixHomeUrl: `${settings.domain.pix + settings.domain.tldOrg}`,
+      pixOrgaHomeUrl: `${settings.domain.pixOrga + settings.domain.tldOrg}`,
+      redirectionUrl: `${settings.domain.pixOrga + settings.domain.tldOrg}/rejoindre?invitationId=${organizationInvitationId}&code=${code}`,
+      locale
+    };
+  }
+
+  return mailer.sendEmail({
+    from: EMAIL_ADDRESS_NO_RESPONSE,
+    fromName: PIX_ORGA_NAME,
+    to: email,
+    subject: 'Invitation à rejoindre Pix Orga',
+    template: mailer.organizationInvitationTemplateId,
+    variables,
+    tags: tags || null
   });
 }
 

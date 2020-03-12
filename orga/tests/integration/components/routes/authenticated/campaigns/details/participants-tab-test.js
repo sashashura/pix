@@ -1,7 +1,6 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
-import { run } from '@ember/runloop';
 import hbs from 'htmlbars-inline-precompile';
 
 module('Integration | Component | routes/authenticated/campaign/details | participants-tab', function(hooks) {
@@ -10,107 +9,157 @@ module('Integration | Component | routes/authenticated/campaign/details | partic
   let store;
 
   hooks.beforeEach(function() {
-    run(() => {
-      store = this.owner.lookup('service:store');
-    });
+    store = this.owner.lookup('service:store');
   });
 
-  test('it should display the participant list of the campaign', async function(assert) {
+  test('it should display the participant list of the campaign with results', async function(assert) {
     // given
-    const campaign = run(() => store.createRecord('campaign', {
+    const campaign = store.createRecord('campaign', {
       id: 1,
       name: 'campagne 1',
-    }));
+    });
 
-    const participants = [
-      { 
-        user: { firstName: 'John', lastName: 'Doe' }, 
-        campaignParticipationResult: { masteryPercentage: 80 },
-        participantExternalId: '123',  
+    const participations = [
+      {
+        firstName: 'John',
+        lastName: 'Doe',
+        masteryPercentage: 80,
         isShared: true,
       },
-      { 
-        user: { firstName: 'John', lastName: 'Doe2' }, 
-        campaignParticipationResult: { isCompleted: true },
-        participantExternalId: '1234',  
-        isShared: false,
-      },
-      { 
-        user: { firstName: 'John', lastName: 'Doe3' }, 
-        campaignParticipationResult: { isCompleted: false },
-        participantExternalId: '12345',  
+    ];
+    participations.meta = {
+      rowCount: 1
+    };
+    const goTo = function() {};
+
+    this.set('campaign', campaign);
+    this.set('participations', participations);
+    this.set('goToParticipantPage', goTo);
+
+    // when
+    await render(hbs`<Routes::Authenticated::Campaigns::Details::ParticipantsTab @campaign={{campaign}} @participations={{participations}} @goToParticipantPage={{goToParticipantPage}}/>`);
+
+    // then
+    assert.notContains('En attente de participants');
+    assert.contains('Doe');
+    assert.contains('John');
+    assert.contains('80%');
+  });
+
+  test('it should display the participant list of the campaign with results pending', async function(assert) {
+    // given
+    const campaign = store.createRecord('campaign', {
+      id: 1,
+      name: 'campagne 1',
+    });
+
+    const participations = [
+      {
+        firstName: 'John',
+        lastName: 'Doe2',
+        isCompleted: true,
+        participantExternalId: '1234',
         isShared: false,
       },
     ];
-    participants.meta = {
+    participations.meta = {
+      rowCount: 1
+    };
+    const goTo = function() {};
+
+    this.set('campaign', campaign);
+    this.set('participations', participations);
+    this.set('goToParticipantPage', goTo);
+
+    // when
+    await render(hbs`<Routes::Authenticated::Campaigns::Details::ParticipantsTab @campaign={{campaign}} @participations={{participations}} @goToParticipantPage={{goToParticipantPage}}/>`);
+
+    // then
+    assert.contains('Doe2');
+    assert.contains('John');
+    assert.contains('En attente');
+  });
+
+  test('it should display the participant list of the campaign with assessment not finished yet', async function(assert) {
+    // given
+    const campaign = store.createRecord('campaign', {
+      id: 1,
+      name: 'campagne 1',
+    });
+
+    const participations = [
+      {
+        firstName: 'John',
+        lastName: 'Doe3',
+        isCompleted: false,
+        participantExternalId: '12345',
+        isShared: false,
+      },
+    ];
+    participations.meta = {
       rowCount: 3
     };
     const goTo = function() {};
 
     this.set('campaign', campaign);
-    this.set('participants', participants);
+    this.set('participations', participations);
     this.set('goToParticipantPage', goTo);
 
     // when
-    await render(hbs`{{routes/authenticated/campaigns/details/participants-tab campaign=campaign participants=participants goToParticipantPage=goToParticipantPage}}`);
+    await render(hbs`<Routes::Authenticated::Campaigns::Details::ParticipantsTab @campaign={{campaign}} @participations={{participations}} @goToParticipantPage={{goToParticipantPage}}/>`);
 
     // then
-    assert.dom('.participant-list__no-participants').doesNotExist();
-    assert.dom('table tbody tr:first-child td:first-child').hasText('Doe');
-    assert.dom('table tbody tr:first-child td:nth-child(2)').hasText('John');
-    assert.dom('table tbody tr:first-child td:nth-child(3)').hasText('80%');
-    assert.dom('table tbody tr:nth-child(2) td:nth-child(3)').hasText('En attente');
-    assert.dom('table tbody tr:nth-child(3) td:nth-child(3)').hasText('En cours de test');
+    assert.contains('Doe3');
+    assert.contains('John');
+    assert.contains('En cours de test');
   });
 
   test('it should display the participant list of the campaign with external id', async function(assert) {
     // given
-    const campaign = run(() => store.createRecord('campaign', {
+    const campaign = store.createRecord('campaign', {
       id: 1,
       name: 'campagne 1',
       idPixLabel: 'identifiant externe'
-    }));
+    });
 
-    const participants = [{ user: { firstName: 'John', lastName: 'Doe' }, participantExternalId: '123' }];
-    participants.meta = {
+    const participations = [{ firstName: 'John', lastName: 'Doe', participantExternalId: '123' }];
+    participations.meta = {
       rowCount: 1
     };
 
     const goTo = function() {};
 
     this.set('campaign', campaign);
-    this.set('participants', participants);
+    this.set('participations', participations);
     this.set('goToParticipantPage', goTo);
 
     // when
-    await render(hbs`{{routes/authenticated/campaigns/details/participants-tab campaign=campaign participants=participants goToParticipantPage=goToParticipantPage}}`);
+    await render(hbs`<Routes::Authenticated::Campaigns::Details::ParticipantsTab @campaign={{campaign}} @participations={{participations}} @goToParticipantPage={{goToParticipantPage}}/>`);
 
     // then
-    assert.dom('table tbody tr td:first-child').hasText('Doe');
-    assert.dom('table tbody tr td:nth-child(2)').hasText('John');
-    assert.dom('table tbody tr td:nth-child(3)').hasText('123');
+    assert.contains('identifiant externe');
+    assert.contains('123');
   });
 
   test('it should display a sentence when there is no participant yet', async function(assert) {
     // given
-    const campaign = run(() => store.createRecord('campaign', {
+    const campaign = store.createRecord('campaign', {
       id: 1,
       name: 'campagne 1',
-    }));
+    });
 
-    const participants = [];
-    participants.meta = {
+    const participations = [];
+    participations.meta = {
       rowCount: 0
     };
 
     this.set('campaign', campaign);
-    this.set('participants', participants);
+    this.set('participations', participations);
 
     // when
-    await render(hbs`{{routes/authenticated/campaigns/details/participants-tab campaign=campaign participants=participants}}`);
+    await render(hbs`<Routes::Authenticated::Campaigns::Details::ParticipantsTab @campaign={{campaign}} @participations={{participations}}/>`);
 
     // then
-    assert.dom('table tbody').doesNotExist();
-    assert.dom('.table__empty').hasText('En attente de participants');
+    assert.contains('En attente de participants');
   });
 });

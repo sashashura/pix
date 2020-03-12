@@ -10,14 +10,15 @@ module.exports = {
         const assessment = Object.assign({}, currentAssessment);
 
         // TODO: We can't use currentAssessment.isCertification() because
-        // this serializer is also used by model SmartPlacementAssessment
+        // this serializer is also used by model CampaignAssessment
         assessment.certificationNumber = null;
         if (currentAssessment.type === Assessment.types.CERTIFICATION) {
-          assessment.certificationNumber = currentAssessment.courseId;
+          assessment.certificationNumber = currentAssessment.certificationCourseId;
+          assessment.certificationCourse = { id: currentAssessment.certificationCourseId };
         }
 
-        // Same here for isSmartPlacement() and isCompetenceEvaluation()
-        if ([Assessment.types.SMARTPLACEMENT, Assessment.types.COMPETENCE_EVALUATION].includes(currentAssessment.type)) {
+        // Same here for isForCampaign() and isCompetenceEvaluation()
+        if ([Assessment.types.CAMPAIGN, Assessment.types.COMPETENCE_EVALUATION].includes(currentAssessment.type)) {
           assessment.progression = {
             id: Progression.generateIdFromAssessmentId(currentAssessment.id),
           };
@@ -31,17 +32,11 @@ module.exports = {
           assessment.course = { id: currentAssessment.courseId };
         }
 
-        if (currentAssessment.type === Assessment.types.CERTIFICATION) {
-          assessment.certificationCourse = { id: currentAssessment.courseId };
-        }
-
         assessment.title = currentAssessment.title;
 
         return assessment;
       },
       attributes: [
-        'estimatedLevel',
-        'pixScore',
         'title',
         'type',
         'state',
@@ -55,6 +50,11 @@ module.exports = {
       ],
       answers: {
         ref: 'id',
+        relationshipLinks: {
+          related(record) {
+            return `/api/answers?assessmentId=${record.id}`;
+          }
+        }
       },
       course: {
         ref: 'id',
@@ -85,11 +85,11 @@ module.exports = {
     const type = json.data.attributes.type;
 
     let courseId = null;
-    if (type !== Assessment.types.SMARTPLACEMENT && type !== Assessment.types.PREVIEW) {
+    if (type !== Assessment.types.CAMPAIGN && type !== Assessment.types.PREVIEW) {
       courseId = json.data.relationships.course.data.id;
     }
 
-    return Assessment.fromAttributes({
+    return new Assessment({
       id: json.data.id,
       type,
       courseId,

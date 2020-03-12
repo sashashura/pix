@@ -45,7 +45,7 @@ function _createAssessment({ userId, competenceId, assessmentRepository }) {
     type: Assessment.types.COMPETENCE_EVALUATION,
     courseId: Assessment.courseIdMessage.COMPETENCE_EVALUATION,
   });
-  return assessmentRepository.save(assessment);
+  return assessmentRepository.save({ assessment });
 }
 
 function _createCompetenceEvaluation(competenceId, assessmentId, userId, competenceEvaluationRepository) {
@@ -55,7 +55,7 @@ function _createCompetenceEvaluation(competenceId, assessmentId, userId, compete
     competenceId,
     status: CompetenceEvaluation.statuses.STARTED,
   });
-  return competenceEvaluationRepository.save(competenceEvaluation);
+  return competenceEvaluationRepository.save({ competenceEvaluation });
 }
 
 async function _restartCompetenceEvaluation({ userId, competenceEvaluation, assessmentRepository, competenceEvaluationRepository }) {

@@ -1,31 +1,24 @@
-import Component from '@ember/component';
-import { computed } from '@ember/object';
+import Component from '@glimmer/component';
 
-export default Component.extend({
-  classNames: [ 'tutorial-panel' ],
-
-  hint: null,
-  tutorials: null,
-
-  shouldDisplayHintOrTuto: computed('tutorials', 'hint', function() {
-    const tutorials = this.tutorials || [];
-    const hint = this.hint || [];
+export default class TutorialPanel extends Component {
+  get shouldDisplayHintOrTuto() {
+    const tutorials = this.args.tutorials || [];
+    const hint = this.args.hint || [];
 
     return (hint.length > 0) || (tutorials.length > 0);
-  }),
+  }
 
-  shouldDisplayHint: computed('hint', function() {
-    const hint = this.hint || [];
+  get shouldDisplayHint() {
+    const hint = this.args.hint || [];
     return hint.length > 0;
-  }),
+  }
 
-  shouldDisplayTutorial: computed('tutorials', function() {
-    const tutorials = this.tutorials || [];
+  get shouldDisplayTutorial() {
+    const tutorials = this.args.tutorials || [];
     return tutorials.length > 0;
-  }),
+  }
 
-  limitedTutorials: computed('tutorials', function() {
-    return this.tutorials.slice(0, 3);
-  }),
-
-});
+  get limitedTutorials() {
+    return this.args.tutorials.slice(0, 3);
+  }
+}

@@ -68,7 +68,8 @@ describe('Unit | Service | ScorecardService', function() {
           knowledgeElements: knowledgeElementList,
           competence,
           competenceEvaluation,
-          blockReachablePixAndLevel: false
+          allowExcessLevel: false,
+          allowExcessPix: false
         }).returns(expectedUserScorecard);
 
         // when
@@ -110,7 +111,7 @@ describe('Unit | Service | ScorecardService', function() {
       beforeEach(async () => {
         // when
         const shouldResetCompetenceEvaluation = true;
-        assessmentRepository = { findNotAbortedSmartPlacementAssessmentsByUserId: sinon.stub() };
+        assessmentRepository = { findNotAbortedCampaignAssessmentsByUserId: sinon.stub() };
         competenceEvaluationRepository = { updateStatusByUserIdAndCompetenceId: sinon.stub() };
         knowledgeElementRepository = {
           save: sinon.stub(),
@@ -150,7 +151,7 @@ describe('Unit | Service | ScorecardService', function() {
       beforeEach(async () => {
         // when
         const shouldResetCompetenceEvaluation = false;
-        assessmentRepository = { findNotAbortedSmartPlacementAssessmentsByUserId: sinon.stub() };
+        assessmentRepository = { findNotAbortedCampaignAssessmentsByUserId: sinon.stub() };
         knowledgeElementRepository = {
           save: sinon.stub(),
           findUniqByUserIdAndCompetenceId: sinon.stub(),
@@ -197,11 +198,11 @@ describe('Unit | Service | ScorecardService', function() {
       beforeEach(async () => {
         const skill = domainBuilder.buildSkill({ id: skillId });
         const targetProfile = domainBuilder.buildTargetProfile({ skills: [skill] });
-        campaign = domainBuilder.buildCampaign({ targetProfileId: targetProfile.id, targetProfile });
+        campaign = domainBuilder.buildCampaign.ofTypeAssessment({ targetProfileId: targetProfile.id, targetProfile });
         campaignParticipation1 = domainBuilder.buildCampaignParticipation({ id: 1, campaign, campaignId: campaign.id, isShared: false });
         campaignParticipation2 = domainBuilder.buildCampaignParticipation({ id: 2, campaign, campaignId: campaign.id, isShared: false });
-        oldAssessment1 = domainBuilder.buildAssessment.ofTypeSmartPlacement({ id: assessmentId1, state: 'started', campaignParticipationId: campaignParticipation1.id, userId });
-        oldAssessment2 = domainBuilder.buildAssessment.ofTypeSmartPlacement({ id: assessmentId2, state: 'started', campaignParticipationId: campaignParticipation2.id, userId });
+        oldAssessment1 = domainBuilder.buildAssessment.ofTypeCampaign({ id: assessmentId1, state: 'started', campaignParticipationId: campaignParticipation1.id, userId });
+        oldAssessment2 = domainBuilder.buildAssessment.ofTypeCampaign({ id: assessmentId2, state: 'started', campaignParticipationId: campaignParticipation2.id, userId });
         oldAssessment1Aborted = domainBuilder.buildAssessment({ ...oldAssessment1, state: Assessment.states.ABORTED, campaignParticipationId: campaignParticipation1.id });
         oldAssessment2Aborted = domainBuilder.buildAssessment({ ...oldAssessment2, state: Assessment.states.ABORTED, campaignParticipationId: campaignParticipation2.id });
         newAssessment1Saved = domainBuilder.buildAssessment({ id: 67890, campaignParticipationId: campaignParticipation1.id });
@@ -211,9 +212,9 @@ describe('Unit | Service | ScorecardService', function() {
 
         // when
         assessmentRepository = {
-          findNotAbortedSmartPlacementAssessmentsByUserId: sinon.stub(),
+          findNotAbortedCampaignAssessmentsByUserId: sinon.stub(),
           save: sinon.stub(),
-          updateStateById: sinon.stub(),
+          abortByAssessmentId: sinon.stub(),
         };
         knowledgeElementRepository = {
           save: sinon.stub(),
@@ -224,10 +225,10 @@ describe('Unit | Service | ScorecardService', function() {
           updateAssessmentIdByOldAssessmentId: sinon.stub(),
         };
 
-        assessmentRepository.findNotAbortedSmartPlacementAssessmentsByUserId.withArgs(userId).resolves([oldAssessment1, oldAssessment2]);
+        assessmentRepository.findNotAbortedCampaignAssessmentsByUserId.withArgs(userId).resolves([oldAssessment1, oldAssessment2]);
 
-        assessmentRepository.updateStateById.withArgs({ id: oldAssessment1.id, state: Assessment.states.ABORTED }).resolves(oldAssessment1Aborted);
-        assessmentRepository.updateStateById.withArgs({ id: oldAssessment2.id, state: Assessment.states.ABORTED }).resolves(oldAssessment2Aborted);
+        assessmentRepository.abortByAssessmentId.withArgs(oldAssessment1.id).resolves(oldAssessment1Aborted);
+        assessmentRepository.abortByAssessmentId.withArgs(oldAssessment2.id).resolves(oldAssessment2Aborted);
 
         assessmentRepository.save
           .onFirstCall().resolves(newAssessment1Saved)
@@ -270,8 +271,8 @@ describe('Unit | Service | ScorecardService', function() {
           userId, competenceId, shouldResetCompetenceEvaluation, assessmentRepository, knowledgeElementRepository, campaignParticipationRepository, competenceEvaluationRepository,
         });
         // given
-        expect(assessmentRepository.save.args[0][0]).to.include({ type: 'SMART_PLACEMENT', state: 'started', userId, campaignParticipationId: 1 });
-        expect(assessmentRepository.save.args[1][0]).to.include({ type: 'SMART_PLACEMENT', state: 'started', userId, campaignParticipationId: 2 });
+        expect(assessmentRepository.save.args[0][0].assessment).to.include({ type: 'CAMPAIGN', state: 'started', userId, campaignParticipationId: 1 });
+        expect(assessmentRepository.save.args[1][0].assessment).to.include({ type: 'CAMPAIGN', state: 'started', userId, campaignParticipationId: 2 });
       });
 
       context('when campaign is already shared', function() {
@@ -321,16 +322,16 @@ describe('Unit | Service | ScorecardService', function() {
         // when
         const shouldResetCompetenceEvaluation = false;
         assessmentRepository = {
-          findNotAbortedSmartPlacementAssessmentsByUserId: sinon.stub(),
+          findNotAbortedCampaignAssessmentsByUserId: sinon.stub(),
           save: sinon.stub(),
-          updateStateById: sinon.stub(),
+          abortByAssessmentId: sinon.stub(),
         };
         knowledgeElementRepository = {
           save: sinon.stub(),
           findUniqByUserIdAndCompetenceId: sinon.stub(),
         };
 
-        assessmentRepository.findNotAbortedSmartPlacementAssessmentsByUserId.withArgs(userId).resolves(null);
+        assessmentRepository.findNotAbortedCampaignAssessmentsByUserId.withArgs(userId).resolves(null);
 
         knowledgeElementRepository.findUniqByUserIdAndCompetenceId
           .withArgs({ userId, competenceId }).resolves(knowledgeElements);
@@ -353,7 +354,7 @@ describe('Unit | Service | ScorecardService', function() {
 
       it('should not save another assessment', async () => {
         expect(assessmentRepository.save).to.not.have.been.called;
-        expect(assessmentRepository.updateStateById).to.not.have.been.called;
+        expect(assessmentRepository.abortByAssessmentId).to.not.have.been.called;
         expect(resetCampaignParticipation).to.equal(null);
       });
     });

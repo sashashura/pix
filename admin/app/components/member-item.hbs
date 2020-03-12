@@ -1,0 +1,88 @@
+<td>{{@membership.id}}</td>
+<td>{{@membership.user.firstName}}</td>
+<td>{{@membership.user.lastName}}</td>
+<td>{{@membership.user.email}}</td>
+<td class="editable-cell">
+  {{#if this.isEditionMode}}
+    <PowerSelect @options={{this.organizationRoles}}
+                 @selected={{this.selectedNewRole}}
+                 @searchEnabled={{false}}
+                 @onchange={{this.setRoleSelection}}
+                 @placeholder="Sélectionner"
+                 aria-label="Sélectionner un rôle"
+                 as |role|>
+      {{role.label}}
+    </PowerSelect>
+  {{else}}
+    {{@membership.displayedOrganizationRole}}
+  {{/if}}
+</td>
+<td>
+  <div class="member-item-actions">
+    <div>
+      {{#if this.isEditionMode}}
+        <div>
+          <button type="button"
+                  class="btn btn-primary btn-sm"
+                  aria-label="Enregistrer"
+                  {{on 'click' this.updateRoleOfMember}}>
+            Enregistrer
+          </button>
+          <button type="button"
+                  class="btn btn-outline-default btn-sm"
+                  aria-label="Annuler"
+                  {{on 'click' this.cancelUpdateRoleOfMember}}>
+            <FaIcon @icon='times' />
+          </button>
+        </div>
+      {{else}}
+        <div>
+          {{#if @membership.isSaving}}
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    aria-label="Modifier le rôle"
+                    disabled>
+              <FaIcon @icon="edit" />
+              Modifier le rôle
+            </button>
+          {{else}}
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    aria-label="Modifier le rôle"
+                    {{on 'click' this.editRoleOfMember}}>
+              <FaIcon @icon="edit" />
+              Modifier le rôle
+            </button>
+          {{/if}}
+        </div>
+      {{/if}}
+    </div>
+    <div>
+      {{#if @membership.isSaving}}
+        <button type="button"
+                class="btn btn-danger btn-sm disable-membership-button"
+                aria-label="Désactiver"
+                disabled>
+          <FaIcon @icon="trash" />
+          Désactiver
+        </button>
+      {{else}}
+        <button type="button"
+                class="btn btn-danger btn-sm disable-membership-button"
+                aria-label="Désactiver"
+                {{on 'click' this.toggleDisplayConfirm}}>
+          <FaIcon @icon="trash" />
+          Désactiver
+        </button>
+      {{/if }}
+    </div>
+  </div>
+</td>
+
+<ConfirmPopup @message="Etes-vous sûr de vouloir désactiver ce membre de cette équipe ?"
+              @title="Désactivation d'un membre"
+              @submitTitle="Désactiver"
+              @confirm={{this.disableMembership}}
+              @cancel={{this.toggleDisplayConfirm}}
+              @show={{this.displayConfirm}}
+/>

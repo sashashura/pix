@@ -6,9 +6,10 @@ module.exports = async function getProgression(
     userId,
     assessmentRepository,
     competenceEvaluationRepository,
-    smartPlacementAssessmentRepository,
+    campaignParticipationRepository,
     knowledgeElementRepository,
     skillRepository,
+    targetProfileRepository,
     improvementService,
   }) {
 
@@ -17,9 +18,11 @@ module.exports = async function getProgression(
   const assessment = await assessmentRepository.getByAssessmentIdAndUserId(assessmentId, userId);
   let progression;
 
-  if (assessment.isSmartPlacement()) {
-    const smartPlacementAssessment = await smartPlacementAssessmentRepository.get(assessmentId);
-    const knowledgeElementsBeforeSharedDate = await knowledgeElementRepository.findUniqByUserId({ userId, limitDate: smartPlacementAssessment.campaignParticipation.sharedAt });
+  if (assessment.isForCampaign()) {
+    const campaignParticipation = await campaignParticipationRepository.get(assessment.campaignParticipationId);
+    const targetProfile = await targetProfileRepository.getByCampaignId(campaignParticipation.campaignId);
+    const knowledgeElementsBeforeSharedDate = await knowledgeElementRepository.findUniqByUserId({ userId, limitDate: campaignParticipation.sharedAt });
+
     const knowledgeElementsForProgression = await improvementService.filterKnowledgeElementsIfImproving({
       knowledgeElements: knowledgeElementsBeforeSharedDate,
       assessment
@@ -27,9 +30,9 @@ module.exports = async function getProgression(
 
     progression = new Progression({
       id: progressionId,
-      targetedSkills: smartPlacementAssessment.targetProfile.skills,
+      targetedSkills: targetProfile.skills,
       knowledgeElements: knowledgeElementsForProgression,
-      isProfileCompleted: smartPlacementAssessment.isCompleted
+      isProfileCompleted: assessment.isCompleted(),
     });
   }
 
@@ -39,11 +42,15 @@ module.exports = async function getProgression(
       skillRepository.findByCompetenceId(competenceEvaluation.competenceId),
       knowledgeElementRepository.findUniqByUserId({ userId })]
     );
+    const knowledgeElementsForProgression = await improvementService.filterKnowledgeElementsIfImproving({
+      knowledgeElements,
+      assessment
+    });
 
     progression = new Progression({
       id: progressionId,
       targetedSkills,
-      knowledgeElements,
+      knowledgeElements: knowledgeElementsForProgression,
       isProfileCompleted: assessment.isCompleted()
     });
   }

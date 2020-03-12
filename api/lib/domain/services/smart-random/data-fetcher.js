@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 async function fetchForCampaigns({
   assessment,
   answerRepository,
@@ -9,27 +11,28 @@ async function fetchForCampaigns({
   const targetProfileId = assessment.campaignParticipation.getTargetProfileId();
 
   const [
-    lastAnswer,
+    allAnswers,
     knowledgeElements,
     [
       targetSkills,
       challenges,
     ],
   ] = await Promise.all([
-    answerRepository.findLastByAssessment(assessment.id),
-    _fetchKnowledgeElementsForCampaign({ assessment, knowledgeElementRepository, improvementService }),
+    answerRepository.findByAssessment(assessment.id),
+    _fetchKnowledgeElements({ assessment, knowledgeElementRepository, improvementService }),
     _fetchSkillsAndChallenges({ targetProfileId, targetProfileRepository, challengeRepository })
   ]);
 
   return {
-    lastAnswer,
+    allAnswers,
+    lastAnswer: _.isEmpty(allAnswers) ? null : _.last(allAnswers),
     targetSkills,
     challenges,
     knowledgeElements,
   };
 }
 
-async function _fetchKnowledgeElementsForCampaign({
+async function _fetchKnowledgeElements({
   assessment,
   knowledgeElementRepository,
   improvementService,
@@ -54,23 +57,24 @@ async function fetchForCompetenceEvaluations({
   challengeRepository,
   knowledgeElementRepository,
   skillRepository,
+  improvementService,
 }) {
 
   const [
-    lastAnswer,
+    allAnswers,
     targetSkills,
     challenges,
     knowledgeElements
-
   ] = await Promise.all([
-    answerRepository.findLastByAssessment(assessment.id),
+    answerRepository.findByAssessment(assessment.id),
     skillRepository.findByCompetenceId(assessment.competenceId),
     challengeRepository.findByCompetenceId(assessment.competenceId),
-    knowledgeElementRepository.findUniqByUserId({ userId: assessment.userId })]
-  );
+    _fetchKnowledgeElements({ assessment, knowledgeElementRepository, improvementService })
+  ]);
 
   return {
-    lastAnswer,
+    allAnswers,
+    lastAnswer: _.isEmpty(allAnswers) ? null : _.last(allAnswers),
     targetSkills,
     challenges,
     knowledgeElements,

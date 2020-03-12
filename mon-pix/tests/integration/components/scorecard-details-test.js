@@ -5,6 +5,7 @@ import { setupRenderingTest } from 'ember-mocha';
 import EmberObject from '@ember/object';
 import { find, findAll, render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
+import config from '../../../config/environment';
 
 describe('Integration | Component | scorecard-details', function() {
   setupRenderingTest();
@@ -18,10 +19,10 @@ describe('Integration | Component | scorecard-details', function() {
       this.set('scorecard', scorecard);
 
       // when
-      await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+      await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
       // then
-      expect(this.element.querySelector('.scorecard-details__content')).to.exist;
+      expect(find('.scorecard-details__content')).to.exist;
     });
 
     it('should display the scorecard header with area color', async function() {
@@ -36,10 +37,10 @@ describe('Integration | Component | scorecard-details', function() {
       this.set('scorecard', scorecard);
 
       // when
-      await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+      await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
       // then
-      const element = this.element.querySelector('.scorecard-details-content-left__area');
+      const element = find('.scorecard-details-content-left__area');
       expect(element.getAttribute('class')).to.contains('scorecard-details-content-left__area--jaffa');
       expect(element.textContent).to.contains(scorecard.area.title);
     });
@@ -54,11 +55,11 @@ describe('Integration | Component | scorecard-details', function() {
       this.set('scorecard', scorecard);
 
       // when
-      await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+      await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
       // then
-      expect(this.element.querySelector('.scorecard-details-content-left__name').textContent).to.contain(scorecard.name);
-      expect(this.element.querySelector('.scorecard-details-content-left__description').textContent).to.contain(scorecard.description);
+      expect(find('.scorecard-details-content-left__name').textContent).to.contain(scorecard.name);
+      expect(find('.scorecard-details-content-left__description').textContent).to.contain(scorecard.description);
     });
 
     it('should display the scorecard level, earnedPix and remainingPixToNextLevel', async function() {
@@ -72,12 +73,12 @@ describe('Integration | Component | scorecard-details', function() {
       this.set('scorecard', scorecard);
 
       // when
-      await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+      await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
       // then
-      expect(this.element.querySelector('.score-value').textContent).to.contain(scorecard.level);
-      expect(this.element.getElementsByClassName('score-value')[1].textContent).to.contain(scorecard.earnedPix);
-      expect(this.element.querySelector('.scorecard-details-content-right__level-info').textContent).to.contain(`${scorecard.remainingPixToNextLevel} pix avant le niveau ${scorecard.level + 1}`);
+      expect(find('.score-value').textContent).to.contain(scorecard.level);
+      expect(findAll('.score-value')[1].textContent).to.contain(scorecard.earnedPix);
+      expect(find('.scorecard-details-content-right__level-info').textContent).to.contain(`${scorecard.remainingPixToNextLevel} pix avant le niveau ${scorecard.level + 1}`);
     });
 
     it('should display a dash instead of the scorecard level and earnedPix if they are set to zero', async function() {
@@ -90,36 +91,72 @@ describe('Integration | Component | scorecard-details', function() {
       this.set('scorecard', scorecard);
 
       // when
-      await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+      await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
       // then
-      expect(this.element.querySelector('.score-value').textContent).to.contain('–');
-      expect(this.element.querySelector('.score-value').textContent).to.contain('–');
+      expect(find('.score-value').textContent).to.contain('–');
+      expect(find('.score-value').textContent).to.contain('–');
     });
 
     context('When the user has finished a competence', async function() {
-      beforeEach(async function() {
+      let scorecard;
+      const configurationForImprovingCompetence = config.APP.FT_IMPROVE_COMPETENCE_EVALUATION;
+
+      afterEach(function() {
+        config.APP.FT_IMPROVE_COMPETENCE_EVALUATION = configurationForImprovingCompetence;
+      });
+
+      beforeEach(function() {
         // given
-        const scorecard = {
+        config.APP.FT_IMPROVE_COMPETENCE_EVALUATION = true;
+        scorecard = {
           remainingPixToNextLevel: 1,
           isFinished: true,
           tutorials: [],
         };
-
-        this.set('scorecard', scorecard);
-
-        // when
-        await render(hbs`{{scorecard-details scorecard=scorecard}}`);
       });
 
       it('should not display remainingPixToNextLevel', async function() {
+        // when
+        this.set('scorecard', scorecard);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
+
         // then
-        expect(this.element.querySelector('.scorecard-details-content-right__level-info')).to.not.exist;
+        expect(find('.scorecard-details-content-right__level-info')).to.not.exist;
       });
 
       it('should not display a button', async function() {
+        // when
+        this.set('scorecard', scorecard);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
+
         // then
-        expect(this.element.querySelector('.scorecard-details__resume-or-start-button')).to.not.exist;
+        expect(find('.scorecard-details__resume-or-start-button')).to.not.exist;
+      });
+
+      it('should show the improving button if the remaining days before improving are equal to 0', async function() {
+        // given
+        scorecard.remainingDaysBeforeImproving = 0;
+
+        // when
+        this.set('scorecard', scorecard);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
+
+        // then
+        expect(find('.scorecard-details__improve-button')).to.exist;
+      });
+
+      it('should show the improving countdown if the remaining days before improving are different than 0', async function() {
+        // given
+        scorecard.remainingDaysBeforeImproving = 3;
+
+        // when
+        this.set('scorecard', scorecard);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
+
+        // then
+        expect(find('.scorecard-details__improvement-countdown')).to.exist;
+        expect(find('.scorecard-details__improvement-countdown').textContent).to.contains('3 jours');
       });
 
       context('and the user has reached the max level', async function() {
@@ -135,17 +172,22 @@ describe('Integration | Component | scorecard-details', function() {
           this.set('scorecard', scorecard);
 
           // when
-          await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+          await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
         });
 
         it('should not display remainingPixToNextLevel', function() {
           // then
-          expect(this.element.querySelector('.scorecard-details-content-right__level-info')).to.not.exist;
+          expect(find('.scorecard-details-content-right__level-info')).to.not.exist;
         });
 
         it('should show congrats design', function() {
           // then
           expect(find('.competence-card__congrats')).to.exist;
+        });
+
+        it('should not show the improving button', function() {
+          // then
+          expect(find('.scorecard-details__improve-button')).to.not.exist;
         });
       });
     });
@@ -161,11 +203,11 @@ describe('Integration | Component | scorecard-details', function() {
         this.set('scorecard', scorecard);
 
         // when
-        await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
         // then
-        expect(this.element.querySelector('.scorecard-details-content-right__score-container')).to.not.exist;
-        expect(this.element.querySelector('.scorecard-details-content-right__level-info')).to.not.exist;
+        expect(find('.scorecard-details-content-right__score-container')).to.not.exist;
+        expect(find('.scorecard-details-content-right__level-info')).to.not.exist;
       });
 
       it('should display a button stating "Commencer" if scorecard.isStarted is false', async function() {
@@ -178,10 +220,10 @@ describe('Integration | Component | scorecard-details', function() {
         this.set('scorecard', scorecard);
 
         // when
-        await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
         // then
-        const element = this.element.querySelector('.scorecard-details__resume-or-start-button');
+        const element = find('.scorecard-details__resume-or-start-button');
         expect(element).to.exist;
         expect(element.textContent).to.contain('Commencer');
       });
@@ -199,10 +241,10 @@ describe('Integration | Component | scorecard-details', function() {
         this.set('scorecard', scorecard);
 
         // when
-        await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
         // then
-        const element = this.element.querySelector('.scorecard-details__resume-or-start-button');
+        const element = find('.scorecard-details__resume-or-start-button');
         expect(element).to.exist;
         expect(element.textContent).to.contain('Reprendre');
       });
@@ -217,7 +259,7 @@ describe('Integration | Component | scorecard-details', function() {
         this.set('scorecard', scorecard);
 
         // when
-        await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+        await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
         // then
         expect(find('.tutorials')).to.not.exist;
@@ -256,59 +298,14 @@ describe('Integration | Component | scorecard-details', function() {
           this.set('scorecard', scorecard);
 
           // when
-          await render(hbs`{{scorecard-details scorecard=scorecard}}`);
+          await render(hbs`<ScorecardDetails @scorecard={{this.scorecard}} />`);
 
           // then
           expect(find('.tutorials')).to.exist;
           expect(findAll('.tube')).to.have.lengthOf(2);
-          expect(findAll('.tutorial')).to.have.lengthOf(3);
+          expect(findAll('.tutorial-item')).to.have.lengthOf(3);
         });
 
-        it('should display the 4th tutorial of a tube on a new line', async function() {
-          // given
-          const tuto1 = EmberObject.create({
-            title: 'Tuto 1.1',
-            tubeName: '@first_tube',
-            tubePracticalTitle: 'Practical Title',
-            duration: '00:15:10',
-          });
-          const tuto2 = EmberObject.create({
-            title: 'Tuto 1.2',
-            tubeName: '@first_tube',
-            tubePracticalTitle: 'Practical Title',
-            duration: '00:04:00',
-          });
-          const tuto3 = EmberObject.create({
-            title: 'Tuto 1.3',
-            tubeName: '@first_tube',
-            tubePracticalTitle: 'Practical Title',
-            duration: '00:04:00',
-          });
-          const tuto4 = EmberObject.create({
-            title: 'Tuto 1.4',
-            tubeName: '@first_tube',
-            tubePracticalTitle: 'Practical Title',
-            duration: '00:04:00',
-          });
-
-          const tutorials = A([tuto1, tuto2, tuto3, tuto4]);
-
-          const scorecard = EmberObject.create({
-            competenceId: 1,
-            isStarted: true,
-            tutorials,
-          });
-
-          this.set('scorecard', scorecard);
-
-          // when
-          await render(hbs`{{scorecard-details scorecard=scorecard}}`);
-
-          // then
-          expect(find('.tutorials')).to.exist;
-          expect(findAll('.tube')).to.have.lengthOf(1);
-          expect(findAll('.tutorial')).to.have.lengthOf(4);
-        });
       });
     });
   });

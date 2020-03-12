@@ -6,12 +6,12 @@
 
 <main class="page-body">
   <section class="page-section">
-    {{routes/authenticated/users/list-items
-      users=model
-      firstName=firstName
-      lastName=lastName
-      email=email
-      triggerFiltering=(action 'triggerFiltering')
-    }}
+    <Users::ListItems
+      @users={{@model}}
+      @firstName={{this.firstName}}
+      @lastName={{this.lastName}}
+      @email={{this.email}}
+      @triggerFiltering={{this.triggerFiltering}}
+      @goToUserDetailPage={{this.goToUserDetailPage}} />
   </section>
 </main>

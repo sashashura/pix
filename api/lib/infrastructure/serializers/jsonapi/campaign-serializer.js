@@ -7,7 +7,9 @@ module.exports = {
 
   serialize(campaigns, meta, { tokenForCampaignResults, ignoreCampaignReportRelationshipData = true } = {}) {
     return new Serializer('campaign', {
-      attributes: ['name', 'code', 'title', 'createdAt', 'customLandingPageText', 'archivedAt', 'tokenForCampaignResults', 'idPixLabel', 'organizationLogoUrl', 'organizationName', 'targetProfile', 'campaignReport', 'campaignCollectiveResult', 'isRestricted', 'creator'],
+      attributes: ['name', 'code', 'title', 'type', 'createdAt', 'customLandingPageText', 'archivedAt',
+        'tokenForCampaignResults', 'idPixLabel', 'organizationLogoUrl', 'organizationName', 'targetProfile',
+        'campaignReport', 'campaignCollectiveResult', 'isRestricted', 'creator', 'campaignAnalysis'],
       typeForAttribute(attribute) {
         if (attribute === 'creator') {
           return 'users';
@@ -48,6 +50,15 @@ module.exports = {
           }
         }
       },
+      campaignAnalysis: {
+        ref: 'id',
+        ignoreRelationshipData: true,
+        relationshipLinks: {
+          related(record, current, parent) {
+            return `/api/campaigns/${parent.id}/analyses`;
+          }
+        }
+      },
       meta,
     }).serialize(campaigns);
   },
@@ -56,7 +67,11 @@ module.exports = {
     return new Deserializer({ keyForAttribute: 'camelCase' })
       .deserialize(json)
       .then((campaign) => {
-        campaign.targetProfileId = parseInt(_.get(json.data, ['relationships', 'target-profile', 'data', 'id']));
+        campaign.organizationId = parseInt(_.get(json.data, ['attributes', 'organization-id']));
+        const targetProfileId = _.get(json.data, ['relationships', 'target-profile', 'data', 'id']);
+        if (targetProfileId) {
+          campaign.targetProfileId = parseInt(targetProfileId);
+        }
         return new Campaign(campaign);
       });
   }

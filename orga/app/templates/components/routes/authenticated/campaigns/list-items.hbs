@@ -12,13 +12,21 @@
           </tr>
           <tr>
             <th>
-              <SearchInput @inputName="campaignName" @class="input table__input search-input" @value={{campaignName}} @placeholder="Rechercher une campagne" @keyUp={{action triggerFiltering "name" campaignName}} />
+              <SearchInput 
+                class="table__input" 
+                @inputName="campaignName" 
+                @value={{@campaignName}} 
+                @placeholder="Rechercher une campagne" 
+                @filterFunction={{fn @triggerFiltering "name"}}
+              />
             </th>
             <th>
-              <Routes::Authenticated::Campaigns::SelectCreator
-                @organizationMembers={{organizationMembers}}
-                @campaignCreatorId={{campaignCreatorId}}
-                @selectCampaignCreator={{action 'selectCampaignCreator'}} />
+              <SelectInput
+                @class="table__input"
+                @onChange={{this.selectCampaignCreator}}
+                @options={{@organizationMembers}}
+                @selectedOption={{@campaignCreatorId}}
+              />
             </th>
             <th></th>
             <th></th>
@@ -27,8 +35,8 @@
         </thead>
 
         <tbody>
-        {{#each campaigns as |campaign|}}
-          <tr onclick={{action goToCampaignPage campaign.id}} class="tr--clickable">
+        {{#each @campaigns as |campaign|}}
+          <tr aria-label="Campagne" role="button" {{on 'click' (fn @goToCampaignPage campaign.id)}} class="tr--clickable">
             <td>{{campaign.name}}</td>
             <td class="table__column--truncated">{{campaign.creator.fullName}}</td>
             <td>{{moment-format campaign.createdAt 'DD/MM/YYYY' allow-empty=true}}</td>
@@ -38,8 +46,11 @@
         {{/each}}
         </tbody>
       </table>
+      {{#if (eq @campaigns.length 0)}}
+        <div class="table__empty content-text">Aucune campagne</div>
+      {{/if}}
     </div>
   </div>
 </div>
 
-<PaginationControl @pagination={{campaigns.meta}} @paginationLink="authenticated.campaigns" />
+<PaginationControl @pagination={{@campaigns.meta}} @paginationLink="authenticated.campaigns" />

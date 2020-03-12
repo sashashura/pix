@@ -3,10 +3,9 @@ import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 
 export default class UserLoggedMenu extends Component {
+
   @service currentUser;
-
   @service router;
-
   @service store;
 
   isMenuOpen = false;
@@ -44,16 +43,18 @@ export default class UserLoggedMenu extends Component {
 
   @action
   async onOrganizationChange(organization) {
-    const user = this.currentUser.user;
-    const userOrgaSettingsId = user.userOrgaSettings.get('id');
+    const prescriber = this.currentUser.prescriber;
+    const userOrgaSettingsId = prescriber.userOrgaSettings.get('id');
 
     const userOrgaSettings = await this.store.peekRecord('user-orga-setting', userOrgaSettingsId);
     const selectedOrganization = await this.store.peekRecord('organization', organization.get('id'));
 
     userOrgaSettings.set('organization', selectedOrganization);
-    userOrgaSettings.save();
+    await userOrgaSettings.save({ adapterOptions: { userId: prescriber.id } });
 
     await this.currentUser.load();
+
+    this.closeMenu();
 
     const queryParams = {};
     Object.keys(this.router.currentRoute.queryParams).forEach((key) => queryParams[key] = undefined);

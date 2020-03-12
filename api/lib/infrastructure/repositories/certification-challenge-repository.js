@@ -1,70 +1,48 @@
 const Bookshelf = require('../bookshelf');
-const CertificationChallenge = require('../../domain/models/CertificationChallenge');
+const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
+const DomainTransaction = require('../DomainTransaction');
 const CertificationChallengeBookshelf = require('../data/certification-challenge');
 const logger = require('../../infrastructure/logger');
 
 const { AssessmentEndedError } = require('../../domain/errors');
 
 const logContext = {
-  zone: 'certificationChallengeRepository.getNonAnsweredChallengeByCourseId',
+  zone: 'certificationChallengeRepository.getNextNonAnsweredChallengeByCourseId',
   type: 'repository',
 };
 
-function _toDomain(model) {
-  return new CertificationChallenge({
-    id: model.get('id'),
-    challengeId: model.get('challengeId'),
-    competenceId: model.get('competenceId'),
-    associatedSkillName: model.get('associatedSkill'),
-    associatedSkillId: model.get('associatedSkillId'),
-    courseId: model.get('courseId'),
-  });
-}
-
 module.exports = {
 
-  // TODO modifier pour que cela prenne un CertificationChallenge en entrée
-  save(challenge, certificationCourse) {
-    const certificationChallenge = new CertificationChallengeBookshelf({
-      challengeId: challenge.id,
-      competenceId: challenge.competenceId,
-      associatedSkill: challenge.testedSkill,
-      associatedSkillId: undefined, // TODO: Add skillId
-      courseId: certificationCourse.id,
+  async save({ certificationChallenge, domainTransaction = DomainTransaction.emptyTransaction() }) {
+    const certificationChallengeToSave = new CertificationChallengeBookshelf({
+      challengeId: certificationChallenge.challengeId,
+      competenceId: certificationChallenge.competenceId,
+      associatedSkillName: certificationChallenge.associatedSkillName,
+      associatedSkillId: certificationChallenge.associatedSkillId,
+      courseId: certificationChallenge.courseId,
     });
-
-    return certificationChallenge.save()
-      .then((certificationChallenge) => {
-        return _toDomain(certificationChallenge);
-      });
+    const savedCertificationChallenge = await certificationChallengeToSave.save(null, { transacting: domainTransaction.knexTransaction });
+    return bookshelfToDomainConverter.buildDomainObject(CertificationChallengeBookshelf, savedCertificationChallenge);
   },
 
-  findByCertificationCourseId(certificationCourseId) {
-    return CertificationChallengeBookshelf
-      .where({ courseId: certificationCourseId })
-      .fetchAll()
-      .then((challenges) => challenges.models.map(_toDomain));
-  },
-
-  getNonAnsweredChallengeByCourseId(assessmentId, courseId) {
-
+  async getNextNonAnsweredChallengeByCourseId(assessmentId, courseId) {
     const answeredChallengeIds = Bookshelf.knex('answers')
       .select('challengeId')
       .where({ assessmentId });
 
-    return CertificationChallengeBookshelf
+    const certificationChallenge = await CertificationChallengeBookshelf
       .where({ courseId })
       .query((knex) => knex.whereNotIn('challengeId', answeredChallengeIds))
-      .fetch()
-      .then((certificationChallenge) => {
-        if (certificationChallenge === null) {
-          logger.trace(logContext, 'no found challenges');
-          throw new AssessmentEndedError();
-        }
+      .orderBy('id', 'asc')
+      .fetch();
 
-        logContext.challengeId = certificationChallenge.id;
-        logger.trace(logContext, 'found challenge');
-        return _toDomain(certificationChallenge);
-      });
+    if (certificationChallenge === null) {
+      logger.trace(logContext, 'no found challenges');
+      throw new AssessmentEndedError();
+    }
+
+    logContext.challengeId = certificationChallenge.id;
+    logger.trace(logContext, 'found challenge');
+    return bookshelfToDomainConverter.buildDomainObject(CertificationChallengeBookshelf, certificationChallenge);
   },
 };

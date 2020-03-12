@@ -34,8 +34,12 @@ module.exports = (function() {
       base: process.env.CYPRESS_AIRTABLE_BASE || process.env.AIRTABLE_BASE,
     },
 
-    app: {
-      domain: 'app.pix.fr'
+    domain: {
+      tldFr: process.env.TLD_FR || '.fr',
+      tldOrg: process.env.TLD_ORG || '.org',
+      pix: process.env.DOMAIN_PIX || 'https://pix',
+      pixApp: process.env.DOMAIN_PIX_APP || 'https://app.pix',
+      pixOrga: process.env.DOMAIN_PIX_ORGA || 'https://orga.pix',
     },
 
     logging: {
@@ -112,7 +116,9 @@ module.exports = (function() {
       dayBeforeCompetenceResetV2: _getNumber(process.env.DAY_BEFORE_COMPETENCE_RESET_V2,7),
     },
 
-    pixOrgaUrl: process.env.PIXORGA_URL,
+    infra: {
+      concurrencyForHeavyOperations: _getNumber(process.env.INFRA_CONCURRENCY_HEAVY_OPERATIONS, 2),
+    },
 
     sentry: {
       enabled: isFeatureEnabled(process.env.SENTRY_ENABLED),
@@ -120,16 +126,20 @@ module.exports = (function() {
       environment: (process.env.SENTRY_ENVIRONMENT || 'development'),
       maxBreadcrumbs: _getNumber(process.env.SENTRY_MAX_BREADCRUMBS, 100),
       debug: isFeatureEnabled(process.env.SENTRY_DEBUG),
+      maxValueLength: 1000,
     },
   };
 
   if (process.env.NODE_ENV === 'test') {
     config.port = 0;
 
-    config.app.domain = 'localhost';
-
     config.airtable.apiKey = 'test-api-key';
     config.airtable.base = 'test-base';
+
+    config.domain.tldFr = '.fr';
+    config.domain.tldOrg = '.org';
+    config.domain.pix = 'https://pix';
+    config.domain.pixOrga = 'https://orga.pix';
 
     config.mailing.enabled = false;
     config.mailing.provider = 'mailjet';
@@ -157,8 +167,6 @@ module.exports = (function() {
     config.caching.redisUrl = null;
     config.caching.redisCacheKeyLockTTL = 0;
     config.caching.redisCacheLockedWaitBeforeRetry = 0;
-
-    config.pixOrgaUrl = 'http://dev.pix-orga.fr';
 
     config.sentry.enabled = false;
   }

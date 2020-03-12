@@ -10,7 +10,7 @@ describe('Unit | Controller | assessment-controller-save', () => {
 
   describe('#save', () => {
 
-    context('when the assessment saved is a smart placement', () => {
+    context('when the assessment saved is a campaign placement', () => {
 
       const request = {
         headers: {
@@ -20,7 +20,7 @@ describe('Unit | Controller | assessment-controller-save', () => {
           data: {
             id: 42,
             attributes: {
-              'type': 'SMART_PLACEMENT',
+              'type': 'CAMPAIGN',
               'code-campaign': 'CODECAMPAIGN',
               'participant-external-id': 'matricule123',
             },
@@ -32,12 +32,12 @@ describe('Unit | Controller | assessment-controller-save', () => {
         sinon.stub(usecases, 'createAssessmentForCampaign').resolves({});
       });
 
-      it('should save an assessment with the type SMART_PLACEMENT and with a fake courseId', async function() {
+      it('should save an assessment with the type CAMPAIGN and with a fake courseId', async function() {
         // given
-        const expectedAssessment = Assessment.fromAttributes({
+        const expectedAssessment = new Assessment({
           id: 42,
           courseId: null,
-          type: 'SMART_PLACEMENT',
+          type: 'CAMPAIGN',
           state: undefined,
           userId: null,
         });
@@ -86,7 +86,7 @@ describe('Unit | Controller | assessment-controller-save', () => {
 
       it('should save an assessment with type PREVIEW', async function() {
         // given
-        const expected = Assessment.fromAttributes({
+        const expected = new Assessment({
           id: 42,
           courseId: null,
           type: 'PREVIEW',
@@ -98,7 +98,7 @@ describe('Unit | Controller | assessment-controller-save', () => {
         await controller.save(request, hFake);
 
         // then
-        expect(assessmentRepository.save).to.have.been.calledWith(expected);
+        expect(assessmentRepository.save).to.have.been.calledWith({ assessment: expected });
       });
     });
   });

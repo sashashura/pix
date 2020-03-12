@@ -1,0 +1,56 @@
+<div class="organization-list content-text content-text--small">
+  <div class="table-admin">
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>Identifiant externe</th>
+        </tr>
+        <tr>
+          <th>
+            <input id="name"
+                   type="text"
+                   value={{@name}}
+                   oninput={{perform @triggerFiltering 'name'}}
+                   class="table-admin-input" />
+          </th>
+          <th>
+            <input id="type"
+                   type="text"
+                   value={{@type}}
+                   oninput={{perform @triggerFiltering 'type'}}
+                   class="table-admin-input" />
+          </th>
+          <th>
+            <input id="externalId"
+                   type="text"
+                   value={{@externalId}}
+                   oninput={{perform @triggerFiltering 'externalId'}}
+                   class="table-admin-input" />
+          </th>
+        </tr>
+      </thead>
+
+      {{#if @organizations}}
+        <tbody>
+        {{#each @organizations as |organization|}}
+          <tr role="button" {{on "click" (fn @goToOrganizationPage organization.id)}} class="tr--clickable">
+            <td>{{organization.name}}</td>
+            <td>{{organization.type}}</td>
+            <td>{{organization.externalId}}</td>
+          </tr>
+        {{/each}}
+        </tbody>
+      {{/if}}
+    </table>
+
+    {{#unless @organizations}}
+      <div class="table__empty content-text">Aucun résultat</div>
+    {{/unless}}
+  </div>
+</div>
+
+{{#if @organizations}}
+  <PaginationControl @pagination={{@organizations.meta}} />
+{{/if}}

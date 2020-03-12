@@ -39,6 +39,8 @@ class Challenge {
    * @param validator
    * @param competenceId
    * @param format
+   * @param locales
+   * @param autoReply
    */
   constructor(
     {
@@ -55,8 +57,10 @@ class Challenge {
       proposals,
       status,
       timer,
-      // includes
       type,
+      locales,
+      autoReply,
+      // includes
       answer,
       skills = [],
       // references
@@ -78,23 +82,13 @@ class Challenge {
     this.timer = timer;
     this.status = status;
     this.type = type;
+    this.locales = locales;
+    this.autoReply = autoReply;
     // includes
     this.skills = skills;
     this.validator = validator;
     // references
     this.competenceId = competenceId;
-  }
-
-  /**
-   * @deprecated
-   */
-  static fromAttributes(attributes) {
-    const challenge = new Challenge();
-    Object.assign(challenge, attributes);
-    if (!challenge.skills) {
-      challenge.skills = [];
-    }
-    return challenge;
   }
 
   addSkill(skill) {

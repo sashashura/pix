@@ -17,7 +17,7 @@ describe('Acceptance | Controller | users-controller-reset-scorecard', () => {
       .where({ userId, competenceId });
   }
 
-  function inspectSmartPlacementAssessmentsInDb({ userId, state }) {
+  function inspectCampaignAssessmentsInDb({ userId, state }) {
     return knex.select('*')
       .from('assessments')
       .where({ userId, state });
@@ -100,12 +100,12 @@ describe('Acceptance | Controller | users-controller-reset-scorecard', () => {
         await databaseBuilder.commit();
       });
 
-      it('should respond with a 421 - precondition failed - if last knowledge element date is not old enough', async () => {
+      it('should respond with a 412 - precondition failed - if last knowledge element date is not old enough', async () => {
         // when
         const response = await server.inject(options);
 
         // then
-        expect(response.statusCode).to.equal(421);
+        expect(response.statusCode).to.equal(412);
       });
     });
 
@@ -159,7 +159,7 @@ describe('Acceptance | Controller | users-controller-reset-scorecard', () => {
             ]
           },
           {
-            assessment: { userId, type: 'SMART_PLACEMENT' },
+            assessment: { userId, type: 'CAMPAIGN' },
             campaignParticipation: { campaignId: campaign.id, isShared: false },
             knowledgeElements: [
               { skillId: 'url1', status: 'validated', source: 'direct', competenceId, earnedPix: 2, createdAt, },
@@ -200,6 +200,7 @@ describe('Acceptance | Controller | users-controller-reset-scorecard', () => {
               'pix-score-ahead-of-next-level': 0,
               status: 'NOT_STARTED',
               'remaining-days-before-reset': null,
+              'remaining-days-before-improving': null,
             },
             relationships: {
               area: {
@@ -219,7 +220,7 @@ describe('Acceptance | Controller | users-controller-reset-scorecard', () => {
             {
               attributes: {
                 code: area.fields.Code,
-                title: area.fields.Titre,
+                title: area.fields['Titre fr-fr'],
                 color: area.fields.Couleur,
               },
               id: area.id,
@@ -255,8 +256,8 @@ describe('Acceptance | Controller | users-controller-reset-scorecard', () => {
         response = await server.inject(options);
 
         // then
-        const smartPlacementAssessments = await inspectSmartPlacementAssessmentsInDb({ userId, state });
-        expect(smartPlacementAssessments).to.have.lengthOf(1);
+        const campaignAssessments = await inspectCampaignAssessmentsInDb({ userId, state });
+        expect(campaignAssessments).to.have.lengthOf(1);
       });
 
       it('should have reset the knowledge elements created from both competence evaluations and campaign', async () => {

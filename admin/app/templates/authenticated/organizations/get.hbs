@@ -1,23 +1,34 @@
 <header class="page-header">
   <div class="page-title">
-    {{link-to 'Toutes les organisations' 'authenticated.organizations.list'}}
-    <span style="color: #DDDDDD;">&nbsp;>&nbsp;</span>
-    {{model.name}}
+    <LinkTo @route="authenticated.organizations.list">Toutes les organisations</LinkTo>
+    <span class="wire">&nbsp;>&nbsp;</span>
+    {{@model.name}}
   </div>
   <div class="page-actions">
-    <button class="btn btn-outline-default btn-thin hidden">
-      {{fa-icon "edit"}} Modifier
+    <button type="button" class="btn btn-outline-default btn-thin hidden">
+      <FaIcon @icon="edit" /> Modifier
     </button>
-    <button class="btn btn-outline-default btn-thin hidden">
-      {{fa-icon "trash"}} Supprimer
+    <button type="button" class="btn btn-outline-default btn-thin hidden">
+      <FaIcon @icon="trash" /> Supprimer
     </button>
   </div>
 </header>
 
 <main class="page-body" id="organizations-get-page">
 
-  {{organization-information-section organization=model onLogoUpdated=(action "updateOrganizationInformation")}}
+  <OrganizationInformationSection @organization={{@model}}
+                                  @onLogoUpdated={{this.updateOrganizationInformation}}
+                                  @onSubmit={{this.updateOrganizationInformation}} />
 
-  {{organization-members-section organization=model userEmail=userEmail addMembership=(action "addMembership")}}
+  <nav class="navbar">
+    <LinkTo @route="authenticated.organizations.get.members" @model={{@model}} class="navbar-item">
+      Membres
+    </LinkTo>
 
+    <LinkTo @route="authenticated.organizations.get.target-profiles" @model={{@model}} class="navbar-item">
+      Profils cibles
+    </LinkTo>
+  </nav>
+
+  {{outlet}}
 </main>

@@ -8,6 +8,7 @@ function _toDomain(skillData) {
     pixValue: skillData.pixValue,
     competenceId: skillData.competenceId,
     tutorialIds: skillData.tutorialIds,
+    tubeId: skillData.tubeId,
   });
 }
 
@@ -15,6 +16,11 @@ module.exports = {
 
   findByCompetenceId(competenceId) {
     return skillDatasource.findByCompetenceId(competenceId)
+      .then((skillDatas) => skillDatas.map(_toDomain));
+  },
+
+  findByIds(skillIds) {
+    return skillDatasource.findByRecordIds(skillIds)
       .then((skillDatas) => skillDatas.map(_toDomain));
   },
 };

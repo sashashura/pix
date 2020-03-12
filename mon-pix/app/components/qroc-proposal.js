@@ -1,33 +1,38 @@
-import { computed } from '@ember/object';
+/* eslint ember/no-classic-components: 0 */
+/* eslint ember/no-component-lifecycle-hooks: 0 */
+/* eslint ember/require-tagless-components: 0 */
+
+import { classNames } from '@ember-decorators/component';
+import { action, computed } from '@ember/object';
 import Component from '@ember/component';
+import classic from 'ember-classic-decorator';
 import proposalsAsBlocks from 'mon-pix/utils/proposals-as-blocks';
 
-export default Component.extend({
+@classic
+@classNames('qroc-proposal')
+export default class QrocProposal extends Component {
+  format = null;
+  proposals = null;
+  answerValue = null;
+  answerChanged = null; // action
 
-  classNames: ['qroc-proposal'],
-
-  format: null,
-  proposals: null,
-  answerValue: null,
-  answerChanged: null, // action
-
-  _blocks: computed('proposals', function() {
+  @computed('proposals')
+  get _blocks() {
     return proposalsAsBlocks(this.proposals);
-  }),
+  }
 
-  userAnswer : computed('answerValue', function() {
+  @computed('answerValue')
+  get userAnswer() {
     const answer = this.answerValue || '';
     return answer.indexOf('#ABAND#') > -1 ? '' : answer;
-  }),
+  }
 
-  didInsertElement: function() {
+  @action
+  onInputChange() {
+    this.answerChanged();
+  }
 
-    this.$('input').keydown(() => {
-      this.answerChanged();
-    });
-  },
-
-  willRender: function() {
+  willRender() {
     this.notifyPropertyChange('proposals');
   }
-});
+}

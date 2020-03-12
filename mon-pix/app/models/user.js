@@ -1,3 +1,5 @@
+/* eslint ember/no-computed-properties-in-native-classes: 0 */
+
 import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 import { computed } from '@ember/object';
 
@@ -10,6 +12,7 @@ export default class User extends Model {
   @attr('string') username;
   @attr('string') password;
   @attr('boolean') cgu;
+  @attr('boolean') mustValidateTermsOfService;
   @attr('boolean') hasSeenAssessmentInstructions;
   @attr('string') recaptchaToken;
 

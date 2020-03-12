@@ -47,6 +47,14 @@ describe('Unit | Domain | Errors', () => {
     expect(errors.InvalidCertificationCandidate).to.exist;
   });
 
+  it('should export a InvalidCertificationReportForFinalization', () => {
+    expect(errors.InvalidCertificationReportForFinalization).to.exist;
+  });
+
+  it('should export a InvalidParametersForSessionPublication', () => {
+    expect(errors.InvalidParametersForSessionPublication).to.exist;
+  });
+
   it('should export a UserAlreadyLinkedToCandidateInSessionError', () => {
     expect(errors.UserAlreadyLinkedToCandidateInSessionError).to.exist;
   });
@@ -55,8 +63,8 @@ describe('Unit | Domain | Errors', () => {
     expect(errors.CampaignAlreadyArchivedError).to.exist;
   });
 
-  it('should export a UserNotAuthorizedToUpdateStudentPassword', () => {
-    expect(errors.UserNotAuthorizedToUpdateStudentPasswordError).to.exist;
+  it('should export a UserNotAuthorizedToUpdatePasswordError', () => {
+    expect(errors.UserNotAuthorizedToUpdatePasswordError).to.exist;
   });
 
   it('should export a UserNotAuthorizedToUpdateCampaignError', () => {

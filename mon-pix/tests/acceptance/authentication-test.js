@@ -1,28 +1,31 @@
-import { click, fillIn, currentURL } from '@ember/test-helpers';
-import { beforeEach, describe, it } from 'mocha';
 import { expect } from 'chai';
-import { authenticateByEmail } from '../helpers/authentification';
-import visitWithAbortedTransition from '../helpers/visit';
-import defaultScenario from '../../mirage/scenarios/default';
+import { beforeEach, describe, it } from 'mocha';
 import { setupApplicationTest } from 'ember-mocha';
+import { click, fillIn, currentURL } from '@ember/test-helpers';
 import { setupMirage } from 'ember-cli-mirage/test-support';
 
+import visit from '../helpers/visit';
+
+import { authenticateByEmail, authenticateByUsername } from '../helpers/authentication';
+
 describe('Acceptance | Authentication', function() {
+
   setupApplicationTest();
   setupMirage();
+
   let user;
 
   beforeEach(function() {
-    defaultScenario(this.server);
     user = server.create('user', 'withEmail');
   });
 
   describe('Success cases', function() {
 
     describe('Accessing to the /profil page while disconnected', async function() {
+
       it('should redirect to the connexion page', async function() {
         // when
-        await visitWithAbortedTransition('/profil');
+        await visit('/profil');
 
         // then
         expect(currentURL()).to.equal('/connexion');
@@ -30,6 +33,7 @@ describe('Acceptance | Authentication', function() {
     });
 
     describe('Log-in phase', function() {
+
       it('should redirect to the /profil after connexion', async function() {
         // given
         await authenticateByEmail(user);
@@ -41,9 +45,10 @@ describe('Acceptance | Authentication', function() {
   });
 
   describe('Error case', function() {
+
     it('should stay in /connexion , when authentication failed', async function() {
       // given
-      await visitWithAbortedTransition('/connexion');
+      await visit('/connexion');
       await fillIn('#login', 'anyone@pix.world');
       await fillIn('#password', 'Pix20!!');
 
@@ -52,6 +57,17 @@ describe('Acceptance | Authentication', function() {
 
       // then
       expect(currentURL()).to.equal('/connexion');
+    });
+
+    it('should redirect to /update-expired-password, when user use one time password', async function() {
+      // given
+      user = server.create('user', 'withUsername', 'shouldChangePassword');
+
+      // when
+      await authenticateByUsername(user);
+
+      // then
+      expect(currentURL()).to.equal('/mise-a-jour-mot-de-passe-expire');
     });
   });
 });

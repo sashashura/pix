@@ -4,10 +4,16 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = function(defaults) {
   const app = new EmberApp(defaults, {
-    // Add options here
+    babel: {
+      sourceMaps: EmberApp.env() === 'development' ? 'inline' : false
+    },
     'ember-cli-babel': {
       includePolyfill: true
-    }
+    },
+    fingerprint: {
+      exclude: ['png', 'svg'],
+      extensions: ['js', 'css', 'jpg', 'gif', 'map']
+    },
   });
 
   // Use `app.import` to add additional libraries to the generated

@@ -1,0 +1,38 @@
+{{title pageTitle}}
+<div class="background-banner-wrapper">
+  <div class="background-banner"></div>
+  <div class="rounded-panel rounded-panel--strong rounded-panel--over-background-banner send-profile-header">
+
+    <div class="send-profile-header__announcement">
+      <h1 class="send-profile-header__title">Envoi de votre profil Pix</h1>
+      <p class="send-profile-header__instruction">
+        Vous allez transmettre le score et les niveaux de compétence présents sur votre profil Pix.
+        <br>Toute évolution de votre profil après cet envoi ne sera pas transmise.
+        <br>Pensez à le vérifier avant de l'envoyer !
+      </p>
+    </div>
+
+    <ProfileSharingForm
+            @sendProfile={{action "sendProfile"}}
+            @campaignParticipation={{this.model.campaignParticipation}}
+            @campaign={{this.model.campaign}}
+            @isLoading={{this.isLoading}}
+            @errorMessage={{this.errorMessage}}
+    />
+
+    <div class="send-profile-header__profile send-profile-header__profile--with-border-bottom">
+      <HexagonScore @pixScore={{this.model.user.pixScore.value}} />
+      <div class="send-profile-header__profile__cards">
+        <ProfileScorecards @interactive={{false}} class="send-profile-header__profile__cards" @areasCode={{this.model.user.areasCode}} @scorecards={{this.model.user.scorecards}}/>
+      </div>
+    </div>
+
+    <ProfileSharingForm
+            @sendProfile={{action "sendProfile"}}
+            @campaignParticipation={{this.model.campaignParticipation}}
+            @campaign={{this.model.campaign}}
+            @isLoading={{this.isLoading}}
+            @errorMessage={{this.errorMessage}}
+    />
+  </div>
+</div>

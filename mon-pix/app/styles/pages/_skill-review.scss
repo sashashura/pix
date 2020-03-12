@@ -38,8 +38,8 @@
   }
 
   &__explain-text {
-    font-size: 2.4rem;
-    color: $dove-gray;
+    font-size: 1.5rem;
+    color: $grey-60;
     line-height: 33px;
     font-weight: $font-light;
   }
@@ -52,51 +52,51 @@
 .skill-review-information {
   &__info-icon {
     float: left;
-    color: $dove-gray;
-    font-size: 1.5em;
+    color: $grey-60;
+    font-size: 0.938em;
   }
 
   &__text {
     padding-left: 14px;
     margin-top: 14px;
-    color: $dove-gray;
+    color: $grey-60;
     font-family: $font-open-sans;
-    font-size: 1.4rem;
+    font-size: 0.875rem;
   }
 }
 
 .skill-review-competence {
   &__bullet {
-    font-size: 1.8rem;
+    font-size: 1.125rem;
     margin-right: 12px;
 
     &--jaffa {
-      color: $jaffa;
+      color: $information-light;
     }
 
     &--emerald {
-      color: $emerald;
+      color: $content-light;
     }
 
     &--cerulean {
-      color: $cerulean;
+      color: $communication-light;
     }
 
     &--wild-strawberry {
-      color: $wild-strawberry;
+      color: $security-light;
     }
 
     &--butterfly-bush {
-      color: $butterfly-bush;
+      color: $environment-light;
     }
   }
 }
 
 .skill-review-table-header {
   &__circle-chart-value {
-    color: $nero;
+    color: $grey-100;
     font-family: $font-roboto;
-    font-size: 3.1rem;
+    font-size: 1.938rem;
   }
 }
 
@@ -104,21 +104,7 @@
   &__abstract {
     text-align: center;
     text-transform: none;
-    margin-bottom: 10px;
-  }
-
-  &__badge {
-    text-align: center;
-    margin-bottom: 20px;
-    img {
-      width: 190px;
-    }
-    &-information {
-      font-family: $font-roboto;
-      font-weight: $font-light;
-      font-size: 2.4rem;
-      padding-top: 20px;
-    }
+    margin: 16px 0;
   }
 
   &__dash-line {
@@ -153,17 +139,26 @@
     justify-content: space-between;
     align-items: center;
     text-align: center;
-    padding: 20px;
+    padding: 0;
 
     @include device-is('tablet') {
       flex-direction: row;
+      padding: 20px 0;
     }
+  }
+
+  &__subtitle {
+    color: $grey-100;
+    font-family: $font-open-sans;
+    font-size: 1.5rem;
+    font-weight: $font-normal;
+    margin: 28px 0 24px;
   }
 }
 
 .skill-review-result-abstract {
   &__percentage {
-    color: $pix-blue;
+    color: $blue;
     display: inline-block;
   }
 }
@@ -171,33 +166,33 @@
 .skill-review-share {
   &__button {
     text-transform: uppercase;
-    letter-spacing: 0.05rem;
+    letter-spacing: 0.031rem;
   }
 
   &__legal {
     text-align: center;
-    font-size: 2.4rem;
-    color: $dove-gray;
-    line-height: 33px;
+    font-size: 1.25rem;
+    color: $grey-60;
+    line-height: 2rem;
     font-weight: $font-light;
-    margin: 0 20px 24px 20px;
+    margin: 0 20px 16px 20px;
   }
 
   &__thanks {
     font-family: $font-open-sans;
     font-weight: $font-light;
-    font-size: 2.4rem;
+    font-size: 1.5rem;
     padding-top: 20px;
   }
 
   &__error {
     color: $pure-orange;
-    font-size: 1.5rem;
+    font-size: 0.938rem;
     padding-bottom: 10px;
   }
 
   &__back-to-home {
-    font-size: 1.6rem;
+    font-size: 1rem;
     font-weight: $font-bold;
     font-family: $font-open-sans;
     text-align: center;
@@ -211,13 +206,13 @@
 }
 
 .skill-review__campaign-archived-text {
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 30px;
   max-width: 640px;
   margin: 30px auto 60px;
   font-family: $font-open-sans;
   font-weight: $font-light;
-  color: $gray;
+  color: $grey-35;
 }
 
 @media print {
@@ -226,11 +221,11 @@
   }
 
   .progression-gauge {
-    border-bottom: 4px solid $alto-grey;
+    border-bottom: 4px solid $grey-20;
   }
 
   .progression-gauge__marker {
-    border-bottom: 4px solid $dark-orange;
+    border-bottom: 4px solid $information-light;
   }
 
   .default-table thead {

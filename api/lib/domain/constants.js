@@ -10,8 +10,8 @@ module.exports = {
 
   MINIMUM_CERTIFIABLE_COMPETENCES_FOR_CERTIFIABILITY: 5,
   MINIMUM_COMPETENCE_LEVEL_FOR_CERTIFIABILITY: 1,
-  MINIMUM_REPRODUCTIBILITY_RATE_TO_BE_CERTIFIED: 50,
-  MINIMUM_REPRODUCTIBILITY_RATE_TO_BE_TRUSTED: 80,
+  MINIMUM_REPRODUCIBILITY_RATE_TO_BE_CERTIFIED: 50,
+  MINIMUM_REPRODUCIBILITY_RATE_TO_BE_TRUSTED: 80,
   UNCERTIFIED_LEVEL: -1,
 
   MAX_LEVEL_TO_BE_AN_EASY_TUBE: 3,
@@ -29,5 +29,9 @@ module.exports = {
   PIX_CERTIF: {
     SCOPE: 'pix-certif',
     NOT_LINKED_CERTIFICATION_MSG: 'L\'accès à Pix Certif est limité aux centres de certification Pix. Contactez le référent de votre centre de certification si vous pensez avoir besoin d\'y accéder.'
+  },
+  LOCALE: {
+    FRENCH_FRANCE: 'fr-fr',
+    FRENCH_SPOKEN: 'fr',
   },
 };

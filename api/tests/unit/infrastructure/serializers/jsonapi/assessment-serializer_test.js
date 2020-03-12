@@ -8,13 +8,14 @@ describe('Unit | Serializer | JSONAPI | assessment-serializer', function() {
 
     it('should convert an Assessment model object (of type CERTIFICATION) into JSON API data', function() {
       //given
-      const assessment = domainBuilder.buildAssessment();
+      const certificationCourseId = 1;
+      const assessment = domainBuilder.buildAssessment({ certificationCourseId });
       const expectedJson = {
         data: {
           id: assessment.id.toString(),
           type: 'assessments',
           attributes: {
-            'certification-number': assessment.courseId.toString(),
+            'certification-number': certificationCourseId,
             state: assessment.state,
             type: assessment.type,
             title: assessment.courseId.toString(),
@@ -27,7 +28,10 @@ describe('Unit | Serializer | JSONAPI | assessment-serializer', function() {
                   id: assessment.answers[0].id.toString(),
                   type: 'answers',
                 }
-              ]
+              ],
+              links: {
+                related: '/api/answers?assessmentId=' + assessment.id.toString()
+              }
             },
             course: {
               data: {
@@ -37,7 +41,7 @@ describe('Unit | Serializer | JSONAPI | assessment-serializer', function() {
             },
             'certification-course': {
               links: {
-                related: '/api/certification-courses/courseId',
+                related: `/api/certification-courses/${certificationCourseId}`,
               }
             },
           },
@@ -87,10 +91,10 @@ describe('Unit | Serializer | JSONAPI | assessment-serializer', function() {
       expect(json.data.attributes['title']).to.equal('Traiter des données');
     });
 
-    it('should convert an Assessment model object with type SMARTPLACEMENT into JSON API data', function() {
+    it('should convert an Assessment model object with type CAMPAIGN into JSON API data', function() {
       //given
       const assessment = domainBuilder.buildAssessment({
-        type: Assessment.types.SMARTPLACEMENT,
+        type: Assessment.types.CAMPAIGN,
         campaignParticipation: { campaign: { code: 'Konami' } },
       });
       const expectedProgressionJson = {
@@ -165,9 +169,9 @@ describe('Unit | Serializer | JSONAPI | assessment-serializer', function() {
       expect(assessment.courseId).to.equal(jsonAssessment.data.relationships.course.data.id);
     });
 
-    it('should have a null courseId for type SMARTPLACEMENT', () => {
+    it('should have a null courseId for type CAMPAIGN', () => {
       //given
-      jsonAssessment.data.attributes.type = Assessment.types.SMARTPLACEMENT;
+      jsonAssessment.data.attributes.type = Assessment.types.CAMPAIGN;
 
       // when
       const assessment = serializer.deserialize(jsonAssessment);

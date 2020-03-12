@@ -25,14 +25,15 @@ module.exports = {
         'birthplace',
         'date',
         'firstName',
+        'deliveredAt',
         'isPublished',
         'lastName',
         'status',
         'pixScore',
         'commentForCandidate',
         'resultCompetenceTree',
+        'cleaCertificationStatus',
       ],
-
       resultCompetenceTree: {
         included: true,
         ref: 'id',
@@ -42,7 +43,7 @@ module.exports = {
         areas: {
           included: true,
           ref: 'id',
-          attributes: ['code', 'name', 'title', 'resultCompetences'],
+          attributes: ['code', 'name', 'title', 'color', 'resultCompetences'],
 
           resultCompetences: {
             included: true,
@@ -72,10 +73,19 @@ module.exports = {
             return Promise.reject(new WrongDateFormatError());
           }
         }
-        if (_.isEmpty(_.trim(certifications.examinerComment))) {
+
+        if (!_isOmitted(certifications.examinerComment) && _hasNoExaminerComment(certifications.examinerComment)) {
           certifications.examinerComment = NO_EXAMINER_COMMENT;
         }
         return certifications;
       }));
   },
 };
+
+function _isOmitted(aString) {
+  return _.isUndefined(aString);
+}
+
+function _hasNoExaminerComment(aString) {
+  return _.isEmpty(_.trim(aString));
+}

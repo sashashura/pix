@@ -3,6 +3,7 @@ import Route from '@ember/routing/route';
 import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 
 export default class AuthenticatedRoute extends Route.extend(AuthenticatedRouteMixin) {
+
   @service currentUser;
 
   beforeModel(transition) {
@@ -10,7 +11,7 @@ export default class AuthenticatedRoute extends Route.extend(AuthenticatedRouteM
     if (transition.isAborted) {
       return;
     }
-    if (!this.currentUser.user.pixOrgaTermsOfServiceAccepted) {
+    if (!this.currentUser.prescriber.pixOrgaTermsOfServiceAccepted) {
       return this.replaceWith('terms-of-service');
     }
   }

@@ -1,10 +1,12 @@
 const _ = require('lodash');
+const AirtableNotFoundError = require('../../infrastructure/datasources/airtable/AirtableResourceNotFound');
+const Area = require('../../domain/models/Area');
+const areaDatasource = require('../datasources/airtable/area-datasource');
 const Competence = require('../../domain/models/Competence');
 const competenceDatasource = require('../datasources/airtable/competence-datasource');
-const areaDatasource = require('../datasources/airtable/area-datasource');
-const Area = require('../../domain/models/Area');
+const knowledgeElementRepository = require('./knowledge-element-repository');
+const scoringService = require('../../domain/services/scoring/scoring-service');
 const { NotFoundError } = require('../../domain/errors');
-const AirtableNotFoundError = require('../../infrastructure/datasources/airtable/AirtableResourceNotFound');
 
 const PixOriginName = 'Pix';
 
@@ -16,11 +18,11 @@ function _toDomain(competenceData, areaDatas) {
     index: competenceData.index,
     description: competenceData.description,
     origin: competenceData.origin,
-    skills: competenceData.skillIds,
+    skillIds: competenceData.skillIds,
     area: areaData && new Area({
       id: areaData.id,
       code: areaData.code,
-      title: areaData.title,
+      title: areaData.titleFrFr,
       color: areaData.color,
     }),
   });
@@ -59,7 +61,22 @@ module.exports = {
       .catch(() => {
         throw new NotFoundError('La compétence demandée n’existe pas');
       });
-  }
+  },
+
+  async getPixScoreByCompetence({ userId, limitDate }) {
+    const knowledgeElementsGroupedByCompetenceId = await knowledgeElementRepository.findUniqByUserIdGroupedByCompetenceId({
+      userId,
+      limitDate,
+    });
+
+    return _.mapValues(knowledgeElementsGroupedByCompetenceId, (knowledgeElements) => {
+      const {
+        pixScoreForCompetence,
+      } = scoringService.calculateScoringInformationForCompetence({ knowledgeElements });
+      return pixScoreForCompetence;
+    });
+  },
+
 };
 
 function _list() {

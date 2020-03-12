@@ -1,11 +1,8 @@
 const {
-  knex,
   expect,
   airtableBuilder,
   databaseBuilder,
   generateValidRequestAuthorizationHeader,
-  insertUserWithStandardRole,
-  insertUserWithRolePixMaster,
 } = require('../../../test-helper');
 const createServer = require('../../../../server');
 const Assessment = require('../../../../lib/domain/models/Assessment');
@@ -14,23 +11,23 @@ const { map } = require('lodash');
 describe('Acceptance | API | Certifications', () => {
 
   let server, options;
-  const authenticatedUserID = 1234;
-  let session, certificationCourse, assessment, assessmentResult;
+  let userId;
+  let session, certificationCourse, assessment, assessmentResult, badge;
 
-  beforeEach(async function() {
+  beforeEach(async () => {
     server = await createServer();
 
+    userId = databaseBuilder.factory.buildUser().id;
     session = databaseBuilder.factory.buildSession();
-    await insertUserWithRolePixMaster();
-    await insertUserWithStandardRole();
+    badge = databaseBuilder.factory.buildBadge();
     certificationCourse = databaseBuilder.factory.buildCertificationCourse({
       sessionId: session.id,
-      userId: authenticatedUserID,
+      userId,
       isPublished: false
     });
     assessment = databaseBuilder.factory.buildAssessment({
-      userId: authenticatedUserID,
-      courseId: certificationCourse.id,
+      userId,
+      certificationCourseId: certificationCourse.id,
       type: Assessment.types.CERTIFICATION,
       state: 'completed',
     });
@@ -41,52 +38,56 @@ describe('Acceptance | API | Certifications', () => {
       emitter: 'PIX-ALGO',
       status: 'rejected',
     });
+    databaseBuilder.factory.buildPartnerCertification({
+      certificationCourseId: certificationCourse.id,
+      partnerKey: badge.key
+    });
+
+    return databaseBuilder.commit();
   });
 
   describe('GET /api/certifications', () => {
-    beforeEach(function() {
-      return databaseBuilder.commit();
-    });
 
-    it('should return 200 HTTP status code', () => {
+    it('should return 200 HTTP status code', async () => {
       options = {
         method: 'GET',
         url: '/api/certifications',
-        headers: { authorization: generateValidRequestAuthorizationHeader() },
+        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
       };
       // when
-      const promise = server.inject(options);
+      const response = await server.inject(options);
 
       // then
-      return promise.then((response) => {
-        expect(response.statusCode).to.equal(200);
-        expect(response.result.data).to.deep.equal([
-          {
-            type: 'certifications',
-            id: `${certificationCourse.id}`,
-            attributes: {
-              'birthdate': certificationCourse.birthdate,
-              'birthplace': certificationCourse.birthplace,
-              'certification-center': session.certificationCenter,
-              'comment-for-candidate': assessmentResult.commentForCandidate,
-              'date': certificationCourse.completedAt,
-              'first-name': certificationCourse.firstName,
-              'is-published': certificationCourse.isPublished,
-              'last-name': certificationCourse.lastName,
-              'pix-score': assessmentResult.pixScore,
-              'status': assessmentResult.status,
-            },
-            relationships: {
-              'result-competence-tree': {
-                'data': null,
-              },
+      expect(response.statusCode).to.equal(200);
+      expect(response.result.data).to.deep.equal([
+        {
+          type: 'certifications',
+          id: `${certificationCourse.id}`,
+          attributes: {
+            'birthdate': certificationCourse.birthdate,
+            'birthplace': certificationCourse.birthplace,
+            'certification-center': session.certificationCenter,
+            'comment-for-candidate': assessmentResult.commentForCandidate,
+            'date': certificationCourse.createdAt,
+            'first-name': certificationCourse.firstName,
+            'delivered-at': session.publishedAt,
+            'is-published': certificationCourse.isPublished,
+            'last-name': certificationCourse.lastName,
+            'pix-score': assessmentResult.pixScore,
+            'status': assessmentResult.status,
+            'clea-certification-status': 'not_passed'
+
+          },
+          relationships: {
+            'result-competence-tree': {
+              'data': null,
             },
           },
-        ]);
-      });
+        },
+      ]);
     });
 
-    it('should return 401 HTTP status code if user is not authenticated', () => {
+    it('should return 401 HTTP status code if user is not authenticated', async () => {
       // given
       const options = {
         method: 'GET',
@@ -94,12 +95,10 @@ describe('Acceptance | API | Certifications', () => {
       };
 
       // when
-      const promise = server.inject(options);
+      const response = await server.inject(options);
 
       // then
-      return promise.then((response) => {
-        expect(response.statusCode).to.equal(401);
-      });
+      expect(response.statusCode).to.equal(401);
     });
   });
 
@@ -141,27 +140,28 @@ describe('Acceptance | API | Certifications', () => {
         .activate();
     });
 
-    beforeEach(async function() {
+    beforeEach(() => {
       databaseBuilder.factory.buildCompetenceMark({
         level: 3,
         score: 23,
         area_code: '1',
         competence_code: '1.1',
         assessmentResultId: assessmentResult.id,
+        acquiredPartnerCertifications: [badge.key]
       });
       return databaseBuilder.commit();
     });
 
-    it('should return 200 HTTP status code and the certification with the result competence tree included', () => {
+    it('should return 200 HTTP status code and the certification with the result competence tree included', async () => {
       // given
       options = {
         method: 'GET',
         url: `/api/certifications/${certificationCourse.id}`,
-        headers: { authorization: generateValidRequestAuthorizationHeader(authenticatedUserID) },
+        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
       };
 
       // when
-      const promise = server.inject(options);
+      const response = await server.inject(options);
 
       // then
       const expectedBody = {
@@ -171,12 +171,15 @@ describe('Acceptance | API | Certifications', () => {
             'birthplace': certificationCourse.birthplace,
             'certification-center': session.certificationCenter,
             'comment-for-candidate': assessmentResult.commentForCandidate,
-            'date': certificationCourse.completedAt,
+            'date': certificationCourse.createdAt,
             'first-name': certificationCourse.firstName,
+            'delivered-at': session.publishedAt,
             'is-published': certificationCourse.isPublished,
             'last-name': certificationCourse.lastName,
             'pix-score': assessmentResult.pixScore,
             'status': assessmentResult.status,
+            'clea-certification-status': 'not_passed'
+
           },
           'id': `${certificationCourse.id}`,
           'relationships': {
@@ -225,6 +228,7 @@ describe('Acceptance | API | Certifications', () => {
               'code': '1',
               'name': '1. Information et données',
               'title': 'Information et données',
+              'color': 'jaffa',
             },
             'id': 'recvoGdo7z2z7pXWa',
             'relationships': {
@@ -266,16 +270,13 @@ describe('Acceptance | API | Certifications', () => {
           },
         ],
       };
-      return promise
-        .then((response) => {
-          expect(response.statusCode).to.equal(200);
-          expect(response.result).to.deep.equal(expectedBody);
-        });
+      expect(response.statusCode).to.equal(200);
+      expect(response.result).to.deep.equal(expectedBody);
     });
 
-    it('should return unauthorized 403 HTTP status code when user is not owner of the certification', () => {
+    it('should return unauthorized 403 HTTP status code when user is not owner of the certification', async () => {
       // given
-      const unauthenticatedUserId = authenticatedUserID + 1;
+      const unauthenticatedUserId = userId + 1;
       options = {
         method: 'GET',
         url: `/api/certifications/${certificationCourse.id}`,
@@ -283,92 +284,10 @@ describe('Acceptance | API | Certifications', () => {
       };
 
       // when
-      const promise = server.inject(options);
+      const response = await server.inject(options);
 
       // then
-      return promise
-        .then((response) => expect(response.statusCode).to.equal(403));
-    });
-  });
-
-  describe('PATCH /api/certifications/:id', () => {
-    beforeEach(function() {
-      return databaseBuilder.commit();
-    });
-
-    it('should return 200 HTTP status code and the updated certification', () => {
-      // given
-      options = {
-        method: 'PATCH',
-        url: `/api/certifications/${certificationCourse.id}`,
-        headers: { authorization: generateValidRequestAuthorizationHeader() },
-        payload: {
-          data: {
-            type: 'certifications',
-            id: certificationCourse.id,
-            attributes: {
-              'is-published': true,
-            },
-          },
-        },
-      };
-
-      // when
-      const promise = server.inject(options);
-
-      // then
-      return promise
-        .then((response) => {
-          expect(response.statusCode).to.equal(200);
-          expect(response.result.data).to.deep.equal({
-            type: 'certifications',
-            id: `${certificationCourse.id}`,
-            attributes: {
-              'birthdate': certificationCourse.birthdate,
-              'birthplace': certificationCourse.birthplace,
-              'certification-center': session.certificationCenter,
-              'comment-for-candidate': assessmentResult.commentForCandidate,
-              'date': certificationCourse.completedAt,
-              'first-name': certificationCourse.firstName,
-              'is-published': true,
-              'last-name': certificationCourse.lastName,
-              'pix-score': assessmentResult.pixScore,
-              'status': assessmentResult.status,
-            },
-            relationships: {
-              'result-competence-tree': {
-                'data': null,
-              },
-            },
-          });
-        })
-        .then(() => knex('certification-courses').where('id', certificationCourse.id))
-        .then((foundCertification) => expect(foundCertification[0].isPublished).to.be.true);
-    });
-
-    it('should return unauthorized 403 HTTP status code when user is not pixMaster', () => {
-      // given
-      options = {
-        method: 'PATCH',
-        url: `/api/certifications/${certificationCourse.id}`,
-        headers: { authorization: generateValidRequestAuthorizationHeader(4444) },
-        payload: {
-          data: {
-            attributes: {
-              'is-published': true,
-            },
-          },
-        },
-      };
-
-      // when
-      const promise = server.inject(options);
-
-      // then
-      return promise
-        .then((response) => expect(response.statusCode).to.equal(403))
-        .then(() => knex('certification-courses').where('id', certificationCourse.id))
-        .then((certifications) => expect(certifications[0].isPublished).to.be.false);
+      expect(response.statusCode).to.equal(403);
     });
   });
 

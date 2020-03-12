@@ -1,4 +1,10 @@
 import Response from 'ember-cli-mirage/response';
+import {
+  findPaginatedCampaignAssessmentParticipationSummaries,
+  findPaginatedCampaignProfilesCollectionParticipationSummaries,
+} from './handlers/find-paginated-campaign-participation-summaries';
+import { findPaginatedOrganizationMemberships } from './handlers/find-paginated-organization-memberships';
+import { findFilteredPaginatedStudents } from './handlers/find-filtered-paginated-students';
 
 function parseQueryString(queryString) {
   const result = Object.create(null);
@@ -34,7 +40,23 @@ export default function() {
 
   this.post('/revoke', () => {});
 
-  this.post('/users');
+  this.get('/prescription/prescribers/:id', (schema, request) => {
+    const prescriber = schema.prescribers.find(request.params.id);
+    return prescriber;
+  });
+
+  this.post('/users', (schema, request) => {
+    const body = JSON.parse(request.requestBody);
+    const user = schema.users.create({ ...body.data.attributes });
+
+    schema.prescribers.create({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+
+    return user;
+  });
 
   this.get('/users/me', (schema, request) => {
     const userToken = request.requestHeaders.authorization.replace('Bearer ', '');
@@ -56,17 +78,18 @@ export default function() {
 
   this.patch('/memberships/:id', (schema, request) => {
     const id = request.params.id;
-    return schema.memberships.where({ id });
+    return schema.memberships.find(id);
   });
 
-  this.get('/organizations/:id/campaigns', (schema) => {
-    return schema.campaigns.all();
+  this.get('/organizations/:id/campaigns', (schema, request) => {
+    const results = schema.campaigns.all();
+    const json = this.serializerOrRegistry.serialize(results, request);
+    json.meta = { hasCampaigns: results.length > 0 };
+
+    return json;
   });
 
-  this.get('/organizations/:id/memberships', (schema, request) => {
-    const organizationId = request.params.id;
-    return schema.memberships.where({ organizationId });
-  });
+  this.get('/organizations/:id/memberships', findPaginatedOrganizationMemberships);
 
   this.get('/organizations/:id/invitations', (schema, request) => {
     const organizationId = request.params.id;
@@ -79,10 +102,12 @@ export default function() {
     const email = requestBody.data.attributes.email;
     const code = 'ABCDEFGH01';
 
-    return schema.organizationInvitations.create({
+    schema.organizationInvitations.create({
       organizationId, email: email, status: 'PENDING', code,
       createdAt: new Date()
     });
+
+    return schema.organizationInvitations.where({ email });
   });
 
   this.get('/organization-invitations/:id', (schema, request) => {
@@ -97,7 +122,7 @@ export default function() {
       return new Response(404, {}, { errors: [ { status: '404', detail: '' } ] });
     }
     if (organizationInvitation.status === 'accepted') {
-      return new Response(421, {}, { errors: [ { status: '421', detail: '' } ] });
+      return new Response(412, {}, { errors: [ { status: '412', detail: '' } ] });
     }
 
     return organizationInvitation;
@@ -106,16 +131,19 @@ export default function() {
   this.post('/organization-invitations/:id/response', (schema, request) => {
     const organizationInvitationId = request.params.id;
     const requestBody = JSON.parse(request.requestBody);
-    const { code, status, email } = requestBody.data.attributes;
+    const { code, status } = requestBody.data.attributes;
 
     const organizationInvitation = schema.organizationInvitations.findBy({ id: organizationInvitationId, code });
-    const user = schema.users.findBy({ email });
+    const prescriber = schema.prescribers.first();
 
-    schema.memberships.create({
-      userId: user.id,
+    const membership = schema.memberships.create({
+      userId: prescriber.id,
       organizationId: organizationInvitation.organizationId,
       organizationRole: 'MEMBER'
     });
+
+    prescriber.memberships = [membership];
+    prescriber.save();
 
     organizationInvitation.update({ status });
     schema.organizationInvitationResponses.create();
@@ -123,10 +151,7 @@ export default function() {
     return new Response(204);
   });
 
-  this.get('/organizations/:id/students', (schema, request) => {
-    const organizationId = request.params.id;
-    return schema.students.where({ organizationId });
-  });
+  this.get('/organizations/:id/students', findFilteredPaginatedStudents);
 
   this.post('/organizations/:id/import-students', (schema, request) => {
     const type = request.requestBody.type;
@@ -138,6 +163,10 @@ export default function() {
     } else if (type === 'file-with-students-info-problems') {
       return new Promise((resolve) => {
         resolve(new Response(409, {}, { errors: [ { status: '409', detail: '409 - Le détail affiché est envoyé par le back' } ] }));
+      });
+    } else if (type === 'file-with-problems') {
+      return new Promise((resolve) => {
+        resolve(new Response(400, {}, { errors: [ { status: '400', detail: '400 - détail.' } ] }));
       });
     } else if (type === 'valid-file') {
       const organizationId = request.params.id;
@@ -157,7 +186,21 @@ export default function() {
     return schema.targetProfiles.all();
   });
 
-  this.post('/campaigns');
+  this.post('/campaigns', (schema, request) => {
+    const body = JSON.parse(request.requestBody);
+    const campaign = {
+      ...body.data.attributes,
+      customLandingPageText: body.data.attributes['custom-landing-page-text'],
+      idPixLabel: body.data.attributes['id-pix-label'],
+    };
+    if (campaign.type === 'PROFILES_COLLECTION') {
+      return schema.campaigns.create(campaign);
+    } else if (campaign.type === 'ASSESSMENT') {
+      const targetProfileId = body.data.relationships['target-profile'].data.id;
+      return schema.campaigns.create({ ...campaign, targetProfileId });
+    }
+    return new Response(422);
+  });
 
   this.get('/campaigns/:id/campaign-report', (schema, request) => {
     const campaignId = request.params.id;
@@ -173,39 +216,30 @@ export default function() {
     return campaign.campaignCollectiveResult;
   });
 
-  this.get('/campaign-participations', (schema, request) => {
-    const qp = request.queryParams;
-    const campaignId = qp['filter[campaignId]'];
-    const pageNumber = parseInt(qp['page[number]']);
-    const pageSize = parseInt(qp['page[size]']);
-    const start = (pageNumber - 1) * pageSize;
-    const end = start + pageSize;
-    const campaignParticipations = schema.campaignParticipations.where({ campaignId }).models;
-    const campaignParticipationIds = campaignParticipations.slice(start, end).map(
-      (campaignParticipation) => campaignParticipation.attrs.id
-    );
-    const results = schema.campaignParticipations.find(campaignParticipationIds);
-    const json = this.serializerOrRegistry.serialize(results, request);
-    const rowCount = campaignParticipations.length;
-    const pageCount = Math.ceil(rowCount / pageSize);
-    json.meta = { page: pageNumber, pageSize, rowCount, pageCount };
-    return json;
+  this.get('/campaigns/:id/analyses', (schema, request) => {
+    const campaignId = request.params.id;
+    const campaign = schema.campaigns.find(campaignId);
+    return campaign.campaignAnalysis;
   });
+
+  this.get('/campaigns/:campaignId/assessment-participations', findPaginatedCampaignAssessmentParticipationSummaries);
+
+  this.get('/campaigns/:id/profiles-collection-participations', findPaginatedCampaignProfilesCollectionParticipationSummaries);
 
   this.get('/campaign-participations/:id');
 
+  this.get('/campaign-participations/:id/analyses', (schema, request) => {
+    const campaignParticipationId = request.params.id;
+    const campaignParticipation = schema.campaignParticipations.find(campaignParticipationId);
+    return campaignParticipation.campaignAnalysis;
+  });
+
   this.get('/campaign-participation-results/:id');
 
-  this.post('/student-dependent-users/password-update', (schema, request) => {
-    const passwordForFailure = 'passwordFor01Failure';
-
-    const requestBody = JSON.parse(request.requestBody);
-    const { password } = requestBody.data.attributes;
-    if (password === passwordForFailure) {
-      return new Response(500, {}, { errors: [ { status: '500', detail: '' } ] });
-    }
-
-    return schema.users.find(1);
+  this.post('/schooling-registration-dependent-users/password-update', (schema) => {
+    const schoolingRegistrationDependentUser = schema.schoolingRegistrationDependentUsers.create();
+    schoolingRegistrationDependentUser.generatedPassword = 'Passw0rd';
+    return schoolingRegistrationDependentUser;
   });
 
   this.post('/user-orga-settings', (schema, request) => {
@@ -219,14 +253,26 @@ export default function() {
     return schema.userOrgaSettings.create({ user, organization });
   });
 
-  this.patch('/user-orga-settings/:id', (schema, request) => {
+  this.put('/user-orga-settings/:id', (schema, request) => {
     const requestBody = JSON.parse(request.requestBody);
     const userOrgaSettingsId = request.params.id;
     const organizationId = requestBody.data.relationships.organization.data.id;
 
     const userOrgaSettings = schema.userOrgaSettings.find(userOrgaSettingsId);
     const organization = schema.organizations.find(organizationId);
+
     return userOrgaSettings.update({ organization });
+  });
+
+  this.get('/campaigns/:campaignId/profiles-collection-participations/:campaignParticipationId', (schema, request) => {
+    return schema.campaignProfiles.findBy({ ...request.params });
+  });
+
+  this.delete('/schooling-registration-user-associations', (schema, request) => {
+    const requestBody = JSON.parse(request.requestBody);
+
+    const student = schema.students.find(requestBody.data.attributes['schooling-registration-id']);
+    return student.update({ email: null });
   });
 
 }

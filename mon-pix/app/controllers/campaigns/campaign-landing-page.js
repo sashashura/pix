@@ -1,17 +1,16 @@
+import { action } from '@ember/object';
 import Controller from '@ember/controller';
+import { tracked } from '@glimmer/tracking';
 
-export default Controller.extend({
-  queryParams: ['participantExternalId'],
-  participantExternalId: null,
-  isLoading: false,
-  pageTitle: 'Présentation',
+export default class CampaignLandingPageController extends Controller {
+  pageTitle = 'Présentation';
+  @tracked isLoading = false;
 
-  actions: {
-    startCampaignParticipation() {
-      this.set('isLoading', true);
-      return this.transitionToRoute('campaigns.start-or-resume', this.model.code, {
-        queryParams: { hasSeenLanding: true, participantExternalId: this.participantExternalId }
-      });
-    }
+  @action
+  startCampaignParticipation() {
+    this.isLoading = true;
+    return this.transitionToRoute('campaigns.start-or-resume', this.model.code, {
+      queryParams: { hasUserSeenLandingPage: true }
+    });
   }
-});
+}

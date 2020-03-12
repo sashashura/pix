@@ -10,21 +10,29 @@ class CertificationProfile {
       profileDate,
       userId,
       userCompetences,
-      challengeIdsCorrectlyAnswered,
     } = {}) {
     // attributes
     this.profileDate = profileDate;
     this.userId = userId;
     this.userCompetences = userCompetences;
-    this.challengeIdsCorrectlyAnswered = challengeIdsCorrectlyAnswered;
   }
 
   isCertifiable() {
-    const certifiableCompetences = _(this.userCompetences)
+    return this.getCertifiableCompetencesCount() >= MINIMUM_CERTIFIABLE_COMPETENCES_FOR_CERTIFIABILITY;
+  }
+
+  getCertifiableCompetencesCount() {
+    return _(this.userCompetences)
       .filter((userCompetence) => userCompetence.isCertifiable())
       .size();
+  }
 
-    return certifiableCompetences >= MINIMUM_CERTIFIABLE_COMPETENCES_FOR_CERTIFIABILITY;
+  getCompetencesCount() {
+    return this.userCompetences.length;
+  }
+
+  getPixScore() {
+    return _.sumBy(this.userCompetences, 'pixScore');
   }
 }
 

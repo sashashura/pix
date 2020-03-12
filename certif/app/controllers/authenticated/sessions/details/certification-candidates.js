@@ -7,18 +7,13 @@ import _ from 'lodash';
 
 import config from '../../../../config/environment';
 
-export default class AuthenticatedSessionsDetailsCertificationCandidatesController extends Controller {
+export default class CertificationCandidatesController extends Controller {
 
-  @alias('model') currentSession;
-  @tracked candidatesInStaging;
   @service session;
   @service notifications;
 
-  constructor() {
-    super(...arguments);
-
-    this.candidatesInStaging = [];
-  }
+  @alias('model') currentSession;
+  @tracked candidatesInStaging = [];
 
   @computed('currentSession.certificationCandidates.{[],@each.isLinked}')
   get importAllowed() {
@@ -60,7 +55,7 @@ export default class AuthenticatedSessionsDetailsCertificationCandidatesControll
         headers: { Authorization: `Bearer ${access_token}` },
       });
       this.currentSession.certificationCandidates.reload();
-      this.notifications.success('La liste des candidats a été importée avec succès', {
+      this.notifications.success('La liste des candidats a été importée avec succès.', {
         autoClear,
         clearDuration,
       });
@@ -73,7 +68,7 @@ export default class AuthenticatedSessionsDetailsCertificationCandidatesControll
           clearDuration,
         });
       } else {
-        this.notifications.error('Une erreur s\'est produite lors de l\'import des candidats', {
+        this.notifications.error('Une erreur s\'est produite lors de l\'import des candidats.', {
           autoClear,
           clearDuration,
         });
@@ -116,7 +111,7 @@ export default class AuthenticatedSessionsDetailsCertificationCandidatesControll
         clearDuration,
       });
     } catch (err) {
-      let errorText = 'Une erreur s\'est produite lors de la suppression du candidat';
+      let errorText = 'Une erreur s\'est produite lors de l\'ajout du candidat.';
       if (_.get(err, 'errors[0].status') === '409' || err === 'Duplicate') {
         errorText = 'Ce candidat est déjà dans la liste, vous ne pouvez pas l\'ajouter à nouveau.';
       }

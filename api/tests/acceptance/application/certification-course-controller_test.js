@@ -108,8 +108,7 @@ describe('Acceptance | API | Certification Course', () => {
           // then
           const result = response.result.data;
           expect(result.attributes['competences-with-mark']).to.have.lengthOf(0);
-          expect(result.attributes['assessment-id']).to.be.null;
-          expect(result.attributes['status']).to.equal('missing-assessment');
+          expect(result.attributes['status']).to.equal('started');
         });
       });
 
@@ -125,7 +124,7 @@ describe('Acceptance | API | Certification Course', () => {
           isPublished: false,
         }));
         const { id: assessmentId } = databaseBuilder.factory.buildAssessment({
-          courseId: certificationCourseId.toString(),
+          certificationCourseId: certificationCourseId,
           state: 'completed',
           type: Assessment.types.CERTIFICATION,
         });
@@ -206,11 +205,11 @@ describe('Acceptance | API | Certification Course', () => {
 
           const firstCertifiedCompetence = result.attributes['competences-with-mark'][0];
           expect(firstCertifiedCompetence.level).to.equal(2);
-          expect(firstCertifiedCompetence['competence-code']).to.equal('4.3');
+          expect(firstCertifiedCompetence.competence_code).to.equal('4.3');
 
           const secondCertifiedCompetence = result.attributes['competences-with-mark'][1];
           expect(secondCertifiedCompetence.level).to.equal(4);
-          expect(secondCertifiedCompetence['competence-code']).to.equal('2.1');
+          expect(secondCertifiedCompetence.competence_code).to.equal('2.1');
         });
       });
 
@@ -340,7 +339,7 @@ describe('Acceptance | API | Certification Course', () => {
         examinerComment: 'il s\'est enfuit de la session',
         hasSeenEndTestScreen: false,
       });
-      const assessment = databaseBuilder.factory.buildAssessment({ courseId: certificationCourse.id });
+      const assessment = databaseBuilder.factory.buildAssessment({ certificationCourseId: certificationCourse.id });
       userId = certificationCourse.userId;
       options = {
         method: 'GET',
@@ -456,12 +455,15 @@ describe('Acceptance | API | Certification Course', () => {
 
       beforeEach(async () => {
         // given
-        const { area, competences, skills, challenges, competencesAssociatedSkillsAndChallenges } = airtableBuilder.factory.buildCertificationPrerequisites();
+        const { area, competences, tubes, skills, challenges, competencesAssociatedSkillsAndChallenges } = airtableBuilder.factory.buildLearningContentForCertification();
         airtableBuilder.mockList({ tableName: 'Domaines' })
           .returns([area])
           .activate();
         airtableBuilder.mockList({ tableName: 'Competences' })
           .returns(competences)
+          .activate();
+        airtableBuilder.mockList({ tableName: 'Tubes' })
+          .returns(tubes)
           .activate();
         airtableBuilder.mockList({ tableName: 'Acquis' })
           .returns(skills)
@@ -470,13 +472,8 @@ describe('Acceptance | API | Certification Course', () => {
           .returns(challenges)
           .activate();
 
-        certificationCandidate = databaseBuilder.factory.buildCertificationCandidate({
-          sessionId,
-          userId,
-        });
-        const assessmentId = databaseBuilder.factory.buildAssessment({
-          userId,
-        }).id;
+        certificationCandidate = databaseBuilder.factory.buildCertificationCandidate({ sessionId, userId });
+        const assessmentId = databaseBuilder.factory.buildAssessment({ userId }).id;
         const commonUserIdAssessmentIdAndEarnedPixForAllKEs = { userId, assessmentId, earnedPix: 4 };
         competencesAssociatedSkillsAndChallenges.forEach((element) => {
           const { challengeId, competenceId } = element;
@@ -528,7 +525,7 @@ describe('Acceptance | API | Certification Course', () => {
       beforeEach(async () => {
         // given
         certificationCourseId = databaseBuilder.factory.buildCertificationCourse({ userId, sessionId }).id;
-        databaseBuilder.factory.buildAssessment({ userId, courseId: certificationCourseId });
+        databaseBuilder.factory.buildAssessment({ userId, certificationCourseId: certificationCourseId });
         await databaseBuilder.commit();
 
         // when

@@ -41,7 +41,7 @@ describe('Integration | Application | Organization-invitations | organization-in
 
     context('Success cases', () => {
 
-      it('should return an HTTP response with status code 200', async () => {
+      it('should return an HTTP response with status code 204', async () => {
         // given
         usecases.answerToOrganizationInvitation.resolves();
 
@@ -49,13 +49,13 @@ describe('Integration | Application | Organization-invitations | organization-in
         const response = await httpTestServer.request('POST', '/api/organization-invitations/1/response', payload);
 
         // then
-        expect(response.statusCode).to.equal(200);
+        expect(response.statusCode).to.equal(204);
       });
     });
 
     context('Error cases', () => {
 
-      it('should respond an HTTP response with status code 421 when AlreadyExistingOrganizationInvitationError', async () => {
+      it('should respond an HTTP response with status code 412 when AlreadyExistingOrganizationInvitationError', async () => {
         // given
         usecases.answerToOrganizationInvitation.rejects(new AlreadyExistingOrganizationInvitationError());
 
@@ -63,7 +63,7 @@ describe('Integration | Application | Organization-invitations | organization-in
         const response = await httpTestServer.request('POST', '/api/organization-invitations/1/response', payload);
 
         // then
-        expect(response.statusCode).to.equal(421);
+        expect(response.statusCode).to.equal(412);
       });
 
       it('should respond an HTTP response with status code 404 when NotFoundError', async () => {

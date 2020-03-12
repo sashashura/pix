@@ -2,7 +2,7 @@ const { expect } = require('../../../../test-helper');
 const serializer = require('../../../../../lib/infrastructure/serializers/jsonapi/certification-result-serializer');
 const CertificationResult = require('../../../../../lib/domain/models/CertificationResult');
 
-describe('Unit | Serializer | JSONAPI | certification-course-serializer', function() {
+describe('Unit | Serializer | JSONAPI | certification-result-serializer', function() {
 
   describe('#serialize', function() {
 
@@ -22,17 +22,17 @@ describe('Unit | Serializer | JSONAPI | certification-course-serializer', functi
         isV2Certification: true,
         pixScore: 30,
         status: 'validated',
-        level: 3,
         emitter: 'PIX_ALGO',
         commentForCandidate: null,
         commentForJury: 'Salut',
         commentForOrganization: '',
         examinerComment: 'un commentaire',
         hasSeenEndTestScreen: true,
+        cleaCertificationStatus: 'acquired',
         competencesWithMark: [],
-        assessmentId: 20,
         juryId: 21,
         sessionId: 22,
+        assessmentId: 99
       });
 
       // when
@@ -44,7 +44,6 @@ describe('Unit | Serializer | JSONAPI | certification-course-serializer', functi
           id: certificationResult.id.toString(),
           type: 'results',
           attributes: {
-            'assessment-id': certificationResult.assessmentId,
             birthdate: certificationResult.birthdate,
             birthplace: certificationResult.birthplace,
             'comment-for-candidate': certificationResult.commentForCandidate,
@@ -52,6 +51,7 @@ describe('Unit | Serializer | JSONAPI | certification-course-serializer', functi
             'comment-for-organization': certificationResult.commentForOrganization,
             'examiner-comment': 'un commentaire',
             'has-seen-end-test-screen': true,
+            'clea-certification-status': certificationResult.cleaCertificationStatus,
             'competences-with-mark': certificationResult.competencesWithMark,
             'completed-at': new Date('2017-02-20T01:02:03Z'),
             'created-at': new Date('2017-02-20T01:02:03Z'),
@@ -62,10 +62,10 @@ describe('Unit | Serializer | JSONAPI | certification-course-serializer', functi
             'is-v2-certification': certificationResult.isV2Certification,
             'jury-id': certificationResult.juryId,
             'last-name': certificationResult.lastName,
-            level: certificationResult.level,
             'pix-score': certificationResult.pixScore,
             'result-created-at': new Date('2017-02-20T01:02:03Z'),
             'session-id': certificationResult.sessionId,
+            'assessment-id': certificationResult.assessmentId,
             status: certificationResult.status,
           }
         }

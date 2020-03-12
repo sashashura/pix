@@ -1,11 +1,9 @@
 {{title pageTitle}}
 <BurgerMenu @animation="push" @translucentOverlay={{true}} as |burger|>
   <burger.outlet>
-    <NavbarHeader @class="navbar-header--white" @burger={{burger}} />
+    <NavbarHeader @burger={{burger}} />
 
-    <div class="user-certifications-page__container">
-      {{outlet}}
-    </div>
+    {{outlet}}
 
   </burger.outlet>
 </BurgerMenu>

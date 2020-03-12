@@ -17,18 +17,23 @@ const buildUser = function buildUser({
   username = firstName + '.' + lastName + faker.random.number({ min: 1000, max: 9999 }),
   password,
   cgu = true,
+  lastTermsOfServiceValidatedAt = null,
+  mustValidateTermsOfService = false,
   pixOrgaTermsOfServiceAccepted = false,
   pixCertifTermsOfServiceAccepted = false,
   hasSeenAssessmentInstructions = false,
   samlId,
+  shouldChangePassword = false,
+  createdAt = new Date(),
+  updatedAt = new Date(),
 } = {}) {
 
   password = _.isUndefined(password) ? encrypt.hashPasswordSync(faker.internet.password()) : encrypt.hashPasswordSync(password);
-  email = _.isUndefined(email) ? faker.internet.exampleEmail(firstName, lastName).toLowerCase() : email.toLowerCase();
+  email = _.isUndefined(email) ? faker.internet.exampleEmail(firstName, lastName).toLowerCase() : email || null;
 
   const values = {
-    id, firstName, lastName, email, username, password, cgu, pixOrgaTermsOfServiceAccepted,
-    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions, samlId,
+    id, firstName, lastName, email, username, password, cgu, lastTermsOfServiceValidatedAt, mustValidateTermsOfService, pixOrgaTermsOfServiceAccepted,
+    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions, samlId, shouldChangePassword, createdAt, updatedAt
   };
 
   return databaseBuffer.pushInsertable({
@@ -45,17 +50,20 @@ buildUser.withUnencryptedPassword = function buildUserWithUnencryptedPassword({
   username,
   rawPassword = faker.internet.password(),
   cgu = true,
+  lastTermsOfServiceValidatedAt,
+  mustValidateTermsOfService = false,
   pixOrgaTermsOfServiceAccepted = false,
   pixCertifTermsOfServiceAccepted = false,
   hasSeenAssessmentInstructions = false,
   samlId,
+  shouldChangePassword = false,
 }) {
 
   const password = encrypt.hashPasswordSync(rawPassword);
 
   const values = {
-    id, firstName, lastName, email, username, password, cgu, pixOrgaTermsOfServiceAccepted,
-    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions, samlId,
+    id, firstName, lastName, email, username, password, cgu, lastTermsOfServiceValidatedAt, mustValidateTermsOfService, pixOrgaTermsOfServiceAccepted,
+    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions, samlId, shouldChangePassword,
   };
 
   return databaseBuffer.pushInsertable({
@@ -71,13 +79,15 @@ buildUser.withPixRolePixMaster = function buildUserWithPixRolePixMaster({
   email = faker.internet.exampleEmail().toLowerCase(),
   password = encrypt.hashPasswordSync(faker.internet.password()),
   cgu = true,
+  lastTermsOfServiceValidatedAt,
+  mustValidateTermsOfService = false,
   pixOrgaTermsOfServiceAccepted = false,
   pixCertifTermsOfServiceAccepted = false,
   hasSeenAssessmentInstructions = false,
 } = {}) {
 
   const values = {
-    id, firstName, lastName, email, password, cgu, pixOrgaTermsOfServiceAccepted,
+    id, firstName, lastName, email, password, cgu, lastTermsOfServiceValidatedAt, mustValidateTermsOfService, pixOrgaTermsOfServiceAccepted,
     pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions
   };
 
@@ -98,6 +108,8 @@ buildUser.withMembership = function buildUserWithMemberships({
   email = faker.internet.exampleEmail().toLowerCase(),
   password = 'encrypt.hashPasswordSync(faker.internet.password())',
   cgu = true,
+  lastTermsOfServiceValidatedAt,
+  mustValidateTermsOfService,
   pixOrgaTermsOfServiceAccepted = false,
   pixCertifTermsOfServiceAccepted = false,
   hasSeenAssessmentInstructions = false,
@@ -106,7 +118,7 @@ buildUser.withMembership = function buildUserWithMemberships({
 } = {}) {
 
   const values = {
-    id, firstName, lastName, email, password, cgu, pixOrgaTermsOfServiceAccepted,
+    id, firstName, lastName, email, password, cgu, lastTermsOfServiceValidatedAt, mustValidateTermsOfService, pixOrgaTermsOfServiceAccepted,
     pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions
   };
 

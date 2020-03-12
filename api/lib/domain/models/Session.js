@@ -2,10 +2,14 @@ const _ = require('lodash');
 
 const CREATED = 'created';
 const FINALIZED = 'finalized';
+const IN_PROCESS = 'in_process';
+const PROCESSED = 'processed';
 
 const statuses = {
   CREATED,
   FINALIZED,
+  IN_PROCESS,
+  PROCESSED,
 };
 
 const NO_EXAMINER_GLOBAL_COMMENT = null;
@@ -17,42 +21,57 @@ class Session {
     accessCode,
     address,
     certificationCenter,
-    certificationCenterId,
     date,
     description,
     examiner,
     room,
     time,
-    status,
     examinerGlobalComment,
     finalizedAt,
     resultsSentToPrescriberAt,
+    publishedAt,
     // includes
     certificationCandidates,
     // references
+    certificationCenterId,
+    assignedCertificationOfficerId,
   } = {}) {
     this.id = id;
     // attributes
     this.accessCode = accessCode;
     this.address = address;
     this.certificationCenter = certificationCenter;
-    this.certificationCenterId = certificationCenterId;
     this.date = date;
     this.description = description;
     this.examiner = examiner;
     this.room = room;
     this.time = time;
-    this.status = status;
     this.examinerGlobalComment = examinerGlobalComment;
     this.finalizedAt = finalizedAt;
     this.resultsSentToPrescriberAt = resultsSentToPrescriberAt;
+    this.publishedAt = publishedAt;
     // includes
     this.certificationCandidates = certificationCandidates;
     // references
+    this.certificationCenterId = certificationCenterId;
+    this.assignedCertificationOfficerId = assignedCertificationOfficerId;
   }
 
   areResultsFlaggedAsSent() {
     return !_.isNil(this.resultsSentToPrescriberAt);
+  }
+
+  get status() {
+    if (this.publishedAt) {
+      return statuses.PROCESSED;
+    }
+    if (this.assignedCertificationOfficerId) {
+      return statuses.IN_PROCESS;
+    }
+    if (this.finalizedAt) {
+      return statuses.FINALIZED;
+    }
+    return statuses.CREATED;
   }
 }
 

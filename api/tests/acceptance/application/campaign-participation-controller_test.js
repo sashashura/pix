@@ -35,7 +35,7 @@ describe('Acceptance | API | Campaign Participations', () => {
       assessment = databaseBuilder.factory.buildAssessment({
         campaignParticipationId: campaignParticipation.id,
         userId: user.id,
-        type: Assessment.types.SMARTPLACEMENT,
+        type: Assessment.types.CAMPAIGN,
       });
 
       await databaseBuilder.commit();
@@ -77,6 +77,11 @@ describe('Acceptance | API | Campaign Participations', () => {
               related: `/api/campaign-participations/${campaignParticipation.id}/campaign-participation-result`
             }
           },
+          'campaign-analysis': {
+            links: {
+              related: `/api/campaign-participations/${campaignParticipation.id}/analyses`
+            }
+          }
         }
       };
 
@@ -101,7 +106,7 @@ describe('Acceptance | API | Campaign Participations', () => {
       assessment = databaseBuilder.factory.buildAssessment({
         campaignParticipationId: campaignParticipation.id,
         userId: user.id,
-        type: Assessment.types.SMARTPLACEMENT,
+        type: Assessment.types.CAMPAIGN,
       });
 
       await databaseBuilder.commit();
@@ -150,6 +155,11 @@ describe('Acceptance | API | Campaign Participations', () => {
               'campaign-participation-result': {
                 links: {
                   related: `/api/campaign-participations/${campaignParticipation.id}/campaign-participation-result`
+                }
+              },
+              'campaign-analysis': {
+                links: {
+                  related: `/api/campaign-participations/${campaignParticipation.id}/analyses`
                 }
               }
             }
@@ -251,7 +261,7 @@ describe('Acceptance | API | Campaign Participations', () => {
       assessment = databaseBuilder.factory.buildAssessment({
         campaignParticipationId: campaignParticipation.id,
         userId: user.id,
-        type: Assessment.types.SMARTPLACEMENT,
+        type: Assessment.types.CAMPAIGN,
       });
 
       // And starts answering questions
@@ -323,6 +333,11 @@ describe('Acceptance | API | Campaign Participations', () => {
                   id: participant.id.toString(),
                   type: 'users',
                 }
+              },
+              'campaign-analysis': {
+                links: {
+                  related: `/api/campaign-participations/${campaignParticipation.id}/analyses`
+                }
               }
             },
             type: 'campaign-participations'
@@ -339,31 +354,56 @@ describe('Acceptance | API | Campaign Participations', () => {
           },
           {
             attributes: {
-              'competence-results': [
-                {
-                  id: 1,
-                  index: '1.1',
-                  name: 'Liberticide',
-                  areaColor: JAFFA_COLOR,
-                  testedSkillsCount: 4,
-                  totalSkillsCount: 4,
-                  validatedSkillsCount: 3,
-                },
-                {
-                  id: 2,
-                  index: '1.1',
-                  name: 'Inéquités, inégalités',
-                  areaColor: JAFFA_COLOR,
-                  testedSkillsCount: 3,
-                  totalSkillsCount: 3,
-                  validatedSkillsCount: 2,
-                },
-              ],
+              'area-color': 'jaffa',
+              index: '1.1',
+              'mastery-percentage': 75,
+              name: 'Liberticide',
+              'tested-skills-count': 4,
+              'total-skills-count': 4,
+              'validated-skills-count': 3,
+            },
+            id: '1',
+            type: 'competenceResults',
+          },
+          {
+            attributes: {
+              'area-color': 'jaffa',
+              index: '1.1',
+              'mastery-percentage': 67,
+              name: 'Inéquités, inégalités',
+              'tested-skills-count': 3,
+              'total-skills-count': 3,
+              'validated-skills-count': 2,
+            },
+            id: '2',
+            type: 'competenceResults',
+          },
+          {
+            attributes: {
               id: campaignParticipation.id,
               'is-completed': true,
+              'mastery-percentage': 71,
               'tested-skills-count': 7,
               'total-skills-count': 7,
               'validated-skills-count': 5,
+              'progress': 1,
+            },
+            relationships: {
+              'campaign-participation-badges': {
+                data: []
+              },
+              'competence-results': {
+                data: [
+                  {
+                    id: '1',
+                    type: 'competenceResults',
+                  },
+                  {
+                    id: '2',
+                    type: 'competenceResults',
+                  }
+                ]
+              },
             },
             id: campaignParticipation.id.toString(),
             type: 'campaignParticipationResults',
@@ -484,7 +524,7 @@ describe('Acceptance | API | Campaign Participations', () => {
         assessment = databaseBuilder.factory.buildAssessment({
           campaignParticipationId: campaignParticipation.id,
           userId: user.id,
-          type: Assessment.types.SMARTPLACEMENT,
+          type: Assessment.types.CAMPAIGN,
         });
 
         _([
@@ -526,7 +566,7 @@ describe('Acceptance | API | Campaign Participations', () => {
         assessment = databaseBuilder.factory.buildAssessment({
           campaignParticipationId: campaignParticipation.id,
           userId: user.id,
-          type: Assessment.types.SMARTPLACEMENT,
+          type: Assessment.types.CAMPAIGN,
         });
 
         await databaseBuilder.commit();
@@ -602,7 +642,7 @@ describe('Acceptance | API | Campaign Participations', () => {
       expect(response.statusCode).to.equal(404);
     });
 
-    it('should return 421 error if the user has already participated to the campaign', async () => {
+    it('should return 412 error if the user has already participated to the campaign', async () => {
       // given
       options.payload.data.relationships.campaign.data.id = campaignId;
       databaseBuilder.factory.buildCampaignParticipation({ userId: user.id, campaignId });
@@ -612,7 +652,7 @@ describe('Acceptance | API | Campaign Participations', () => {
       const response = await server.inject(options);
 
       // then
-      expect(response.statusCode).to.equal(421);
+      expect(response.statusCode).to.equal(412);
     });
   });
 
@@ -701,14 +741,50 @@ describe('Acceptance | API | Campaign Participations', () => {
         };
       });
 
-      it('should return 421 HTTP status code', async () => {
+      it('should return 412 HTTP status code', async () => {
         // when
         const response = await server.inject(options);
 
         // then
-        expect(response.statusCode).to.equal(421);
+        expect(response.statusCode).to.equal(412);
       });
     });
   });
 
+  describe('GET /api/campaigns/{campaignId}/profiles-collection-participations/{campaignParticipationId}', function() {
+
+    beforeEach(() => {
+      airtableBuilder.mockList({ tableName: 'Competences' }).returns([]).activate();
+      airtableBuilder.mockList({ tableName: 'Domaines' }).returns([]).activate();
+    });
+
+    afterEach(() => {
+      airtableBuilder.cleanAll();
+      cache.flushAll();
+    });
+
+    it('should return the campaign profile as JSONAPI', async () => {
+      const userId = databaseBuilder.factory.buildUser().id;
+      const organization = databaseBuilder.factory.buildOrganization();
+
+      databaseBuilder.factory.buildMembership({ userId, organizationId: organization.id });
+
+      const campaign = databaseBuilder.factory.buildCampaign({ organizationId: organization.id });
+      const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({ participantExternalId: 'Die Hard', campaignId: campaign.id });
+
+      await databaseBuilder.commit();
+
+      const options = {
+        method: 'GET',
+        url: `/api/campaigns/${campaign.id}/profiles-collection-participations/${campaignParticipation.id}`,
+        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
+      };
+
+      const response = await server.inject(options);
+
+      expect(response.statusCode).to.equal(200);
+      const campaignProfile = response.result.data.attributes;
+      expect(campaignProfile['external-id']).to.equal('Die Hard');
+    });
+  });
 });

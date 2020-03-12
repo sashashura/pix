@@ -1,6 +1,6 @@
 const { expect, sinon } = require('../../../test-helper');
 const Hapi = require('@hapi/hapi');
-const securityController = require('../../../../lib/interfaces/controllers/security-controller');
+const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
 const userController = require('../../../../lib/application/users/user-controller');
 const userVerification = require('../../../../lib/application/preHandlers/user-existence-verification');
 
@@ -16,10 +16,10 @@ describe('Unit | Router | user-router', () => {
   describe('GET /api/users', () => {
 
     beforeEach(() => {
-      sinon.stub(securityController, 'checkUserIsAuthenticated').callsFake((request, h) => {
+      sinon.stub(securityPreHandlers, 'checkUserIsAuthenticated').callsFake((request, h) => {
         h.continue({ credentials: { accessToken: 'jwt.access.token' } });
       });
-      sinon.stub(securityController, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
+      sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
       sinon.stub(userController, 'findPaginatedFilteredUsers').returns('ok');
       startServer();
     });
@@ -99,7 +99,7 @@ describe('Unit | Router | user-router', () => {
   describe('GET /api/users/{id}/memberships', function() {
     beforeEach(() => {
       sinon.stub(userController, 'getMemberships').returns('ok');
-      sinon.stub(securityController, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
+      sinon.stub(securityPreHandlers, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
       startServer();
     });
 
@@ -193,7 +193,7 @@ describe('Unit | Router | user-router', () => {
   describe('GET /api/users/{id}/certification-profile', function() {
     beforeEach(() => {
       sinon.stub(userController, 'getCertificationProfile').returns('ok');
-      sinon.stub(securityController, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
+      sinon.stub(securityPreHandlers, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
       startServer();
     });
 
@@ -215,7 +215,7 @@ describe('Unit | Router | user-router', () => {
   describe('GET /api/users/{id}/pixscore', function() {
     beforeEach(() => {
       sinon.stub(userController, 'getPixScore').returns('ok');
-      sinon.stub(securityController, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
+      sinon.stub(securityPreHandlers, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
       startServer();
     });
 
@@ -237,7 +237,7 @@ describe('Unit | Router | user-router', () => {
   describe('GET /api/users/{id}/scorecards', function() {
     beforeEach(() => {
       sinon.stub(userController, 'getScorecards').returns('ok');
-      sinon.stub(securityController, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
+      sinon.stub(securityPreHandlers, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
       startServer();
     });
 
@@ -259,7 +259,7 @@ describe('Unit | Router | user-router', () => {
   describe('GET /api/users/{id}/user-orga-settings', function() {
     beforeEach(() => {
       sinon.stub(userController, 'getUserOrgaSettings').returns('ok');
-      sinon.stub(securityController, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
+      sinon.stub(securityPreHandlers, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
       startServer();
     });
 
@@ -275,6 +275,181 @@ describe('Unit | Router | user-router', () => {
         // then
         sinon.assert.calledOnce(userController.getUserOrgaSettings);
       });
+    });
+  });
+
+  describe('GET /api/users/{userId}/campaigns/{campaignId}/profile', function() {
+    beforeEach(() => {
+      sinon.stub(userController, 'getUserProfileSharedForCampaign').returns('ok');
+      sinon.stub(securityPreHandlers, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
+      startServer();
+    });
+
+    it('should return 200', async () => {
+      // when
+      const result = await server.inject({ method: 'GET', url: '/api/users/12/campaigns/34/profile' });
+
+      // then
+      expect(result.statusCode).to.equal(200);
+    });
+
+    it('should return 400 when userId is not a number', async () => {
+      // given
+      const userId = 'wrongId';
+
+      // when
+      const result = await server.inject({ method: 'GET', url: `/api/users/${userId}/campaigns/34/profile` });
+
+      // then
+      expect(result.statusCode).to.equal(400);
+    });
+
+    it('should return 400 when campaignId is not a number', async () => {
+      // given
+      const campaignId = 'wrongId';
+
+      // when
+      const result = await server.inject({ method: 'GET', url: `/api/users/12/campaigns/${campaignId}/profile` });
+
+      // then
+      expect(result.statusCode).to.equal(400);
+    });
+  });
+
+  describe('GET /api/users/{userId}/campaigns/{campaignId}/campaign-participations', function() {
+    beforeEach(() => {
+      sinon.stub(userController, 'getUserCampaignParticipationToCampaign').returns('ok');
+      sinon.stub(securityPreHandlers, 'checkRequestedUserIsAuthenticatedUser').callsFake((request, h) => h.response(true));
+      startServer();
+    });
+
+    it('should return 200', async () => {
+      // when
+      const result = await server.inject({ method: 'GET', url: '/api/users/12/campaigns/34/campaign-participations' });
+
+      // then
+      expect(result.statusCode).to.equal(200);
+    });
+
+    it('should return 400 when userId is not a number', async () => {
+      // given
+      const userId = 'wrongId';
+
+      // when
+      const result = await server.inject({ method: 'GET', url: `/api/users/${userId}/campaigns/34/campaign-participations` });
+
+      // then
+      expect(result.statusCode).to.equal(400);
+    });
+
+    it('should return 400 when campaignId is not a number', async () => {
+      // given
+      const campaignId = 'wrongId';
+
+      // when
+      const result = await server.inject({ method: 'GET', url: `/api/users/12/campaigns/${campaignId}/campaign-participations` });
+
+      // then
+      expect(result.statusCode).to.equal(400);
+    });
+  });
+
+  describe('PATCH /api/admin/users/{id}', function() {
+
+    const userId = '12344';
+    const request = (payloadAttributes) => ({
+      method: 'PATCH',
+      url: `/api/admin/users/${userId}`,
+      payload: { data: { attributes: payloadAttributes } },
+    });
+
+    beforeEach(() => {
+      sinon.stub(userController, 'updateUserDetailsForAdministration').returns('ok');
+      sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
+      startServer();
+    });
+
+    it('should verify user identity and return sucess update', async () => {
+      // given
+      const payloadAttributes = { 'first-name': 'firstname', 'last-name': 'lastname', email: 'partial@update.com' };
+
+      // when
+      const result = await server.inject(request(payloadAttributes));
+
+      // then
+      expect(result.statusCode).to.equal(200);
+      sinon.assert.calledOnce(securityPreHandlers.checkUserHasRolePixMaster);
+    });
+
+    describe('Payload and path param schema validation', () => {
+
+      it('should return bad request when param id is not numeric', async () => {
+        // given
+        const requestWithoutPayload = {
+          method: 'PATCH',
+          url: '/api/admin/users/not_number',
+          payload: { data: { attributes: { email : 'partial@update.net' } } },
+        };
+
+        // when
+        const result = await server.inject(requestWithoutPayload);
+
+        // then
+        expect(result.statusCode).to.equal(400);
+      });
+
+      it('should return bad request when payload is not found', async () => {
+        // given
+        const requestWithoutPayload = {
+          method: 'PATCH',
+          url: '/api/admin/users/NOT_NUMBER',
+        };
+
+        // when
+        const result = await server.inject(requestWithoutPayload);
+
+        // then
+        expect(result.statusCode).to.equal(400);
+      });
+
+    });
+  });
+
+  describe('POST /api/admin/users/{id}/anonymize', () => {
+
+    beforeEach(() => {
+      sinon.stub(userController, 'anonymizeUser').callsFake((request, h) => h.response({}).code(204));
+      sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
+      startServer();
+    });
+
+    it('should exist', async () => {
+      // given
+      const options = {
+        method: 'POST',
+        url: '/api/admin/users/1/anonymize',
+      };
+
+      // when
+      const response = await server.inject(options);
+
+      // then
+      expect(response.statusCode).to.equal(204);
+    });
+
+    it('should return 400 when id is not a number', async () => {
+      // given
+      const options = {
+        method: 'POST',
+        url: '/api/admin/users/wrongId/anonymize',
+      };
+
+      // when
+      const response = await server.inject(options);
+
+      // then
+      expect(response.statusCode).to.equal(400);
+      expect(JSON.parse(response.payload).errors[0].detail).to.equal('"id" must be a number');
     });
   });
 });

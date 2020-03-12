@@ -10,16 +10,16 @@
 
   &__title {
     text-align: center;
-    margin-bottom: 42px;
+    margin-bottom: 32px;
   }
 
   &__instruction {
-    color: $nero;
+    color: $grey-100;
     font-family: $font-open-sans;
-    font-size: 1.95rem;
+    font-size: 1.219rem;
     text-align: center;
     font-weight: $font-light;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
   }
 
   &__form-field {
@@ -28,7 +28,7 @@
 
     & input {
       box-sizing: content-box;
-      border: solid 2px $alto-grey;
+      border: solid 2px $grey-20;
       border-radius: 3px;
       outline: none;
       height: 50px;
@@ -36,13 +36,13 @@
       text-transform: uppercase;
       width: 13.6ch;
       background: repeating-linear-gradient(90deg,
-        $silver-grey 0,
-        $silver-grey 1ch,
+        $grey-22 0,
+        $grey-22 1ch,
         transparent 0,
         transparent 1.5ch) 0 96%/98% 2px no-repeat;
       background-origin: content-box;
-      color: $tundora-grey;
-      font-size: 3rem;
+      color: $grey-70;
+      font-size: 1.875rem;
       font-family: $font-roboto-mono;
       letter-spacing: .5ch;
 
@@ -52,8 +52,8 @@
         width: 15.6ch;
         letter-spacing: .4ch;
         background: repeating-linear-gradient(90deg,
-          $silver-grey 0,
-          $silver-grey 1.33ch,
+          $grey-22 0,
+          $grey-22 1.33ch,
           transparent 0,
           transparent 1.733ch) 0 96%/98% 2px no-repeat;
         background-origin: content-box;
@@ -71,7 +71,7 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    height: 130px;
+    height: 118px;
     margin-bottom: 30px;
   }
 
@@ -83,7 +83,7 @@
 
   &__error {
     color: $pure-orange;
-    font-size: 1.4rem;
+    font-size: 0.875rem;
     padding: 16px 10px;
     text-align: center;
   }

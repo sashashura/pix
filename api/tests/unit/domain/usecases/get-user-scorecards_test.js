@@ -72,7 +72,7 @@ describe('Unit | UseCase | get-user-scorecard', () => {
         });
 
         const assessmentStartedOfCompetence2 = domainBuilder.buildAssessment({
-          type: 'SMART_PLACEMENT',
+          type: 'CAMPAIGN',
           state: 'started'
         });
         const competenceEvaluationOfCompetence1 = domainBuilder.buildCompetenceEvaluation({
@@ -132,24 +132,21 @@ describe('Unit | UseCase | get-user-scorecard', () => {
           userId,
           knowledgeElements: knowledgeElementGroupedByCompetenceId[1],
           competence: competenceList[0],
-          competenceEvaluation: competenceEvaluationOfCompetence1,
-          blockReachablePixAndLevel: true,
+          competenceEvaluation: competenceEvaluationOfCompetence1
         }).returns(expectedUserScorecard[0]);
 
         Scorecard.buildFrom.withArgs({
           userId,
           knowledgeElements: knowledgeElementGroupedByCompetenceId[2],
           competence: competenceList[1],
-          competenceEvaluation: undefined,
-          blockReachablePixAndLevel: true,
+          competenceEvaluation: undefined
         }).returns(expectedUserScorecard[1]);
 
         Scorecard.buildFrom.withArgs({
           userId,
           knowledgeElements: undefined,
           competence: competenceList[2],
-          competenceEvaluation: undefined,
-          blockReachablePixAndLevel: true,
+          competenceEvaluation: undefined
         }).returns(expectedUserScorecard[2]);
 
         // when

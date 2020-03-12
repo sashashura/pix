@@ -1,11 +1,9 @@
 const faker = require('faker');
 const _ = require('lodash');
 const Assessment = require('../../../../lib/domain/models/Assessment');
-const SmartPlacementAssessment = require('../../../../lib/domain/models/SmartPlacementAssessment');
 
 const buildAnswer = require('./build-answer');
 const buildCourse = require('./build-course');
-const buildAssessmentResult = require('./build-assessment-result');
 const buildKnowledgeElement = require('./build-knowledge-element');
 const buildTargetProfile = require('./build-target-profile');
 const buildCampaignParticipation = require('./build-campaign-participation');
@@ -22,14 +20,9 @@ function buildAssessment({
   isImproving = false,
   course = buildCourse({ id: 'courseId' }),
   answers = [buildAnswer()],
-  assessmentResults = [buildAssessmentResult()],
   campaignParticipation = null,
   competenceId = null,
 } = {}) {
-
-  if (type === Assessment.types.CERTIFICATION) {
-    certificationCourseId = parseInt(courseId);
-  }
   return new Assessment({
     // attributes
     id,
@@ -44,13 +37,12 @@ function buildAssessment({
     competenceId,
     // relationships
     answers,
-    assessmentResults,
     course,
     campaignParticipation,
   });
 }
 
-buildAssessment.ofTypeSmartPlacement = function({
+buildAssessment.ofTypeCampaign = function({
   id = faker.random.number(),
 
   courseId = 'courseId',
@@ -61,10 +53,8 @@ buildAssessment.ofTypeSmartPlacement = function({
   isImproving = false,
 
   answers = [buildAnswer()],
-  assessmentResults = [buildAssessmentResult()],
   course = buildCourse({ id: 'courseId' }),
   targetProfile = buildTargetProfile(),
-  knowledgeElements = [buildKnowledgeElement()],
   campaignParticipation = null,
   campaignParticipationId = null,
   title = 'campaignTitle',
@@ -80,7 +70,7 @@ buildAssessment.ofTypeSmartPlacement = function({
     campaignParticipationId = campaignParticipation.id;
   }
 
-  return new SmartPlacementAssessment({
+  return new Assessment({
     // attributes
     id,
     courseId,
@@ -88,17 +78,15 @@ buildAssessment.ofTypeSmartPlacement = function({
     userId,
     competenceId,
     title,
-    type: Assessment.types.SMARTPLACEMENT,
+    type: Assessment.types.CAMPAIGN,
     state,
     isImproving,
     campaignParticipationId,
 
     // relationships
     answers,
-    assessmentResults,
     course,
     targetProfile,
-    knowledgeElements,
     campaignParticipation
   });
 };
@@ -115,7 +103,6 @@ buildAssessment.ofTypeCompetenceEvaluation = function({
   campaignParticipationId = null,
 
   answers = [buildAnswer()],
-  assessmentResults = [buildAssessmentResult()],
   course = buildCourse({ id: 'courseId' }),
   targetProfile = buildTargetProfile(),
   knowledgeElements = [buildKnowledgeElement()],
@@ -139,7 +126,6 @@ buildAssessment.ofTypeCompetenceEvaluation = function({
 
     // relationships
     answers,
-    assessmentResults,
     course,
     targetProfile,
     knowledgeElements,

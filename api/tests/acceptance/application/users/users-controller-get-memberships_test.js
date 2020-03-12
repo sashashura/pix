@@ -74,8 +74,7 @@ describe('Acceptance | Controller | users-controller-get-memberships', () => {
                 'organization-role': organizationRole,
               },
               relationships: {
-                'organization': { data: { type: 'organizations', id: organization.id.toString() }, },
-                'user': { data: null, },
+                'organization': { data: { type: 'organizations', id: organization.id.toString() }, }
               },
             },
           ],
@@ -88,6 +87,7 @@ describe('Acceptance | Controller | users-controller-get-memberships', () => {
                 type: organization.type,
                 'external-id': organization.externalId,
                 'is-managing-students': organization.isManagingStudents,
+                'can-collect-profiles': organization.canCollectProfiles,
               },
               relationships: {
                 campaigns: {

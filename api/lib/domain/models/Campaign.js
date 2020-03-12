@@ -1,3 +1,8 @@
+const types = {
+  ASSESSMENT: 'ASSESSMENT',
+  PROFILES_COLLECTION: 'PROFILES_COLLECTION',
+};
+
 class Campaign {
 
   constructor({
@@ -13,10 +18,12 @@ class Campaign {
     customLandingPageText,
     isRestricted = false,
     archivedAt,
+    type,
     // includes
     targetProfile,
     campaignReport,
     campaignCollectiveResult,
+    campaignAnalysis,
     creator,
     // references
     organizationId,
@@ -35,16 +42,28 @@ class Campaign {
     this.customLandingPageText = customLandingPageText;
     this.isRestricted = isRestricted;
     this.archivedAt = archivedAt;
+    this.type = type;
     // includes
     this.targetProfile = targetProfile;
     this.campaignReport = campaignReport;
     this.campaignCollectiveResult = campaignCollectiveResult;
+    this.campaignAnalysis = campaignAnalysis;
     this.creator = creator;
     // references
     this.organizationId = organizationId;
     this.targetProfileId = targetProfileId;
     this.creatorId = creatorId;
   }
+
+  isAssessment() {
+    return this.type === types.ASSESSMENT;
+  }
+
+  isProfilesCollection() {
+    return this.type === types.PROFILES_COLLECTION;
+  }
 }
+
+Campaign.types = types;
 
 module.exports = Campaign;

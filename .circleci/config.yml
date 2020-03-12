@@ -29,8 +29,9 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
                 - gh-pages
+                - master
+                - prod
                 - /release-.*/
 
       - api_build_and_test:
@@ -54,13 +55,14 @@ workflows:
             - checkout
 
       - e2e_test:
+          context: Pix
           requires:
             - checkout
 
 jobs:
   checkout:
     docker:
-      - image: circleci/node:12.14.0
+      - image: circleci/node:12.18.0
     working_directory: ~/pix
     steps:
       - checkout
@@ -77,8 +79,8 @@ jobs:
 
   api_build_and_test:
     docker:
-      - image: circleci/node:12.14.0
-      - image: postgres:11.7-alpine
+      - image: circleci/node:12.18.0
+      - image: postgres:12.2-alpine
         environment:
           POSTGRES_USER: circleci
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -104,7 +106,7 @@ jobs:
 
   mon_pix_build_and_test:
     docker:
-      - image: circleci/node:12.14.0-browsers
+      - image: circleci/node:12.18.0-browsers
         environment:
           # See https://git.io/vdao3 for details.
           JOBS: 2
@@ -127,9 +129,8 @@ jobs:
 
   orga_build_and_test:
     docker:
-      - image: circleci/node:12.14.0-browsers
+      - image: circleci/node:12.18.0-browsers
         environment:
-          # See https://git.io/vdao3 for details.
           JOBS: 2
     working_directory: ~/pix/orga
     steps:
@@ -148,9 +149,8 @@ jobs:
 
   certif_build_and_test:
     docker:
-      - image: circleci/node:12.14.0-browsers
+      - image: circleci/node:12.18.0-browsers
         environment:
-          # See https://git.io/vdao3 for details.
           JOBS: 2
     working_directory: ~/pix/certif
     steps:
@@ -169,9 +169,8 @@ jobs:
 
   admin_build_and_test:
     docker:
-      - image: circleci/node:12.14.0-browsers
+      - image: circleci/node:12.18.0-browsers
         environment:
-          # See https://git.io/vdao3 for details.
           JOBS: 2
     working_directory: ~/pix/admin
     steps:
@@ -190,11 +189,12 @@ jobs:
 
   e2e_test:
     docker:
-      - image: cypress/browsers:node12.14.0-chrome79-ff71
-      - image: postgres:11.7-alpine
+      - image: cypress/browsers:node12.18.0-chrome83-ff77
+      - image: postgres:12.2-alpine
         environment:
           POSTGRES_USER: circleci
           POSTGRES_HOST_AUTH_METHOD: trust
+    parallelism: 5
     working_directory: ~/pix/high-level-tests/e2e
     steps:
       - attach_workspace:
@@ -241,9 +241,20 @@ jobs:
             - v7-orga-npm-{{ checksum "~/pix/orga/cachekey" }}
       - run:
           environment:
-            # See https://git.io/vdao3 for details.
             JOBS: 2
           working_directory: ~/pix/orga
+          command: npm ci
+
+      - run:
+          working_directory: ~/pix/certif
+          command: cat package*.json > cachekey
+      - restore_cache:
+          keys:
+            - v7-certif-npm-{{ checksum "~/pix/certif/cachekey" }}
+      - run:
+          environment:
+            JOBS: 2
+          working_directory: ~/pix/certif
           command: npm ci
 
       - run:
@@ -263,8 +274,14 @@ jobs:
       - run:
           working_directory: ~/pix/orga
           environment:
-            # See https://git.io/vdao3 for details.
             JOBS: 2
+          background: true
+          command: npm start
+
+      - run:
+          working_directory: ~/pix/certif
+          environment:
+            JOBS: 1
           background: true
           command: npm start
 
@@ -275,4 +292,4 @@ jobs:
             wget --retry-connrefused -T 60 -qO- http://localhost:4200
             wget --retry-connrefused -T 60 -qO- http://localhost:4201
             wget --retry-connrefused -T 60 -qO- http://localhost:3000/api
-            npm run cy:run
+            npm run cy:run:ci

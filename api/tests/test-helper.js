@@ -74,20 +74,6 @@ async function insertUserWithRolePixMaster() {
   return user;
 }
 
-async function insertUserWithStandardRole() {
-  const user = databaseBuilder.factory.buildUser({
-    id: 4444,
-    firstName: 'Classic',
-    lastName: 'Papa',
-    email: 'classic.papa@example.net',
-    password: 'abcd1234',
-  });
-
-  await databaseBuilder.commit();
-
-  return user;
-}
-
 // Hapi
 const hFake = {
   response(source) {
@@ -161,6 +147,25 @@ function compareDatabaseObject(evaluatedObject, expectedObject) {
 
 }
 
+chai.use(function(chai) {
+  const Assertion = chai.Assertion;
+
+  Assertion.addMethod('exactlyContain', function(expectedElements) {
+    const errorMessage = `expect [${this._obj}] to exactly contain [${expectedElements}]`;
+    new Assertion(this._obj, errorMessage).to.have.members(expectedElements);
+  });
+});
+
+chai.use(function(chai) {
+  const Assertion = chai.Assertion;
+
+  Assertion.addMethod('exactlyContainInOrder', function(expectedElements) {
+    const errorMessage = `expect [${this._obj}] to exactly contain in order [${expectedElements}]`;
+
+    new Assertion(this._obj, errorMessage).to.deep.equal(expectedElements);
+  });
+});
+
 module.exports = {
   EMPTY_BLANK_AND_NULL,
   airtableBuilder,
@@ -172,7 +177,6 @@ module.exports = {
   hFake,
   HttpTestServer: require('./tooling/server/http-test-server'),
   insertUserWithRolePixMaster,
-  insertUserWithStandardRole,
   knex,
   nock,
   sinon,

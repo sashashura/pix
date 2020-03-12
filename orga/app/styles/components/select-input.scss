@@ -1,0 +1,22 @@
+.select-input {
+  &__select {
+    padding-left: 10px;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+  }
+
+  &__wrapper {
+    position:relative
+  }
+
+  &__chevron {
+    font-size: 11px;
+    color: $grey-30;
+    right:8px;
+    top:2px;
+    padding:0 0 2px;
+    position:absolute;
+    pointer-events:none;
+  }
+}

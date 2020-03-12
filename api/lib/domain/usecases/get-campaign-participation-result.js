@@ -1,47 +1,25 @@
-const _ = require('lodash');
-const CampaignParticipationResult = require('../../domain/models/CampaignParticipationResult');
 const { UserNotAuthorizedToAccessEntity } = require('../errors');
 
-module.exports = async function getCampaignParticipationResult(
-  {
-    userId,
-    campaignParticipationId,
-    assessmentRepository,
-    badgeRepository,
-    campaignParticipationRepository,
-    campaignRepository,
-    competenceRepository,
-    knowledgeElementRepository,
-    targetProfileRepository,
-    badgeCriteriaService,
-  }
-) {
+module.exports = async function getCampaignParticipationResult({
+  userId,
+  campaignParticipationId,
+  badgeRepository,
+  badgeAcquisitionRepository,
+  campaignParticipationRepository,
+  campaignParticipationResultRepository,
+  campaignRepository,
+  targetProfileRepository,
+}) {
   const campaignParticipation = await campaignParticipationRepository.get(campaignParticipationId);
   await _checkIfUserHasAccessToThisCampaignParticipation(userId, campaignParticipation, campaignRepository);
 
-  const [ targetProfile, competences, assessment, knowledgeElements ] = await Promise.all([
-    targetProfileRepository.getByCampaignId(campaignParticipation.campaignId),
-    competenceRepository.list(),
-    assessmentRepository.get(campaignParticipation.assessmentId),
-    knowledgeElementRepository.findUniqByUserId({ userId: campaignParticipation.userId, limitDate: campaignParticipation.sharedAt }),
-  ]);
+  const targetProfile = await targetProfileRepository.getByCampaignId(campaignParticipation.campaignId);
+  const campaignBadges = await badgeRepository.findByTargetProfileId(targetProfile.id);
+  const campaignBadgeIds = campaignBadges.map((badge) => badge.id);
 
-  const badge = await badgeRepository.findOneByTargetProfileId(targetProfile.id);
+  const acquiredBadgeIds = await badgeAcquisitionRepository.getAcquiredBadgeIds({ userId, badgeIds: campaignBadgeIds });
 
-  const campaignParticipationResult = CampaignParticipationResult.buildFrom({
-    campaignParticipationId,
-    assessment,
-    competences,
-    targetProfile,
-    knowledgeElements,
-    badge
-  });
-
-  if (_hasBadgeInformation(badge)) {
-    campaignParticipationResult.areBadgeCriteriaFulfilled = badgeCriteriaService.areBadgeCriteriaFulfilled({ campaignParticipationResult });
-  }
-
-  return campaignParticipationResult;
+  return campaignParticipationResultRepository.getByParticipationId(campaignParticipationId, campaignBadges, acquiredBadgeIds);
 };
 
 async function _checkIfUserHasAccessToThisCampaignParticipation(userId, campaignParticipation, campaignRepository) {
@@ -54,8 +32,4 @@ async function _checkIfUserHasAccessToThisCampaignParticipation(userId, campaign
   if (!campaignParticipationBelongsToUser && !userIsMemberOfCampaignOrganization) {
     throw new UserNotAuthorizedToAccessEntity('User does not have access to this campaign participation');
   }
-}
-
-function _hasBadgeInformation(badge) {
-  return !_.isEmpty(badge);
 }

@@ -1,81 +1,47 @@
 .user-certifications-detail-result {
-  background-color: $white;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
   justify-content: flex-start;
-  max-width:370px;
+  max-width: 370px;
+  height: 100%;
 
-  color: $charcoal-grey;
-  font-size: 1.8rem;
-  line-height: 2.6rem;
+  color: $grey-80;
+  font-size: 1.125rem;
+  line-height: 1.625rem;
   margin-bottom: 40px;
 
-  @include device-is('desktop') {
-    margin-right: 20px;
+  h2 {
+    color: $grey-60;
+    font-family: $font-open-sans;
+    font-size: 1.125rem;
+    margin-bottom: 8px;
+    font-weight: normal;
   }
-}
 
-.user-certifications-detail-result__pix-score{
-  margin-bottom: 1.25rem;
-  width: 27rem;
-}
-
-.user-certifications-detail-result__badge-pix-score{
-  width: 13rem;
-  height: 13rem;
-  padding-top: 4.7rem;
-  float: left;
-
-  background: url('/images/pix-pastille-certif.svg') no-repeat;
-  background-size: cover;
-
-  text-align: center;
-  display: table;
-
-  span {
-    height: 1.75rem;
-    width: 2.81rem;
-    color: $tundora-grey;
-    font-size: 3rem;
-    font-weight: bold;
-    line-height: 2.06rem;
+  &__badge-clea {
+    margin: 24px;
     text-align: center;
-
   }
-}
 
-.user-certifications-detail-result__pix-certified {
-  color: $tundora-grey;
-  font-size: 2.5rem;
-  font-weight: bold;
-  line-height: 1.75rem;
-  margin-top: 4.8rem;
-  text-align: right;
-}
+  &__comment-jury {
+    margin: 24px 16px;
+    font-family: $font-open-sans;
+    font-size: 1rem;
+    font-weight: $font-medium;
+    line-height: 1.625rem;
+  }
 
-.user-certifications-detail-result__separation{
-  clear: both;
-  position: absolute;
-  height: 14rem;
-  margin-top: 0.8rem;
-  width : 0.25rem;
-  background: black;
-}
+  @include device-is('mobile') {
+    min-width: 100%;
+  }
 
-.user-certifications-detail-result__text-pix-certified {
-  padding-left: 1.25rem;
+  @include device-is('tablet') {
+    min-width: 100%;
+  }
 
-  border-left-style: solid;
-  border-left-color: $charcoal-grey;
-  border-left-width: 3px;
-}
-
-.user-certifications-detail-result__title-comment-jury {
-  color: #7D808A;
-  font-family: $font-open-sans;
-  font-size: 1.6rem;
-  font-weight: 500;
-  line-height: 2.6rem;
+  @include device-is('desktop') {
+    min-width: 30%;
+    margin-left: 20px;
+  }
 }

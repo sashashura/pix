@@ -1,105 +1,103 @@
-const Assessment = require('../../domain/models/Assessment');
+const bluebird = require('bluebird');
 const AssessmentResultBookshelf = require('../data/assessment-result');
 const CertificationCourseBookshelf = require('../../../lib/infrastructure/data/certification-course');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
 const Bookshelf = require('../bookshelf');
 const Certification = require('../../../lib/domain/models/Certification');
-const { NotFoundError } = require('../../../lib/domain/errors');
+const { NotFoundError, CertificationCourseNotPublishableError } = require('../../../lib/domain/errors');
 
-function _certificationToDomain(certificationCourseBookshelf) {
-  const assessmentResultsBookshelf = certificationCourseBookshelf
-    .related('assessments').models[0]
-    .related('assessmentResults');
-  const assessmentResults = bookshelfToDomainConverter.buildDomainObjects(AssessmentResultBookshelf, assessmentResultsBookshelf);
+async function getAssessmentResultsStatusesBySessionId(id) {
+  const collection = await CertificationCourseBookshelf
+    .query((qb) => {
+      qb.innerJoin('assessments','assessments.certificationCourseId','certification-courses.id');
+      qb.innerJoin(
+        Bookshelf.knex.raw(
+          `"assessment-results" ar ON ar."assessmentId" = "assessments".id
+                    and ar."createdAt" = (select max(sar."createdAt") from "assessment-results" sar where sar."assessmentId" = "assessments".id)`
+        )
+      );
+      qb.where({ 'certification-courses.sessionId': id });
+    })
+    .fetchAll({ columns: ['status'] });
 
-  return _createCertificationDomainModel({ certificationCourseBookshelf, assessmentResults });
+  return collection.map((obj) => obj.attributes.status);
 }
 
-function _createCertificationDomainModel({ certificationCourseBookshelf, assessmentResults }) {
-  return new Certification({
-    id: certificationCourseBookshelf.get('id'),
-    assessmentState: certificationCourseBookshelf.related('assessments').models[0].get('state'),
-    assessmentResults: assessmentResults,
-    certificationCenter: certificationCourseBookshelf.related('session').get('certificationCenter'),
-    birthdate: certificationCourseBookshelf.get('birthdate'),
-    birthplace: certificationCourseBookshelf.get('birthplace'),
-    firstName: certificationCourseBookshelf.get('firstName'),
-    lastName: certificationCourseBookshelf.get('lastName'),
-    date: certificationCourseBookshelf.get('completedAt'),
-    isPublished: Boolean(certificationCourseBookshelf.get('isPublished')),
-    userId: certificationCourseBookshelf.get('userId'),
-  });
+async function _getLatestAssessmentResult(certificationCourseId) {
+  const latestAssessmentResultBookshelf = await AssessmentResultBookshelf
+    .query((qb) => {
+      qb.join('assessments', 'assessments.id', 'assessment-results.assessmentId');
+      qb.where('assessments.certificationCourseId', '=', certificationCourseId);
+    })
+    .orderBy('createdAt', 'desc')
+    .fetch({ require: true });
+
+  return bookshelfToDomainConverter.buildDomainObject(AssessmentResultBookshelf, latestAssessmentResultBookshelf);
+}
+
+function _getBaseCertificationQuery() {
+  return Bookshelf.knex
+    .select({
+      id: 'certification-courses.id',
+      firstName: 'certification-courses.firstName',
+      lastName: 'certification-courses.lastName',
+      birthdate: 'certification-courses.birthdate',
+      birthplace: 'certification-courses.birthplace',
+      isPublished: 'certification-courses.isPublished',
+      userId: 'certification-courses.userId',
+      date: 'certification-courses.createdAt',
+      deliveredAt: 'sessions.publishedAt',
+      certificationCenter: 'sessions.certificationCenter',
+    })
+    .from('certification-courses')
+    .join('assessments', 'assessments.certificationCourseId', 'certification-courses.id')
+    .join('assessment-results', 'assessment-results.assessmentId', 'assessments.id')
+    .join('sessions', 'sessions.id', 'certification-courses.sessionId');
 }
 
 module.exports = {
 
-  getByCertificationCourseId({ id }) {
-    return CertificationCourseBookshelf
-      .query((qb) => {
-        qb.innerJoin(
-          Bookshelf.knex.raw('"assessments" ON "assessments"."courseId" = CAST("certification-courses"."id" as varchar)')
-        );
-        qb.where('certification-courses.id', id);
-        qb.where('assessments.state', Assessment.states.COMPLETED);
-      })
-      .fetch({
-        require: true,
-        withRelated: [
-          'session',
-          { 'assessments': (qb) => qb.where('assessments.state', Assessment.states.COMPLETED) },
-          'assessments.assessmentResults',
-        ],
-      })
-      .then(_certificationToDomain)
-      .catch((err) => {
-        if (err instanceof CertificationCourseBookshelf.NotFoundError) {
-          throw new NotFoundError(`Not found certification for ID ${id}`);
-        } else {
-          throw err;
-        }
-      });
+  async getByCertificationCourseId({ id }) {
+    const certification = await _getBaseCertificationQuery()
+      .where('certification-courses.id', '=', id)
+      .first();
+    if (!certification) {
+      throw new NotFoundError(`Not found certification for ID ${id}`);
+    }
+    const latestAssessmentResult = await _getLatestAssessmentResult(id);
+
+    return new Certification({
+      ...certification,
+      pixScore: latestAssessmentResult && latestAssessmentResult.pixScore,
+      status: latestAssessmentResult && latestAssessmentResult.status,
+      commentForCandidate: latestAssessmentResult && latestAssessmentResult.commentForCandidate,
+    });
   },
 
-  findByUserId(userId) {
-    return CertificationCourseBookshelf
-      .query((qb) => {
-        qb.innerJoin(
-          Bookshelf.knex.raw('"assessments" ON "assessments"."courseId" = CAST("certification-courses"."id" as varchar)')
-        );
-        qb.where('certification-courses.userId', userId);
-        qb.where('assessments.state', Assessment.states.COMPLETED);
-        qb.orderBy('id', 'desc');
-      })
-      .fetchAll({
-        required: false,
-        withRelated: [
-          'session',
-          { 'assessments': (qb) => qb.where('assessments.state', Assessment.states.COMPLETED) },
-          'assessments.assessmentResults',
-        ],
-      })
-      .then((certificationCoursesBookshelf) => {
-        return certificationCoursesBookshelf.map(_certificationToDomain);
+  async findByUserId(userId) {
+    const results = await _getBaseCertificationQuery()
+      .where('certification-courses.userId', '=', userId)
+      .orderBy('id', 'desc');
+
+    return bluebird.mapSeries(results, async (result) => {
+      const latestAssessmentResult = await _getLatestAssessmentResult(result.id);
+
+      return new Certification({
+        ...result,
+        pixScore: latestAssessmentResult && latestAssessmentResult.pixScore,
+        status: latestAssessmentResult && latestAssessmentResult.status,
+        commentForCandidate: latestAssessmentResult && latestAssessmentResult.commentForCandidate,
       });
+    });
   },
 
-  updatePublicationStatus({ id, isPublished }) {
-    return CertificationCourseBookshelf
-      .where({ id })
-      .save({ isPublished }, {
-        patch: true,
-        method: 'update',
-        require: true,
-      })
-      .catch((err) => {
-        if (err instanceof CertificationCourseBookshelf.NoRowsUpdatedError) {
-          throw new NotFoundError(`Not found certification for ID ${id}`);
-        } else {
-          throw err;
-        }
-      })
-      .then(() => {
-        return module.exports.getByCertificationCourseId({ id });
-      });
-  },
+  async updatePublicationStatusesBySessionId(sessionId, toPublish) {
+    const statuses = await getAssessmentResultsStatusesBySessionId(sessionId);
+    if (statuses.includes('error') || statuses.includes('started')) {
+      throw new CertificationCourseNotPublishableError();
+    }
+    await CertificationCourseBookshelf
+      .where({ sessionId })
+      .save({ isPublished: toPublish }, { method: 'update' });
+  }
 };

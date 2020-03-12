@@ -5,6 +5,10 @@ module.exports = {
   serialize(userOrgaSettings) {
     return new Serializer('user-orga-settings', {
       transform(record) {
+        if (!record.user) {
+          delete record.user;
+        }
+
         record.organization = record.currentOrganization;
 
         // we add a 'campaigns' attr to the organization so that the serializer
@@ -22,7 +26,7 @@ module.exports = {
       organization: {
         ref: 'id',
         included: true,
-        attributes: ['code', 'name', 'type', 'isManagingStudents', 'externalId', 'campaigns', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
+        attributes: ['code', 'name', 'type', 'isManagingStudents', 'canCollectProfiles', 'externalId', 'campaigns', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
         campaigns: {
           ref: 'id',
           ignoreRelationshipData: true,

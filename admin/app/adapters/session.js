@@ -1,22 +1,34 @@
 import ApplicationAdapter from './application';
 
-export default ApplicationAdapter.extend({
+export default class SessionAdapter extends ApplicationAdapter {
 
-  urlForUpdateRecord(id, modelName, { adapterOptions }) {
-    const url = this._super(...arguments);
-    if (adapterOptions && adapterOptions.flagResultsAsSentToPrescriber)  {
-      delete adapterOptions.flagResultsAsSentToPrescriber;
-      return url + '/results-sent-to-prescriber';
-    }
+  urlForQuery() {
+    return `${this.host}/${this.namespace}/jury/sessions`;
+  }
 
-    return url;
-  },
+  urlForFindRecord(id) {
+    return `${this.host}/${this.namespace}/jury/sessions/${id}`;
+  }
+
+  urlForUpdateRecord(id) {
+    return `${this.host}/${this.namespace}/jury/sessions/${id}`;
+  }
 
   updateRecord(store, type, snapshot) {
     if (snapshot.adapterOptions.flagResultsAsSentToPrescriber) {
-      return this.ajax(this.urlForUpdateRecord(snapshot.id, type.modelName, snapshot), 'PUT');
+      const url = this.urlForUpdateRecord(snapshot.id, type.modelName, snapshot) + '/results-sent-to-prescriber';
+      return this.ajax(url, 'PUT');
+    }
+    if (snapshot.adapterOptions.updatePublishedCertifications) {
+      const data =  { data: { attributes: { toPublish: snapshot.adapterOptions.toPublish } } };
+      const url = this.urlForUpdateRecord(snapshot.id, type.modelName, snapshot) + '/publication';
+      return this.ajax(url, 'PATCH', { data });
+    }
+    if (snapshot.adapterOptions.certificationOfficerAssignment) {
+      const url = this.urlForUpdateRecord(snapshot.id, type.modelName, snapshot) + '/certification-officer-assignment';
+      return this.ajax(url, 'PATCH');
     }
 
-    return this._super(...arguments);
+    return super.updateRecord(...arguments);
   }
-});
+}

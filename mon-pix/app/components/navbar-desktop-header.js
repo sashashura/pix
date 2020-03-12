@@ -1,23 +1,22 @@
-import { computed } from '@ember/object';
-import Component from '@ember/component';
-import { alias } from '@ember/object/computed';
+/* eslint ember/no-computed-properties-in-native-classes: 0 */
+
+import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
+import { alias } from '@ember/object/computed';
 
-export default Component.extend({
-  router: service(),
-  session: service(),
+export default class NavbarDesktopHeader extends Component {
+  @service router;
+  @service session;
 
-  classNames: ['navbar-desktop-header'],
-  _canDisplayMenu: false,
-  _menuItems: [
+  _menuItems = [
     { name: 'Se connecter', link: 'login', class: 'navbar-menu-signin-link' },
     { name: 'S’inscrire', link: 'inscription', class: 'navbar-menu-signup-link' }
-  ],
+  ];
 
-  isUserLogged: alias('session.isAuthenticated'),
+  @alias('session.isAuthenticated') isUserLogged;
 
-  menu: computed('isUserLogged', function() {
+  get menu() {
     const menuItems = this._menuItems;
     return this.isUserLogged ? menuItems.filterBy('permanent', true) : menuItems;
-  })
-});
+  }
+}

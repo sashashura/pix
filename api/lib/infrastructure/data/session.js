@@ -1,16 +1,18 @@
 const Bookshelf = require('../bookshelf');
-require('./certification-course');
 require('./certification-candidate');
 
-module.exports = Bookshelf.model('Session', {
+const modelName = 'Session';
+
+module.exports = Bookshelf.model(modelName, {
+
   tableName: 'sessions',
   hasTimestamps: ['createdAt', null],
-
-  certificationCourses() {
-    return this.hasMany('CertificationCourse', 'sessionId');
-  },
+  requireFetch: false,
 
   certificationCandidates() {
     return this.hasMany('CertificationCandidate', 'sessionId');
   },
+
+}, {
+  modelName
 });

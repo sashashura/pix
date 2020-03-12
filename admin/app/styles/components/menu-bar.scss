@@ -1,5 +1,4 @@
 .menu-bar {
-  height: 100%;
   width: 100%;
   color: $white;
 
@@ -13,6 +12,8 @@
       padding: 0 15px;
 
       .menu-bar__link {
+        width: 50px;
+        position: relative;
         color: $grey-22;
         display: block;
         line-height: 50px;
@@ -21,10 +22,6 @@
         text-align: center;
         border-radius: 5px;
         font-size: 1.25rem;
-
-        span {
-          display: none;
-        }
 
         i.fa {
           margin: 0 10px;

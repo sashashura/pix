@@ -1,5 +1,5 @@
 .not-connected {
-  background: $pix-blue-to-purple-gradient-top-left-to-bottom-right;
+  background: $default-gradient;
   height: 100vh;
   padding-top: 5%;
 
@@ -22,8 +22,8 @@
     padding-top: 30px;
     text-align: center;
     line-height: 46px;
-    font-size: 3rem;
+    font-size: 1.875rem;
     font-weight: $font-light;
-    color: $grayish-grey;
+    color: $grey-80;
   }
 }

@@ -21,14 +21,14 @@
 }
 
 .comparison-window--body {
-  background-color: $porcelain-grey;
+  background-color: $grey-10;
   display: flex;
   flex-direction: column;
 }
 
 .comparison-window__instruction {
   margin: 15px;
-  font-size: 16px;
+  font-size: 1rem;
 
   @include device-is('desktop') {
     margin: 20px 40px 0 40px;
@@ -51,7 +51,7 @@
   right: -10px; /*XXX : right alignment, found no other way to achieve it;*/
   margin-right: 0;
   height: 17px;
-  font-size: 14px;
+  font-size: 0.875rem;
   border: none;
   background-color: transparent;
   color: $white;
@@ -82,20 +82,20 @@
   margin-left: 9px;
   max-width: 618.5px;
   font-family: $font-open-sans;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: $font-heavy;
-  color: $charcoal-grey;
+  color: $grey-80;
 }
 
 .assessment-results-result-light-line {
   width: 1px;
   height: 50px;
-  border: solid 1.5px $alto-grey;
+  border: solid 1.5px $grey-20;
   margin-left: 15px;
 }
 
 .comparison-window__feedback-panel {
-  background-color: $alto-grey;
+  background-color: $grey-20;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   padding: 20px 40px;
@@ -105,7 +105,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 1.3px dashed $raven-grey;
+  border: 1.3px dashed $grey-40;
   max-width: 991px;
   border-radius: 5px;
   padding: 36px 0 28px;
@@ -118,14 +118,14 @@
 
 .comparison-windows__default-message-title {
   font-family: $font-open-sans;
-  font-size: 17px;
+  font-size: 1.063rem;
   text-align: center;
-  color: $black;
+  color: $grey-200;
   font-weight: $font-semi-bold;
   margin-top: 10.2px;
 
   @include device-is('desktop') {
-    font-size: 22px;
+    font-size: 1.375rem;
     line-height: 26px;
   }
 }

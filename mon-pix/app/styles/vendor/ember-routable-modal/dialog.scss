@@ -15,17 +15,17 @@
 .routable-modal--title {
   margin-top: 0;
   margin-bottom: 0;
-  font-size: 1.5rem;
+  font-size: 0.938rem;
 }
 
 button.routable-modal--close {
   background: transparent;
   padding: 0;
   margin: 0;
-  font-size: 2rem;
-  line-height: 1.5rem;
+  font-size: 1.25rem;
+  line-height: 0.938rem;
   border: 0;
-  color: $boulder-grey;
+  color: $grey-45;
   cursor: pointer;
   float: right;
 }
@@ -33,6 +33,6 @@ button.routable-modal--close {
 button.routable-modal--close:hover,
 button.routable-modal--close:focus,
 button.routable-modal--close:active {
-  color: $black;
+  color: $grey-200;
   outline: 0;
 }

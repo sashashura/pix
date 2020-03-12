@@ -46,8 +46,14 @@ class AlreadySharedCampaignParticipationError extends DomainError {
   }
 }
 
-class StudentsCouldNotBeSavedError extends DomainError {
-  constructor(message = 'Une erreur est survenue durant le traitement. Veuillez réessayer ou contacter le support via l\'adresse support@pix.fr') {
+class NoCampaignParticipationForUserAndCampaign extends DomainError {
+  constructor(message = 'L\'utilisateur n\'a pas encore participé à la campagne') {
+    super(message);
+  }
+}
+
+class SchoolingRegistrationsCouldNotBeSavedError extends DomainError {
+  constructor(message = 'Une erreur est survenue durant le traitement.') {
     super(message);
   }
 }
@@ -113,8 +119,20 @@ class CertificationCourseUpdateError extends DomainError {
   }
 }
 
+class CertificationCourseNotPublishableError extends DomainError {
+  constructor(message = 'Une Certification avec le statut \'started\' ou \'error\' ne peut-être publiée.') {
+    super(message);
+  }
+}
+
 class InvalidCertificationReportForFinalization extends DomainError {
   constructor(message = 'Echec lors de la validation du certification course') {
+    super(message);
+  }
+}
+
+class InvalidParametersForSessionPublication extends DomainError {
+  constructor(message = 'Echec lors de la publication des résultats de la session, paramètres entrants invalides.') {
     super(message);
   }
 }
@@ -302,6 +320,12 @@ class AssessmentNotCompletedError extends DomainError {
   }
 }
 
+class NotEligibleCandidateError extends DomainError {
+  constructor(message = 'Erreur, candidat non éligible à la certification.') {
+    super(message);
+  }
+}
+
 class NotFoundError extends DomainError {
   constructor(message = 'Erreur, ressource introuvable.') {
     super(message);
@@ -314,7 +338,13 @@ class ObjectValidationError extends DomainError {
   }
 }
 
-class OrganizationStudentAlreadyLinkedToUserError extends DomainError {
+class UserShouldChangePasswordError extends DomainError {
+  constructor(message = 'Erreur, vous devez changer votre mot de passe.') {
+    super(message);
+  }
+}
+
+class SchoolingRegistrationAlreadyLinkedToUserError extends DomainError {
   constructor(message = 'L\'élève est déjà rattaché à un compte utilisateur.') {
     super(message);
   }
@@ -402,8 +432,8 @@ class UserNotAuthorizedToCertifyError extends DomainError {
   }
 }
 
-class UserNotAuthorizedToUpdateStudentPasswordError extends DomainError {
-  constructor(message = 'Cet utilisateur n\'est pas autorisé à mettre à jour le mot de passe de l\'étudiant.') {
+class UserNotAuthorizedToUpdatePasswordError extends DomainError {
+  constructor(message = 'L\'utilisateur n\'est pas autorisé à mettre à jour ce mot de passe.') {
     super(message);
   }
 }
@@ -436,6 +466,12 @@ class WrongDateFormatError extends DomainError {
   }
 }
 
+class NotImplementedError extends Error {
+  constructor(message = 'Not implemented error.') {
+    super(message);
+  }
+}
+
 module.exports = {
   DomainError,
   AlreadyExistingCampaignParticipationError,
@@ -445,6 +481,7 @@ module.exports = {
   AlreadyRegisteredEmailError,
   AlreadyRegisteredUsernameError,
   AlreadySharedCampaignParticipationError,
+  NoCampaignParticipationForUserAndCampaign,
   AssessmentEndedError,
   AssessmentNotCompletedError,
   CampaignAlreadyArchivedError,
@@ -462,6 +499,7 @@ module.exports = {
   CertificationCenterMembershipCreationError,
   CertificationComputeError,
   CertificationCourseUpdateError,
+  CertificationCourseNotPublishableError,
   ChallengeAlreadyAnsweredError,
   CompetenceResetError,
   EntityValidationError,
@@ -469,20 +507,22 @@ module.exports = {
   ForbiddenAccess,
   InvalidCertificationCandidate,
   InvalidCertificationReportForFinalization,
+  InvalidParametersForSessionPublication,
   InvalidRecaptchaTokenError,
   InvalidTemporaryKeyError,
   MembershipCreationError,
   MembershipUpdateError,
   MissingOrInvalidCredentialsError,
+  NotEligibleCandidateError,
   NotFoundError,
   ObjectValidationError,
-  OrganizationStudentAlreadyLinkedToUserError,
   PasswordNotMatching,
   PasswordResetDemandNotFoundError,
   SameNationalStudentIdInFileError,
   SameNationalStudentIdInOrganizationError,
+  SchoolingRegistrationAlreadyLinkedToUserError,
+  SchoolingRegistrationsCouldNotBeSavedError,
   SessionAlreadyFinalizedError,
-  StudentsCouldNotBeSavedError,
   UserAlreadyLinkedToCandidateInSessionError,
   UserNotAuthorizedToAccessEntity,
   UserNotAuthorizedToCertifyError,
@@ -491,10 +531,12 @@ module.exports = {
   UserNotAuthorizedToGetCampaignResultsError,
   UserNotAuthorizedToGetCertificationCoursesError,
   UserNotAuthorizedToUpdateCampaignError,
+  UserNotAuthorizedToUpdatePasswordError,
   UserNotAuthorizedToUpdateResourceError,
-  UserNotAuthorizedToUpdateStudentPasswordError,
   UserNotFoundError,
-  WrongDateFormatError,
-  UserOrgaSettingsCreationError,
   UserNotMemberOfOrganizationError,
+  UserOrgaSettingsCreationError,
+  UserShouldChangePasswordError,
+  WrongDateFormatError,
+  NotImplementedError,
 };

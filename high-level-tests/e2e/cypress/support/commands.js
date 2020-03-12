@@ -1,4 +1,16 @@
 const jsonwebtoken = require('jsonwebtoken');
+const compareSnapshotCommand = require('cypress-visual-regression/dist/command');
+
+function setEmberSimpleAuthSession(response) {
+  window.localStorage.setItem('ember_simple_auth-session', JSON.stringify({
+    authenticated: {
+      authenticator: 'authenticator:oauth2',
+      token_type: 'bearer',
+      access_token: response.body.access_token,
+      user_id: response.body.user_id
+    }
+  }));
+}
 
 Cypress.Commands.add('login', (username, password) => {
   cy.server();
@@ -11,16 +23,22 @@ Cypress.Commands.add('login', (username, password) => {
       username,
       password,
     }
-  }).then((response) => {
-    window.localStorage.setItem('ember_simple_auth-session', JSON.stringify({
-      authenticated: {
-        authenticator: 'authenticator:oauth2',
-        token_type: 'bearer',
-        access_token: response.body.access_token,
-        user_id: response.body.user_id
-      }
-    }));
-  });
+  }).then(setEmberSimpleAuthSession);
+  cy.wait(['@getCurrentUser']);
+});
+
+Cypress.Commands.add('loginOrga', (username, password) => {
+  cy.server();
+  cy.route('/api/prescription/prescribers/**').as('getCurrentUser');
+  cy.request({
+    url: `${Cypress.env('API_URL')}/api/token`,
+    method: 'POST',
+    form: true,
+    body: {
+      username,
+      password,
+    }
+  }).then(setEmberSimpleAuthSession);
   cy.wait(['@getCurrentUser']);
 });
 
@@ -80,12 +98,23 @@ Cypress.Commands.add('visitOrga', (url) => {
   return cy.visit(url, { app: 'orga' });
 });
 
+Cypress.Commands.add('visitCertif', (url) => {
+  return cy.visit(url, { app: 'certif' });
+});
+
 Cypress.Commands.overwrite('visit', (originalFn, url, options) => {
   const ORGA_URL = Cypress.env('ORGA_URL');
+  const CERTIF_URL = Cypress.env('CERTIF_URL');
 
   if (options.app === 'orga') {
     url = ORGA_URL + url;
   }
 
+  if (options.app === 'certif') {
+    url = CERTIF_URL + url;
+  }
+
   return originalFn(url, options);
 });
+
+compareSnapshotCommand();

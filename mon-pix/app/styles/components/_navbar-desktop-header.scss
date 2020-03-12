@@ -4,46 +4,46 @@
     max-width: 980px;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     padding: 20px 0;
     align-items: center;
+    position: relative;
   }
 }
 
 .navbar-desktop-header-container {
   &__menu {
     display: flex;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 68px;
+    margin-right: 20px;
   }
 }
 
 .navbar-desktop-header-menu {
   &__item {
-    margin-left: 23.3px;
-    margin-right: 23.3px;
+    margin-left: 20px;
+    margin-right: 20px;
     padding-top: 5px;
     padding-bottom: 5px;
-    font-size: 1.6rem;
+    font-size: 1rem;
     font-family: $font-roboto;
-    color: $dove-gray;
+    color: $grey-60;
     text-decoration: none;
 
     &.active {
       text-decoration: none;
-      color: $dodger-blue;
-      border-bottom: 2px solid $dodger-blue;
+      color: $light-blue;
+      border-bottom: 2px solid $light-blue;
     }
 
     &:focus {
       text-decoration: none;
-      color: $gray;
+      color: $grey-35;
     }
 
     &:hover {
       text-decoration: none;
       cursor: pointer;
-      color: $dodger-blue;
+      color: $light-blue;
     }
   }
 }
@@ -52,6 +52,7 @@
   display: flex;
   padding: 0;
   margin: 0;
+  margin-left: auto;
 }
 
 /* Logo
@@ -60,7 +61,6 @@
 .navbar-desktop-header-logo {
   display: flex;
   position: relative;
-  width: 220px;
 
   &__link {
     display: inline-block;
@@ -73,8 +73,6 @@
   }
 
   &__marianne {
-    float:right;
-    margin-top: 5px;
-    margin-left: 16px;
+    margin-left: 24px;
   }
 }

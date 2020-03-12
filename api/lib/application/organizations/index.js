@@ -1,7 +1,7 @@
 const Joi = require('@hapi/joi');
 
-const securityController = require('../../interfaces/controllers/security-controller');
-const organisationController = require('./organization-controller');
+const securityPreHandlers = require('../security-pre-handlers');
+const organizationController = require('./organization-controller');
 
 exports.register = async (server) => {
   server.route([
@@ -10,10 +10,10 @@ exports.register = async (server) => {
       path: '/api/organizations',
       config: {
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
-        handler: organisationController.create,
+        handler: organizationController.create,
         tags: ['api', 'organizations']
       }
     },
@@ -22,15 +22,15 @@ exports.register = async (server) => {
       path: '/api/organizations',
       config: {
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
-        handler: organisationController.findPaginatedFilteredOrganizations,
+        handler: organizationController.findPaginatedFilteredOrganizations,
         tags: ['api', 'organizations'],
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés avec le rôle Pix Master**\n' +
           '- Elle permet de récupérer & chercher une liste d’organisations\n' +
-          '- Cette liste est paginée et filtrée selon un **name** et/ou un **type** donnés'
+          '- Cette liste est paginée et filtrée selon un **name** et/ou un **type** et/ou un **identifiant externe** donnés'
         ]
       }
     },
@@ -39,10 +39,10 @@ exports.register = async (server) => {
       path: '/api/organizations/{id}',
       config: {
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
-        handler: organisationController.getOrganizationDetails,
+        handler: organizationController.getOrganizationDetails,
         tags: ['api', 'organizations'],
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés avec le rôle Pix Master**\n' +
@@ -55,10 +55,10 @@ exports.register = async (server) => {
       path: '/api/organizations/{id}',
       config: {
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
-        handler: organisationController.updateOrganizationInformation,
+        handler: organizationController.updateOrganizationInformation,
         tags: ['api', 'organizations'],
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés avec le rôle Pix Master**\n' +
@@ -70,7 +70,7 @@ exports.register = async (server) => {
       method: 'GET',
       path: '/api/organizations/{id}/campaigns',
       config: {
-        handler: organisationController.findPaginatedFilteredCampaigns,
+        handler: organizationController.findPaginatedFilteredCampaigns,
         tags: ['api', 'organizations'],
         notes: [
           'Cette route est restreinte aux utilisateurs authentifiés',
@@ -83,10 +83,10 @@ exports.register = async (server) => {
       path: '/api/organizations/{id}/memberships',
       config: {
         pre: [{
-          method: securityController.checkUserIsAdminInOrganizationOrHasRolePixMaster,
-          assign: 'isAdminInOrganizationOrHasRolePixMaster'
+          method: securityPreHandlers.checkUserBelongsToOrganizationOrHasRolePixMaster,
+          assign: 'belongsToOrganization'
         }],
-        handler: organisationController.getMemberships,
+        handler: organizationController.findPaginatedFilteredMemberships,
         tags: ['api', 'organizations'],
         notes: [
           'Cette route est restreinte aux utilisateurs authentifiés',
@@ -98,7 +98,7 @@ exports.register = async (server) => {
       method: 'GET',
       path: '/api/organizations/{id}/target-profiles',
       config: {
-        handler: organisationController.findTargetProfiles,
+        handler: organizationController.findTargetProfiles,
         tags: ['api', 'target-profile'],
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
@@ -107,14 +107,32 @@ exports.register = async (server) => {
       }
     },
     {
+      method: 'POST',
+      path: '/api/organizations/{id}/target-profiles',
+      config: {
+        pre: [{
+          method: securityPreHandlers.checkUserHasRolePixMaster,
+          assign: 'hasRolePixMaster'
+        }],
+        handler: organizationController.attachTargetProfiles,
+        tags: ['api', 'organizations']
+      }
+    },
+    {
       method: 'GET',
       path: '/api/organizations/{id}/students',
       config: {
         pre: [{
-          method: securityController.checkUserBelongsToScoOrganizationAndManagesStudents,
+          method: securityPreHandlers.checkUserBelongsToScoOrganizationAndManagesStudents,
           assign: 'belongsToScoOrganizationAndManageStudents'
         }],
-        handler: organisationController.findStudents,
+        validate: {
+          query: Joi.object({
+            'page[size]': Joi.number().integer().empty(''),
+            'page[number]': Joi.number().integer().empty(''),
+          }).options({ allowUnknown: true }),
+        },
+        handler: organizationController.findPaginatedFilteredSchoolingRegistrations,
         tags: ['api', 'students'],
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
@@ -127,17 +145,17 @@ exports.register = async (server) => {
       path: '/api/organizations/{id}/import-students',
       config: {
         pre: [{
-          method: securityController.checkUserIsAdminInScoOrganizationAndManagesStudents,
+          method: securityPreHandlers.checkUserIsAdminInScoOrganizationAndManagesStudents,
           assign: 'isAdminInScoOrganizationAndManagesStudents'
         }],
         payload: {
           maxBytes: 1048576 * 10, // 10MB
           parse: 'gunzip',
         },
-        handler: organisationController.importStudentsFromSIECLE,
+        handler: organizationController.importSchoolingRegistrationsFromSIECLE,
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés et responsables de l\'organisation**\n' +
-          '- Elle permet d\'importer des élèves en masse depuis un fichier au format SIECLE\n' +
+          '- Elle permet d\'importer des inscriptions d\'élèves, en masse, depuis un fichier au format SIECLE\n' +
           '- Elle ne retourne aucune valeur de retour'
         ],
         tags: ['api', 'students']
@@ -148,10 +166,10 @@ exports.register = async (server) => {
       path: '/api/organizations/{id}/invitations',
       config: {
         pre: [{
-          method: securityController.checkUserIsAdminInOrganizationOrHasRolePixMaster,
+          method: securityPreHandlers.checkUserIsAdminInOrganizationOrHasRolePixMaster,
           assign: 'isAdminInOrganizationOrHasRolePixMaster'
         }],
-        handler: organisationController.sendInvitations,
+        handler: organizationController.sendInvitations,
         validate: {
           options: {
             allowUnknown: true
@@ -176,10 +194,10 @@ exports.register = async (server) => {
       path: '/api/organizations/{id}/invitations',
       config: {
         pre: [{
-          method: securityController.checkUserIsAdminInOrganization,
+          method: securityPreHandlers.checkUserIsAdminInOrganization,
           assign: 'isAdminInOrganization'
         }],
-        handler: organisationController.findPendingInvitations,
+        handler: organizationController.findPendingInvitations,
         tags: ['api', 'invitations'],
         notes: [
           '- Cette route est restreinte aux utilisateurs authentifiés responsables de l\'organisation',

@@ -1,4 +1,5 @@
 const Hapi = require('@hapi/hapi');
+const Inert = require('@hapi/inert');
 const preResponseUtils = require('../../../lib/application/pre-response-utils');
 
 /**
@@ -8,7 +9,7 @@ const preResponseUtils = require('../../../lib/application/pre-response-utils');
  *
  * beforeEach(() => {
  *   sinon.stub(usecases, 'updateOrganizationInformation');
- *   sinon.stub(securityController, 'checkUserHasRolePixMaster').callsFake((request, reply) => reply(true));
+ *   sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, reply) => reply(true));
  *   httpTestServer = new HttpTestServer(moduleUnderTest);
  * });
  */
@@ -17,6 +18,11 @@ class HttpTestServer {
   constructor(moduleUnderTest) {
     this.hapiServer = Hapi.server();
     this.hapiServer.ext('onPreResponse', preResponseUtils.handleDomainAndHttpErrors);
+    this.hapiServer.events.on({ name: 'request', channels: 'error' }, (request, event) => {
+      console.error(event.error);
+    });
+
+    this.hapiServer.register(Inert);
     this.hapiServer.register(moduleUnderTest);
   }
 

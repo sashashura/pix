@@ -20,6 +20,7 @@ describe('Unit | Serializer | JSONAPI | certification-serializer', () => {
             'birthplace': 'Namek',
             'birthdate': '1989-10-24',
             'external-id': 'xenoverse2',
+            'examiner-comment': 'Un signalement surveillant',
           },
         },
       };
@@ -31,7 +32,7 @@ describe('Unit | Serializer | JSONAPI | certification-serializer', () => {
         birthplace: 'Namek',
         birthdate: '1989-10-24',
         externalId: 'xenoverse2',
-        examinerComment: null,
+        examinerComment: 'Un signalement surveillant',
       };
     });
 
@@ -68,6 +69,17 @@ describe('Unit | Serializer | JSONAPI | certification-serializer', () => {
         expect(result.examinerComment).to.equal(NO_EXAMINER_COMMENT);
       });
     });
+
+    it('should return undefined if no examiner comment', async function() {
+      // given
+      jsonCertificationCourse.data.attributes['examiner-comment'] = undefined;
+
+      // when
+      const result = await serializer.deserialize(jsonCertificationCourse);
+
+      // then
+      expect(result.examinerComment).to.equal(undefined);
+    });
   });
 
   describe('#serialize', () => {
@@ -91,11 +103,13 @@ describe('Unit | Serializer | JSONAPI | certification-serializer', () => {
               'certification-center': 'L’univeristé du Pix',
               'date': new Date('2018-12-01T01:02:03Z'),
               'first-name': 'Jean',
+              'delivered-at': new Date('2018-10-03T01:02:03Z'),
               'is-published': true,
               'last-name': 'Bon',
               'status': 'rejected',
               'pix-score': 23,
               'comment-for-candidate': 'Vous auriez dû travailler plus.',
+              'clea-certification-status': 'acquired'
             },
             'relationships': {
               'result-competence-tree': {
@@ -135,11 +149,14 @@ describe('Unit | Serializer | JSONAPI | certification-serializer', () => {
               'certification-center': 'L’univeristé du Pix',
               'date': new Date('2018-12-01T01:02:03Z'),
               'first-name': 'Jean',
+              'delivered-at': new Date('2018-10-03T01:02:03Z'),
               'is-published': true,
               'last-name': 'Bon',
               'status': 'rejected',
               'pix-score': 23,
               'comment-for-candidate': 'Vous auriez dû travailler plus.',
+              'clea-certification-status': 'acquired'
+
             },
             'relationships': {
               'result-competence-tree': {
@@ -170,11 +187,13 @@ describe('Unit | Serializer | JSONAPI | certification-serializer', () => {
             'certification-center': 'L’univeristé du Pix',
             'date': new Date('2018-12-01T01:02:03Z'),
             'first-name': 'Jean',
+            'delivered-at': new Date('2018-10-03T01:02:03Z'),
             'is-published': true,
             'last-name': 'Bon',
             'status': 'rejected',
             'pix-score': 23,
             'comment-for-candidate': 'Vous auriez dû travailler plus.',
+            'clea-certification-status': 'acquired'
           },
           'relationships': {
             'result-competence-tree': {
@@ -223,6 +242,7 @@ describe('Unit | Serializer | JSONAPI | certification-serializer', () => {
               'code': '1',
               'name': '1. Information et données',
               'title': 'Information et données',
+              'color': 'jaffa',
             },
             'id': 'recvoGdo7z2z7pXWa',
             'relationships': {

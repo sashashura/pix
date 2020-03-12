@@ -1,9 +1,10 @@
 import { module, test } from 'qunit';
 import { currentURL, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'ember-qunit';
-import { authenticateSession } from 'ember-simple-auth/test-support';
 
 import setupMirage from 'ember-cli-mirage/test-support/setup-mirage';
+
+import { createAuthenticateSession } from 'pix-admin/tests/helpers/test-init';
 
 module('Acceptance | Certification-centers List', function(hooks) {
   setupApplicationTest(hooks);
@@ -23,7 +24,7 @@ module('Acceptance | Certification-centers List', function(hooks) {
   module('When user is logged in', function(hooks) {
 
     hooks.beforeEach(async () => {
-      await authenticateSession({ userId: 1 });
+      await createAuthenticateSession({ userId: 1 });
     });
 
     test('it should be accessible for an authenticated user', async function(assert) {
@@ -47,7 +48,9 @@ module('Acceptance | Certification-centers List', function(hooks) {
 
     test('it should display the current filter when certification-centers are filtered', async function(assert) {
       // given
-      server.createList('certification-center', 12);
+      server.createList('certification-center', 1, { type: 'PRO' });
+      server.createList('certification-center', 2, { type: 'SCO' });
+      server.createList('certification-center', 3, { type: 'SUP' });
 
       // when
       await visit('/certification-centers/list?type=sup');

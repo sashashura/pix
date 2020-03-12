@@ -1,3 +1,9 @@
+/* eslint ember/no-actions-hash: 0 */
+/* eslint ember/no-classic-classes: 0 */
+/* eslint ember/no-classic-components: 0 */
+/* eslint ember/no-component-lifecycle-hooks: 0 */
+/* eslint ember/require-tagless-components: 0 */
+
 import { computed } from '@ember/object';
 import { cancel, later } from '@ember/runloop';
 import Component from '@ember/component';
@@ -19,7 +25,7 @@ const ChallengeItemGeneric = Component.extend({
 
   init() {
     this._super(...arguments);
-    if (!_.isInteger(this.get('challenge.timer'))) {
+    if (!_.isInteger(this.challenge.timer)) {
       this._start();
     }
   },
@@ -51,7 +57,7 @@ const ChallengeItemGeneric = Component.extend({
   }),
 
   hasTimerDefined() {
-    return _.isInteger(this.get('challenge.timer'));
+    return _.isInteger(this.challenge.timer);
   },
 
   _getTimeout() {
@@ -86,16 +92,16 @@ const ChallengeItemGeneric = Component.extend({
         if (this._hasError()) {
 
           const errorMessage = this._getErrorMessage();
-          
+
           this.set('errorMessage', errorMessage);
 
           return;
         }
-        
+
         this.set('errorMessage', null);
         this.set('_isUserAwareThatChallengeIsTimed', false);
         this.set('isValidateButtonEnabled', false);
-        
+
         return this.answerValidated(this.challenge, this.assessment, this._getAnswerValue(), this._getTimeout(), this._getElapsedTime())
           .finally(() => this.set('isValidateButtonEnabled', true));
       }

@@ -1,5 +1,8 @@
-const securityController = require('../../interfaces/controllers/security-controller');
+const Joi = require('@hapi/joi');
+const JSONAPIError = require('jsonapi-serializer').Error;
+const securityPreHandlers = require('../security-pre-handlers');
 const membershipController = require('./membership-controller');
+const { idSpecification } = require('../../domain/validators/id-specification');
 
 exports.register = async function(server) {
   server.route([
@@ -8,7 +11,7 @@ exports.register = async function(server) {
       path: '/api/memberships',
       config: {
         pre: [{
-          method: securityController.checkUserHasRolePixMaster,
+          method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
         handler: membershipController.create,
@@ -30,13 +33,27 @@ exports.register = async function(server) {
       path: '/api/memberships/{id}',
       config: {
         pre: [{
-          method: securityController.checkUserIsAdminInOrganization,
-          assign: 'isAdminInOrganization'
+          method: securityPreHandlers.checkUserIsAdminInOrganizationOrHasRolePixMaster,
+          assign: 'isAdminInOrganizationOrHasRolePixMaster'
         }],
+        validate: {
+          params: Joi.object({
+            id: Joi.number().integer().required()
+          }),
+          failAction: (request, h, err) => {
+            const errorHttpStatusCode = 400;
+            const jsonApiError = new JSONAPIError({
+              code: errorHttpStatusCode.toString(),
+              title: 'Bad request',
+              detail: err.details[0].message,
+            });
+            return h.response(jsonApiError).code(errorHttpStatusCode).takeover();
+          },
+        },
         handler: membershipController.update,
         description: 'Update organization role by admin for a organization members',
         notes: [
-          '- **Cette route est restreinte aux utilisateurs authentifiés en tant qu\'administrateur de l\'organisation**\n' +
+          '- **Cette route est restreinte aux utilisateurs authentifiés en tant qu\'administrateur de l\'organisation ou ayant le rôle Pix Master**\n' +
           '- Elle permet de modifier le rôle d\'un membre de l\'organisation'
         ],
         plugins: {
@@ -47,7 +64,27 @@ exports.register = async function(server) {
         },
         tags: ['api','memberships'],
       }
-    }
+    },
+    {
+      method: 'POST',
+      path: '/api/memberships/{id}/disable',
+      config: {
+        pre: [{
+          method: securityPreHandlers.checkUserHasRolePixMaster,
+          assign: 'hasRolePixMaster'
+        }],
+        validate: {
+          params: Joi.object({
+            id: idSpecification
+          })
+        },
+        handler: membershipController.disable,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés avec le rôle Pix Master**\n' +
+          '- Elle permet la désactivation d\'un membre'
+        ],
+      }
+    },
   ]);
 };
 

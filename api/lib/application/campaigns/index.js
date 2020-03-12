@@ -1,3 +1,4 @@
+const Joi = require('@hapi/joi');
 const campaignController = require('./campaign-controller');
 
 exports.register = async function(server) {
@@ -40,13 +41,27 @@ exports.register = async function(server) {
     },
     {
       method: 'GET',
-      path: '/api/campaigns/{id}/csvResults',
+      path: '/api/campaigns/{id}/csv-assessment-results',
       config: {
         auth: false,
-        handler: campaignController.getCsvResults,
+        handler: campaignController.getCsvAssessmentResults,
         notes: [
           '- **Cette route est restreinte via un token dédié passé en paramètre avec l\'id de l\'utilisateur.**\n' +
-          '- Récupération d\'un CSV avec les résultats de la campagne\n' +
+          '- Récupération d\'un CSV avec les résultats de la campagne d‘évaluation\n' +
+          '- L‘utilisateur doit avoir les droits d‘accès à l‘organisation liée à la campagne à créer',
+        ],
+        tags: ['api', 'campaign']
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/campaigns/{id}/csv-profiles-collection-results',
+      config: {
+        auth: false,
+        handler: campaignController.getCsvProfilesCollectionResults,
+        notes: [
+          '- **Cette route est restreinte via un token dédié passé en paramètre avec l\'id de l\'utilisateur.**\n' +
+          '- Récupération d\'un CSV avec les résultats de la campagne de collecte de profils\n' +
           '- L‘utilisateur doit avoir les droits d‘accès à l‘organisation liée à la campagne à créer',
         ],
         tags: ['api', 'campaign']
@@ -90,13 +105,30 @@ exports.register = async function(server) {
       }
     },
     {
+      method: 'GET',
+      path: '/api/campaigns/{id}/analyses',
+      config: {
+        validate: {
+          params: Joi.object({
+            id: Joi.number().integer().required()
+          }),
+        },
+        handler: campaignController.getAnalysis,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
+          '- Récupération de l\'analyse de la campagne par son id',
+        ],
+        tags: ['api', 'campaign']
+      }
+    },
+    {
       method: 'PUT',
       path: '/api/campaigns/{id}/archive',
       config: {
         handler: campaignController.archiveCampaign,
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
-          '- Archivage d\'une campagne son id',
+          '- Archivage d\'une campagne par son id',
         ],
       }
     },
@@ -107,10 +139,60 @@ exports.register = async function(server) {
         handler: campaignController.unarchiveCampaign,
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
-          '- Désarchivage d\'une campagne son id',
+          '- Désarchivage d\'une campagne par son id',
         ],
       }
-    }
+    },
+    {
+      /**
+       * @deprecated in favor of '/api/campaigns/{id}/profiles-collection-participations',
+       */
+      method: 'GET',
+      path: '/api/campaigns/{id}/profiles-collection/participations',
+      config: {
+        validate: {
+          params: Joi.object({
+            id: Joi.number().integer().required()
+          }),
+        },
+        handler: campaignController.findProfilesCollectionParticipations,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
+          '- Récupération des profils collectés d\'une campagne par son id',
+          '- Route dépréciée en faveur de "/api/campaigns/{id}/profiles-collection-participations"',
+        ],
+        tags: ['api', 'campaign']
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/campaigns/{id}/profiles-collection-participations',
+      config: {
+        validate: {
+          params: Joi.object({
+            id: Joi.number().integer().required()
+          }),
+        },
+        handler: campaignController.findProfilesCollectionParticipations,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
+          '- Récupération des profils collectés d\'une campagne par son id',
+        ],
+        tags: ['api', 'campaign']
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/campaigns/{id}/assessment-participations',
+      config: {
+        handler: campaignController.findAssessmentParticipations,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
+          '- Récupération des campaign-assessment-participation-summaries par campagne',
+        ],
+        tags: ['api', 'campaign-assessment-participation-summary']
+      }
+    },
   ]);
 };
 

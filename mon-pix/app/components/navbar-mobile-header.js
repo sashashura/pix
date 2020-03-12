@@ -1,13 +1,11 @@
-import Component from '@ember/component';
-import { alias } from '@ember/object/computed';
+/* eslint ember/no-computed-properties-in-native-classes: 0 */
+
 import { inject as service } from '@ember/service';
+import { alias } from '@ember/object/computed';
+import Component from '@glimmer/component';
 
-export default Component.extend({
-  session: service(),
+export default class NavbarMobileHeader extends Component {
+  @service session;
 
-  classNames: ['navbar-mobile-header'],
-
-  isUserLogged: alias('session.isAuthenticated'),
-
-  burger: null,
-});
+  @alias('session.isAuthenticated') isUserLogged;
+}

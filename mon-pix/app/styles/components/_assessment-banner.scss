@@ -10,7 +10,8 @@
   min-height: 80px;
   max-width: 990px;
   width: 100%;
-  padding-right: 10px;
+  padding:0 10px;
+  margin-top: 5px;
 
   @include device-is('desktop') {
     min-height: 100px;
@@ -19,7 +20,7 @@
 }
 
 .assessment-banner__title {
-  font-size: 1.75rem;
+  font-size: 1.094rem;
   font-weight: $font-light;
   margin: 0;
 
@@ -28,22 +29,13 @@
   }
 }
 
-.assessment-banner__pix-logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 70px;
-}
-
 .assessment-banner__pix-logo img {
-  position: relative;
-  top: 4px;
-  right: -8px;
+  height:47px;
 }
 
 .assessment-banner__splitter {
   width: 1px;
-  background: $mercury-grey;
+  background: $grey-15;
   height: 40px;
   margin: 0 10px;
 
@@ -54,8 +46,8 @@
 
 .assessment-banner__home-link {
   font-family: $font-roboto;
-  font-size: 1.6rem;
-  letter-spacing: 0.025rem;
+  font-size: 1rem;
+  letter-spacing: 0.016rem;
   font-weight: $font-medium;
   margin-left: auto;
   text-align: right;

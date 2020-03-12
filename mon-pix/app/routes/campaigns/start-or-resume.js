@@ -1,102 +1,161 @@
-import Route from '@ember/routing/route';
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
-
+import _ from 'lodash';
 import { inject as service } from '@ember/service';
-import { isEmpty } from '@ember/utils';
+import Route from '@ember/routing/route';
+import SecuredRouteMixin from 'mon-pix/mixins/secured-route-mixin';
 
-export default Route.extend(AuthenticatedRouteMixin, {
+export default class StartOrResumeRoute extends Route.extend(SecuredRouteMixin) {
+  @service currentUser;
+  @service session;
 
-  session: service(),
-  currentUser: service(),
+  state = null;
 
-  campaignCode: null,
-  campaign: null,
-  associationDone: false,
-  campaignIsRestricted: false,
-  givenParticipantExternalId: null,
-  userHasSeenLanding: false,
-  userHasJustConsultedTutorial: false,
-  authenticationRoute: 'inscription',
-  _isReady: false,
+  constructor() {
+    super(...arguments);
+    this._resetState();
+  }
 
   beforeModel(transition) {
-    this.set('_isReady', false);
-    this.set('campaignCode', transition.to.params.campaign_code);
-    this.set('associationDone', transition.to.queryParams.associationDone);
-    this.set('campaignIsRestricted', transition.to.queryParams.campaignIsRestricted);
-    this.set('givenParticipantExternalId', transition.to.queryParams.participantExternalId);
-    this.set('userHasSeenLanding', transition.to.queryParams.hasSeenLanding);
-    this.set('userHasJustConsultedTutorial', transition.to.queryParams.hasJustConsultedTutorial);
+    this.authenticationRoute = 'inscription';
+    const campaign = this.modelFor('campaigns');
+    this._updateStateFrom({ campaign, queryParams: transition.to.queryParams });
 
-    if (this._userIsUnauthenticated() && !this.userHasSeenLanding && this.campaignIsRestricted) {
-      this.set('authenticationRoute', 'login-or-register-to-access-restricted-campaign');
-      this.transitionTo('login-or-register-to-access-restricted-campaign',this.campaignCode);
+    if (this._shouldLoginToAccessRestrictedCampaign) {
+      return this._redirectToLoginBeforeAccessingToCampaign(transition, campaign);
     }
-    if (this._userIsUnauthenticated() && !this.userHasSeenLanding && !this.campaignIsRestricted) {
-      return this.replaceWith('campaigns.campaign-landing-page', this.campaignCode, { queryParams: transition.to.queryParams });
+
+    if (this._shouldJoinRestrictedCampaign) {
+      if (this.currentUser.user.mustValidateTermsOfService) {
+        return this._redirectToTermsOfServicesBeforeAccessingToCampaign(transition);
+      }
+      return this.replaceWith('campaigns.restricted.join', campaign);
     }
-    this._super(...arguments);
-  },
+
+    if (this._shouldVisitLandingPageAsVisitor) {
+      return this.replaceWith('campaigns.campaign-landing-page', campaign, { queryParams: transition.to.queryParams });
+    }
+
+    super.beforeModel(...arguments);
+  }
+
+  _redirectToTermsOfServicesBeforeAccessingToCampaign(transition) {
+    this.session.set('attemptedTransition', transition);
+    return this.transitionTo('terms-of-service');
+  }
+
+  _redirectToLoginBeforeAccessingToCampaign(transition, campaign) {
+    this.session.set('attemptedTransition', transition);
+    return this.transitionTo('campaigns.restricted.login-or-register-to-access', campaign.code);
+  }
 
   async model() {
-    this.set('isLoading', true);
-    const campaigns = await this.store.query('campaign', { filter: { code: this.campaignCode } });
+    this.isLoading = true;
+    return this.modelFor('campaigns');
+  }
 
-    return campaigns.get('firstObject');
-  },
-
-  async afterModel(campaign) {
-
+  async redirect(campaign) {
     if (campaign.isArchived) {
-      this.set('isLoading', false);
-      return this.set('_isReady', true);
+      this.isLoading = false;
+      return;
     }
 
-    const smartPlacementAssessments = await this.store.query(
-      'assessment',
-      { filter: { type: 'SMART_PLACEMENT', codeCampaign: this.campaignCode } },
-    );
-    this.set('_isReady', true);
+    const ongoingCampaignParticipation = await this.store.queryRecord('campaignParticipation', { campaignId: campaign.id, userId: this.currentUser.user.id });
+    this._updateStateFrom({ ongoingCampaignParticipation });
 
-    if (this._thereIsNoAssessment(smartPlacementAssessments)) {
-      if (this.userHasSeenLanding) {
-        return this.replaceWith('campaigns.fill-in-id-pix', this.campaignCode, { queryParams: { givenParticipantExternalId: this.givenParticipantExternalId } });
+    if (this._shouldVisitLandingPageAsLoggedUser) {
+      return this.replaceWith('campaigns.campaign-landing-page', campaign);
+    }
+
+    if (this._shouldProvideExternalIdToAccessCampaign) {
+      return this.replaceWith('campaigns.fill-in-id-pix', campaign);
+    }
+
+    if (this._shouldStartCampaignParticipation) {
+      try {
+        const campaignParticipation = await this.store.createRecord('campaign-participation', { campaign, participantExternalId: this.state.participantExternalId }).save();
+        this._updateStateFrom({ ongoingCampaignParticipation: campaignParticipation });
+      } catch (err) {
+        if (_.get(err, 'errors[0].status') === 403) {
+          this.session.invalidate();
+          return this.transitionTo('campaigns.start-or-resume', campaign);
+        }
+        return this.send('error', err, this.transitionTo('campaigns.start-or-resume'));
       }
-      if (!campaign.isRestricted || this.associationDone) {
-        return this.replaceWith('campaigns.campaign-landing-page', this.campaignCode, { queryParams: { givenParticipantExternalId: this.givenParticipantExternalId } });
-      }
-      return this.replaceWith('campaigns.join-restricted-campaign', this.campaignCode, { queryParams: { givenParticipantExternalId: this.givenParticipantExternalId } });
     }
 
-    const assessment = await smartPlacementAssessments.get('firstObject').reload();
+    if (campaign.isTypeProfilesCollection) {
+      return this.replaceWith('campaigns.profiles-collection.start-or-resume', campaign);
+    } else {
+      return this.replaceWith('campaigns.assessment.start-or-resume', campaign);
+    }
+  }
 
-    if (this._showTutorial(assessment)) {
-      return this.replaceWith('campaigns.tutorial', this.campaignCode);
+  _resetState() {
+    this.state = {
+      isCampaignRestricted: false,
+      hasUserCompletedRestrictedCampaignAssociation: false,
+      hasUserSeenLandingPage: false,
+      isUserLogged: false,
+      doesUserHaveOngoingParticipation: false,
+      doesCampaignAskForExternalId: false,
+      participantExternalId: null,
+    };
+  }
+
+  _updateStateFrom({ campaign = {}, queryParams = {}, ongoingCampaignParticipation = null }) {
+    const hasUserCompletedRestrictedCampaignAssociation = this._handleQueryParamBoolean(queryParams.associationDone, this.state.hasUserCompletedRestrictedCampaignAssociation);
+    const hasUserSeenLandingPage = this._handleQueryParamBoolean(queryParams.hasUserSeenLandingPage, this.state.hasUserSeenLandingPage);
+    this.state = {
+      isCampaignRestricted: _.get(campaign, 'isRestricted', this.state.isCampaignRestricted),
+      hasUserCompletedRestrictedCampaignAssociation,
+      hasUserSeenLandingPage,
+      isUserLogged: this.session.isAuthenticated,
+      doesUserHaveOngoingParticipation: Boolean(ongoingCampaignParticipation),
+      doesCampaignAskForExternalId: _.get(campaign, 'idPixLabel', this.state.doesCampaignAskForExternalId),
+      participantExternalId: _.get(queryParams, 'participantExternalId', this.state.participantExternalId),
+    };
+  }
+
+  get _shouldLoginToAccessRestrictedCampaign() {
+    return this.state.isCampaignRestricted
+      && !this.state.isUserLogged;
+  }
+
+  get _shouldJoinRestrictedCampaign() {
+    return this.state.isCampaignRestricted
+      && this.state.isUserLogged
+      && !this.state.hasUserCompletedRestrictedCampaignAssociation;
+  }
+
+  get _shouldVisitLandingPageAsVisitor() {
+    return !this.state.hasUserSeenLandingPage
+      && !this.state.isUserLogged;
+  }
+
+  get _shouldVisitLandingPageAsLoggedUser() {
+    return !this.state.hasUserSeenLandingPage
+      && this.state.isUserLogged
+      && !this.state.doesUserHaveOngoingParticipation;
+  }
+
+  get _shouldProvideExternalIdToAccessCampaign() {
+    return this.state.doesCampaignAskForExternalId
+      && !this.state.participantExternalId
+      && !this.state.doesUserHaveOngoingParticipation;
+  }
+
+  get _shouldStartCampaignParticipation() {
+    return !this.state.doesUserHaveOngoingParticipation;
+  }
+
+  _handleQueryParamBoolean(value, defaultValue) {
+    if (_.isBoolean(value)) {
+      return value;
     }
 
-    return this.replaceWith('assessments.resume', assessment.get('id'));
-  },
-
-  _userIsUnauthenticated() {
-    return this.get('session.isAuthenticated') === false;
-  },
-
-  _thereIsNoAssessment(assessments) {
-    return isEmpty(assessments);
-  },
-
-  _showTutorial(assessment) {
-    return (
-      !this.userHasJustConsultedTutorial
-      && assessment.answers.length === 0
-      && !assessment.isCompleted
-      && !this.currentUser.user.hasSeenAssessmentInstructions
-    );
-  },
-
-  actions: {
-    loading() {
-      return this._isReady;
+    if (_.isString(value)) {
+      return value.toLowerCase() === 'true';
     }
-  },
-});
+
+    return defaultValue;
+  }
+}

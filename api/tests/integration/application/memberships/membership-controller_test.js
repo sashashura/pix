@@ -1,7 +1,7 @@
 const { expect, sinon, domainBuilder, HttpTestServer } = require('../../../test-helper');
 const usecases = require('../../../../lib/domain/usecases');
 const Membership = require('../../../../lib/domain/models/Membership');
-const securityController = require('../../../../lib/interfaces/controllers/security-controller');
+const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
 const moduleUnderTest = require('../../../../lib/application/memberships');
 
 describe('Integration | Application | Memberships | membership-controller', () => {
@@ -10,9 +10,10 @@ describe('Integration | Application | Memberships | membership-controller', () =
 
   beforeEach(() => {
     sinon.stub(usecases, 'createMembership');
-    sinon.stub(usecases, 'updateMembershipRole');
-    sinon.stub(securityController, 'checkUserHasRolePixMaster');
-    sinon.stub(securityController, 'checkUserIsAdminInOrganization');
+    sinon.stub(usecases, 'updateMembership');
+    sinon.stub(usecases, 'disableMembership');
+    sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster');
+    sinon.stub(securityPreHandlers, 'checkUserIsAdminInOrganizationOrHasRolePixMaster');
     httpTestServer = new HttpTestServer(moduleUnderTest);
   });
 
@@ -34,7 +35,7 @@ describe('Integration | Application | Memberships | membership-controller', () =
         const membership = domainBuilder.buildMembership();
         usecases.createMembership.resolves(membership);
 
-        securityController.checkUserHasRolePixMaster.callsFake((request, h) => h.response(true));
+        securityPreHandlers.checkUserHasRolePixMaster.callsFake((request, h) => h.response(true));
       });
 
       it('should resolve a 201 HTTP response', async () => {
@@ -59,7 +60,7 @@ describe('Integration | Application | Memberships | membership-controller', () =
       context('when user is not allowed to access resource', () => {
 
         beforeEach(() => {
-          securityController.checkUserHasRolePixMaster.callsFake((request, h) => {
+          securityPreHandlers.checkUserHasRolePixMaster.callsFake((request, h) => {
             return Promise.resolve(h.response().code(403).takeover());
           });
         });
@@ -96,8 +97,8 @@ describe('Integration | Application | Memberships | membership-controller', () =
         const membership = domainBuilder.buildMembership({
           organizationRole: Membership.roles.MEMBER
         });
-        usecases.updateMembershipRole.resolves(membership);
-        securityController.checkUserIsAdminInOrganization.callsFake((request, h) => h.response(true));
+        usecases.updateMembership.resolves(membership);
+        securityPreHandlers.checkUserIsAdminInOrganizationOrHasRolePixMaster.callsFake((request, h) => h.response(true));
       });
 
       it('should return a 200 HTTP response', async () => {
@@ -114,7 +115,7 @@ describe('Integration | Application | Memberships | membership-controller', () =
       context('when user is not allowed to access resource', () => {
 
         beforeEach(() => {
-          securityController.checkUserIsAdminInOrganization.callsFake((request, h) => {
+          securityPreHandlers.checkUserIsAdminInOrganizationOrHasRolePixMaster.callsFake((request, h) => {
             return Promise.resolve(h.response().code(403).takeover());
           });
         });
@@ -122,6 +123,48 @@ describe('Integration | Application | Memberships | membership-controller', () =
         it('should resolve a 403 HTTP response', async () => {
           // when
           const response = await httpTestServer.request('PATCH', '/api/memberships/1');
+
+          // then
+          expect(response.statusCode).to.equal(403);
+        });
+      });
+    });
+  });
+
+  describe('#disable', () => {
+
+    let membershipId;
+
+    context('Success cases', () => {
+
+      beforeEach(() => {
+        membershipId = domainBuilder.buildMembership().id;
+        usecases.disableMembership.resolves();
+        securityPreHandlers.checkUserHasRolePixMaster.callsFake((request, h) => h.response(true));
+      });
+
+      it('should return a 200 HTTP response', async () => {
+        // when
+        const response = await httpTestServer.request('POST', `/api/memberships/${membershipId}/disable`);
+
+        // then
+        expect(response.statusCode).to.equal(204);
+      });
+    });
+
+    context('Error cases', () => {
+
+      context('when user has not pix master role', () => {
+
+        beforeEach(() => {
+          securityPreHandlers.checkUserHasRolePixMaster.callsFake((request, h) => {
+            return Promise.resolve(h.response().code(403).takeover());
+          });
+        });
+
+        it('should resolve a 403 HTTP response', async () => {
+          // when
+          const response = await httpTestServer.request('POST', `/api/memberships/${membershipId}/disable`);
 
           // then
           expect(response.statusCode).to.equal(403);

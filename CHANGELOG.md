@@ -1,5 +1,562 @@
 # Pix Changelog
 
+## v2.171.0 (08/07/2020)
+
+- [#1621](https://github.com/1024pix/pix/pull/1621) [FEATURE] Ne pas afficher le champ "Réponse" sur la page de résultat pour les challenges QROC sans réponse(PIX-902).
+- [#1597](https://github.com/1024pix/pix/pull/1597) [FEATURE] Cacher le champ de réponse si l’épreuve est un embed auto-validé (PIX-900)
+- [#1612](https://github.com/1024pix/pix/pull/1612) [BUGFIX] Retour en arrière sur le correctif des liens téléchargeables (`target=_blank`)(PIX-835).
+- [#1606](https://github.com/1024pix/pix/pull/1606) [BUGFIX] Fermer la bannière de félicitation pour rejoindre une session (PIX-488)
+- [#1608](https://github.com/1024pix/pix/pull/1608) [BUGFIX] Corriger le formulaire d'anonymisation d'utilisateur de Pix Admin (PIX-944).
+- [#1623](https://github.com/1024pix/pix/pull/1623) [TECH] Utiliser un token pix-service dédié à la Github Action Auto-merge
+- [#1622](https://github.com/1024pix/pix/pull/1622) [TECH] Suppression du déclencheur status pour le workflow automerge
+- [#1600](https://github.com/1024pix/pix/pull/1600) [TECH] Ajouter les colonnes SUP à la table schooling-registrations (PIX-925).
+- [#1456](https://github.com/1024pix/pix/pull/1456) [TECH] Merge automatique grâce aux Github Actions
+- [#1613](https://github.com/1024pix/pix/pull/1613) [TECH] Inclure toute la stack trace asynchrone dans les erreurs Knex
+- [#1615](https://github.com/1024pix/pix/pull/1615) [TECH] Augmenter la taille des messages d'erreur dans Sentry
+- [#1620](https://github.com/1024pix/pix/pull/1620) [ORGA] Mettre à jour le lien de la documentation pour les organisation de type SCO. (Pix-817)
+- [#1611](https://github.com/1024pix/pix/pull/1611) [CLEANUP] Refacto admin save certification (PIX-946)
+- [#1604](https://github.com/1024pix/pix/pull/1604) [CLEANUP] Montée de version des linters dans Pix Admin (PIX-926).
+- [#1614](https://github.com/1024pix/pix/pull/1614) [CLEANUP] Requête SQL plus cohérente pour les détails d'une session (PIX-877)
+
+## v2.170.0 (06/07/2020)
+
+- [#1596](https://github.com/1024pix/pix/pull/1596) [FEATURE] Mettre à jour les conditions d'utilisation de Pix Orga en incluant le pix.org ( PIX-871 )
+- [#1588](https://github.com/1024pix/pix/pull/1588) [FEATURE] Permettre l'édition de l'e-mail d'une organisation dans Pix Admin (PIX-880).
+- [#1589](https://github.com/1024pix/pix/pull/1589) [FEATURE] Ajout de la colonne Réponse Automatique (PIX-899).
+- [#1598](https://github.com/1024pix/pix/pull/1598) [BUGFIX] Modification des scores dans pixAdmin (PIX-917)
+- [#1599](https://github.com/1024pix/pix/pull/1599) [BUGFIX] Il manque des certifs dans le détails d'une session (PIX-877)
+- [#1602](https://github.com/1024pix/pix/pull/1602) [BUGFIX] Cache l'action dissocier le compte pour les membres d'une organisation (PIX-941).
+- [#1586](https://github.com/1024pix/pix/pull/1586) [BUGFIX] Les certification sans cleaCompetenceMarks ne passent pas en completed (PIX-915)
+- [#1594](https://github.com/1024pix/pix/pull/1594) [BUGFIX] Niveau certifié non affiché dans le détail d'une certification (PIX-930)
+- [#1593](https://github.com/1024pix/pix/pull/1593) [BUGFIX] Recherche par certification id mort (PIX-922)
+- [#1601](https://github.com/1024pix/pix/pull/1601) [TECH] Ajouter le linter pour assurer la glimmerization (PIX-927).
+- [#1592](https://github.com/1024pix/pix/pull/1592) [TECH] Mettre à disposition des configurations d'IDE
+- [#1595](https://github.com/1024pix/pix/pull/1595) [TECH] Empêcher la création d'appartenance à une organisation si le rôle n'est pas connu.
+
+## v2.169.0 (01/07/2020)
+
+- [#1555](https://github.com/1024pix/pix/pull/1555) [FEATURE] Permettre la désactivation d'un membre depuis Pix Admin (PIX-394).
+- [#1580](https://github.com/1024pix/pix/pull/1580) [FEATURE] Savoir à quelle question on se trouve dans le titre de la page (PIX-906).
+- [#1582](https://github.com/1024pix/pix/pull/1582) [FEATURE] Permettre l'envoi d'une invitation par une nouvelle page (1ère partie)(PIX-881).
+- [#1581](https://github.com/1024pix/pix/pull/1581) [FEATURE] Retenter des acquis de compétence échoués au bout de 4 jours (PIX-758).
+- [#1584](https://github.com/1024pix/pix/pull/1584) [FEATURE] Paramétrer l'attribut lang de Pix App (PIX-833).
+- [#1577](https://github.com/1024pix/pix/pull/1577) [FEATURE] PART 3 - Nouveau design certificat (PIX-839)
+- [#1561](https://github.com/1024pix/pix/pull/1561) [FEATURE] PART 2 - Nouveau design certificat (PIX-838)
+- [#1560](https://github.com/1024pix/pix/pull/1560) [BUGFIX] Corrige la numérotation des épreuves de certif dans Pix Admin (PIX-869)
+- [#1572](https://github.com/1024pix/pix/pull/1572) [BUGFIX] Correction de l'affichage du macaron Cléa sur la certif (PIX-879)
+- [#1583](https://github.com/1024pix/pix/pull/1583) [BUGFIX] Le signalement surveillant était supprimé en enregistrant une certif (PIX-916)
+
+## v2.168.0 (29/06/2020)
+
+- [#1567](https://github.com/1024pix/pix/pull/1567) [FEATURE] Alimenter les adresses e-mail des organisations (PIX-874).
+- [#1571](https://github.com/1024pix/pix/pull/1571) [FEATURE] Afficher l'email de l'organisation dans Pix Admin (PIX-844).
+- [#1557](https://github.com/1024pix/pix/pull/1557) [FEATURE] Sauvegarder l'identifiant de l'administrateur qui a modifié le lien d'un utilisateur avec une organisation (PIX-859).
+- [#1576](https://github.com/1024pix/pix/pull/1576) [BUGFIX] Afficher un message d'erreur dans Pix Orga lorsque l'e-mail d'invitation est incorrect (PIX-471).
+- [#1570](https://github.com/1024pix/pix/pull/1570) [BUGFIX] Fix admin certification detail page
+- [#1574](https://github.com/1024pix/pix/pull/1574) [BUGFIX] Retirer le message de contexte sur la double mire de Pix Orga (PIX-912).
+- [#1562](https://github.com/1024pix/pix/pull/1562) [CLEANUP] Corriger les erreurs signalées dans Pix Admin par le linter (PIX-889).
+- [#1575](https://github.com/1024pix/pix/pull/1575) [A11Y] Supprimer target='blank" des fichiers téléchargeables depuis les épreuves (PIX-835).
+- [#1573](https://github.com/1024pix/pix/pull/1573) [INFRA] Permettre que les e-mails renvoient vers le bon environnement (PIX-888).
+
+## v2.167.0 (26/06/2020)
+
+- [#1568](https://github.com/1024pix/pix/pull/1568) [FEATURE] Cacher le bouton Retenter quand l'utilisateur a terminé une compétence avec le niveau max (PIX-759).
+- [#1565](https://github.com/1024pix/pix/pull/1565) [FEATURE] Ajout d'un email de récupération pour les organisations (PIX-843).
+- [#1538](https://github.com/1024pix/pix/pull/1538) [FEATURE] Modification dans le design des badges sur la page de résultat (PIX-778).
+- [#1559](https://github.com/1024pix/pix/pull/1559) [FEATURE] Afficher le bouton retenter sur la carte de la competence (PIX-757).
+- [#1556](https://github.com/1024pix/pix/pull/1556) [FEATURE] Permettre à un prescripteur d'obtenir un e-mail d'invitation en fonction de sa région (PIX-810).
+- [#1551](https://github.com/1024pix/pix/pull/1551) [FEATURE] Ajout de la pagination sur le tableau des élèves (PIX-723)
+- [#1566](https://github.com/1024pix/pix/pull/1566) [BUGFIX] Corriger le pourcentage de la barre de progression lorsque la compétence est retentée (PIX-841).
+- [#1563](https://github.com/1024pix/pix/pull/1563) [BUGFIX] Rollback Ember lint compatibilité (PIX-890)
+- [#1564](https://github.com/1024pix/pix/pull/1564) [BUGFIX] Vérifier qu'un membre désactivé n'accede pas aux routes de campagnes (PIX-857).
+- [#1558](https://github.com/1024pix/pix/pull/1558) [BUGFIX] Rediriger le prescrit vers son parcours après inscription (PIX-886).
+- [#1548](https://github.com/1024pix/pix/pull/1548) [BUGFIX] Bloquer les double-clics sur l'envoi de signalements (PIX-704).
+- [#1528](https://github.com/1024pix/pix/pull/1528) [CLEANUP] Suppression du modèle CampaignAssessment et de son repository (PIX-897)
+- [#1569](https://github.com/1024pix/pix/pull/1569) [CLEANUP] Accélère la manière de construire un CertificationProfile (PIX-896)
+- [#1553](https://github.com/1024pix/pix/pull/1553) [ORGA] Remonter l'item documentation dans le menu. (PIX-461)
+- [#1536](https://github.com/1024pix/pix/pull/1536)  [FEATURE] Afficher un message d'erreur approprié lors de la connexion à Pix App (PIX-367).
+- [#1552](https://github.com/1024pix/pix/pull/1552) [CLEANUP] Corriger les erreurs signalées dans Pix Admin, par le linter dans app/templates/authenticated (PIX-878).
+
+## v2.166.0 (23/06/2020)
+
+- [#1509](https://github.com/1024pix/pix/pull/1509) [FEATURE] PART-1 : Nouveau visuel certificat (PIX-597)
+- [#1545](https://github.com/1024pix/pix/pull/1545) [FEATURE] Ajouter un nouveau type de signalement (PIX-836).
+- [#1537](https://github.com/1024pix/pix/pull/1537) [FEATURE] Filtrer les élèves par type de connexion dans pix-orga (PIX-722)
+- [#1530](https://github.com/1024pix/pix/pull/1530) [BUGFIX] Éviter de reposer un challenge auquel on a déjà répondu (PIX-210).
+- [#1549](https://github.com/1024pix/pix/pull/1549) [BUGFIX] Gérer les erreurs sur la page de changement de mot de passe (PIX-434).
+- [#1554](https://github.com/1024pix/pix/pull/1554) [BUGFIX] Correction d'un test aléatoire sur les filtres des élèves
+- [#1506](https://github.com/1024pix/pix/pull/1506) [TECH] Ajouter les configurations d'IDE pour faciliter le déboggage.
+- [#1529](https://github.com/1024pix/pix/pull/1529) [CLEANUP] Retrait de l'attribut level (déprécié) du modèle AssessmentResult (PIX-863)
+- [#1503](https://github.com/1024pix/pix/pull/1503) [CLEANUP] Renommer SmartPlacement en Campaign (PIX-830).
+
+## v2.165.0 (22/06/2020)
+
+- [#1547](https://github.com/1024pix/pix/pull/1547) [FEATURE] Ajout d'un retour utilisateur lors de la dissociation d'un élève (PIX-865)
+- [#1516](https://github.com/1024pix/pix/pull/1516) [FEATURE] Permettre à l'utilisateur de rejoindre son parcours grâce à l'e-mail de création de compte (PIX-429).
+- [#1546](https://github.com/1024pix/pix/pull/1546) [FEATURE] Amélioration des formulations lors de la réconciliation (PIX-816).
+- [#1525](https://github.com/1024pix/pix/pull/1525) [FEATURE] Dissocier les comptes utilisateurs des élèves depuis Pix ORGA (Pix-718).
+- [#1544](https://github.com/1024pix/pix/pull/1544) [BUGFIX] Permettre à un utilisateur connecté d'aller sur la page de changement de mot de passe (PIX-516).
+- [#1539](https://github.com/1024pix/pix/pull/1539) [BUGFIX] Erreur lorsqu'on tente de modifier une certification sur PixAdmin (PIX-866)
+- [#1543](https://github.com/1024pix/pix/pull/1543) [BUGFIX] Déconnecter un utilisateur qui n'a plus de membership dans Pix Orga (PIX-837).
+- [#1540](https://github.com/1024pix/pix/pull/1540) [BUGFIX] Empêcher l'édition des informations d'un utilisateur connecté via le GAR depuis Pix Admin(PIX-861)
+- [#1508](https://github.com/1024pix/pix/pull/1508) [TECH] Amélioration de la configuration de Bookshelf
+- [#1531](https://github.com/1024pix/pix/pull/1531) [TECH] Montée de la BDD en version 12
+- [#1541](https://github.com/1024pix/pix/pull/1541) [CLEANUP] Corriger les erreurs signalées dans Pix Admin, par le ember template linter (PIX-828).
+- [#1519](https://github.com/1024pix/pix/pull/1519) [CLEANUP] Simplification et amélioration de l'accès aux campagnes (PIX-847)
+
+## v2.164.0 (18/06/2020)
+
+- [#1526](https://github.com/1024pix/pix/pull/1526) [FEATURE] Ajouter lien sur le tableau de bord d'un utilisateur (PIX-606).
+- [#1535](https://github.com/1024pix/pix/pull/1535) [FEATURE] Filtrer les élèves par prénom dans pix-orga (PIX-721).
+- [#1534](https://github.com/1024pix/pix/pull/1534) [FEATURE] Afficher l'url d'une campagne dans Pix Orga suivant l'extension sur laquelle on est (fr ou org) (PIX-826).
+- [#1532](https://github.com/1024pix/pix/pull/1532) [FEATURE] Ajout d'une colonne de titre pour les badges (PIX-849).
+- [#1524](https://github.com/1024pix/pix/pull/1524) [FEATURE] Permettre l'anonymisation d'un utilisateur depuis Pix Admin (PIX-729)
+- [#1527](https://github.com/1024pix/pix/pull/1527) [FEATURE] Changement du système de pagination et filtrage des membres d'une organisation dans Pix Admin et Pix Orga (PIX-860).
+- [#1520](https://github.com/1024pix/pix/pull/1520) [FEATURE] Filtrer les élèves par nom dans pix-orga (PIX-719).
+- [#1513](https://github.com/1024pix/pix/pull/1513) [FEATURE] Afficher les competences avec score et niveau pour un participant (PIX-622)
+- [#1521](https://github.com/1024pix/pix/pull/1521) [BUGFIX] Ne pas lever une erreur 500 lors de la recherche d'une session avec un identifiant trop grand.
+- [#1533](https://github.com/1024pix/pix/pull/1533) [TECH] Supprimer les tests unitaires Ember redondants
+- [#1523](https://github.com/1024pix/pix/pull/1523) [TECH] Assurer que la version de node installée est 12.18.x.
+- [#1483](https://github.com/1024pix/pix/pull/1483) [DESIGN-SYSTEM] Ajout de la PixTooltip sur Pix Admin
+
+## v2.163.0 (16/06/2020)
+
+- [#1522](https://github.com/1024pix/pix/pull/1522) [BUGFIX] Mauvais affichage des notifications après la finalisation (PIX-848)
+- [#1514](https://github.com/1024pix/pix/pull/1514) [TECH] Correction des tests e2e qui échouent aléatoirement sur la CI.
+- [#1517](https://github.com/1024pix/pix/pull/1517) [TECH] Montée de version de Node (12.18.0) et NPM (6.14.4).
+- [#1518](https://github.com/1024pix/pix/pull/1518) [TECH] Paralléliser les tests end-to-end sur la CI.
+- [#1488](https://github.com/1024pix/pix/pull/1488) [DOC] Mise à jour des bonnes pratiques d'accessibilité
+- [#1468](https://github.com/1024pix/pix/pull/1468) [CLEANUP] Ne plus sélectionner les assessment-results automatiquement lorsqu'on sélectionne un assessment depuis la BDD (PIX-775)
+
+## v2.162.0 (15/06/2020)
+
+- [#1445](https://github.com/1024pix/pix/pull/1445) [FEATURE] Afficher l'obtention de la certif cléa sur pix admin (PIX-630)
+- [#1496](https://github.com/1024pix/pix/pull/1496) [FEATURE] Ajouter lien vers BI sur le détail d'une organisation (PIX-605).
+- [#1507](https://github.com/1024pix/pix/pull/1507) [FEATURE] Ne plus afficher les membres désactivés dans PixOrga et PixAdmin (PIX-409).
+- [#1504](https://github.com/1024pix/pix/pull/1504) [FEATURE] Permettre la mise à jour du prénom, nom et l'email d'un utilisateur connecté par email dans Pix Admin (PIX-458).
+- [#1510](https://github.com/1024pix/pix/pull/1510) [FEATURE] Changer la source de stockage des images de badges (PIX-777)
+- [#1512](https://github.com/1024pix/pix/pull/1512) [BUGFIX] Format de date invalide lors de la création d'un utilisateur SCO (PIX-834).
+
+## v2.161.0 (12/06/2020)
+
+- [#1511](https://github.com/1024pix/pix/pull/1511) [FEATURE] Empêcher la connexion à Pix Orga d'un utilisateur dont le membership a été désactivé (PIX-766).
+- [#1497](https://github.com/1024pix/pix/pull/1497) [FEATURE] Ajout des info de certification dans le tableau des participants (PIX-619).
+- [#1501](https://github.com/1024pix/pix/pull/1501) [FEATURE] Ajouter un système d'onglets dans le détail d'une organisation dans Pix Admin (PIX-827).
+- [#1475](https://github.com/1024pix/pix/pull/1475) [FEATURE] Multi-badge sur une campagne (PIX-660).
+- [#1484](https://github.com/1024pix/pix/pull/1484) [FEATURE] Création d'une composant graphique Modal (PIX-717).
+- [#1481](https://github.com/1024pix/pix/pull/1481) [FEATURE] Retenter des acquis échoués depuis la page compétence (PIX-756).
+- [#1489](https://github.com/1024pix/pix/pull/1489) [BUGFIX] Eviter le crash de container lorsqu'une analyse de campagne se déclenche (PIX-785)
+- [#1499](https://github.com/1024pix/pix/pull/1499) [TECH] Suppression de la route dépréciée `/campaigns/id/csvResults` (PIX-832).
+- [#1458](https://github.com/1024pix/pix/pull/1458) [TECH] Montée de version des apps Ember de 3.15 à 3.18
+- [#1434](https://github.com/1024pix/pix/pull/1434) [TECH] Montée de version de Bookshelf
+- [#1505](https://github.com/1024pix/pix/pull/1505) [TECH] Paralléliser les tests end-to-end sur la CI.
+- [#1492](https://github.com/1024pix/pix/pull/1492) [TECH] Simplification de la création de badge en BDD (PIX-736).
+- [#1486](https://github.com/1024pix/pix/pull/1486) Afficher les informations générales d'un profil partagé pendant une campagne (PIX-626).
+- [#1495](https://github.com/1024pix/pix/pull/1495) [CLEANUP] Clarifier la log du script de création des centres de certification.
+
+## v2.160.0 (09/06/2020)
+
+- [#1491](https://github.com/1024pix/pix/pull/1491) [FEATURE] Mettre à jour le nom, identifiant externe et département d'une organisation dans Pix Admin (PIX-456).
+- [#1476](https://github.com/1024pix/pix/pull/1476) [FEATURE] Modifier les attributs d'un user dans un contexte d'administration (PIX-734).
+- [#1473](https://github.com/1024pix/pix/pull/1473) [FEATURE] Affichage du profil Pix sur la page de profil déjà envoyé (PIX-752)
+- [#1474](https://github.com/1024pix/pix/pull/1474) [FEATURE] Ajout d'un composant dropdown dans Pix Orga (PIX-716).
+- [#1494](https://github.com/1024pix/pix/pull/1494) [BUGFIX] Corrige une erreur 500 en 404 quand un test de démo n'est pas trouvé
+- [#1493](https://github.com/1024pix/pix/pull/1493) [BUGFIX] La flèche de checkpoint doit s'afficher en plus grand (PIX-811).
+- [#1490](https://github.com/1024pix/pix/pull/1490) [BUGFIX] Correction d'un test knex-utils aléatoire
+- [#1477](https://github.com/1024pix/pix/pull/1477) [BUGFIX]  Amélioration de la validation du formulaire d'inscription dans Pix Orga (PIX-468).
+- [#1470](https://github.com/1024pix/pix/pull/1470) [BUGFIX] Réduction de la largeur de certaines colonnes dans le tableau des membres (PIX-459).
+- [#1464](https://github.com/1024pix/pix/pull/1464) [TECH] Utiliser un EventDispatcher pour passer les Domain Events aux Event Handlers
+- [#1442](https://github.com/1024pix/pix/pull/1442) [TECH] Ecriture d'un script pour élaborer des statistiques sur la qualité des tests de certification (PIX-738)
+- [#1485](https://github.com/1024pix/pix/pull/1485)  [FEATURE ] Obtenir la date de délivrance des certifications (PIX-164)
+- [#1479](https://github.com/1024pix/pix/pull/1479) [INFRA] Ajouter les dernières variables d'environnement dans le fichier sample.env
+- [#1482](https://github.com/1024pix/pix/pull/1482) [CLEANUP] Correction du changelog après une mauvaise manip qui a provoqué la duplication d'une entrée (PIX-774)
+
+## v2.159.0 (03/06/2020)
+
+- [#1465](https://github.com/1024pix/pix/pull/1465) [FEATURE] Afficher la dernière date d'envoi d'une invitation dans Pix Orga (PIX-730).
+- [#1471](https://github.com/1024pix/pix/pull/1471) [FEATURE] Permettre à l'utilisateur d'obtenir un e-mail de création de compte en fonction de sa région (PIX-745).
+- [#1472](https://github.com/1024pix/pix/pull/1472) [FEATURE] Empêcher le candidat de faire un signalement pendant le test de certification (PIX-578)
+- [#1466](https://github.com/1024pix/pix/pull/1466) [FEATURE] Afficher uniquement la date sans la partie "temps" pour les valeurs de date de finalisation, publication et diffusion au prescripteur (PIX-765)
+- [#1455](https://github.com/1024pix/pix/pull/1455) [FEATURE] Ajout de la pagination pour les participants au collectes de profils (PIX-621)
+- [#1480](https://github.com/1024pix/pix/pull/1480) [BUGFIX] Problème d'affichage de la bannière de reprise de parcours (PIX-770)
+- [#1478](https://github.com/1024pix/pix/pull/1478) [BUGFIX] Corrections relatives au changement d'organisation dans Pix Orga (PIX-538).
+- [#1467](https://github.com/1024pix/pix/pull/1467) [BUGFIX] Ne prendre en compte que les compétences évaluées en certification lors du scoring de certification CléA (PIX-679)
+- [#1469](https://github.com/1024pix/pix/pull/1469) [BUGFIX] Récupérer les derniers knowledge-elements pour un skill avant la date de partage des résultats (PIX-767).
+- [#1457](https://github.com/1024pix/pix/pull/1457) [CLEANUP] Change la manière de récupérer les réponses d'un QCM (PIX-768).
+- [#1452](https://github.com/1024pix/pix/pull/1452) [CLEANUP] Ajout de tests sur les challenges (PIX-638).
+- [#1417](https://github.com/1024pix/pix/pull/1417) [INFRA] Désactivation de la compression des réponses HTTP
+
+## v2.158.0 (29/05/2020)
+
+- [#1462](https://github.com/1024pix/pix/pull/1462) [FEATURE] Permettre à l'utilisateur d'obtenir un e-mail de réinitialisation de mot de passe en fonction de sa région (PIX-746).
+- [#1454](https://github.com/1024pix/pix/pull/1454) [FEATURE] Montrer de manière claire que l'utilisateur a déjà envoyé son profil Pix (PIX-610).
+- [#1453](https://github.com/1024pix/pix/pull/1453) [FEATURE] Ne pas montrer la page de présentation si l'utilisateur a déjà commencé sa participation (PIX-616).
+- [#1461](https://github.com/1024pix/pix/pull/1461) [BUGFIX] Vérifier le seuil des 75% CléA sur le score certifié par compétence (et non positionné) (PIX-680).
+- [#1397](https://github.com/1024pix/pix/pull/1397) [TECH] Améliorer l'accès à la liste des participants sur Pix Orga (PIX-608).
+- [#1448](https://github.com/1024pix/pix/pull/1448) [CLEANUP] Utilisation d'un read-model dans le service Current-user de Pix Orga (PIX-553).
+- [#1418](https://github.com/1024pix/pix/pull/1418) [CLEANUP] Suppression du package "api/lib/interfaces" et de ses modules devenus inutiles.
+
+## v2.157.0 (27/05/2020)
+
+- [#1437](https://github.com/1024pix/pix/pull/1437) [FEATURE] Tracer les modifications des appartenances aux organisations (PF-494).
+- [#1447](https://github.com/1024pix/pix/pull/1447) [BUGFIX] Correction du calcul du score en pix (différence entre export du profil et affichage sur le profil) (PIX-739).
+- [#1419](https://github.com/1024pix/pix/pull/1419) [CLEANUP] Extraction d'un modèle d'assessment dédié au scoring de certification (PIX-733)
+
+## v2.156.0 (26/05/2020)
+
+- [#1444](https://github.com/1024pix/pix/pull/1444) [FEATURE] Permettre la modification du rôle d'un membership dans Pix Admin (PIX-455).
+- [#1449](https://github.com/1024pix/pix/pull/1449) [FEATURE] Voir les campagnes archivées quand plus de campagnes actives (PIX-663)
+- [#1430](https://github.com/1024pix/pix/pull/1430) [FEATURE] Ajout du filtre sur la colonne "Qui ?" dans la liste des sessions dans Pix Admin (PA-211)
+- [#1428](https://github.com/1024pix/pix/pull/1428) [BUGFIX] Empêcher l'utilisateur de demander plusieurs fois la réinitialisation de son mot de passe (PIX-489).
+- [#1451](https://github.com/1024pix/pix/pull/1451) [BUGFIX] Correction de la mise à jour de l'affichage de la liste des participants (PIX-747).
+- [#1438](https://github.com/1024pix/pix/pull/1438) [BUGFIX] Affichage correct du label de l'identifiant externe dans Pix Orga (PIX-643).
+
+## v2.155.0 (25/05/2020)
+
+- [#1441](https://github.com/1024pix/pix/pull/1441) [FEATURE] Résultats collectifs prenant en compte les nouvelles compétences de Pix + (PIX-673)
+- [#1443](https://github.com/1024pix/pix/pull/1443) [FEATURE] Afficher le bon lien vers les CGU sur .org et .fr (PIX-683).
+- [#1402](https://github.com/1024pix/pix/pull/1402) [FEATURE] Industrialiser les critères de badge (PIX-563).
+- [#1436](https://github.com/1024pix/pix/pull/1436) [FEATURE] Rediriger sur le site vitrine après déconnexion (PF-682).
+- [#1426](https://github.com/1024pix/pix/pull/1426) [FEATURE] Afficher la liste des participants à une collecte de profil dans pix orga (PIX-618)
+- [#1440](https://github.com/1024pix/pix/pull/1440) [BUGFIX] L'ordre de tri sur la liste paginée des sessions sur PixAdmin n'est pas déterministe (PIX-728)
+- [#1439](https://github.com/1024pix/pix/pull/1439) [BUGFIX] Rétablissement du loader quand on lance une évaluation (PIX-653).
+- [#1394](https://github.com/1024pix/pix/pull/1394) [BUGFIX] Stabilisation des perfs pour l'export CSV des campagnes de collecte de profils et d'évaluation (PIX-607).
+- [#1433](https://github.com/1024pix/pix/pull/1433) [TECH] Montée de version des dépendances de Pix API
+- [#1411](https://github.com/1024pix/pix/pull/1411) [CLEANUP] Extraction d'un JuryCertificationSummary pour plus de clarté concernant le traitement des sessions (PIX-654)
+
+## v2.154.0 (19/05/2020)
+
+- [#1429](https://github.com/1024pix/pix/pull/1429) [FEATURE] Traduire les titres des domaines (PIX-664)
+- [#1420](https://github.com/1024pix/pix/pull/1420) [FEATURE] Changer la façon d'accéder à la page de détail d'un utilisateur dans Pix Admin (PIX-677). 
+- [#1408](https://github.com/1024pix/pix/pull/1408) [FEATURE] Clarifier la page de changement de mot de passe (PIX-554).
+- [#1410](https://github.com/1024pix/pix/pull/1410) [FEATURE] Modification du calcul des Pix Globaux (PIX-649)
+- [#1396](https://github.com/1024pix/pix/pull/1396) [FEATURE] Voir qui est assigné à une session sur Pix Admin (PIX-588)
+- [#1427](https://github.com/1024pix/pix/pull/1427) [BUGFIX] Nom du fichier avant jury sans underscore (PIX-661)
+- [#1431](https://github.com/1024pix/pix/pull/1431) [TECH] Ajouter les sourcemaps en développement
+- [#1409](https://github.com/1024pix/pix/pull/1409) [TECH] Diviser le flux d'accès aux campagnes (PIX-651).
+- [#1393](https://github.com/1024pix/pix/pull/1393) [TECH] Glimmerize challenge-statement (PIX-676).
+- [#1377](https://github.com/1024pix/pix/pull/1377) [DOC] Ajouter un standard de test.
+
+## v2.153.0 (15/05/2020)
+
+- [#1403](https://github.com/1024pix/pix/pull/1403) [FEATURE] Valider les QROCM seulement si l'utilisateur a rempli tous les champs réponse (PIX-375).
+- [#1424](https://github.com/1024pix/pix/pull/1424) [BUGFIX] Changer la description de la page de connexion de Pix Certif (PIX-678)
+- [#1423](https://github.com/1024pix/pix/pull/1423) [BUGFIX] Remettre l'ancien gradient sur la page de connexion sur Pix Orga (PIX-655).
+- [#1421](https://github.com/1024pix/pix/pull/1421) [BUGFIX] Corriger l'affichage de la progression sur le didacticiel (PIX-560).
+- [#1399](https://github.com/1024pix/pix/pull/1399) [BUGFIX] Limiter les Pix et Levels max sur l'export de collecte de profils (PIX-615).
+- [#1412](https://github.com/1024pix/pix/pull/1412) [BUGFIX] Empêcher le chevauchement des boutons sur la page CGU en version mobile (PIX-662)
+- [#1415](https://github.com/1024pix/pix/pull/1415) [BUGFIX] Suppression d'un warning ember-data sur les user-orga-settings.
+- [#1414](https://github.com/1024pix/pix/pull/1414) [BUGFIX] Suppression de warnings ember-data sur les memberships.
+- [#1400](https://github.com/1024pix/pix/pull/1400) [BUGFIX] Validation de la longueur d'un id de session. 
+- [#1416](https://github.com/1024pix/pix/pull/1416) [TECH] Ajout d'un helper de test contains pour vérifier qu'un texte est présent dans le rendu (PIX-675) .
+- [#1413](https://github.com/1024pix/pix/pull/1413) [CLEANUP] Retrait d'une clause SELECT inutile dans le KE repository
+
+## v2.152.0 (13/05/2020)
+
+- [#1398](https://github.com/1024pix/pix/pull/1398) [FEATURE] Améliorer le design de la page de login (PIX-511).
+- [#1406](https://github.com/1024pix/pix/pull/1406) [FEATURE] Centrer les messages d'erreur sur la page de connexion de Pix Orga (PIX-652).
+- [#1317](https://github.com/1024pix/pix/pull/1317) [FEATURE] Certif clea zone grise (PF-1147)
+- [#1372](https://github.com/1024pix/pix/pull/1372) [FEATURE] Ajoute le système d'archivage sur les campagnes de type collecte de profils (PIX-584).
+- [#1395](https://github.com/1024pix/pix/pull/1395) [FEATURE][FIX] Utiliser l'élément UL pour la liste à puces dans la double mire de connexion SCO (PIX-647).
+- [#1392](https://github.com/1024pix/pix/pull/1392) [FEATURE] Mettre à jour le texte de la page de login de PixOrga et son design (PIX-530).
+- [#1374](https://github.com/1024pix/pix/pull/1374) [FEATURE] Supprimer le logo de la Marianne si l'on n'est pas sur ".fr" (PIX-603)
+- [#1407](https://github.com/1024pix/pix/pull/1407) [BUGFIX] Correction des couleurs de la navigation.
+- [#1401](https://github.com/1024pix/pix/pull/1401) [BUGFIX] Ne pas permettre d'évaluer un tutoriel 2 fois (PIX-648).
+- [#1405](https://github.com/1024pix/pix/pull/1405) [BUGFIX] Utiliser le bon dégradé de couleur pour le fond de la bannière de la page évaluation.
+- [#1389](https://github.com/1024pix/pix/pull/1389) [BUGFIX] Supprime le bouton "J'ai un code" pour les utilisateurs non connectés (PIX-601).
+- [#1387](https://github.com/1024pix/pix/pull/1387) [BUGFIX] Suppression d'un warning ember-data sur les campaignParticipations.
+- [#1378](https://github.com/1024pix/pix/pull/1378) [BUGFIX] Ne plus avoir les erreurs de transition dans la console (PIX-632).
+- [#1277](https://github.com/1024pix/pix/pull/1277) [TECH] Remplir la colonne associatedSkillId de la table certification-challenges avec l'id de l'acquis approprié (PF-1229)
+- [#1404](https://github.com/1024pix/pix/pull/1404) [CLEANUP] Déplacement et renommage du module "security-controller"
+- [#1382](https://github.com/1024pix/pix/pull/1382) [INFRA] Amélioration des performances mémoire (et donc vitesse) lors de l'utilisation du knowledge-element-repository (PIX-635).
+- [#1292](https://github.com/1024pix/pix/pull/1292)  [DESIGN SYSTEM] Mise a jour des couleurs (PF-1152)
+
+## v2.151.0 (11/05/2020)
+
+- [#1386](https://github.com/1024pix/pix/pull/1386) [FEATURE] Modification du message concernant la réinitialisation d'un mot de passe, sur la double mire de connexion (PIX-556).
+- [#1380](https://github.com/1024pix/pix/pull/1380) [FEATURE] Copier/Coller les informations contenues dans la pop-up Gestion du compte de l'élève de PixOrga (PIX-557).
+- [#1334](https://github.com/1024pix/pix/pull/1334) [FEATURE] Traduction des pages d'inscription/connexion (PF-1207).
+- [#1390](https://github.com/1024pix/pix/pull/1390) [BUGFIX] Rediriger vers la page de campagne après revalidation des CGU (PIX-644).
+- [#1384](https://github.com/1024pix/pix/pull/1384) [CLEANUP] Retrait du code lié à la route GET /api/feedbacks, non utilisée (PIX-639)
+
+## v2.150.0 (07/05/2020)
+
+- [#1357](https://github.com/1024pix/pix/pull/1357) [FEATURE]  Ajout de la page /cgu au workflow de connexion (PF-1249). 
+- [#1379](https://github.com/1024pix/pix/pull/1379) [FEATURE] Pouvoir trier la recommandation dans l'onglet analyse (PIX-585).
+- [#1368](https://github.com/1024pix/pix/pull/1368) [FEATURE] Permettre la modification d'une campagne de type collecte de profils (PIX-579).
+- [#1376](https://github.com/1024pix/pix/pull/1376) [FEATURE] Enregister l'acceptation des CGU par l'utilisateur (PF-1235)
+- [#1388](https://github.com/1024pix/pix/pull/1388) [BUGFIX] Deux épreuves avec des fichiers à télécharger ont les mêmes fichiers (PIX-642).
+- [#1385](https://github.com/1024pix/pix/pull/1385) [BUGFIX] Corriger les rem de la communication banner (PIX-646).
+- [#1367](https://github.com/1024pix/pix/pull/1367) [TECH] Regrouper les tests des cas d'erreurs des contrôleurs (PIX-599).
+- [#1360](https://github.com/1024pix/pix/pull/1360) [INFRA] Possibilité d'ajouter des en-têtes HTTP grâce à des variables d'environnement.
+- [#1331](https://github.com/1024pix/pix/pull/1331) [CLEANUP] Convertir les font-size exprimées en px en rem et aligner la valeur du rem de Pix App sur les autres fronts.
+- [#1359](https://github.com/1024pix/pix/pull/1359) [INFRA] Corrige le status code HTTP "precondition failed" (421 -> 412)
+
+## v2.149.1 (06/05/2020)
+
+- [#1383](https://github.com/1024pix/pix/pull/1383) [BUGFIX] Problème d'affichage des réponses des QROCM (PIX-636).
+
+## v2.149.0 (06/05/2020)
+
+- [#1293](https://github.com/1024pix/pix/pull/1293) [FEATURE] Evaluer un tutoriel (PF-1095).
+- [#1373](https://github.com/1024pix/pix/pull/1373) [FEATURE] Supprime le terme parcours des messages d'erreurs des pages de réconciliation (PIX-582).
+- [#1371](https://github.com/1024pix/pix/pull/1371) [FEATURE] Supprime le terme parcours des messages d'erreurs des pages de réconciliation (PIX-582).
+- [#1381](https://github.com/1024pix/pix/pull/1381) [BUGFIX] Le résultat de certificat de l'utilisateur ne s'affiche plus (PIX-631)
+- [#1369](https://github.com/1024pix/pix/pull/1369) [BUGFIX] Le changement rapide du contenu de plusieurs filtres dans les listes paginées n'est pas bien géré (PIX-598)
+- [#1323](https://github.com/1024pix/pix/pull/1323) [CLEANUP] Refacto autour des sessions côté PixAdmin (PIX-589)
+- [#1297](https://github.com/1024pix/pix/pull/1297) [INFRA] Ajout d'en-têtes HTTP pour la sécurité
+- [#1370](https://github.com/1024pix/pix/pull/1370) [CLEANUP] Suppression de la feature d'analyse de PV de session dans PixAdmin (PIX-600)
+- [#1344](https://github.com/1024pix/pix/pull/1344) [BSR] Supprimer les actions dépréciées POST et PATCH sur la route user-orga-settings
+- [#1247](https://github.com/1024pix/pix/pull/1247) [DOC] Ajouter des diagrammes de séquence sur la sécurité
+- [#1375](https://github.com/1024pix/pix/pull/1375) [CLEANUP] Suppression d'un appel inutile dans la page challenge (PIX-609).
+
+## v2.148.0 (04/05/2020)
+
+- [#1332](https://github.com/1024pix/pix/pull/1332) [FEATURE] Permettre de signaler que les utilisateurs non SCO doivent valider les prochaines CGU (PF-1236).
+- [#1337](https://github.com/1024pix/pix/pull/1337) [FEATURE] Ajout d'un filtre sur la colonne "Centre de certification" dans la liste des sessions paginée sur PixAdmin (PA-210)
+- [#1366](https://github.com/1024pix/pix/pull/1366) [FEATURE] Mise à jour de l'apparence du bouton "J'ai un code" (PIX-595).
+- [#1340](https://github.com/1024pix/pix/pull/1340) [FEATURE] Afficher le profil d'un utilisateur avant qu'il le partage dans une campagne de collecte de profils (PIX-559).
+- [#1348](https://github.com/1024pix/pix/pull/1348) [FEATURE] Ajout d'une bannière spécifique à l'envoi de profil (PIX-568).
+- [#1351](https://github.com/1024pix/pix/pull/1351) [FEATURE] Ajout d'un lien vers la documentation pour les utilisateurs d'organisations pro (PIX-565).
+- [#1356](https://github.com/1024pix/pix/pull/1356) [FEATURE] Changer les messages d'erreur à la saisie de code campagne (PIX-573).
+- [#1354](https://github.com/1024pix/pix/pull/1354) [FEATURE] Changer le texte du loader de campagne dans pix-app  (PIX-572)
+- [#1308](https://github.com/1024pix/pix/pull/1308) [CLEANUP] Appliquer la règle eslint no-get dans PixApp (PF-1247).
+- [#1353](https://github.com/1024pix/pix/pull/1353) [INFRA] Corriger le démarrage des apps pour les tests Cypress en local (PIX-596).
+
+## v2.147.0 (30/04/2020)
+
+- [#1358](https://github.com/1024pix/pix/pull/1358) [FEATURE] Retirer la pagination à 100 sur les participations aux campagnes (PIX-594).
+- [#1362](https://github.com/1024pix/pix/pull/1362) [FEATURE] Ajout de la gestion du mot de passe à usage unique sur la double mire (PF-1216).
+- [#1347](https://github.com/1024pix/pix/pull/1347) [FEATURE] Création d'une page pour afficher la nouvelle version des cgus Pix. (PF-998)
+- [#1346](https://github.com/1024pix/pix/pull/1346) [TECH] Utiliser .integer() sur les validations d'ID (PIX-591).
+- [#1355](https://github.com/1024pix/pix/pull/1355) [DOC] Met à jour la description du tag de PR `BUGFIX`
+
+## v2.146.0 (28/04/2020)
+
+- [#1299](https://github.com/1024pix/pix/pull/1299) [FEATURE] Générer un mot de passe à usage unique pour un élève dans Pix Orga (PO-321).
+- [#1338](https://github.com/1024pix/pix/pull/1338) [FEATURE] Ajout d'onglets sur la page participant (PIX-569).
+- [#1345](https://github.com/1024pix/pix/pull/1345) [FEATURE] Retrait de la colonne "Nombre de certifications publiées" dans la liste des sessions de PixAdmin (PIX-566).
+- [#1339](https://github.com/1024pix/pix/pull/1339) [FEATURE] Ajuster la formulation de la page d'identifiant externe (PIX-564).
+- [#1350](https://github.com/1024pix/pix/pull/1350) [BUGFIX] Export CSV d'une campagne, ne pas mettre l'id externe quand la campagne n'en a pas (PIX-592).
+- [#1341](https://github.com/1024pix/pix/pull/1341) [BUGFIX] Le temps d'attente d'envoi de requêtes mis en place lors de la recherche de campagnes par nom dans PixOrga ne marche plus (PO-440)
+- [#1342](https://github.com/1024pix/pix/pull/1342) [BUGFIX] Affichage défectueux lorsqu'on supprime rapidement un filtre sur nom dans la liste des campagnes (PIX-583)
+- [#1336](https://github.com/1024pix/pix/pull/1336) [TECH] Eviter les erreurs de contraintes d'unicité. 
+
+## v2.145.0 (24/04/2020)
+
+- [#1335](https://github.com/1024pix/pix/pull/1335) [FEATURE] Renommer et déplacer l'entrée vers la page de saisie de code depuis le menu de PIX App (PF-1226).
+- [#1333](https://github.com/1024pix/pix/pull/1333) [FEATURE] Changement du wording de la page de saisi de code (PF-1227).
+- [#1309](https://github.com/1024pix/pix/pull/1309) [FEATURE] Ajouter des filtres concernant le statut et l'envoi des résultats au prescripteur sur la liste des sessions paginées (PA-205)
+- [#1275](https://github.com/1024pix/pix/pull/1275) [FEATURE] Certif clea zone rouge (PF-1147)
+- [#1318](https://github.com/1024pix/pix/pull/1318) [FEATURE] Affichage des tutoriels par sujets dans l'analyse de campagne (PO-408).
+- [#1313](https://github.com/1024pix/pix/pull/1313) [FEATURE] Affichage d'une bannière pour informer les utilisateurs de problèmes sur la prod (PF-1251)
+- [#1324](https://github.com/1024pix/pix/pull/1324) [FEATURE] Ajouter un loader au chargement de l'analyse de campagne (PO-431)
+- [#1322](https://github.com/1024pix/pix/pull/1322) [FEATURE] Ajout de la recommandation pour un participant à une campagne (PO-422)
+- [#1320](https://github.com/1024pix/pix/pull/1320) [BUGFIX] Le temps d'attente (debounce) avant de lancer une requête de recherche ne marchait pas dans les listes paginées sur PixAdmin (PA-206)
+- [#1298](https://github.com/1024pix/pix/pull/1298) [TECH] Simplification de la génération de CSV de campagne d'évaluation (PO-427).
+
+## v2.144.0 (23/04/2020)
+
+- [#1311](https://github.com/1024pix/pix/pull/1311) [BUGFIX] Correction de l'affichage du logo sous IE (PF-1225).
+- [#1328](https://github.com/1024pix/pix/pull/1328) [TECH] Éviter de générer des heap dumps lors de l'utilisation de `nodemon`
+- [#1326](https://github.com/1024pix/pix/pull/1326) [TECH] Problème de script npm start en développement. 
+- [#1300](https://github.com/1024pix/pix/pull/1300) [TECH][FIX] Catégoriser les envois d'e-mail en alimentant la propriété TAGS (PF-1242).
+- [#1303](https://github.com/1024pix/pix/pull/1303) [TECH] Correction des routes d'API destinées aux diagnostics mémoire
+- [#1330](https://github.com/1024pix/pix/pull/1330) Revert "[BUGFIX] Restreindre l'accès au détail d'une campagne dans Pix Orga (PO-357). "
+- [#1327](https://github.com/1024pix/pix/pull/1327) [BSR] Remplacer Promise.all par bluebird.mapSeries lors de la génération des résultats de certification d'une session entière (PA-209)
+- [#1325](https://github.com/1024pix/pix/pull/1325) [BUG] Propriétés cgus incorrects lors de l'affichage de détail utilisateurs.(PA-208)
+
+## v2.143.0 (21/04/2020)
+
+- [#1319](https://github.com/1024pix/pix/pull/1319) [BUGFIX] Affichage non correct du résumé des résultats collectifs de campagne d'évaluation (PO-432).
+- [#1316](https://github.com/1024pix/pix/pull/1316) [TECH] Remplacer les dummy tests unitaires par défaut Ember par de vrais tests (PC-145)
+
+## v2.142.0 (20/04/2020)
+
+- [#1314](https://github.com/1024pix/pix/pull/1314) [FEATURE] afficher l id de certif dans le champ de recherche admin (PA-201)
+- [#1294](https://github.com/1024pix/pix/pull/1294) [FEATURE] Ajout d'une entrée Analyse dans la sous navigation du détails d'une campagne (PO-407).
+- [#1310](https://github.com/1024pix/pix/pull/1310) [FEATURE] Affichage de la liste des sujets pour un participant à une campagne (PO-421)
+- [#1291](https://github.com/1024pix/pix/pull/1291) [FEATURE] Calculer et afficher la recommandation des tubes d'une campagne d'évaluation (PO-380). 
+- [#1286](https://github.com/1024pix/pix/pull/1286) [FEATURE] Afficher le détail des utilisateurs dans Pix Admin (PA-192).
+- [#1312](https://github.com/1024pix/pix/pull/1312) [BUGFIX] Restreindre l'accès au détail d'une campagne dans Pix Orga (PO-357). 
+- [#1210](https://github.com/1024pix/pix/pull/1210) [TECH] Mise en transaction de la création des éléments nécessaires à un test de certification (CertifCourse, assessment et challenges) (PF-1179)
+- [#1279](https://github.com/1024pix/pix/pull/1279) [CLEANUP] Glimmerisation du composant pour gérer les simulateurs embarqués dans les épreuves (PF-1241).
+
+## v2.141.0 (17/04/2020)
+
+- [#1280](https://github.com/1024pix/pix/pull/1280) [FEATURE] Pouvoir s'assigner une session à traiter dans PixAdmin (PA-137)
+- [#1199](https://github.com/1024pix/pix/pull/1199) [FEATURE] Permettre l'utilisation d'un mot de passe à usage unique (PF-1027).
+- [#1305](https://github.com/1024pix/pix/pull/1305) [FEATURE] Ajout de la date de diffusion au prescripteur dans la liste des sessions sur PixAdmin (PA-189)
+- [#1306](https://github.com/1024pix/pix/pull/1306) [FEATURE] Ordonner la liste des sessions paginée dans PixAdmin de sorte à remonter les sessions à traiter en premier par le pôle certification (PA-178)
+- [#1304](https://github.com/1024pix/pix/pull/1304) [TECH] Tester la présence d'un ID et pas sa valeur dans le test auto sur les tutos (PF-1244)
+- [#1307](https://github.com/1024pix/pix/pull/1307) [TECH] Ajout de tests e2e (PF-1246).
+
+## v2.140.0 (16/04/2020)
+
+- [#1290](https://github.com/1024pix/pix/pull/1290) [FEATURE] Changement des formulations de la landing page des collectes de profils (PF-1222).
+- [#1301](https://github.com/1024pix/pix/pull/1301) [FEATURE] Appliquer une recherche stricte sur le filtre de la colonne ID dans la liste des sessions sur PixAdmin (PA-202)
+- [#1283](https://github.com/1024pix/pix/pull/1283) [FEATURE] Exporter les résultats de campagne de collecte de profils (PO-393).
+- [#1289](https://github.com/1024pix/pix/pull/1289) [FEATURE] Ajout d'informations sur la méthode de calcul des recommandations (PO-405).
+- [#1296](https://github.com/1024pix/pix/pull/1296) [BUGFIX] Le menu "Élèves" ne s'affiche pas correctement lorsque l'on change d'organisation (PO-426).
+- [#1287](https://github.com/1024pix/pix/pull/1287) [BUGFIX] Campagnes non affichées sur IE (PO-398).
+- [#1285](https://github.com/1024pix/pix/pull/1285) [TECH] Ajout de tests de non régression visuelle.
+- [#1278](https://github.com/1024pix/pix/pull/1278) [TECH] Retourner une réponse 204 lors de l'appel de rafraichissement du cache
+
+## v2.139.0 (10/04/2020)
+
+- [#1284](https://github.com/1024pix/pix/pull/1284) [FEATURE] Ajout d'un composant pour représenter les différents niveaux de recommandation des sujets (PO-403).
+- [#1282](https://github.com/1024pix/pix/pull/1282) [FEATURE] Ajout d'un commentaire en dessous des profils cibles lors de la création d'une campagne (PO-415).
+- [#1208](https://github.com/1024pix/pix/pull/1208) [FEATURE]  certif clea zone verte (pf-1146)
+- [#1272](https://github.com/1024pix/pix/pull/1272) [BUGFIX] Messages d'erreurs d'authentifications erronés dans pix-certif (PC-143)
+- [#1185](https://github.com/1024pix/pix/pull/1185) [CLEANUP] Faire les calculs de score et de niveau à un seul endroit.
+
+## v2.138.0 (09/04/2020)
+
+- [#1268](https://github.com/1024pix/pix/pull/1268) [FEATURE] Pouvoir envoyer son profil Pix au prescripteur de la campagne de type Collecte de profils (PF-1178).
+- [#1271](https://github.com/1024pix/pix/pull/1271) [FEATURE] Supprimer un tutoriel de sa liste personnalisée (PF-1180).
+- [#1225](https://github.com/1024pix/pix/pull/1225) [FEATURE] Ajout d'une date de publication dans la session (PA-153)
+- [#1265](https://github.com/1024pix/pix/pull/1265) [BUGFIX] Ré-afficher les messages d'erreurs renvoyés par l'API (PO-414).
+- [#1269](https://github.com/1024pix/pix/pull/1269) [TECH] Supprimer le endpoint DELETE /api/cache
+- [#1256](https://github.com/1024pix/pix/pull/1256) [TECH] Ajout de tests E2E Cypress sur PixCertif (PC-142)
+- [#1270](https://github.com/1024pix/pix/pull/1270) [TECH] Renommer tubeName de Skill dans api
+- [#1237](https://github.com/1024pix/pix/pull/1237) [TECH] Mise en place d'EmberData throttling sur les applications (PF-1197)
+- [#1240](https://github.com/1024pix/pix/pull/1240) [CLEANUP] Extraire la logique de scoring de certification dans un Event Handler dédié (PF-1202)
+- [#1273](https://github.com/1024pix/pix/pull/1273) [CLEANUP] Ajout de tests end-to-end pour la fonctionnalité de sauvegarde de tutoriels
+- [#1233](https://github.com/1024pix/pix/pull/1233) [CLEANUP] Convertir les classes PixApp en syntaxe native (PF-1194).
+
+## v2.137.0 (07/04/2020)
+
+- [#1253](https://github.com/1024pix/pix/pull/1253) [FEATURE] Créer des campagnes de type collecte de profils (PO-392).
+- [#1252](https://github.com/1024pix/pix/pull/1252) [FEATURE] Rendre une épreuve multilangue (PF-1196)
+- [#1260](https://github.com/1024pix/pix/pull/1260) [FEATURE] MAJ Logo et phrase badge Cléa (PF-1211).
+- [#1249](https://github.com/1024pix/pix/pull/1249) [FEATURE] Afficher la liste des tutos sauvegardés sur une page dédiée (PF-1096).
+- [#1266](https://github.com/1024pix/pix/pull/1266) [BUGFIX] Correction du design du formulaire de rattachement de profils cibles (PA-200).
+- [#1259](https://github.com/1024pix/pix/pull/1259) [BUGFIX] Correction du design du loader dans Pix Orga (PO-413).
+- [#1264](https://github.com/1024pix/pix/pull/1264) [BUGFIX] Supprime un logo de badge sur la page de résultat de certification
+- [#1243](https://github.com/1024pix/pix/pull/1243) [TECH] Ajout et utilisation d'une route pour récupérer toutes les answers (PF-1195).
+- [#1248](https://github.com/1024pix/pix/pull/1248) [TECH] Catégoriser les envois d'e-mail en alimentant la propriété TAGS (PF-1213).
+- [#1261](https://github.com/1024pix/pix/pull/1261) [TECH] Suppression du endpoint obsolète /metrics.
+- [#1151](https://github.com/1024pix/pix/pull/1151) [TECH] Sauvegarder l'obtention des badges
+- [#1232](https://github.com/1024pix/pix/pull/1232) [CLEANUP] Convertir les services PixApp en syntaxe native (PF-1193).
+- [#1267](https://github.com/1024pix/pix/pull/1267) BUGFIX - Revert PF-1213 - Réparer l'envoi des mails d'invitation - (PF-1219)
+- [#1262](https://github.com/1024pix/pix/pull/1262) [DOC] Corriger la section sur le nommage des commits
+- [#1258](https://github.com/1024pix/pix/pull/1258) [DOC] Description de l'anatomie des sources de Pix.
+
+## v2.136.0 (03/04/2020)
+
+- [#1254](https://github.com/1024pix/pix/pull/1254) [FEATURE] Invitation à Pix Orga depuis Pix Admin (PA-96).
+- [#1193](https://github.com/1024pix/pix/pull/1193) [FEATURE] Changer l'onglet certifications dans Pix Admin (PA-182)
+- [#1235](https://github.com/1024pix/pix/pull/1235) [FEATURE] Affichage des sujets d'un profil cible dans l'analyse d'une campagne (PO-397).
+- [#1231](https://github.com/1024pix/pix/pull/1231) [FEATURE] Modifier le design de la modal de changement de mot de passe (PO-382).
+- [#1234](https://github.com/1024pix/pix/pull/1234) [BUGFIX] Affichage menu sous IE (PC-140)
+- [#1236](https://github.com/1024pix/pix/pull/1236) [TECH] Renommer le type de campagne TEST_GIVEN to ASSESSMENT (PO-399).
+- [#1242](https://github.com/1024pix/pix/pull/1242) [DOC] Mise à jour des conventions de nommage des commits et des branches
+- [#1250](https://github.com/1024pix/pix/pull/1250) [DESIGN-SYSTEM] Changer les couleurs utilisées dans Pix Orga pour celles du design system (PO-410).
+
+## v2.135.0 (01/04/2020)
+
+- [#1183](https://github.com/1024pix/pix/pull/1183) [FEATURE] Accéder à une campagne Pix Emploi (PF-837)
+- [#1238](https://github.com/1024pix/pix/pull/1238) [BUGFIX] [EXPEDITE] Correction de l'affichage des boutons sur la page de détails d'une campagne (PO-402).
+- [#1229](https://github.com/1024pix/pix/pull/1229) [BUGFIX] Numéro de session dans la barre de recherche incohérent avec la page affichée (PA-191)
+- [#1226](https://github.com/1024pix/pix/pull/1226) [BSR] Script send-invitations-to-sco-organizations - Supprimer les appels HTTP (PF-1192).
+
+## v2.134.0 (30/03/2020)
+
+- [#1215](https://github.com/1024pix/pix/pull/1215) [FEATURE] Pouvoir rattacher des profils cibles à une organisation dans Pix Admin (PA-167).
+- [#1217](https://github.com/1024pix/pix/pull/1217) [FEATURE] Cacher les détails pour les campagnes de récupération de profils (PO-391).
+- [#1227](https://github.com/1024pix/pix/pull/1227) [BUGFIX] Ne pas afficher une bande blanche en bas des CGUs de PixCertif (PC-80)
+- [#1228](https://github.com/1024pix/pix/pull/1228) [BUGFIX] Faire en sorte que le logo de Pix Orga ne soit pas déformé sous IE (PO-289).
+- [#1221](https://github.com/1024pix/pix/pull/1221) [BUGFIX] Mauvaise notification d'erreur lors de l'échec de l'ajout unitaire de candidat sur PixCertif (PC-139)
+- [#1207](https://github.com/1024pix/pix/pull/1207) [TECH] Renommer la table students (PF-1175).
+- [#1230](https://github.com/1024pix/pix/pull/1230) [BUFIX] Problème d'affichage d'une équipe avec beaucoup de membres. (PO-323).
+- [#1220](https://github.com/1024pix/pix/pull/1220) [INFRA] Mise à jour des dépendances sur Pix Certif, édition Mars 2020 (PC-138)
+- [#1222](https://github.com/1024pix/pix/pull/1222) [INFRA] Réduit le temps de disparition de la notification pendant les tests d'acceptance (PO-396)
+- [#1223](https://github.com/1024pix/pix/pull/1223) [CLEANUP] Suppression des scripts de gestion des releases.
+- [#1190](https://github.com/1024pix/pix/pull/1190) [CLEANUP] Convertir les composants de Pix App en syntaxe native (PF-1165).
+- [#1214](https://github.com/1024pix/pix/pull/1214) [INFRA] Retrait du feature toggle FT_IS_SESSION_FINALIZATION_ACTIVE (PC-137)
+
+## v2.133.0 (26/03/2020)
+
+- [#1166](https://github.com/1024pix/pix/pull/1166) [FEATURE] Ajouter un tutoriel à sa liste (PF-1100).
+- [#1216](https://github.com/1024pix/pix/pull/1216) [BUGFIX] Des utilisateurs sont bloqués sur une épreuve. (PF-1187).
+- [#1219](https://github.com/1024pix/pix/pull/1219) [TECH] Ajout d'une règle de linter pour éviter les injections SQL
+
+## v2.132.0 (26/03/2020)
+
+- [#1177](https://github.com/1024pix/pix/pull/1177) [FEATURE] Ajout d'un lien vers les informations d'une session depuis la liste des sessions (PA-152)
+
+## v2.131.0 (25/03/2020)
+
+- [#1204](https://github.com/1024pix/pix/pull/1204) [FEATURE] Ajouter une colonne dans la liste des sessions pour indiquer le type du centre de certification associé (PA-175)
+- [#1181](https://github.com/1024pix/pix/pull/1181) [BUGFIX] Les certificats dont le test de certif n'était pas fini par le candidat mais examiné et publié par le pôle certif n'était pas visible par le candidat dans son espace de certificats (PF-1118)
+- [#1212](https://github.com/1024pix/pix/pull/1212) [TECH] Ajout d'une gestion de droits à la fonctionnalité de campagne de récupération profils (PO-390).
+- [#1205](https://github.com/1024pix/pix/pull/1205) [TECH] Ajouter la possibilité d'avoir un type de campagne (PO-389).
+- [#1213](https://github.com/1024pix/pix/pull/1213) [CLEANUP] Ajouter les couleurs et les styles de titres du design system à PixApp (PF-1181).
+
+## v2.130.0 (24/03/2020)
+
+- [#1200](https://github.com/1024pix/pix/pull/1200) [FEATURE] Modifier le message d'erreur générique lors d'un import SIECLE en ajoutant un lien vers le formulaire du centre d'aide (PO-388).
+- [#1196](https://github.com/1024pix/pix/pull/1196) [FEATURE] Ajouter un bouton de documentation qui pointe vers un lien différent en fonction du type de centre de certification (PC-136)
+- [#1197](https://github.com/1024pix/pix/pull/1197) [BUGFIX] La touche "Entrée" n'est pas prise en compte dans les questions à réponses multiples (PF-1176).
+- [#1186](https://github.com/1024pix/pix/pull/1186) [BUGFIX] Harmoniser le calcul de pourcentage de progression d'un candidat sur une campagne (PO-325)
+- [#1198](https://github.com/1024pix/pix/pull/1198) [BUGFIX] Des utilisateurs avaient un succès pour un niveau pas encore atteint (PF-1171).
+- [#1146](https://github.com/1024pix/pix/pull/1146) [TECH] Redescendre l'échappement des formules pour le CSV au niveau de la sérialisation
+- [#1191](https://github.com/1024pix/pix/pull/1191) [TECH] Ajoute des scripts npm pour lancer les tests d'intégration ou d'acceptance
+- [#1182](https://github.com/1024pix/pix/pull/1182) [TECH] Création d'une route healthcheck/redis pour brancher Datadog et Freshping.
+- [#1206](https://github.com/1024pix/pix/pull/1206) [DOC] Ajouter la section de test dans le template de PR.
+
+## v2.129.0 (23/03/2020)
+
+- [#1179](https://github.com/1024pix/pix/pull/1179) [FEATURE] Gérer la localisation des acquis francophone ou franco-français (PF-1035).
+- [#1195](https://github.com/1024pix/pix/pull/1195) [BUGFIX]  Publication des certif par session KO dans Pix Admin (pa-184)
+- [#1174](https://github.com/1024pix/pix/pull/1174) [BUGFIX] Bloquer l'inscription si le formulaire n'est pas valide (PO-381).
+- [#1201](https://github.com/1024pix/pix/pull/1201) [TECH] Ajout de tests E2E sur Pix Orga (PO-383).
+- [#1202](https://github.com/1024pix/pix/pull/1202) [CLEANUP] Retrait d'un .only oublié dans les tests PixAdmin (PA-185)
+- [#1188](https://github.com/1024pix/pix/pull/1188) [DESIGN-SYSTEM] Uniformisation des couleurs (CERTIF) (PF-1163)
+
+## v2.128.0 (20/03/2020)
+
+- [#1156](https://github.com/1024pix/pix/pull/1156) [FEATURE] Permettre la ré-initialisation de mot de passe des élèves inscrit par mail (PO-339). 
+- [#1187](https://github.com/1024pix/pix/pull/1187) [FEATURE] Changer la façon de contacter le support de la page d'erreur (PF-1166).
+- [#1171](https://github.com/1024pix/pix/pull/1171) [BUGFIX] Permettre la connexion aux utilisateurs dont un des memberships a été supprimé (PO-376).
+- [#1178](https://github.com/1024pix/pix/pull/1178) [TECH] Renforcer la contrainte d'unicité entre un assessment et un certification-course dans la table Assessments (PF-1161)
+- [#1168](https://github.com/1024pix/pix/pull/1168) [TECH] Ajout d'un composant permettant de représenter le pourcentage de succès (PO-366).
+- [#1189](https://github.com/1024pix/pix/pull/1189) [TECH] Exclure la branche master des tests sur la CI.
+- [#1194](https://github.com/1024pix/pix/pull/1194) [CLEANUP] Supprimer les méthodes dépréciées fromAttributes (PF-1174)
+- [#1176](https://github.com/1024pix/pix/pull/1176) [CLEANUP] Refacto du setup Mirage sur MonPix
+
+## v2.127.0 (18/03/2020)
+
+
+## v2.126.1 (18/03/2020)
+
+- [#1180](https://github.com/1024pix/pix/pull/1180) [BUGFIX] Intégration de Matomo avec les apps front.
+- [#1124](https://github.com/1024pix/pix/pull/1124) [TECH] Montée de version de Pix Admin vers Ember 3.15 / Octane (PA-42).
+- [#1184](https://github.com/1024pix/pix/pull/1184) [EXPEDIT] Mauvais affichage des heures sur la liste des sessions (PA-183)
+
+## v2.126.0 (17/03/2020)
+
+- [#1173](https://github.com/1024pix/pix/pull/1173) [FEATURE] Affichage du nombre de crédits octroyés à une organisation dans Pix Admin (PA-173).
+- [#1169](https://github.com/1024pix/pix/pull/1169) [FEATURE] Optimisation du logo Pix (PF-1013).
+- [#1164](https://github.com/1024pix/pix/pull/1164) [FEATURE] Gérer les critères de badge CLEA (PF-1132).
+- [#1141](https://github.com/1024pix/pix/pull/1141) [FEATURE] Simplifier la publication de certification (PA-171)
+- [#1136](https://github.com/1024pix/pix/pull/1136) [FEATURE] Lister les sessions sur Pix Admin (PA-151)
+- [#1170](https://github.com/1024pix/pix/pull/1170) [FEATURE] Filtrer la liste des organisations par l'identifiant externe (PA-172).
+- [#1175](https://github.com/1024pix/pix/pull/1175) [BUGFIX] Corriger la gestion des nombres décimaux en answer (PF-1155).
+- [#1172](https://github.com/1024pix/pix/pull/1172) [TECH] Rendre Pix véritablement open-contribution.
+- [#1161](https://github.com/1024pix/pix/pull/1161) [TECH] Utiliser le champ certificationCourseId plutôt que courseId du modèle assessment dans un contexte de certification (PF-1150)
+- [#1160](https://github.com/1024pix/pix/pull/1160) [TECH] Passage de Pix Orga à Ember Octane (PO-316-2).
+
+## v2.125.0 (12/03/2020)
+
+- [#1158](https://github.com/1024pix/pix/pull/1158) [FEATURE] Lors de l'export des résultats, forcer les compétences à 0 pour les certifs rejected (PA-174)
+- [#1163](https://github.com/1024pix/pix/pull/1163) [FEATURE] Affichage de la liste des profils cibles d'une organisation (PA-162).
+- [#1155](https://github.com/1024pix/pix/pull/1155) [FEATURE] Ajouter l'identifiant externe dans la liste des organisations (PA-113).
+- [#1165](https://github.com/1024pix/pix/pull/1165) [BUGFIX] Autoriser l'affichage des autres membres d'une organisation pour un simple membre (PO-374).
+- [#1162](https://github.com/1024pix/pix/pull/1162) [TECH] Retrait de la notion d'adaptatif + du type dans le modèle Course
+- [#1167](https://github.com/1024pix/pix/pull/1167) [INFRA] Amélioration de la mise en production
+- [#1154](https://github.com/1024pix/pix/pull/1154) [BSR][TECH] Réusinage de quelques scripts api et de quelques fichiers de migrations.
+
 ## v2.124.0 (10/03/2020)
 
 - [#1140](https://github.com/1024pix/pix/pull/1140) [FEATURE] Ajout d'un filtre sur la colonne "Créé par" dans la liste des campagnes (PO-330).

@@ -2,7 +2,11 @@ import { module, test } from 'qunit';
 import { click, currentURL, fillIn, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'ember-qunit';
 import { authenticateSession } from 'ember-simple-auth/test-support';
-import { createUserMembershipWithRole } from '../helpers/test-init';
+
+import {
+  createUserMembershipWithRole,
+  createPrescriberByUser
+} from '../helpers/test-init';
 
 import setupMirage from 'ember-cli-mirage/test-support/setup-mirage';
 
@@ -11,7 +15,7 @@ module('Acceptance | Team Creation', function(hooks) {
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  test('it should not be accessible by an unauthenticated user', async function(assert) {
+  test('it should not be accessible by an unauthenticated prescriber', async function(assert) {
     // when
     await visit('/equipe/creation');
 
@@ -19,20 +23,21 @@ module('Acceptance | Team Creation', function(hooks) {
     assert.equal(currentURL(), '/connexion');
   });
 
-  module('When user is logged in', function(hooks) {
+  module('When prescriber is logged in', function(hooks) {
 
     let user;
     let organizationId;
 
     hooks.afterEach(function() {
-      const notificationMessagesService = this.owner.lookup('service:notification-messages');
+      const notificationMessagesService = this.owner.lookup('service:notifications');
       notificationMessagesService.clearAll();
     });
 
-    module('When user is a member', function(hooks) {
+    module('When prescriber is a member', function(hooks) {
 
       hooks.beforeEach(async () => {
         user = createUserMembershipWithRole('MEMBER');
+        createPrescriberByUser(user);
 
         await authenticateSession({
           user_id: user.id,
@@ -51,10 +56,12 @@ module('Acceptance | Team Creation', function(hooks) {
       });
     });
 
-    module('When user is an admin', function(hooks) {
+    module('When prescriber is an admin', function(hooks) {
 
       hooks.beforeEach(async () => {
         user = createUserMembershipWithRole('ADMIN');
+        createPrescriberByUser(user);
+
         organizationId = server.db.organizations[0].id;
 
         await authenticateSession({
@@ -73,7 +80,7 @@ module('Acceptance | Team Creation', function(hooks) {
         assert.equal(currentURL(), '/equipe/creation');
       });
 
-      test('it should allow to invite an user and redirect to team page', async function(assert) {
+      test('it should allow to invite a prescriber and redirect to team page', async function(assert) {
         // given
         const email = 'gigi@labrochette.com';
         const code = 'ABCDEFGH01';
@@ -92,10 +99,10 @@ module('Acceptance | Team Creation', function(hooks) {
         assert.equal(organizationInvitation.status, 'PENDING');
         assert.equal(organizationInvitation.code, code);
         assert.equal(currentURL(), '/equipe');
-        assert.dom('#table-members tbody tr').exists({ count: 1 });
+        assert.dom('[aria-label="Membre"]').exists({ count: 1 });
       });
 
-      test('it should not allow to invite a user when an email is not given', async function(assert) {
+      test('it should not allow to invite a prescriber when an email is not given', async function(assert) {
         // given
         await visit('/equipe/creation');
         await fillIn('#email', '');
@@ -143,10 +150,10 @@ module('Acceptance | Team Creation', function(hooks) {
         // then
         assert.equal(currentURL(), '/equipe/creation');
         assert.dom('[data-test-notification-message="error"]').exists();
-        assert.dom('[data-test-notification-message="error"]').hasText('Internal Server Error');
+        assert.dom('[data-test-notification-message="error"]').hasText('Quelque chose s\'est mal passé. Veuillez réessayer.');
       });
 
-      test('it should display error on global form when error 421 is returned from backend', async function(assert) {
+      test('it should display error on global form when error 412 is returned from backend', async function(assert) {
         // given
         await visit('/equipe/creation');
         server.post(`/organizations/${organizationId}/invitations`,
@@ -154,11 +161,11 @@ module('Acceptance | Team Creation', function(hooks) {
             errors: [
               {
                 detail: '',
-                status: '421',
+                status: '412',
                 title: 'Precondition Failed',
               }
             ]
-          }, 421);
+          }, 412);
         await fillIn('#email', 'fake@email');
 
         // when
@@ -192,6 +199,30 @@ module('Acceptance | Team Creation', function(hooks) {
         assert.equal(currentURL(), '/equipe/creation');
         assert.dom('[data-test-notification-message="error"]').exists();
         assert.dom('[data-test-notification-message="error"]').hasText('Cet email n\'appartient à aucun utilisateur.');
+      });
+
+      test('it should display error on global form when error 400 is returned from backend', async function(assert) {
+        // given
+        await visit('/equipe/creation');
+        server.post(`/organizations/${organizationId}/invitations`,
+          {
+            errors: [
+              {
+                detail: '',
+                status: '400',
+                title: 'Bad Request',
+              }
+            ]
+          }, 400);
+        await fillIn('#email', 'fake@email');
+
+        // when
+        await click('button[type="submit"]');
+
+        // then
+        assert.equal(currentURL(), '/equipe/creation');
+        assert.dom('[data-test-notification-message="error"]').exists();
+        assert.dom('[data-test-notification-message="error"]').hasText('Le format de l\'adresse e-mail est incorrect.');
       });
     });
   });

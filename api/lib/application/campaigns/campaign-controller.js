@@ -5,8 +5,11 @@ const usecases = require('../../domain/usecases');
 const tokenService = require('../../../lib/domain/services/token-service');
 
 const campaignSerializer = require('../../infrastructure/serializers/jsonapi/campaign-serializer');
+const campaignAnalysisSerializer = require('../../infrastructure/serializers/jsonapi/campaign-analysis-serializer');
 const campaignReportSerializer = require('../../infrastructure/serializers/jsonapi/campaign-report-serializer');
 const campaignCollectiveResultSerializer = require('../../infrastructure/serializers/jsonapi/campaign-collective-result-serializer');
+const campaignProfilesCollectionParticipationSummarySerializer = require('../../infrastructure/serializers/jsonapi/campaign-profiles-collection-participation-summary-serializer');
+const campaignAssessmentParticipationSummarySerializer = require('../../infrastructure/serializers/jsonapi/campaign-assessment-participation-summary-serializer');
 
 const queryParamsUtils = require('../../infrastructure/utils/query-params-utils');
 const requestResponseUtils = require('../../infrastructure/utils/request-response-utils');
@@ -43,14 +46,36 @@ module.exports = {
       .then((campaign) => campaignSerializer.serialize(campaign, {}, { tokenForCampaignResults }));
   },
 
-  async getCsvResults(request) {
+  async getCsvAssessmentResults(request) {
     const token = request.query.accessToken;
     const userId = tokenService.extractUserIdForCampaignResults(token);
     const campaignId = parseInt(request.params.id);
 
     const writableStream = new PassThrough();
 
-    const { fileName } = await usecases.startWritingCampaignResultsToStream({ userId, campaignId, writableStream });
+    const { fileName } = await usecases.startWritingCampaignAssessmentResultsToStream({ userId, campaignId, writableStream });
+    const escapedFileName = requestResponseUtils.escapeFileName(fileName);
+
+    writableStream.headers = {
+      'content-type': 'text/csv;charset=utf-8',
+      'content-disposition': `attachment; filename="${escapedFileName}"`,
+
+      // WHY: to avoid compression because when compressing, the server buffers
+      // for too long causing a response timeout.
+      'content-encoding': 'identity',
+    };
+
+    return writableStream;
+  },
+
+  async getCsvProfilesCollectionResults(request) {
+    const token = request.query.accessToken;
+    const userId = tokenService.extractUserIdForCampaignResults(token);
+    const campaignId = parseInt(request.params.id);
+
+    const writableStream = new PassThrough();
+
+    const { fileName } = await usecases.startWritingCampaignProfilesCollectionResultsToStream({ userId, campaignId, writableStream });
     const escapedFileName = requestResponseUtils.escapeFileName(fileName);
 
     writableStream.headers = {
@@ -104,6 +129,32 @@ module.exports = {
 
     const campaignCollectiveResult = await usecases.computeCampaignCollectiveResult({ userId, campaignId });
     return campaignCollectiveResultSerializer.serialize(campaignCollectiveResult);
+  },
+
+  async getAnalysis(request) {
+    const { userId } = request.auth.credentials;
+    const campaignId = request.params.id;
+
+    const campaignAnalysis = await usecases.computeCampaignAnalysis({ userId, campaignId });
+    return campaignAnalysisSerializer.serialize(campaignAnalysis);
+  },
+
+  async findAssessmentParticipations(request) {
+    const campaignId = request.params.id;
+    const { page } = queryParamsUtils.extractParameters(request.query);
+
+    const currentUserId = requestResponseUtils.extractUserIdFromRequest(request);
+    const campaignAssessmentParticipationSummariesPaginated = await usecases.findPaginatedCampaignAssessmentParticipationSummaries({ userId: currentUserId, campaignId, page });
+    return campaignAssessmentParticipationSummarySerializer.serializeForPaginatedList(campaignAssessmentParticipationSummariesPaginated);
+  },
+
+  async findProfilesCollectionParticipations(request) {
+    const { userId } = request.auth.credentials;
+    const campaignId = request.params.id;
+    const { page } = queryParamsUtils.extractParameters(request.query);
+
+    const results = await usecases.findCampaignProfilesCollectionParticipationSummaries({ userId, campaignId, page });
+    return campaignProfilesCollectionParticipationSummarySerializer.serialize(results);
   }
 };
 

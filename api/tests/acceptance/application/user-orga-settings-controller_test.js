@@ -3,8 +3,6 @@ const createServer = require('../../../server');
 
 describe('Acceptance | Controller | user-orga-settings-controller', () => {
 
-  let userId;
-  let options;
   let server;
 
   beforeEach(async () => {
@@ -15,124 +13,28 @@ describe('Acceptance | Controller | user-orga-settings-controller', () => {
     await knex('user-orga-settings').delete();
   });
 
-  describe('POST /api/user-orga-settings', () => {
+  describe('PUT /api/user-orga-settings/{id}', () => {
 
-    let organizationId;
-
-    beforeEach(async () => {
-      userId = databaseBuilder.factory.buildUser().id;
-      organizationId = databaseBuilder.factory.buildOrganization().id;
-      await databaseBuilder.commit();
-
-      options = {
-        method: 'POST',
-        url: '/api/user-orga-settings',
-        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
-        payload: {
-          data: {
-            relationships: {
-              organization: {
-                data: {
-                  id: organizationId,
-                  type: 'organizations'
-                }
-              },
-              user: {
-                data: {
-                  id: userId,
-                  type: 'users'
-                }
-              }
-            }
-          }
-        }
-      };
-    });
-
-    describe('Resource access management', () => {
-
-      it('should respond with a 401 - unauthorized access - if user is not authenticated', async () => {
-        // given
-        options.headers.authorization = 'invalid.access.token';
-
-        // when
-        const response = await server.inject(options);
-
-        // then
-        expect(response.statusCode).to.equal(401);
-      });
-
-      it('should respond with a 403 if payload user is not the same as authenticated user', async () => {
-        // given
-        const otherUserId = 9999;
-        options.headers.authorization = generateValidRequestAuthorizationHeader(otherUserId);
-
-        // when
-        const response = await server.inject(options);
-
-        // then
-        expect(response.statusCode).to.equal(403);
-      });
-    });
-
-    describe('Success case', () => {
-
-      it('should update and return 201 HTTP status code', async () => {
-        // when
-        const response = await server.inject(options);
-
-        // then
-        expect(response.statusCode).to.equal(201);
-      });
-    });
-
-    describe('Error case', () => {
-
-      it('should respond with a 400 HTTP status code - if there is no organization id ', async () => {
-        // given
-        options.payload.data.relationships.organization.data = {
-          id: undefined
-        };
-
-        // when
-        const response = await server.inject(options);
-
-        // then
-        expect(response.statusCode).to.equal(400);
-      });
-
-      it('should respond with a 400 HTTP status code - if organization id is not a number', async () => {
-        // given
-        options.payload.data.relationships.organization.data = {
-          id: 'test'
-        };
-
-        // when
-        const response = await server.inject(options);
-
-        // then
-        expect(response.statusCode).to.equal(400);
-      });
-    });
-  });
-
-  describe('PATCH /api/user-orga-settings/{id}', () => {
-
+    let userId;
     let expectedOrganizationId;
+    let options;
 
     beforeEach(async () => {
       userId = databaseBuilder.factory.buildUser().id;
+
       const actualOrganizationId = databaseBuilder.factory.buildOrganization().id;
       expectedOrganizationId = databaseBuilder.factory.buildOrganization().id;
+
       databaseBuilder.factory.buildMembership({ userId, organizationId: actualOrganizationId, organizationRole: 'MEMBER' });
       databaseBuilder.factory.buildMembership({ userId, organizationId: expectedOrganizationId, organizationRole: 'MEMBER' });
+
       databaseBuilder.factory.buildUserOrgaSettings({ userId, currentOrganizationId: actualOrganizationId });
+
       await databaseBuilder.commit();
 
       options = {
-        method: 'PATCH',
-        url: '/api/user-orga-settings/{id}',
-        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
+        method: 'PUT',
+        url: `/api/user-orga-settings/${userId}`,
         payload: {
           data: {
             relationships: {
@@ -148,11 +50,11 @@ describe('Acceptance | Controller | user-orga-settings-controller', () => {
       };
     });
 
-    describe('Resource access management', () => {
+    context('When user is not authenticated', () => {
 
-      it('should respond with a 401 - unauthorized access - if user is not authenticated', async () => {
+      it('should respond with a 401 - unauthorized access', async () => {
         // given
-        options.headers.authorization = 'invalid.access.token';
+        options.headers = { authorization: 'invalid.access.token' };
 
         // when
         const response = await server.inject(options);
@@ -163,7 +65,11 @@ describe('Acceptance | Controller | user-orga-settings-controller', () => {
 
     });
 
-    describe('Success case', () => {
+    context('When user is authenticated', () => {
+
+      beforeEach(async () => {
+        options.headers = { authorization: generateValidRequestAuthorizationHeader(userId) };
+      });
 
       it('should update and return 200 HTTP status code', async () => {
         // when
@@ -172,19 +78,42 @@ describe('Acceptance | Controller | user-orga-settings-controller', () => {
         // then
         expect(response.statusCode).to.equal(200);
       });
-    });
 
-    describe('Error case', () => {
+      context('When user is not member of organization', () => {
 
-      it('should respond with a 422 HTTP status code - if user is not member of organization', async () => {
-        // given
-        options.payload.data.relationships.organization.data.id = 12345;
+        it('should respond with a 422 HTTP status code', async () => {
+          // given
+          options.payload.data.relationships.organization.data.id = 12345;
 
-        // when
-        const response = await server.inject(options);
+          // when
+          const response = await server.inject(options);
 
-        // then
-        expect(response.statusCode).to.equal(422);
+          // then
+          expect(response.statusCode).to.equal(422);
+        });
+      });
+
+      context('When user is a disabled member of the organization', () => {
+
+        it('should respond with a 422 HTTP status code', async () => {
+          // given
+          expectedOrganizationId = databaseBuilder.factory.buildOrganization().id;
+          databaseBuilder.factory.buildMembership({
+            userId,
+            organizationId: expectedOrganizationId,
+            disabledAt: new Date()
+          });
+
+          options.payload.data.relationships.organization.data.id = expectedOrganizationId;
+
+          await databaseBuilder.commit();
+
+          // when
+          const response = await server.inject(options);
+
+          // then
+          expect(response.statusCode).to.equal(422);
+        });
       });
     });
   });

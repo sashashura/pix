@@ -1,4 +1,4 @@
-const { sinon, expect, hFake, domainBuilder, generateValidRequestAuthorizationHeader } = require('../../../test-helper');
+const { sinon, expect, domainBuilder, generateValidRequestAuthorizationHeader } = require('../../../test-helper');
 const assessmentController = require('../../../../lib/application/assessments/assessment-controller');
 const assessmentRepository = require('../../../../lib/infrastructure/repositories/assessment-repository');
 const challengeRepository = require('../../../../lib/infrastructure/repositories/challenge-repository');
@@ -6,6 +6,7 @@ const certificationChallengeRepository = require('../../../../lib/infrastructure
 const usecases = require('../../../../lib/domain/usecases');
 const { AssessmentEndedError } = require('../../../../lib/domain/errors');
 const Assessment = require('../../../../lib/domain/models/Assessment');
+const { FRENCH_FRANCE, FRENCH_SPOKEN } = require('../../../../lib/domain/constants').LOCALE;
 
 describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
 
@@ -16,14 +17,14 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
 
     beforeEach(() => {
 
-      assessmentWithoutScore = Assessment.fromAttributes({
+      assessmentWithoutScore = new Assessment({
         id: 1,
         courseId: 'recHzEA6lN4PEs7LG',
         userId: 5,
         type: 'DEMO',
       });
 
-      assessmentWithScore = Assessment.fromAttributes({
+      assessmentWithScore = new Assessment({
         id: 1,
         courseId: 'recHzEA6lN4PEs7LG', userId: 5,
         estimatedLevel: 0,
@@ -40,9 +41,9 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
       sinon.stub(usecases, 'getAssessment').resolves(scoredAsssessment);
       sinon.stub(usecases, 'getNextChallengeForCertification').resolves();
       sinon.stub(usecases, 'getNextChallengeForDemo').resolves();
-      sinon.stub(usecases, 'getNextChallengeForSmartPlacement').resolves();
+      sinon.stub(usecases, 'getNextChallengeForCampaignAssessment').resolves();
       sinon.stub(usecases, 'getNextChallengeForCompetenceEvaluation').resolves();
-      sinon.stub(certificationChallengeRepository, 'getNonAnsweredChallengeByCourseId').resolves();
+      sinon.stub(certificationChallengeRepository, 'getNextNonAnsweredChallengeByCourseId').resolves();
     });
 
     // TODO: Que faire si l'assessment n'existe pas pas ?
@@ -52,7 +53,7 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
       const PREVIEW_ASSESSMENT_ID = 245;
 
       beforeEach(() => {
-        assessmentRepository.get.resolves(Assessment.fromAttributes({
+        assessmentRepository.get.resolves(new Assessment({
           id: 1,
           courseId: 'null2356871',
           userId: 5,
@@ -64,7 +65,7 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
 
       it('should return a null data directly', async () => {
         // when
-        const response = await assessmentController.getNextChallenge({ params: { id: PREVIEW_ASSESSMENT_ID } }, hFake);
+        const response = await assessmentController.getNextChallenge({ params: { id: PREVIEW_ASSESSMENT_ID } });
 
         // then
         expect(response).to.deep.equal({ data: null });
@@ -83,7 +84,7 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
       context('when the assessment is a DEMO', () => {
         it('should reply with no data', async () => {
           // when
-          const response = await assessmentController.getNextChallenge({ params: { id: 7531 } }, hFake);
+          const response = await assessmentController.getNextChallenge({ params: { id: 7531 } });
 
           // then
           expect(response).to.deep.equal({ data: null });
@@ -99,7 +100,7 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
 
       it('should not evaluate assessment score', async () => {
         // when
-        await assessmentController.getNextChallenge({ params: { id: 7531 } }, hFake);
+        await assessmentController.getNextChallenge({ params: { id: 7531 } });
 
         // then
         expect(usecases.getAssessment).not.to.have.been.called;
@@ -109,7 +110,7 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
 
     describe('when the assessment is a certification assessment', function() {
 
-      const certificationAssessment = Assessment.fromAttributes({
+      const certificationAssessment = new Assessment({
         id: 'assessmentId',
         type: Assessment.types.CERTIFICATION,
       });
@@ -123,7 +124,7 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
         usecases.getNextChallengeForCertification.resolves();
 
         // when
-        await assessmentController.getNextChallenge({ params: { id: 12 } }, hFake);
+        await assessmentController.getNextChallenge({ params: { id: 12 } });
 
         // then
         expect(usecases.getNextChallengeForCertification).to.have.been.calledOnce;
@@ -137,45 +138,68 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
         usecases.getNextChallengeForCertification.rejects(new AssessmentEndedError());
 
         // when
-        const response = await assessmentController.getNextChallenge({ params: { id: 12 } }, hFake);
+        const response = await assessmentController.getNextChallenge({ params: { id: 12 } });
 
         // then
         expect(response).to.deep.equal({ data: null });
       });
     });
 
-    describe('when the assessment is a smart placement assessment', () => {
+    describe('when the assessment is a campaign assessment', () => {
 
-      const assessment = Assessment.fromAttributes({
+      const defaultLocale = FRENCH_FRANCE;
+      const assessment = new Assessment({
         id: 1,
         courseId: 'courseId',
         userId: 5,
-        type: 'SMART_PLACEMENT',
+        type: 'CAMPAIGN',
       });
 
       beforeEach(() => {
         assessmentRepository.get.resolves(assessment);
       });
 
-      it('should call the usecase getNextChallengeForSmartPlacement with tryImproving at false when the query not exists', async () => {
+      it('should call the usecase getNextChallengeForCampaignAssessment with tryImproving at false when the query not exists', async () => {
         // when
-        await assessmentController.getNextChallenge({ params: { id: 1 }, query: { } }, hFake);
+        await assessmentController.getNextChallenge({ params: { id: 1 }, query: {} });
 
         // then
-        expect(usecases.getNextChallengeForSmartPlacement).to.have.been.calledWith({
+        expect(usecases.getNextChallengeForCampaignAssessment).to.have.been.calledWith({
           assessment,
-          tryImproving: false
+          tryImproving: false,
+          locale: defaultLocale,
         });
       });
 
-      it('should call the usecase getNextChallengeForSmartPlacement with the query tryImproving', async () => {
+      it('should call the usecase getNextChallengeForCampaignAssessment with the query tryImproving', async () => {
         // when
-        await assessmentController.getNextChallenge({ params: { id: 1 }, query: { tryImproving: true } }, hFake);
+        await assessmentController.getNextChallenge({ params: { id: 1 }, query: { tryImproving: true } });
 
         // then
-        expect(usecases.getNextChallengeForSmartPlacement).to.have.been.calledWith({
+        expect(usecases.getNextChallengeForCampaignAssessment).to.have.been.calledWith({
           assessment,
-          tryImproving: true
+          tryImproving: true,
+          locale: defaultLocale,
+        });
+      });
+
+      it('should call the usecase getNextChallengeForCampaignAssessment with the locale', async () => {
+        // given
+        const locale = FRENCH_SPOKEN;
+
+        // when
+        await assessmentController.getNextChallenge({
+          params: { id: 1 }, query: { tryImproving: true },
+          headers: {
+            'accept-language': locale
+          }
+        });
+
+        // then
+        expect(usecases.getNextChallengeForCampaignAssessment).to.have.been.calledWith({
+          assessment,
+          tryImproving: true,
+          locale,
         });
       });
     });
@@ -195,19 +219,25 @@ describe('Unit | Controller | assessment-controller-get-next-challenge', () => {
       });
 
       it('should call the usecase getNextChallengeForCompetenceEvaluation', async () => {
+        const locale = FRENCH_SPOKEN;
         const request = {
           params: { id: 1 },
-          headers: { authorization: generateValidRequestAuthorizationHeader(userId) }
+          headers: {
+            authorization: generateValidRequestAuthorizationHeader(userId),
+            'accept-language': locale
+          }
         };
         // when
-        await assessmentController.getNextChallenge(request, hFake);
+        await assessmentController.getNextChallenge(request);
 
         // then
         expect(usecases.getNextChallengeForCompetenceEvaluation).to.have.been.calledWith({
           assessment,
           userId,
+          locale,
         });
       });
     });
   });
-});
+})
+;

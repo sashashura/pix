@@ -11,7 +11,7 @@ describe('Acceptance | API | assessment-controller-get', () => {
   });
 
   let userId;
-  const courseId = 'adaptativeCourseId';
+  const courseId = 'courseId';
   const skillurl1Name = '@url1';
   const skillWeb1Name = '@web1';
   const skillWeb4Name = '@web4';
@@ -45,7 +45,6 @@ describe('Acceptance | API | assessment-controller-get', () => {
   });
   const course = airtableBuilder.factory.buildCourse({
     id: courseId,
-    adaptatif: true,
     competence: [competence.id],
   });
   const firstChallenge = airtableBuilder.factory.buildChallenge({
@@ -160,8 +159,6 @@ describe('Acceptance | API | assessment-controller-get', () => {
           'type': 'assessments',
           'id': assessmentId.toString(),
           'attributes': {
-            'estimated-level': null,
-            'pix-score': null,
             'state': null,
             'title': '',
             'type': null,
@@ -171,11 +168,16 @@ describe('Acceptance | API | assessment-controller-get', () => {
           'relationships': {
             'course': {
               data: {
-                id: 'adaptativeCourseId',
+                id: 'courseId',
                 type: 'courses'
               }
             },
-            'answers': { 'data': [] },
+            'answers': {
+              'data': [],
+              links: {
+                related: `/api/answers?assessmentId=${assessmentId}`,
+              }
+            },
           },
         };
         const assessment = response.result.data;
@@ -217,14 +219,7 @@ describe('Acceptance | API | assessment-controller-get', () => {
     let assessmentId, answer1, answer2;
 
     beforeEach(async () => {
-      const juryId = databaseBuilder.factory.buildUser({}).id;
       assessmentId = databaseBuilder.factory.buildAssessment({ userId, courseId, state: 'completed' }).id;
-      databaseBuilder.factory.buildAssessmentResult({
-        level: 1,
-        pixScore: 12,
-        assessmentId: assessmentId,
-        juryId,
-      });
 
       answer1 = databaseBuilder.factory.buildAnswer({ assessmentId });
       answer2 = databaseBuilder.factory.buildAnswer({ assessmentId });
@@ -282,8 +277,6 @@ describe('Acceptance | API | assessment-controller-get', () => {
           'type': 'assessments',
           'id': assessmentId.toString(),
           'attributes': {
-            'estimated-level': 1,
-            'pix-score': 12,
             'state': 'completed',
             'title': '',
             'type': null,
@@ -323,7 +316,7 @@ describe('Acceptance | API | assessment-controller-get', () => {
         {
           userId,
           courseId: 'anyFromAirTable',
-          type: 'SMART_PLACEMENT',
+          type: 'CAMPAIGN',
           campaignParticipationId: campaignParticipation.id
         }).id;
 
@@ -379,7 +372,7 @@ describe('Acceptance | API | assessment-controller-get', () => {
         'attributes': {
           'state': 'completed',
           'title': undefined,
-          'type': 'SMART_PLACEMENT',
+          'type': 'CAMPAIGN',
           'certification-number': null,
           'code-campaign': 'TESTCODE',
           'competence-id': 'recCompetenceId',

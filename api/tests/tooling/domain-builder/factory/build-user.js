@@ -12,17 +12,22 @@ module.exports = function buildUser(
     username = 'jean.bono1234',
     password = 'liuehrfi128743KUUKNSUkuz12Ukun',
     cgu = true,
+    lastTermsOfServiceValidatedAt = null,
+    mustValidateTermsOfService = false,
     pixOrgaTermsOfServiceAccepted = false,
     pixCertifTermsOfServiceAccepted = false,
     hasSeenAssessmentInstructions = false,
     pixRoles = [buildPixRole()],
     memberships = [buildMembership()],
-    certificationCenterMemberships = [buildCertificationCenterMembership()]
+    certificationCenterMemberships = [buildCertificationCenterMembership()],
+    shouldChangePassword = false
   } = {}) {
 
   return new User({
-    id, firstName, lastName, email, username, password, cgu, pixOrgaTermsOfServiceAccepted,
-    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions,
+    id, firstName, lastName, email, username, password,
+    cgu, lastTermsOfServiceValidatedAt, mustValidateTermsOfService,
+    pixOrgaTermsOfServiceAccepted, pixCertifTermsOfServiceAccepted,
+    hasSeenAssessmentInstructions, shouldChangePassword,
     pixRoles, memberships, certificationCenterMemberships,
   });
 };

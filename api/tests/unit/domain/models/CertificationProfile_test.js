@@ -19,7 +19,6 @@ describe('Unit | Domain | Models | CertificationProfile', () => {
           pixScore: 10,
           estimatedLevel: 5,
         })],
-        challengeIdsCorrectlyAnswered: ['challengeId'],
       };
 
       // when
@@ -63,6 +62,72 @@ describe('Unit | Domain | Models | CertificationProfile', () => {
       expect(result).to.be.true;
     });
 
+  });
+
+  describe('#getCertifiableCompetencesCount', () => {
+
+    it('should return 5', () => {
+      // given
+      const userCompetence1 = new UserCompetence({ estimatedLevel: 5 });
+      const userCompetence2 = new UserCompetence({ estimatedLevel: 1 });
+      const userCompetence3 = new UserCompetence({ estimatedLevel: 2 });
+      const userCompetence4 = new UserCompetence({ estimatedLevel: 3 });
+      const userCompetence5 = new UserCompetence({ estimatedLevel: 1 });
+      const certificationProfile = new CertificationProfile({
+        userCompetences: [userCompetence1, userCompetence2, userCompetence3, userCompetence4, userCompetence5],
+      });
+
+      // when
+      const certifiableCompetencesCount = certificationProfile.getCertifiableCompetencesCount();
+
+      // then
+      expect(certifiableCompetencesCount).to.equal(5);
+    });
+
+    it('should return 1', () => {
+      // given
+      const userCompetence1 = new UserCompetence({ estimatedLevel: 2 });
+      const userCompetence2 = new UserCompetence({ estimatedLevel: 0 });
+      const certificationProfile = new CertificationProfile({
+        userCompetences: [userCompetence1, userCompetence2 ],
+      });
+
+      // when
+      const certifiableCompetencesCount = certificationProfile.getCertifiableCompetencesCount();
+
+      // then
+      expect(certifiableCompetencesCount).to.equal(1);
+    });
+  });
+
+  describe('#getCompetencesCount', () => {
+
+    it('returns the number of competence', () => {
+      const userCompetence1 = new UserCompetence();
+      const userCompetence2 = new UserCompetence();
+      const certificationProfile = new CertificationProfile({
+        userCompetences: [userCompetence1, userCompetence2],
+      });
+
+      const competencesCount = certificationProfile.getCompetencesCount();
+
+      expect(competencesCount).to.equal(2);
+    });
+  });
+
+  describe('#getPixScore', () => {
+
+    it('returns the pixScore', () => {
+      const userCompetence1 = new UserCompetence({ pixScore: 12 });
+      const userCompetence2 = new UserCompetence({ pixScore: 8 });
+      const certificationProfile = new CertificationProfile({
+        userCompetences: [userCompetence1, userCompetence2],
+      });
+
+      const pixScore = certificationProfile.getPixScore();
+
+      expect(pixScore).to.equal(20);
+    });
   });
 
 });

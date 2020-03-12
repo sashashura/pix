@@ -6,6 +6,7 @@ module.exports = async function updateOrganizationInformation({
   externalId,
   provinceCode,
   isManagingStudents,
+  email,
   organizationRepository
 }) {
   const organization = await organizationRepository.get(id);
@@ -13,8 +14,9 @@ module.exports = async function updateOrganizationInformation({
   if (name) organization.name = name;
   if (type) organization.type = type;
   if (logoUrl) organization.logoUrl = logoUrl;
-  if (externalId) organization.externalId = externalId;
-  if (provinceCode) organization.provinceCode = provinceCode;
+  organization.email = email;
+  organization.externalId = externalId;
+  organization.provinceCode = provinceCode;
   if (isManagingStudents) organization.isManagingStudents = isManagingStudents;
 
   await organizationRepository.update(organization);

@@ -13,9 +13,14 @@
     right: 0;
     height: 60px;
     z-index: 4;
+    margin: 0;
 
     .page-title {
       font-weight: 500;
+
+      .wire {
+        color: $grey-20;
+      }
     }
   }
 

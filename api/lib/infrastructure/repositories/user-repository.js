@@ -1,8 +1,10 @@
 const _ = require('lodash');
 const Bookshelf = require('../bookshelf');
 const BookshelfUser = require('../data/user');
-const { AlreadyRegisteredEmailError, AlreadyRegisteredUsernameError, OrganizationStudentAlreadyLinkedToUserError, UserNotFoundError } = require('../../domain/errors');
+const moment = require('moment');
+const { AlreadyRegisteredEmailError, AlreadyRegisteredUsernameError, SchoolingRegistrationAlreadyLinkedToUserError, UserNotFoundError } = require('../../domain/errors');
 const User = require('../../domain/models/User');
+const UserDetailsForAdmin = require('../../domain/models/UserDetailsForAdmin');
 const PixRole = require('../../domain/models/PixRole');
 const Membership = require('../../domain/models/Membership');
 const UserOrgaSettings = require('../../domain/models/UserOrgaSettings');
@@ -12,6 +14,23 @@ const Organization = require('../../domain/models/Organization');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
 
 const PIX_MASTER_ROLE_ID = 1;
+
+function _toUserDetailsForAdminDomain(BookshelfUser) {
+  const rawUserDetailsForAdmin = BookshelfUser.toJSON();
+  return new UserDetailsForAdmin({
+    id: rawUserDetailsForAdmin.id,
+    firstName: rawUserDetailsForAdmin.firstName,
+    lastName: rawUserDetailsForAdmin.lastName,
+    birthdate: rawUserDetailsForAdmin.birthdate,
+    organizationId: rawUserDetailsForAdmin.organizationId,
+    username: rawUserDetailsForAdmin.username,
+    email: rawUserDetailsForAdmin.email,
+    cgu: rawUserDetailsForAdmin.cgu,
+    pixOrgaTermsOfServiceAccepted: rawUserDetailsForAdmin.pixOrgaTermsOfServiceAccepted,
+    pixCertifTermsOfServiceAccepted: rawUserDetailsForAdmin.pixCertifTermsOfServiceAccepted,
+    isAuthenticatedFromGAR: !!rawUserDetailsForAdmin.samlId,
+  });
+}
 
 function _toCertificationCenterMembershipsDomain(certificationCenterMembershipBookshelf) {
   return certificationCenterMembershipBookshelf.map((bookshelf) => {
@@ -36,6 +55,7 @@ function _toMembershipsDomain(membershipsBookshelf) {
         name: membershipBookshelf.related('organization').get('name'),
         type: membershipBookshelf.related('organization').get('type'),
         isManagingStudents: Boolean(membershipBookshelf.related('organization').get('isManagingStudents')),
+        canCollectProfiles: Boolean(membershipBookshelf.related('organization').get('canCollectProfiles')),
         externalId: membershipBookshelf.related('organization').get('externalId')
       }),
     });
@@ -43,7 +63,7 @@ function _toMembershipsDomain(membershipsBookshelf) {
 }
 
 function _toUserOrgaSettingsDomain(userOrgaSettingsBookshelf) {
-  const { id, code, name, type, isManagingStudents, externalId } = userOrgaSettingsBookshelf.related('currentOrganization').attributes;
+  const { id, code, name, type, isManagingStudents, canCollectProfiles, externalId } = userOrgaSettingsBookshelf.related('currentOrganization').attributes;
   return new UserOrgaSettings({
     id: userOrgaSettingsBookshelf.get('id'),
     currentOrganization: new Organization({
@@ -52,6 +72,7 @@ function _toUserOrgaSettingsDomain(userOrgaSettingsBookshelf) {
       name,
       type,
       isManagingStudents: Boolean(isManagingStudents),
+      canCollectProfiles: Boolean(canCollectProfiles),
       externalId
     }),
   });
@@ -74,6 +95,7 @@ function _toDomain(userBookshelf) {
     email: userBookshelf.get('email'),
     username: userBookshelf.get('username'),
     password: userBookshelf.get('password'),
+    shouldChangePassword: Boolean(userBookshelf.get('shouldChangePassword')),
     cgu: Boolean(userBookshelf.get('cgu')),
     pixOrgaTermsOfServiceAccepted: Boolean(userBookshelf.get('pixOrgaTermsOfServiceAccepted')),
     pixCertifTermsOfServiceAccepted: Boolean(userBookshelf.get('pixCertifTermsOfServiceAccepted')),
@@ -130,7 +152,7 @@ module.exports = {
       .query((qb) => qb.where({ email: username.toLowerCase() }).orWhere({ 'username': username }))
       .fetch({
         withRelated: [
-          'memberships',
+          { 'memberships': (qb) => qb.where({ disabledAt: null }) },
           'memberships.organization',
           'pixRoles',
           'certificationCenterMemberships.certificationCenter',
@@ -157,6 +179,20 @@ module.exports = {
       });
   },
 
+  getUserDetailsForAdmin(userId) {
+    return BookshelfUser
+      .where({ id: userId })
+      .fetch({ require: true, columns: ['id','firstName','lastName','email','username','cgu','pixOrgaTermsOfServiceAccepted',
+        'pixCertifTermsOfServiceAccepted','samlId', ] })
+      .then((userDetailsForAdmin) => _toUserDetailsForAdminDomain(userDetailsForAdmin))
+      .catch((err) => {
+        if (err instanceof BookshelfUser.NotFoundError) {
+          throw new UserNotFoundError(`User not found for ID ${userId}`);
+        }
+        throw err;
+      });
+  },
+
   findPaginatedFiltered({ filter, page }) {
     return BookshelfUser
       .query((qb) => _setSearchFiltersForQueryBuilder(filter, qb))
@@ -175,7 +211,7 @@ module.exports = {
       .where({ id: userId })
       .fetch({
         withRelated: [
-          'memberships',
+          { 'memberships': (qb) => qb.where({ disabledAt: null }) },
           'memberships.organization',
         ]
       })
@@ -249,6 +285,19 @@ module.exports = {
       });
   },
 
+  async isEmailAllowedToUseForCurrentUser(userId, email) {
+    const userFound = await BookshelfUser
+      .where('id', '!=', userId)
+      .where({ email: email.toLowerCase() })
+      .fetch();
+    if (userFound) {
+      throw new AlreadyRegisteredEmailError();
+    }
+    else {
+      return true;
+    }
+  },
+
   isUserExistingByEmail(email) {
     return BookshelfUser
       .where({ email: email.toLowerCase() })
@@ -272,6 +321,20 @@ module.exports = {
       });
   },
 
+  async updateUserDetailsForAdministration(id, userAttributes) {
+    try {
+      const updatedUser = await BookshelfUser
+        .where({ id })
+        .save(userAttributes, { patch: true, method: 'update' });
+      return _toUserDetailsForAdminDomain(updatedUser);
+    } catch (err) {
+      if (err instanceof BookshelfUser.NoRowsUpdatedError) {
+        throw new UserNotFoundError(`User not found for ID ${id}`);
+      }
+      throw err;
+    }
+  },
+
   async isPixMaster(id) {
     const user = await BookshelfUser
       .where({ 'users.id': id, 'users_pix_roles.user_id': id })
@@ -284,43 +347,46 @@ module.exports = {
   },
 
   async updateHasSeenAssessmentInstructionsToTrue(id) {
-    let updatedUser = await BookshelfUser
-      .where({ id })
-      .save({ 'hasSeenAssessmentInstructions': true }, { patch: true, method: 'update' });
-    updatedUser = await updatedUser.refresh();
-    return bookshelfToDomainConverter.buildDomainObject(BookshelfUser, updatedUser);
+    const user = await BookshelfUser.where({ id }).fetch();
+    await user.save({ 'hasSeenAssessmentInstructions': true }, { patch: true, method: 'update' });
+    return bookshelfToDomainConverter.buildDomainObject(BookshelfUser, user);
+  },
+
+  async acceptPixLastTermsOfService(id) {
+    const user = await BookshelfUser.where({ id }).fetch();
+    await user.save({
+      'lastTermsOfServiceValidatedAt': moment().toDate(),
+      'mustValidateTermsOfService': false
+    }, { patch: true, method: 'update' });
+    return bookshelfToDomainConverter.buildDomainObject(BookshelfUser, user);
   },
 
   async updatePixOrgaTermsOfServiceAcceptedToTrue(id) {
-    let updatedUser = await BookshelfUser
-      .where({ id })
-      .save({ 'pixOrgaTermsOfServiceAccepted': true }, { patch: true, method: 'update' });
-    updatedUser = await updatedUser.refresh();
-    return bookshelfToDomainConverter.buildDomainObject(BookshelfUser, updatedUser);
+    const user = await BookshelfUser.where({ id }).fetch();
+    await user.save({ 'pixOrgaTermsOfServiceAccepted': true }, { patch: true, method: 'update' });
+    return bookshelfToDomainConverter.buildDomainObject(BookshelfUser, user);
   },
 
   async updatePixCertifTermsOfServiceAcceptedToTrue(id) {
-    let updatedUser = await BookshelfUser
-      .where({ id })
-      .save({ 'pixCertifTermsOfServiceAccepted': true }, { patch: true, method: 'update' });
-    updatedUser = await updatedUser.refresh();
-    return bookshelfToDomainConverter.buildDomainObject(BookshelfUser, updatedUser);
+    const user = await BookshelfUser.where({ id }).fetch();
+    await user.save({ 'pixCertifTermsOfServiceAccepted': true }, { patch: true, method: 'update' });
+    return bookshelfToDomainConverter.buildDomainObject(BookshelfUser, user);
   },
 
-  async createAndAssociateUserToStudent({ domainUser, studentId }) {
+  async createAndAssociateUserToSchoolingRegistration({ domainUser, schoolingRegistrationId }) {
     const userToCreate = _adaptModelToDb(domainUser);
 
     const trx = await Bookshelf.knex.transaction();
     try {
-      const [ userId ] = await trx('users').insert(userToCreate, 'id');
+      const [userId] = await trx('users').insert(userToCreate, 'id');
 
-      const updatedStudentsCount = await trx('students')
-        .where('id', studentId)
+      const updatedSchoolingRegistrationsCount = await trx('schooling-registrations')
+        .where('id', schoolingRegistrationId)
         .whereNull('userId')
         .update({ userId });
 
-      if (updatedStudentsCount !== 1) {
-        throw new OrganizationStudentAlreadyLinkedToUserError(`L'élève ${studentId} est déjà rattaché à un compte utilisateur.`);
+      if (updatedSchoolingRegistrationsCount !== 1) {
+        throw new SchoolingRegistrationAlreadyLinkedToUserError(`L'inscription ${schoolingRegistrationId} est déjà rattachée à un compte utilisateur.`);
       }
 
       await trx.commit();
@@ -339,6 +405,32 @@ module.exports = {
       throw new AlreadyRegisteredUsernameError();
     }
     return username;
+  },
+
+  updatePasswordThatShouldBeChanged(id, hashedPassword) {
+    return BookshelfUser
+      .where({ id })
+      .save({ password: hashedPassword, shouldChangePassword: true }, { patch: true, method: 'update' })
+      .then((bookshelfUser) => bookshelfUser.toDomainEntity())
+      .catch((err) => {
+        if (err instanceof BookshelfUser.NoRowsUpdatedError) {
+          throw new UserNotFoundError(`User not found for ID ${id}`);
+        }
+        throw err;
+      });
+  },
+
+  async updateExpiredPassword({ userId, hashedNewPassword }) {
+    return BookshelfUser
+      .where({ id: userId })
+      .save({ password: hashedNewPassword, shouldChangePassword: false }, { patch: true, method: 'update' })
+      .then((bookshelfUser) => bookshelfUser.toDomainEntity())
+      .catch((err) => {
+        if (err instanceof BookshelfUser.NoRowsUpdatedError) {
+          throw new UserNotFoundError(`User not found for ID ${userId}`);
+        }
+        throw err;
+      });
   }
 
 };

@@ -1,11 +1,11 @@
 .alert {
   outline: none;
-  border-radius: 0.3125em;
+  border-radius: 0.195em;
   padding: 9px;
   margin-bottom: 11px;
   color: $white;
   text-shadow: none;
-  font-size: 1.4rem;
+  font-size: 0.875rem;
 }
 
 .challenge-response + .alert {
@@ -13,18 +13,18 @@
 }
 
 .alert-success {
-  border: 1px solid $deyork-green;
-  background-color: $deyork-green;
+  border: 1px solid $green;
+  background-color: $green;
 }
 
 .alert-danger {
-  border: 1px solid $mandy-red;
-  background-color: $mandy-red;
+  border: 1px solid $light-red;
+  background-color: $light-red;
 }
 
-abbr[title="obligatoire"] {
+abbr.mandatory-mark {
   cursor: help;
-  color: $monza;
+  color: $dark-error;
   display: contents;
-  margin: 2rem;
+  margin: 1.25rem;
 }

@@ -3,32 +3,37 @@ import { inject as service } from '@ember/service';
 import Controller from '@ember/controller';
 
 export default class NewController extends Controller {
-  @service store;
 
+  @service store;
   @service notifications;
 
   isLoading = false;
 
   @action
-  async createOrganizationInvitation(organizationInvitation) {
+  createOrganizationInvitation(event) {
+    event.preventDefault();
     this.set('isLoading', true);
     this.get('notifications').clearAll();
 
-    return organizationInvitation.save({ adapterOptions: { organizationId: organizationInvitation.organizationId } })
+    return this.model.organizationInvitation.save({ adapterOptions: { organizationId: this.model.organizationInvitation.organizationId } })
       .then(() => {
+        this.model.organization.organizationInvitations.reload();
         this.transitionToRoute('authenticated.team');
       })
       .catch((errorResponse) => {
         if (errorResponse.errors && errorResponse.errors.length > 0) {
           errorResponse.errors.forEach((error) => {
-            if (error.status === '421') {
+            if (error.status === '400') {
+              return this.get('notifications').sendError('Le format de l\'adresse e-mail est incorrect.');
+            }
+            if (error.status === '412') {
               return this.get('notifications').sendError('Ce membre a déjà été ajouté.');
             }
             if (error.status === '404') {
               return this.get('notifications').sendError('Cet email n\'appartient à aucun utilisateur.');
             }
             if (error.status === '500') {
-              return this.get('notifications').sendError(error.title);
+              return this.get('notifications').sendError('Quelque chose s\'est mal passé. Veuillez réessayer.');
             }
           });
         } else {

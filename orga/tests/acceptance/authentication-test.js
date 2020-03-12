@@ -9,7 +9,8 @@ import {
   createUserMembershipWithRole,
   createUserWithMembership,
   createUserWithMembershipAndTermsOfServiceAccepted,
-  createUserManagingStudents
+  createUserManagingStudents,
+  createPrescriberByUser,
 } from '../helpers/test-init';
 
 import setupMirage from 'ember-cli-mirage/test-support/setup-mirage';
@@ -31,18 +32,21 @@ module('Acceptance | authentication', function(hooks) {
     });
   });
 
-  module('When user is already logged in', function() {
+  module('When prescriber is already logged in', function(hooks) {
 
-    test('it should redirect user to campaign list page', async function(assert) {
-      // given
+    hooks.beforeEach(async () => {
       const user = createUserWithMembershipAndTermsOfServiceAccepted();
+      createPrescriberByUser(user);
+
       await authenticateSession({
         user_id: user.id,
         access_token: 'aaa.' + btoa(`{"user_id":${user.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
         expires_in: 3600,
         token_type: 'Bearer token type',
       });
+    });
 
+    test('it should redirect prescriber to campaign list page', async function(assert) {
       // when
       await visit('/connexion');
 
@@ -52,15 +56,16 @@ module('Acceptance | authentication', function(hooks) {
     });
   });
 
-  module('When user is logging in but has not accepted terms of service yet', function(hooks) {
+  module('When prescriber is logging in but has not accepted terms of service yet', function(hooks) {
 
     let user;
 
-    hooks.beforeEach(() => {
+    hooks.beforeEach(async () => {
       user = createUserWithMembership();
+      createPrescriberByUser(user);
     });
 
-    test('it should redirect user to the terms-of-service page', async function(assert) {
+    test('it should redirect prescriber to the terms-of-service page', async function(assert) {
       // given
       await visit('/connexion');
       await fillIn('#login-email', user.email);
@@ -98,6 +103,7 @@ module('Acceptance | authentication', function(hooks) {
 
     hooks.beforeEach(() => {
       user = createUserWithMembershipAndTermsOfServiceAccepted();
+      createPrescriberByUser(user);
     });
 
     test('it should redirect user to the campaigns list', async function(assert) {
@@ -134,14 +140,13 @@ module('Acceptance | authentication', function(hooks) {
     });
   });
 
-  module('When user is already authenticated', function() {
+  module('When prescriber is already authenticated', function() {
 
-    module('When user has already accepted terms of service', function(hooks) {
-
-      let user;
+    module('When prescriber has already accepted terms of service', function(hooks) {
 
       hooks.beforeEach(async () => {
-        user = createUserWithMembershipAndTermsOfServiceAccepted();
+        const user = createUserWithMembershipAndTermsOfServiceAccepted();
+        createPrescriberByUser(user);
 
         await authenticateSession({
           user_id: user.id,
@@ -151,7 +156,7 @@ module('Acceptance | authentication', function(hooks) {
         });
       });
 
-      test('it should let user access requested page', async function(assert) {
+      test('it should let prescriber access requested page', async function(assert) {
         // when
         await visit('/campagnes/creation');
 
@@ -160,7 +165,7 @@ module('Acceptance | authentication', function(hooks) {
         assert.ok(currentSession(this.application).get('isAuthenticated'), 'The user is authenticated');
       });
 
-      test('it should display the organization linked to the connected user', async function(assert) {
+      test('it should display the organization linked to the connected prescriber', async function(assert) {
         // when
         await visit('/');
 
@@ -168,7 +173,7 @@ module('Acceptance | authentication', function(hooks) {
         assert.dom('.logged-user-summary__organization').hasText('BRO & Evil Associates (EXTBRO)');
       });
 
-      test('it should redirect user to the campaigns list on root url', async function(assert) {
+      test('it should redirect prescriber to the campaigns list on root url', async function(assert) {
         // when
         await visit('/');
 
@@ -177,37 +182,33 @@ module('Acceptance | authentication', function(hooks) {
       });
     });
 
-    module('When user is admin', function() {
+    module('When prescriber is admin', function(hooks) {
 
-      test('should display team menu', async function(assert) {
-        // given
+      hooks.beforeEach(async () => {
         const user = createUserMembershipWithRole('ADMIN');
+        createPrescriberByUser(user);
+
         await authenticateSession({
           user_id: user.id,
           access_token: 'aaa.' + btoa(`{"user_id":${user.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
           expires_in: 3600,
           token_type: 'Bearer token type',
         });
+      });
 
+      test('should display team menu', async function(assert) {
         // when
         await visit('/');
 
         // then
         assert.dom('.sidebar-menu a').exists({ count: 2 });
-        assert.dom('.sidebar-menu a:first-child').hasText('Campagnes');
-        assert.dom('.sidebar-menu a:nth-child(2)').hasText('Équipe');
+        assert.dom('.sidebar-menu').containsText('Campagnes');
+        assert.dom('.sidebar-menu').containsText('Équipe');
         assert.dom('.sidebar-menu a:first-child').hasClass('active');
       });
 
       test('should redirect to team page', async function(assert) {
         // given
-        const user = createUserMembershipWithRole('ADMIN');
-        await authenticateSession({
-          user_id: user.id,
-          access_token: 'aaa.' + btoa(`{"user_id":${user.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
-          expires_in: 3600,
-          token_type: 'Bearer token type',
-        });
         await visit('/');
 
         // when
@@ -215,16 +216,16 @@ module('Acceptance | authentication', function(hooks) {
 
         // then
         assert.dom('.sidebar-menu a:first-child').hasText('Campagnes');
-        assert.dom('.sidebar-menu a:nth-child(2)').hasText('Équipe');
+        assert.dom('.sidebar-menu').containsText('Équipe');
         assert.dom('.sidebar-menu a:nth-child(2)').hasClass('active');
         assert.dom('.sidebar-menu a:first-child').hasNoClass('active');
       });
 
-      module('When user belongs to an organization that is managing students', function(hooks) {
-        let user;
+      module('When prescriber belongs to an organization that is managing students', function(hooks) {
 
         hooks.beforeEach(async () => {
-          user = createUserManagingStudents('ADMIN');
+          const user = createUserManagingStudents('ADMIN');
+          createPrescriberByUser(user);
 
           await authenticateSession({
             user_id: user.id,
@@ -240,9 +241,9 @@ module('Acceptance | authentication', function(hooks) {
 
           // then
           assert.dom('.sidebar-menu a').exists({ count: 4 });
-          assert.dom('.sidebar-menu a:first-child').hasText('Campagnes');
-          assert.dom('.sidebar-menu a:nth-child(2)').hasText('Équipe');
-          assert.dom('.sidebar-menu a:nth-child(3)').hasText('Élèves');
+          assert.dom('.sidebar-menu').containsText('Campagnes');
+          assert.dom('.sidebar-menu').containsText('Équipe');
+          assert.dom('.sidebar-menu').containsText('Élèves');
           assert.dom('.sidebar-menu a:first-child ').hasClass('active');
         });
 
@@ -253,9 +254,9 @@ module('Acceptance | authentication', function(hooks) {
           await click('.sidebar-menu a:nth-child(3)');
 
           // then
-          assert.dom('.sidebar-menu a:first-child').hasText('Campagnes');
-          assert.dom('.sidebar-menu a:nth-child(2)').hasText('Équipe');
-          assert.dom('.sidebar-menu a:nth-child(3)').hasText('Élèves');
+          assert.dom('.sidebar-menu').containsText('Campagnes');
+          assert.dom('.sidebar-menu').containsText('Équipe');
+          assert.dom('.sidebar-menu').containsText('Élèves');
           assert.dom('.sidebar-menu a:nth-child(3)').hasClass('active');
           assert.dom('.sidebar-menu a:first-child').hasNoClass('active');
         });
@@ -265,37 +266,40 @@ module('Acceptance | authentication', function(hooks) {
           await visit('/');
 
           // then
-          assert.dom('.sidebar-menu-documentation-item__button').hasText('Documentation');
+          assert.contains('Documentation');
         });
       });
     });
 
-    module('When user is member', function() {
+    module('When user is member', function(hooks) {
 
-      test('should not display team menu', async function(assert) {
-        // given
+      hooks.beforeEach(async () => {
         const user = createUserMembershipWithRole('MEMBER');
+        createPrescriberByUser(user);
+
         await authenticateSession({
           user_id: user.id,
           access_token: 'aaa.' + btoa(`{"user_id":${user.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
           expires_in: 3600,
           token_type: 'Bearer token type',
         });
+      });
 
+      test('should not display team menu', async function(assert) {
         // when
         await visit('/');
 
         // then
         assert.dom('.sidebar-menu a').exists({ count: 1 });
-        assert.dom('.sidebar-menu a:first-child').hasText('Campagnes');
+        assert.dom('.sidebar-menu').containsText('Campagnes');
         assert.dom('.sidebar-menu a:first-child ').hasClass('active');
       });
 
       module('When user belongs to an organization that is managing students', function(hooks) {
-        let user;
 
         hooks.beforeEach(async () => {
-          user = createUserManagingStudents('MEMBER');
+          const user = createUserManagingStudents('MEMBER');
+          createPrescriberByUser(user);
 
           await authenticateSession({
             user_id: user.id,
@@ -311,11 +315,12 @@ module('Acceptance | authentication', function(hooks) {
 
           // then
           assert.dom('.sidebar-menu a').exists({ count: 3 });
-          assert.dom('.sidebar-menu a:first-child').hasText('Campagnes');
-          assert.dom('.sidebar-menu a:nth-child(2)').hasText('Élèves');
+          assert.dom('.sidebar-menu').containsText('Campagnes');
+          assert.dom('.sidebar-menu').containsText('Élèves');
           assert.dom('.sidebar-menu a:first-child ').hasClass('active');
         });
       });
     });
   });
+
 });

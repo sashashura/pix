@@ -15,6 +15,7 @@ describe('Unit | UseCase | update-organization-information', () => {
       externalId: 'extId',
       provinceCode: '666',
       isManagingStudents: false,
+      email: null,
     });
     organizationRepository = {
       get: sinon.stub().resolves(originalOrganization),
@@ -100,6 +101,25 @@ describe('Unit | UseCase | update-organization-information', () => {
       expect(resultOrganization.provinceCode).to.equal(originalOrganization.provinceCode);
     });
 
+    it('should allow to update the organization external id with null value', async () => {
+      // given
+      const externalId = null;
+
+      // when
+      const resultOrganization = await updateOrganizationInformation({
+        id: originalOrganization.id,
+        externalId,
+        organizationRepository
+      });
+
+      // then
+      expect(resultOrganization.name).to.equal(originalOrganization.name);
+      expect(resultOrganization.type).to.equal(originalOrganization.type);
+      expect(resultOrganization.logoUrl).to.equal(originalOrganization.logoUrl);
+      expect(resultOrganization.externalId).to.be.null;
+      expect(resultOrganization.provinceCode).to.equal(originalOrganization.provinceCode);
+    });
+
     it('should allow to update the organization province code (only) if modified', async () => {
       // given
       const provinceCode = '975';
@@ -117,6 +137,25 @@ describe('Unit | UseCase | update-organization-information', () => {
       expect(resultOrganization.logoUrl).to.equal(originalOrganization.logoUrl);
       expect(resultOrganization.externalId).to.equal(originalOrganization.externalId);
       expect(resultOrganization.provinceCode).to.equal(provinceCode);
+    });
+
+    it('should allow to update the organization province code with null value', async () => {
+      // given
+      const provinceCode = null;
+
+      // when
+      const resultOrganization = await updateOrganizationInformation({
+        id: originalOrganization.id,
+        provinceCode,
+        organizationRepository
+      });
+
+      // then
+      expect(resultOrganization.name).to.equal(originalOrganization.name);
+      expect(resultOrganization.type).to.equal(originalOrganization.type);
+      expect(resultOrganization.logoUrl).to.equal(originalOrganization.logoUrl);
+      expect(resultOrganization.externalId).to.equal(originalOrganization.externalId);
+      expect(resultOrganization.provinceCode).to.be.null;
     });
 
     it('should allow to update the organization isManagingStudents (only) if modified', async () => {
@@ -137,6 +176,27 @@ describe('Unit | UseCase | update-organization-information', () => {
       expect(resultOrganization.externalId).to.equal(originalOrganization.externalId);
       expect(resultOrganization.isManagingStudents).to.equal(isManagingStudents);
     });
+
+    it('should allow to update the organization email', async () => {
+      // given
+      const newEmail = 'sco.generic.newaccount@example.net';
+
+      // when
+      const resultOrganization = await updateOrganizationInformation({
+        id: originalOrganization.id,
+        email: newEmail,
+        organizationRepository
+      });
+
+      // then
+      expect(resultOrganization.name).to.equal(originalOrganization.name);
+      expect(resultOrganization.type).to.equal(originalOrganization.type);
+      expect(resultOrganization.logoUrl).to.equal(originalOrganization.logoUrl);
+      expect(resultOrganization.externalId).to.equal(originalOrganization.externalId);
+      expect(resultOrganization.isManagingStudents).to.equal(originalOrganization.isManagingStudents);
+      expect(resultOrganization.email).to.equal(newEmail);
+    });
+
   });
 
   context('when an error occurred', () => {

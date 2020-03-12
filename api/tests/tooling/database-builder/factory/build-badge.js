@@ -6,6 +6,8 @@ module.exports = function buildBadge({
   altMessage = faker.random.words(),
   imageUrl = '/img' + faker.random.word() + '.svg',
   message = faker.random.words(),
+  title = faker.random.words(),
+  key = faker.random.words(),
   targetProfileId,
 } = {}) {
 
@@ -14,6 +16,8 @@ module.exports = function buildBadge({
     altMessage,
     imageUrl,
     message,
+    title,
+    key,
     targetProfileId,
   };
   return databaseBuffer.pushInsertable({

@@ -42,7 +42,7 @@ describe('Unit | Usecase | begin-campaign-participation-improvement', () => {
     return expect(promise).to.be.rejectedWith(AlreadySharedCampaignParticipationError);
   });
 
-  it('should create a smart placement assessment with the campaignParticipationId and isImproving at true', () => {
+  it('should create a campaign assessment with the campaignParticipationId and isImproving at true', () => {
     // given
     assessmentRepository.save.resolves({});
 
@@ -53,11 +53,11 @@ describe('Unit | Usecase | begin-campaign-participation-improvement', () => {
     return promise.then(() => {
       expect(assessmentRepository.save).to.have.been.called;
 
-      const assessmentToSave = assessmentRepository.save.firstCall.args[0];
-      expect(assessmentToSave.type).to.equal(Assessment.types.SMARTPLACEMENT);
+      const assessmentToSave = assessmentRepository.save.firstCall.args[0].assessment;
+      expect(assessmentToSave.type).to.equal(Assessment.types.CAMPAIGN);
       expect(assessmentToSave.state).to.equal(Assessment.states.STARTED);
       expect(assessmentToSave.userId).to.equal(userId);
-      expect(assessmentToSave.courseId).to.equal('Smart Placement Tests CourseId Not Used');
+      expect(assessmentToSave.courseId).to.equal('[NOT USED] Campaign Assessment CourseId Not Used');
       expect(assessmentToSave.campaignParticipationId).to.equal(campaignParticipationId);
       expect(assessmentToSave.isImproving).to.be.ok;
     });

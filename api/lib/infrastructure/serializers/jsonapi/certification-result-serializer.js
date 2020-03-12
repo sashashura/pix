@@ -6,7 +6,6 @@ module.exports = {
     return new Serializer('results', {
       attributes: [
         'assessmentId',
-        'level',
         'pixScore',
         'createdAt',
         'resultCreatedAt',
@@ -28,6 +27,7 @@ module.exports = {
         'isV2Certification',
         'examinerComment',
         'hasSeenEndTestScreen',
+        'cleaCertificationStatus',
       ],
     }).serialize(certificationResult);
   },

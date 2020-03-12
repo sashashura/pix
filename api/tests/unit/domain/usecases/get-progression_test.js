@@ -11,7 +11,8 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
   const assessmentId = 1234;
   const userId = 9874;
 
-  const smartPlacementAssessmentRepository = { get: () => undefined };
+  const campaignParticipationRepository = { get: () => undefined };
+  const targetProfileRepository = { getByCampaignId: () => undefined };
   const knowledgeElementRepository = { findUniqByUserId: () => undefined };
   const assessmentRepository = { getByAssessmentIdAndUserId: () => undefined };
   const competenceEvaluationRepository = { getByAssessmentId: () => undefined };
@@ -31,51 +32,33 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
 
   describe('#getProgression', () => {
 
-    context('when the assessment exists and is smart placement', () => {
+    context('when the assessment exists and is campaign', () => {
 
       const assessment = domainBuilder.buildAssessment({
         id: assessmentId,
         userId,
         state: 'completed',
-        type: Assessment.types.SMARTPLACEMENT,
+        type: Assessment.types.CAMPAIGN,
+        campaignParticipationId: 456,
       });
-
-      const smartPlacementAssessment = domainBuilder.buildSmartPlacementAssessment({
-        id: assessmentId,
-        userId,
+      const campaignParticipation = domainBuilder.buildCampaignParticipation({
+        campaignId: 123,
       });
+      const targetProfile = domainBuilder.buildTargetProfile();
 
       beforeEach(() => {
-        sandbox.stub(assessmentRepository, 'getByAssessmentIdAndUserId').resolves(assessment);
-        sandbox.stub(smartPlacementAssessmentRepository, 'get').resolves(smartPlacementAssessment);
-      });
-
-      it('should load the right assessment', () => {
-        // when
-        const promise = getProgression({
-          userId,
-          progressionId,
-          assessmentRepository,
-          competenceEvaluationRepository,
-          smartPlacementAssessmentRepository,
-          knowledgeElementRepository,
-          skillRepository,
-          improvementService
-        });
-
-        // then
-        return promise.then(() => {
-          expect(smartPlacementAssessmentRepository.get).to.have.been.calledWith(assessmentId);
-        });
+        sandbox.stub(assessmentRepository, 'getByAssessmentIdAndUserId').withArgs(assessment.id, userId).resolves(assessment);
+        sandbox.stub(campaignParticipationRepository, 'get').withArgs(assessment.campaignParticipationId).resolves(campaignParticipation);
+        sandbox.stub(targetProfileRepository, 'getByCampaignId').withArgs(campaignParticipation.campaignId).resolves(targetProfile);
       });
 
       it('should return the progression associated to the assessment', () => {
         // given
         const expectedProgression = domainBuilder.buildProgression({
           id: progressionId,
-          targetedSkills: smartPlacementAssessment.targetProfile.skills,
+          targetedSkills: targetProfile.skills,
           knowledgeElements: [],
-          isProfileCompleted: smartPlacementAssessment.isCompleted
+          isProfileCompleted: assessment.isCompleted()
         });
 
         // when
@@ -83,10 +66,11 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
           userId,
           progressionId,
           assessmentRepository,
+          campaignParticipationRepository,
           competenceEvaluationRepository,
-          smartPlacementAssessmentRepository,
           knowledgeElementRepository,
           skillRepository,
+          targetProfileRepository,
           improvementService
         });
 
@@ -117,11 +101,12 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
             userId,
             progressionId,
             assessmentRepository,
+            campaignParticipationRepository,
             competenceEvaluationRepository,
-            smartPlacementAssessmentRepository,
             knowledgeElementRepository,
             skillRepository,
-            improvementService,
+            targetProfileRepository,
+            improvementService
           });
 
           // then
@@ -135,9 +120,9 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
           // given
           const expectedProgression = domainBuilder.buildProgression({
             id: progressionId,
-            targetedSkills: smartPlacementAssessment.targetProfile.skills,
+            targetedSkills: targetProfile.skills,
             knowledgeElements: knowledgeElementsFiltered,
-            isProfileCompleted: smartPlacementAssessment.isCompleted
+            isProfileCompleted: assessment.isCompleted()
           });
 
           // when
@@ -145,11 +130,12 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
             userId,
             progressionId,
             assessmentRepository,
+            campaignParticipationRepository,
             competenceEvaluationRepository,
-            smartPlacementAssessmentRepository,
             knowledgeElementRepository,
             skillRepository,
-            improvementService,
+            targetProfileRepository,
+            improvementService
 
           });
 
@@ -175,11 +161,14 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
         assessmentId,
         userId,
       });
+      const competenceSkills = [domainBuilder.buildSkill()];
 
       beforeEach(() => {
         sandbox.stub(assessmentRepository, 'getByAssessmentIdAndUserId').resolves(competenceEvaluationAssessment);
         sandbox.stub(competenceEvaluationRepository, 'getByAssessmentId').resolves(competenceEvaluation);
-        sandbox.stub(skillRepository, 'findByCompetenceId').resolves([]);
+        sandbox.stub(skillRepository, 'findByCompetenceId').resolves(competenceSkills);
+        sandbox.stub(improvementService, 'filterKnowledgeElementsIfImproving')
+          .withArgs({ knowledgeElements: [], assessment: competenceEvaluationAssessment }).returns([]);
       });
 
       it('should load the right assessment', () => {
@@ -188,10 +177,11 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
           userId,
           progressionId,
           assessmentRepository,
+          campaignParticipationRepository,
           competenceEvaluationRepository,
-          smartPlacementAssessmentRepository,
           knowledgeElementRepository,
           skillRepository,
+          targetProfileRepository,
           improvementService
         });
 
@@ -205,7 +195,7 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
         // given
         const expectedProgression = domainBuilder.buildProgression({
           id: progressionId,
-          targetedSkills: [],
+          targetedSkills: competenceSkills,
           knowledgeElements: [],
           isProfileCompleted: competenceEvaluationAssessment.isCompleted()
         });
@@ -215,15 +205,80 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
           userId,
           progressionId,
           assessmentRepository,
+          campaignParticipationRepository,
           competenceEvaluationRepository,
-          smartPlacementAssessmentRepository,
           knowledgeElementRepository,
           skillRepository,
+          targetProfileRepository,
           improvementService
         });
 
         // then
         return promise.then((progression) => {
+          expect(progression).to.deep.equal(expectedProgression);
+        });
+      });
+
+      context('when the assessment is improving', () => {
+
+        let knowledgeElements, knowledgeElementsFiltered;
+
+        beforeEach(() => {
+          competenceEvaluationAssessment.state = 'improving';
+          knowledgeElements = [
+            domainBuilder.buildKnowledgeElement(),
+            domainBuilder.buildKnowledgeElement()
+          ];
+          knowledgeElementsFiltered = [knowledgeElements[0]];
+          knowledgeElementRepository.findUniqByUserId.resolves(knowledgeElements);
+
+          improvementService.filterKnowledgeElementsIfImproving
+            .withArgs({ knowledgeElements, assessment: competenceEvaluationAssessment }).returns(knowledgeElementsFiltered);
+        });
+
+        it('should filter the knowledge elements', async () => {
+          // when
+          await getProgression({
+            userId,
+            progressionId,
+            assessmentRepository,
+            campaignParticipationRepository,
+            competenceEvaluationRepository,
+            knowledgeElementRepository,
+            skillRepository,
+            targetProfileRepository,
+            improvementService,
+          });
+
+          // then
+          expect(improvementService.filterKnowledgeElementsIfImproving)
+            .to.have.been.calledWith({ knowledgeElements, assessment: competenceEvaluationAssessment });
+
+        });
+
+        it('should return the progression associated to the assessment', async () => {
+          // given
+          const expectedProgression = domainBuilder.buildProgression({
+            id: progressionId,
+            targetedSkills: competenceSkills,
+            knowledgeElements: knowledgeElementsFiltered,
+            isProfileCompleted: competenceEvaluationAssessment.isCompleted()
+          });
+
+          // when
+          const progression = await getProgression({
+            userId,
+            progressionId,
+            assessmentRepository,
+            campaignParticipationRepository,
+            competenceEvaluationRepository,
+            knowledgeElementRepository,
+            skillRepository,
+            targetProfileRepository,
+            improvementService,
+          });
+
+          // then
           expect(progression).to.deep.equal(expectedProgression);
         });
       });
@@ -234,7 +289,7 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
       const assessment = domainBuilder.buildAssessment({
         id: assessmentId,
         userId,
-        type: Assessment.types.SMARTPLACEMENT,
+        type: Assessment.types.CAMPAIGN,
       });
 
       beforeEach(() => {
@@ -250,10 +305,11 @@ describe('Unit | Domain | Use Cases | get-progression', () => {
           userId,
           progressionId,
           assessmentRepository,
+          campaignParticipationRepository,
           competenceEvaluationRepository,
-          smartPlacementAssessmentRepository,
           knowledgeElementRepository,
           skillRepository,
+          targetProfileRepository,
           improvementService
         });
 

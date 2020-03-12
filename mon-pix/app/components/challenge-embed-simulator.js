@@ -1,69 +1,49 @@
-import Component from '@ember/component';
-import { computed } from '@ember/object';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
+import { action } from '@ember/object';
 import { htmlSafe } from '@ember/string';
 
-export default Component.extend({
+export default class ChallengeEmbedSimulator extends Component {
 
-  // Element
-  classNames: ['challenge-embed-simulator'],
-  attributeBindings: ['embedDocumentHeightStyle:style'],
+  @tracked
+  isLoadingEmbed = true;
 
-  // Data props
-  embedDocument: null,
+  @tracked
+  isSimulatorLaunched = false;
 
-  // CPs
-  embedDocumentHeightStyle: computed('embedDocument.height', function() {
-    return htmlSafe(`height: ${this.get('embedDocument.height')}px`);
-  }),
-
-  // Actions
-  actions: {
-    launchSimulator() {
-      const iframe = this._getIframe();
-
-      // TODO: use correct targetOrigin once the embeds are hosted behind our domain
-      iframe.contentWindow.postMessage('launch', '*');
-      iframe.focus();
-
-      this.toggleProperty('_isSimulatorNotYetLaunched');
-      this._unblurSimulator();
-    },
-
-    rebootSimulator() {
-      this._rebootSimulator();
-    },
-  },
-
-  // Internals
-  _isSimulatorNotYetLaunched: true,
-  _hiddenSimulatorClass: null,
-
-  didUpdateAttrs() {
-    this.set('_isSimulatorNotYetLaunched', true);
-    this.set('_hiddenSimulatorClass', 'hidden-class');
-  },
-
-  didRender() {
-    this._super(...arguments);
-    const iframe = this._getIframe();
-    iframe.onload = () => {
-      this._removePlaceholder();
-    };
-  },
-
-  _removePlaceholder() {
-    if (this.embedDocument.url) {
-      this.set('_hiddenSimulatorClass', null);
+  get embedDocumentHeightStyle() {
+    if (this.args.embedDocument) {
+      return htmlSafe(`height: ${this.args.embedDocument.height}px`);
     }
-  },
+    return '';
+  }
 
-  _getIframe() {
-    return this.element.querySelector('.embed__iframe');
-  },
+  configureIframe(iframe, params) {
+    const embedUrl = params[0];
+    const thisComponent = params[1];
 
-  /* This method is not tested because it would be too difficult (add an observer on a complicated stubbed DOM API element!) */
-  _rebootSimulator() {
-    const iframe = this._getIframe();
+    thisComponent.isLoadingEmbed = true;
+    thisComponent.isSimulatorLaunched = false;
+    iframe.onload = () => {
+      if (embedUrl) {
+        thisComponent.isLoadingEmbed = false;
+      }
+    };
+  }
+
+  @action
+  launchSimulator(event) {
+    const iframe = this._getIframe(event);
+
+    // TODO: use correct targetOrigin once the embeds are hosted behind our domain
+    iframe.contentWindow.postMessage('launch', '*');
+    iframe.focus();
+    this.isSimulatorLaunched = true;
+  }
+
+  @action
+  rebootSimulator(event) {
+    const iframe = this._getIframe(event);
     const tmpSrc = iframe.src;
 
     // First onload: when we reset the iframe
@@ -76,10 +56,9 @@ export default Component.extend({
       iframe.src = tmpSrc;
     };
     iframe.src = '';
-  },
-
-  _unblurSimulator() {
-    const $simulatorPanel = this.element.getElementsByClassName('embed__simulator').item(0);
-    $simulatorPanel.classList.remove('blurred');
   }
-});
+
+  _getIframe(event) {
+    return event.currentTarget.parentElement.parentElement.querySelector('.embed__iframe');
+  }
+}

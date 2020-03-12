@@ -11,10 +11,9 @@
 @import "globals/buttons";
 @import "globals/errors";
 @import "globals/forms";
-@import "globals/loading";
 @import "globals/pages";
 @import "globals/panels";
-@import "globals/pix-modal";
+@import "globals/pix-loader";
 @import "globals/tables";
 @import "globals/texts";
 @import "globals/titles";
@@ -22,17 +21,25 @@
 @import "components/campaign-list";
 @import "components/circle-chart";
 @import "components/current-organization";
+@import "components/dissociate-user-modal";
+@import "components/dropdown";
+@import "components/join-request-form";
 @import "components/pagination-control";
-@import "components/password-reset-modal";
+@import "components/previous-page-button";
+@import "components/pix-score-tag";
 @import "components/progression-gauge";
+@import "components/recommendation-indicator";
 @import "components/register-form";
 @import "components/search-input";
+@import "components/select-input";
 @import "components/sidebar-menu";
 @import "components/login-or-register";
 @import "components/user-logged-menu";
-@import "components/select-creator";
+@import "components/password-reset-modal";
+@import "components/modal";
 @import "pages/login";
 @import "pages/join";
+@import "pages/join-request";
 @import "pages/authenticated";
 @import "pages/authenticated/campaigns";
 @import "pages/authenticated/campaigns/details";
@@ -40,9 +47,16 @@
 @import "pages/authenticated/campaigns/new-item";
 @import "pages/authenticated/campaigns/list";
 @import "pages/authenticated/campaigns/no-campaign-panel";
+@import "pages/authenticated/campaigns/details/analysis";
+@import "pages/authenticated/campaigns/details/analysis/analysis-tab";
+@import "pages/authenticated/campaigns/details/analysis/tube-recommendation-row";
 @import "pages/authenticated/campaigns/details/parameters";
+@import "pages/authenticated/campaigns/details/collective-results/success-indicator";
 @import "pages/authenticated/campaigns/details/participants";
-@import "pages/authenticated/campaigns/details/participants/participant-results";
+@import "pages/authenticated/campaigns/details/participants/participant";
+@import "pages/authenticated/campaigns/details/participants/participant/header";
+@import "pages/authenticated/campaigns/details/participants/participant/results";
+@import "pages/authenticated/campaigns/profile";
 @import "pages/authenticated/team";
 @import "pages/authenticated/team/list";
 @import "pages/authenticated/team/new";
@@ -56,7 +70,8 @@ body, html {
   height: 100%;
   font-family: $roboto;
   font-size: 100%;
-  background-color: $porcelain;
+  background-color: $grey-10;
+  color: $black;
 }
 
 body > .ember-view {

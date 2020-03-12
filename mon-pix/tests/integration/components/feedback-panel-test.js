@@ -1,3 +1,6 @@
+/* eslint ember/no-classic-classes: 0 */
+/* eslint ember/require-tagless-components: 0 */
+
 import EmberObject from '@ember/object';
 import { resolve } from 'rsvp';
 import Service from '@ember/service';
@@ -48,27 +51,48 @@ describe('Integration | Component | feedback-panel', function() {
   setupRenderingTest();
 
   describe('Default rendering', function() {
+    context('when assessment is not of type certification', function() {
+      beforeEach(async function() {
+        await render(hbs`{{feedback-panel isFormOpened=false}}`);
+      });
 
-    beforeEach(async function() {
-      await render(hbs`{{feedback-panel isFormOpened=false}}`);
+      it('should display the feedback panel', function() {
+        expect(find('.feedback-panel__view--link')).to.exist;
+      });
+
+      it('should toggle the form view when clicking on the toggle link', async function() {
+        // when
+        await click(TOGGLE_LINK);
+
+        // then
+        expectFormViewToBeVisible();
+
+        // then when
+        await click(TOGGLE_LINK);
+
+        // then
+        expectFormViewToNotBeVisible();
+      });
     });
 
-    it('should display the feedback panel', function() {
-      expect(find('.feedback-panel__view--link')).to.exist;
-    });
+    context('when assessment is of type certification', function() {
+      beforeEach(async function() {
+        const assessment = EmberObject.create({
+          isCertification: true
+        });
+        this.set('assessment', assessment);
+        this.set('isFormOpened', true);
 
-    it('should toggle the form view when clicking on the toggle link', async function() {
-      // when
-      await click(TOGGLE_LINK);
+        await render(hbs`<FeedbackPanel @assessment={{this.assessment}} @isFormOpened={{this.isFormOpened}} />`);
+      });
 
-      // then
-      expectFormViewToBeVisible();
+      it('should display the feedback certification section', async function() {
+        expect(find('.feedback-certification-section__div')).to.exist;
 
-      // then when
-      await click(TOGGLE_LINK);
+        await click(TOGGLE_LINK);
 
-      // then
-      expectFormViewToNotBeVisible();
+        expect(find('.feedback-certification-section__div')).not.to.exist;
+      });
     });
   });
 

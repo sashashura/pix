@@ -19,6 +19,8 @@ const membershipSerializer = require('../../../../lib/infrastructure/serializers
 const userOrgaSettingsSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/user-orga-settings-serializer');
 const scorecardSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/scorecard-serializer');
 const userSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/user-serializer');
+const userDetailsForAdminSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/user-details-for-admin-serializer');
+
 const validationErrorSerializer = require('../../../../lib/infrastructure/serializers/jsonapi/validation-error-serializer');
 
 describe('Unit | Controller | user-controller', () => {
@@ -27,6 +29,7 @@ describe('Unit | Controller | user-controller', () => {
     const email = 'to-be-free@ozone.airplane';
     const deserializedUser = new User({ password: 'password_1234' });
     const savedUser = new User({ email });
+    const locale = 'fr-fr';
 
     beforeEach(() => {
       sinon.stub(userSerializer, 'deserialize').returns(deserializedUser);
@@ -79,6 +82,8 @@ describe('Unit | Controller | user-controller', () => {
         const useCaseParameters = {
           user: deserializedUser,
           reCaptchaToken,
+          locale,
+          campaignCode: null,
         };
 
         // when
@@ -133,6 +138,105 @@ describe('Unit | Controller | user-controller', () => {
 
       // then
       expect(response).to.be.equal('ok');
+    });
+  });
+
+  describe('#updateUserDetailsForAdministration', () => {
+
+    const userId = 1132;
+    const newEmail = 'partiel@update.com';
+
+    beforeEach(() => {
+      sinon.stub(usecases, 'updateUserDetailsForAdministration');
+      sinon.stub(userDetailsForAdminSerializer, 'serialize');
+      sinon.stub(userDetailsForAdminSerializer, 'deserialize');
+    });
+
+    it('should update email,firstName,lastName', async () => {
+
+      const lastName = 'newLastName';
+      const firstName = 'newFirstName';
+      const payload = {
+        data: {
+          attributes: {
+            email: newEmail,
+            lastName: 'newLastName',
+            firstName: 'newFirstName'
+          },
+        },
+      };
+      const request = {
+        params: {
+          id: userId,
+        },
+        payload
+      };
+
+      // given
+      userDetailsForAdminSerializer.deserialize.withArgs(payload).returns({ email: newEmail, lastName, firstName });
+      usecases.updateUserDetailsForAdministration.resolves({ email: newEmail, lastName, firstName });
+      userDetailsForAdminSerializer.serialize.returns('updated');
+
+      // when
+      const response = await userController.updateUserDetailsForAdministration(request);
+
+      // then
+      expect(response).to.be.equal('updated');
+    });
+
+    it('should update email only', async () => {
+      // given
+      const payload = {
+        data: {
+          attributes: {
+            email: newEmail,
+          },
+        },
+      };
+      const request = {
+        params: {
+          id: userId,
+        },
+        payload
+      };
+
+      userDetailsForAdminSerializer.deserialize.withArgs(payload).returns({ email: newEmail });
+      usecases.updateUserDetailsForAdministration.resolves({ email: newEmail });
+      userDetailsForAdminSerializer.serialize.returns(newEmail);
+
+      // when
+      const response = await userController.updateUserDetailsForAdministration(request);
+
+      // then
+      expect(response).to.be.equal(newEmail);
+    });
+  });
+
+  describe('#acceptPixLastTermsOfService', () => {
+    let request;
+    const userId = 1;
+
+    beforeEach(() => {
+      request = {
+        auth: { credentials: { userId } },
+        params: { id: userId },
+      };
+
+      sinon.stub(usecases, 'acceptPixLastTermsOfService');
+      sinon.stub(userSerializer, 'serialize');
+    });
+
+    it('should accept pix terms of service', async () => {
+      // given
+      usecases.acceptPixLastTermsOfService.withArgs({ userId }).resolves({});
+      const stubSerializedObject = 'ok';
+      userSerializer.serialize.withArgs({}).returns(stubSerializedObject);
+
+      // when
+      const response = await userController.accepPixLastTermsOfService(request);
+
+      // then
+      expect(response).to.be.equal(stubSerializedObject);
     });
   });
 
@@ -234,6 +338,30 @@ describe('Unit | Controller | user-controller', () => {
 
       // when
       const response = await userController.getCurrentUser(request);
+
+      // then
+      expect(response).to.be.equal('ok');
+    });
+
+  });
+
+  describe('#getUserDetailsForAdmin', () => {
+    let request;
+
+    beforeEach(() => {
+      request = { params: { id: '123' } };
+
+      sinon.stub(usecases, 'getUserDetailsForAdmin');
+      sinon.stub(userDetailsForAdminSerializer, 'serialize');
+    });
+
+    it('should get the specified user for admin context', async () => {
+      // given
+      usecases.getUserDetailsForAdmin.withArgs({ userId: 123 }).resolves('userDetail');
+      userDetailsForAdminSerializer.serialize.withArgs('userDetail').returns('ok');
+
+      // when
+      const response = await userController.getUserDetailsForAdmin(request);
 
       // then
       expect(response).to.be.equal('ok');
@@ -585,6 +713,71 @@ describe('Unit | Controller | user-controller', () => {
 
       // then
       expect(usecases.resetScorecard).to.have.been.calledWith({ userId, competenceId });
+    });
+  });
+
+  describe('#getUserCampaignParticipationToCampaign', () => {
+    const userId = 789;
+    const campaignId = 456;
+    const campaignParticipation = Symbol('campaign participation');
+    const expectedCampaignParticipation = Symbol('expected campaign participation');
+
+    const request = {
+      auth: {
+        credentials: {
+          userId
+        }
+      },
+      params: {
+        userId,
+        campaignId
+
+      }
+    };
+
+    beforeEach(() => {
+      sinon.stub(campaignParticipationSerializer, 'serialize');
+      sinon.stub(usecases, 'getUserCampaignParticipationToCampaign');
+    });
+
+    it('should return serialized campaign participation', async function() {
+      // given
+      usecases.getUserCampaignParticipationToCampaign.withArgs({ userId, campaignId }).resolves(campaignParticipation);
+      campaignParticipationSerializer.serialize.withArgs(campaignParticipation).returns(expectedCampaignParticipation);
+
+      // when
+      const response = await userController.getUserCampaignParticipationToCampaign(request, hFake);
+
+      // then
+      expect(response).to.equal(expectedCampaignParticipation);
+    });
+  });
+
+  describe('#anonymizeUser', () => {
+
+    const userId = 1;
+    const request = {
+      auth: {
+        credentials: {
+          userId
+        }
+      },
+      params: {
+        id: userId
+      },
+    };
+
+    beforeEach(() => {
+      sinon.stub(usecases, 'anonymizeUser').resolves();
+    });
+
+    it('should call the anonymize user usecase', async () => {
+      // when
+      const response = await userController.anonymizeUser(request, hFake);
+
+      // then
+      expect(usecases.anonymizeUser).to.have.been.calledWith({ userId });
+      expect(response.statusCode).to.equal(204);
     });
   });
 });

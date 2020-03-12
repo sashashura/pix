@@ -1,4 +1,5 @@
 const BookshelfAssessment = require('../data/assessment');
+const DomainTransaction = require('../DomainTransaction');
 const Assessment = require('../../domain/models/Assessment');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
 const { groupBy, map, head, _ } = require('lodash');
@@ -15,7 +16,7 @@ module.exports = {
             answers: function(query) {
               query.orderBy('createdAt', 'ASC');
             },
-          }, 'assessmentResults', 'campaignParticipation', 'campaignParticipation.campaign',
+          }, 'campaignParticipation', 'campaignParticipation.campaign',
         ],
       })
       .then((assessment) => bookshelfToDomainConverter.buildDomainObject(BookshelfAssessment, assessment));
@@ -25,21 +26,18 @@ module.exports = {
     return BookshelfAssessment
       .collection()
       .query((qb) => {
+        qb.join('assessment-results', 'assessment-results.assessmentId', 'assessments.id');
         qb.where({ userId })
           .where(function() {
             this.where({ type: 'PLACEMENT' });
           })
-          .where('createdAt', '<', limitDate)
-          .where('state', '=', 'completed')
-          .orderBy('createdAt', 'desc');
+          .where('assessments.createdAt', '<', limitDate)
+          .where('assessment-results.createdAt', '<', limitDate)
+          .where('assessments.state', '=', 'completed')
+          .orderBy('assessments.createdAt', 'desc');
       })
-      .fetch({
-        withRelated: [
-          { assessmentResults: (qb) => { qb.where('createdAt', '<', limitDate); } },
-        ],
-      })
+      .fetch()
       .then((bookshelfAssessmentCollection) => bookshelfAssessmentCollection.models)
-      .then(_selectAssessmentsHavingAnAssessmentResult)
       .then(_selectLastAssessmentForEachCompetence)
       .then((assessments) => bookshelfToDomainConverter.buildDomainObjects(BookshelfAssessment, assessments));
   },
@@ -58,32 +56,23 @@ module.exports = {
       });
   },
 
-  save(assessment) {
+  save({ assessment, domainTransaction = DomainTransaction.emptyTransaction()  }) {
     return assessment.validate()
       .then(() => new BookshelfAssessment(_adaptModelToDb(assessment)))
-      .then((bookshelfAssessment) => bookshelfAssessment.save())
+      .then((bookshelfAssessment) => bookshelfAssessment.save(null, { transacting: domainTransaction.knexTransaction }))
       .then((assessment) => bookshelfToDomainConverter.buildDomainObject(BookshelfAssessment, assessment));
   },
 
-  getByCertificationCourseId(certificationCourseId) {
+  getIdByCertificationCourseId(certificationCourseId) {
     return BookshelfAssessment
-      .where({ courseId: certificationCourseId, type: 'CERTIFICATION' })
-      .fetchAll({ withRelated: ['assessmentResults'] })
-      .then((assessments) => bookshelfToDomainConverter.buildDomainObjects(BookshelfAssessment, assessments))
-      .then(_selectPreferablyLastCompletedAssessmentOrAnyLastAssessmentOrNull);
-  },
-
-  findOneCertificationAssessmentByUserIdAndCourseId(userId, certificationCourseId) {
-    return BookshelfAssessment
-      .where({ userId, courseId: certificationCourseId, type: 'CERTIFICATION' })
-      .fetchAll({ withRelated: ['assessmentResults', 'answers'] })
-      .then((assessments) => bookshelfToDomainConverter.buildDomainObjects(BookshelfAssessment, assessments))
-      .then(_selectPreferablyLastCompletedAssessmentOrAnyLastAssessmentOrNull);
+      .where({ certificationCourseId, type: 'CERTIFICATION' })
+      .fetch({ columns: 'id' })
+      .then((result) => result ? result.attributes.id : null);
   },
 
   getByCampaignParticipationId(campaignParticipationId) {
     return BookshelfAssessment
-      .where({ 'campaign-participations.id': campaignParticipationId, 'assessments.type': 'SMART_PLACEMENT' })
+      .where({ 'campaign-participations.id': campaignParticipationId, 'assessments.type': 'CAMPAIGN' })
       .query((qb) => {
         qb.innerJoin('campaign-participations', 'campaign-participations.id', 'assessments.campaignParticipationId');
       })
@@ -91,17 +80,17 @@ module.exports = {
       .then((assessment) => bookshelfToDomainConverter.buildDomainObject(BookshelfAssessment, assessment));
   },
 
-  findNotAbortedSmartPlacementAssessmentsByUserId(userId) {
+  findNotAbortedCampaignAssessmentsByUserId(userId) {
     return BookshelfAssessment
-      .where({ userId, type: 'SMART_PLACEMENT' })
+      .where({ userId, type: 'CAMPAIGN' })
       .where('state', '!=', 'aborted')
       .fetchAll()
       .then((assessments) => bookshelfToDomainConverter.buildDomainObjects(BookshelfAssessment, assessments));
   },
 
-  findLastSmartPlacementAssessmentByUserIdAndCampaignCode({ userId, campaignCode, includeCampaign = false }) {
+  findLastCampaignAssessmentByUserIdAndCampaignCode({ userId, campaignCode, includeCampaign = false }) {
     return BookshelfAssessment
-      .where({ 'assessments.userId': userId, 'assessments.type': 'SMART_PLACEMENT', 'campaigns.code': campaignCode })
+      .where({ 'assessments.userId': userId, 'assessments.type': 'CAMPAIGN', 'campaigns.code': campaignCode })
       .query((qb) => {
         qb.innerJoin('campaign-participations', 'campaign-participations.id', 'assessments.campaignParticipationId');
         qb.innerJoin('campaigns', 'campaign-participations.campaignId', 'campaigns.id');
@@ -111,24 +100,27 @@ module.exports = {
       .then((assessment) => bookshelfToDomainConverter.buildDomainObject(BookshelfAssessment, assessment));
   },
 
-  // TODO: maybe obsolete after v1 be finished
-  hasCampaignOrCompetenceEvaluation(userId) {
-    return BookshelfAssessment
-      .where({ userId })
-      .where('type', 'IN', ['SMART_PLACEMENT', 'COMPETENCE_EVALUATION'])
-      .fetchAll()
-      .then((bookshelfAssessmentCollection) => bookshelfAssessmentCollection.length > 0);
+  abortByAssessmentId(assessmentId) {
+    return this._updateStateById({ id: assessmentId, state: Assessment.states.ABORTED });
   },
 
-  completeByAssessmentId(assessmentId) {
-    return this.updateStateById({ id: assessmentId, state: Assessment.states.COMPLETED });
+  completeByAssessmentId(assessmentId, domainTransaction = DomainTransaction.emptyTransaction()) {
+    return this._updateStateById({ id: assessmentId, state: Assessment.states.COMPLETED }, domainTransaction.knexTransaction);
   },
 
-  updateStateById({ id, state }) {
-    return BookshelfAssessment
+  async belongsToUser(id, userId) {
+    const assessment = await BookshelfAssessment
+      .where({ id, userId })
+      .fetch({ columns: 'id' });
+
+    return Boolean(assessment);
+  },
+
+  async _updateStateById({ id, state }, knexTransaction) {
+    const assessment = await BookshelfAssessment
       .where({ id })
-      .save({ state }, { require: true, patch: true })
-      .then((assessment) => bookshelfToDomainConverter.buildDomainObject(BookshelfAssessment, assessment));
+      .save({ state }, { require: true, patch: true, transacting: knexTransaction });
+    return bookshelfToDomainConverter.buildDomainObject(BookshelfAssessment, assessment);
   },
 };
 
@@ -136,10 +128,6 @@ function _selectLastAssessmentForEachCompetence(bookshelfAssessments) {
   const assessmentsGroupedByCompetence = groupBy(bookshelfAssessments,
     (bookshelfAssessment) => bookshelfAssessment.get('competenceId'));
   return map(assessmentsGroupedByCompetence, head);
-}
-
-function _selectAssessmentsHavingAnAssessmentResult(bookshelfAssessments) {
-  return bookshelfAssessments.filter((bookshelfAssessment) => bookshelfAssessment.relations.assessmentResults.length > 0);
 }
 
 function _adaptModelToDb(assessment) {
@@ -150,20 +138,9 @@ function _adaptModelToDb(assessment) {
     'updatedAt',
     'successRate',
     'answers',
-    'assessmentResults',
     'targetProfile',
     'campaign',
     'campaignParticipation',
     'title',
   ]);
-}
-
-function _selectPreferablyLastCompletedAssessmentOrAnyLastAssessmentOrNull(assessments) {
-  const creationDateOrderedAssessments = _.orderBy(assessments, ['createdAt'], ['desc']);
-  const completedAssessment = _.find(creationDateOrderedAssessments, ['state', Assessment.states.COMPLETED]);
-  if (completedAssessment) {
-    return completedAssessment;
-  }
-
-  return _.head(creationDateOrderedAssessments) || null;
 }

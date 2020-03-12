@@ -53,7 +53,7 @@ describe('Unit | UseCase | create-assessment-for-campaign', () => {
     beforeEach(() => {
       userId = faker.random.number();
       // given
-      campaign = domainBuilder.buildCampaign({
+      campaign = domainBuilder.buildCampaign.ofTypeAssessment({
         id: 'campaignId',
       });
 
@@ -64,11 +64,11 @@ describe('Unit | UseCase | create-assessment-for-campaign', () => {
 
       assessment = domainBuilder.buildAssessment({
         id: 'assessmentId',
-        type: 'SMART_PLACEMENT',
+        type: 'CAMPAIGN',
         userId,
         campaignParticipationId: campaignParticipation.id
       });
-      
+
       campaignRepository.getByCode.resolves(campaign);
       assessmentRepository.save.resolves(assessment);
       assessmentRepository.get.resolves(assessment);
@@ -90,7 +90,7 @@ describe('Unit | UseCase | create-assessment-for-campaign', () => {
       // then
       return promise.then(() => {
         expect(assessmentRepository.save).to.have.been.called;
-        expect(assessmentRepository.save).to.have.been.calledWith(assessment);
+        expect(assessmentRepository.save).to.have.been.calledWith({ assessment });
       });
     });
 

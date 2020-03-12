@@ -24,6 +24,7 @@
 
 # IDE
 **/.idea
+!.idea/runConfigurations/*.xml
 *.iml
 
 # SQLite3 local dev file
@@ -42,12 +43,13 @@
 **/bower.json.ember-try
 **/package.json.ember-try
 
-.vscode/launch.json
 api/.vscode/*
 api/.vscode
 api/.nvmrc
 .nvmrc
 .vscode/*
+!.vscode/sample.launch.json
+!.vscode/sample.settings.json
 .history
 
 # ember-try
@@ -71,3 +73,6 @@ high-level-tests/load-testing/report/*.html
 
 # Answers extracts
 api/scripts/extractions
+
+# Visual regression snapshots
+high-level-tests/e2e/cypress/snapshots/actual/**

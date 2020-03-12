@@ -4,34 +4,62 @@
   margin: auto;
   align-items: center;
   background-color: white;
-  max-width: 360px;
   border-radius: 10px;
-  padding: 60px 100px;
+  padding: 40px 60px;
+  max-width: 400px;
+  width: 100%;
+
+  &__title {
+    text-align: center;
+    font-family: $open-sans;
+    font-weight: 400;
+    font-size: 2rem;
+    color: $grey-80;
+    margin-top: 32px;
+    margin-bottom: 8px;
+  }
 
   &__information {
-    max-width: 360px;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
+    text-align: center;
+    font-family: $roboto;
+    max-width: 400px;
+    width: 100%;
   }
 
   &__error-message {
     margin-bottom: 10px;
+    text-align: center;
+    font-size: .875rem;
   }
 
   &__input-container {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    margin-bottom: 22px;
+    margin-bottom: 16px;
+  }
+
+  &__button {
+    margin-top: 8px;
+    font-size: .875rem;
+  }
+
+  form {
+    margin: auto;
   }
 
   &__forgotten-password {
     text-align: left;
+    font-size: .875rem;
+    color: $communication-dark;
 
     a {
       text-decoration: none;
 
-      &:hover, &:active, &:focus {
+      &:hover, &:active, &:focus, &:visited  {
         text-decoration: underline;
+        color: $communication-dark;
       }
     }
   }
@@ -42,10 +70,10 @@
     border-radius: 3px;
     align-items: center;
     background-color: white;
-    border: 2px solid $alto;
+    border: 2px solid $grey-20;
 
     &:focus-within {
-      border: 2px solid $dodger-blue;
+      border: 2px solid $communication-dark;
     }
 
     input {
@@ -66,6 +94,7 @@
         display: none;
       }
     }
+
   }
 
   &__icon {
@@ -79,13 +108,13 @@
 
   &-icon {
     &__eye {
-      color: $dove-gray;
+      color: $grey-45;
       transition: .5s;
       font-size: 1.1rem;
       margin-top: 2px;
 
       &:hover {
-        color: $nero;
+        color: $grey-80;
         cursor: pointer;
       }
     }

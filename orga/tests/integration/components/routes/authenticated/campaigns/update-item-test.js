@@ -5,40 +5,54 @@ import hbs from 'htmlbars-inline-precompile';
 import EmberObject from '@ember/object';
 
 module('Integration | Component | routes/authenticated/campaign | update-item', function(hooks) {
+
   setupRenderingTest(hooks);
-  let campaign;
 
   hooks.beforeEach(function() {
-    campaign = EmberObject.create({});
-    this.set('updateCampaignSpy', (updatedCampaign) => {
-      campaign = updatedCampaign;
-    });
+    this.campaign = EmberObject.create({ isTypeAssessment: true });
+    this.set('updateCampaignSpy', (event) => event.preventDefault());
     this.set('cancelSpy', () => {});
   });
 
   test('it should contain inputs, attributes and validation button', async function(assert) {
     // when
-    await render(hbs`{{routes/authenticated/campaigns/update-item update=(action updateCampaignSpy) cancel=(action cancelSpy)}}`);
+    await render(hbs`<Routes::Authenticated::Campaigns::UpdateItem @campaign={{this.campaign}} @update={{this.updateCampaignSpy}} @cancel={{this.cancelSpy}} />`);
 
     // then
-    assert.dom('#campaign-title').exists();
     assert.dom('#campaign-custom-landing-page-text').exists();
     assert.dom('button[type="submit"]').exists();
-    assert.dom('#campaign-title').hasAttribute('maxLength', '50');
     assert.dom('#campaign-custom-landing-page-text').hasAttribute('maxLength', '350');
   });
 
   test('it should send campaign update action when submitted', async function(assert) {
-    // given
-    this.set('model', campaign);
-
     // when
-    await render(hbs`{{routes/authenticated/campaigns/update-item campaign=model update=(action updateCampaignSpy) cancel=(action cancelSpy)}}`);
+    await render(hbs`<Routes::Authenticated::Campaigns::UpdateItem @campaign={{this.campaign}} @update={{this.updateCampaignSpy}} @cancel={{this.cancelSpy}} />`);
 
     // then
     await fillIn('#campaign-title', 'New title');
     await click('button[type="submit"]');
 
-    assert.deepEqual(campaign.get('title'), 'New title');
+    assert.deepEqual(this.campaign.title, 'New title');
+  });
+
+  module('When campaign type is ASSESSMENT', function() {
+    test('it should display campaign title input', async function(assert) {
+      this.campaign = EmberObject.create({ isTypeAssessment: true });
+
+      await render(hbs`<Routes::Authenticated::Campaigns::UpdateItem @campaign={{this.campaign}} @update={{this.updateCampaignSpy}} @cancel={{this.cancelSpy}} />`);
+
+      assert.dom('input#campaign-title').exists();
+      assert.dom('#campaign-title').hasAttribute('maxLength', '50');
+    });
+  });
+
+  module('When campaign type is not ASSESSMENT', function() {
+    test('it should not display campaign title input', async function(assert) {
+      this.campaign = EmberObject.create({ isTypeAssessment: false });
+
+      await render(hbs`<Routes::Authenticated::Campaigns::UpdateItem @campaign={{this.campaign}} @update={{this.updateCampaignSpy}} @cancel={{this.cancelSpy}} />`);
+
+      assert.dom('input#campaign-title').doesNotExist();
+    });
   });
 });

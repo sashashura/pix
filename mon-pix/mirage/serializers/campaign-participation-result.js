@@ -7,7 +7,9 @@ export default ApplicationSerializer.extend({
     'validatedSkillsCount',
     'masteryPercentage',
     'isCompleted',
-    'areBadgeCriteriaFulfilled',
   ],
-  include: ['badge', 'competenceResults'],
+  include: [
+    'campaignParticipationBadges',
+    'competenceResults',
+  ],
 });

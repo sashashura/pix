@@ -1,13 +1,13 @@
 {
   "name": "pix",
-  "version": "2.124.0",
+  "version": "2.171.0",
   "private": false,
   "description": "Plateforme d'évaluation et de certification des compétences numériques des citoyens francophones.",
   "license": "AGPL-3.0",
   "author": "GIP Pix",
   "engines": {
-    "node": "12.14.1",
-    "npm": "6.13.4"
+    "node": "12.18.x",
+    "npm": "6.14.x"
   },
   "repository": {
     "type": "git",
@@ -58,8 +58,7 @@
     "clean:mon-pix": "cd mon-pix && npm run clean",
     "clean:orga": "cd orga && npm run clean",
     "clean:root": "rm -rf node_modules && rm -rf tmp",
-    "configure": "npm install && run-s ci:all test configure:api",
-    "configure:api": "cd api && npm run db:migrate",
+    "configure": "./scripts/configure.sh",
     "coverage": "run-s coverage:clean coverage:api coverage:merge coverage:coveralls coverage:codeclimate",
     "coverage:api": "cd api && npm run lint && npm run coverage",
     "coverage:clean": "rm -rf ./coverage",
@@ -73,9 +72,7 @@
     "lint:mon-pix": "cd mon-pix && npm run lint",
     "lint:orga": "cd orga && npm run lint",
     "lint:scripts": "cd scripts && eslint .",
-    "preinstall": "test \"$(npm --version)\" = 6.13.4",
-    "release:prepare": "./scripts/release/prepare.sh",
-    "release:publish": "./scripts/release/publish.sh",
+    "preinstall": "npx check-engine",
     "scalingo-post-ra-creation": "echo 'nothing to do'",
     "start": "run-p --print-label start:api start:mon-pix start:orga start:certif start:admin",
     "start:admin": "cd admin && npm start",

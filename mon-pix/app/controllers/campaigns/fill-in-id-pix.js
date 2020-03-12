@@ -1,3 +1,6 @@
+/* eslint ember/no-actions-hash: 0 */
+/* eslint ember/no-classic-classes: 0 */
+
 import Controller from '@ember/controller';
 
 export default Controller.extend({
@@ -16,16 +19,18 @@ export default Controller.extend({
 
       if (participantExternalId) {
         this.set('isLoading', true);
-        return this.start(this.model, participantExternalId);
+        return this.transitionToRoute('campaigns.start-or-resume', this.model, { queryParams: { participantExternalId } });
       } else {
-        return this.set('errorMessage', `Merci de renseigner votre ${this.get('model.idPixLabel')}.`);
+        return this.set('errorMessage', `Merci de renseigner votre ${ this.model.idPixLabel }.`);
       }
     },
 
     cancel() {
       this.set('errorMessage', null);
 
-      return this.transitionToRoute('campaigns.campaign-landing-page', this.model.code);
+      return this.transitionToRoute('campaigns.start-or-resume', this.model.code, {
+        queryParams: { hasUserSeenLandingPage: false }
+      });
     },
   }
 });

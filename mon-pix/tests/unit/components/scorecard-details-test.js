@@ -1,32 +1,29 @@
 import { expect } from 'chai';
+import sinon from 'sinon';
 import { describe, it } from 'mocha';
 import { setupTest } from 'ember-mocha';
 import EmberObject from '@ember/object';
+import Service from '@ember/service';
+import createGlimmerComponent from '../../helpers/create-glimmer-component';
 
 describe('Unit | Component | scorecard-details ', function() {
   setupTest();
 
-  let component;
-
-  beforeEach(function() {
-    component = this.owner.lookup('component:scorecard-details');
-  });
-
   describe('#level', function() {
     it('returns null if the scorecard isNotStarted', function() {
       // when
-      component.set('scorecard', { isNotStarted: true });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: { isNotStarted: true } });
 
       // then
-      expect(component.get('level')).to.be.equal(null);
+      expect(component.level).to.equal(null);
     });
 
     it('returns the level if the scorecard is not isNotStarted', function() {
       // when
-      component.set('scorecard', { level: 1 });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: { level: 1 } });
 
       // then
-      expect(component.get('level')).to.be.equal(1);
+      expect(component.level).to.equal(1);
     });
 
   });
@@ -34,34 +31,52 @@ describe('Unit | Component | scorecard-details ', function() {
   describe('#isProgressable', function() {
     it('returns false if isMaxLevel', function() {
       // when
-      component.set('scorecard', { isMaxLevel: true });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: { isMaxLevel: true } });
 
       // then
-      expect(component.get('isProgressable')).to.be.equal(false);
+      expect(component.isProgressable).to.equal(false);
     });
 
     it('returns false if isNotStarted', function() {
       // when
-      component.set('scorecard', { isNotStarted: true });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: { isNotStarted: true } });
 
       // then
-      expect(component.get('isProgressable')).to.be.equal(false);
+      expect(component.isProgressable).to.equal(false);
     });
 
     it('returns false if isFinished', function() {
       // when
-      component.set('scorecard', { isFinished: true });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: { isFinished: true } });
 
       // then
-      expect(component.get('isProgressable')).to.be.equal(false);
+      expect(component.isProgressable).to.equal(false);
     });
 
     it('returns true otherwise', function() {
       // when
-      component.set('scorecard', {});
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: {} });
 
       // then
-      expect(component.get('isProgressable')).to.be.equal(true);
+      expect(component.isProgressable).to.equal(true);
+    });
+  });
+
+  describe('#canImprove', function() {
+    it('returns true if maxlevel not reached', function() {
+      // when
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: { isFinishedWithMaxLevel: false } });
+
+      // then
+      expect(component.canImprove).to.equal(true);
+    });
+
+    it('returns false if maxlevel reached', function() {
+    // when
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard: { isFinishedWithMaxLevel: true } });
+
+      // then
+      expect(component.canImprove).to.equal(false);
     });
   });
 
@@ -94,6 +109,7 @@ describe('Unit | Component | scorecard-details ', function() {
 
       const tutorials = [tutorial_1, tutorial_2, tutorial_3];
       const scorecard =  EmberObject.create({ tutorials });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard });
 
       const expectedResult = [
         {
@@ -109,8 +125,7 @@ describe('Unit | Component | scorecard-details ', function() {
       ];
 
       // when
-      component.set('scorecard', scorecard);
-      const result = component.get('tutorialsGroupedByTubeName');
+      const result = component.tutorialsGroupedByTubeName;
 
       // then
       expect(result[0].name).to.deep.equal(expectedResult[0].name);
@@ -128,17 +143,117 @@ describe('Unit | Component | scorecard-details ', function() {
     it('returns an empty array when there is no tutorials', function() {
       // given
       const tutorials = [];
-      const scorecard =  EmberObject.create({ tutorials });
+      const scorecard = EmberObject.create({ tutorials });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard });
 
       const expectedResult = [];
 
       // when
-      component.set('scorecard', scorecard);
-      const result = component.get('tutorialsGroupedByTubeName');
+      const result = component.tutorialsGroupedByTubeName;
 
       // then
       expect(result).to.deep.equal(expectedResult);
       expect(result).to.have.lengthOf(0);
     });
   });
+
+  describe('#improveCompetenceEvaluation', function() {
+    let store, userId, competenceId, router;
+
+    beforeEach(async function() {
+      // given
+      competenceId = 'recCompetenceId';
+      const scorecard = EmberObject.create({ competenceId });
+      const component = createGlimmerComponent('component:scorecard-details', { scorecard });
+      store = Service.create({ queryRecord: sinon.stub().resolves() });
+      component.store = store;
+      userId = 'userId';
+      component.currentUser = EmberObject.create({ user: { id: userId } });
+      router = EmberObject.create({ transitionTo: sinon.stub() });
+      component.router = router;
+
+      // when
+      await component.improveCompetenceEvaluation();
+    });
+
+    it('creates a competence-evaluation for improving', async function() {
+      // then
+      sinon.assert.calledWith(store.queryRecord, 'competence-evaluation', {
+        improve: true,
+        userId,
+        competenceId
+      });
+    });
+
+    it('redirects to competences.resume route', async function() {
+      // then
+      sinon.assert.calledWith(router.transitionTo, 'competences.resume', competenceId);
+    });
+
+  });
+
+  describe('#computeRemainingDaysBeforeImproving', function() {
+    let component, scorecard;
+
+    beforeEach(() => {
+      const competenceId = 'recCompetenceId';
+      scorecard = EmberObject.create({ competenceId });
+      component = createGlimmerComponent('component:scorecard-details', { scorecard });
+    });
+
+    it('should return a singular sentence when remaining days before improving are equal to 1', () => {
+      // given
+      scorecard.remainingDaysBeforeImproving = 1;
+
+      // when
+      const result = component.computeRemainingDaysBeforeImproving;
+
+      // then
+      expect(result).to.be.equal('1 jour');
+    });
+
+    it('should return a plural sentence when remaining days before improving are different than 1', () => {
+      // given
+      scorecard.remainingDaysBeforeImproving = 3;
+
+      // when
+      const result = component.computeRemainingDaysBeforeImproving;
+
+      // then
+      expect(result).to.be.equal('3 jours');
+    });
+  });
+
+  describe('#shouldWaitBeforeImproving', function() {
+    let component, scorecard;
+
+    beforeEach(() => {
+      const competenceId = 'recCompetenceId';
+      scorecard = EmberObject.create({ competenceId });
+      component = createGlimmerComponent('component:competence-card-default', { scorecard });
+    });
+
+    it('should return true when remaining days before improving are different than 0', () => {
+      // given
+      scorecard.remainingDaysBeforeImproving = 3;
+
+      // when
+      const result = component.shouldWaitBeforeImproving;
+
+      // then
+      expect(result).to.be.true;
+    });
+
+    it('should return false when remaining days before improving are equal to 0', () => {
+      // given
+      scorecard.remainingDaysBeforeImproving = 0;
+
+      // when
+      const result = component.shouldWaitBeforeImproving;
+
+      // then
+      expect(result).to.be.false;
+    });
+  });
+
 });

@@ -1,12 +1,24 @@
-import { action, computed } from '@ember/object';
+import { inject as service } from '@ember/service';
+import { action } from '@ember/object';
 import Component from '@ember/component';
+import { tracked } from '@glimmer/tracking';
 
 export default class NewItem extends Component {
-  campaign = null;
-  targetProfiles = null;
-  wantIdPix = false;
+  @service currentUser;
 
-  @computed('wantIdPix')
+  campaign = {};
+  targetProfiles = null;
+  @tracked wantIdPix = false;
+  @tracked isCampaignGoalAssessment = null;
+
+  init() {
+    super.init(...arguments);
+    if (!this.currentUser.organization.canCollectProfiles) {
+      this.isCampaignGoalAssessment = true;
+      this.campaign.type = 'ASSESSMENT';
+    }
+  }
+
   get notWantIdPix() {
     return !this.wantIdPix;
   }
@@ -24,9 +36,21 @@ export default class NewItem extends Component {
   }
 
   @action
-  setSelectedTargetProfile(selectedTargetProfileId) {
-    const selectedTargetProfile = this.targetProfiles
-      .find((targetProfile) => targetProfile.get('id') === selectedTargetProfileId);
-    this.campaign.set('targetProfile', selectedTargetProfile);
+  setSelectedTargetProfile(event) {
+    this.campaign.targetProfile = this.targetProfiles
+      .find((targetProfile) => targetProfile.get('id') === event.target.value);
+    this.campaign.errors.remove('targetProfile');
+  }
+
+  @action
+  setCampaignGoal(event) {
+    if (event.target.value === 'collect-participants-profile') {
+      this.isCampaignGoalAssessment = false;
+      this.campaign.title = null;
+      this.campaign.targetProfile = null;
+      return this.campaign.type = 'PROFILES_COLLECTION';
+    }
+    this.isCampaignGoalAssessment = true;
+    return this.campaign.type = 'ASSESSMENT';
   }
 }

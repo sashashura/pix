@@ -75,6 +75,9 @@ describe('Unit | Domain | Models | Scorecard', () => {
       it('should have set the scorecard remainingDaysBeforeReset based on last knowledge element date', () => {
         expect(actualScorecard.remainingDaysBeforeReset).to.equal(7);
       });
+      it('should have set the scorecard remainingDaysBeforeImproving based on last knowledge element date', () => {
+        expect(actualScorecard.remainingDaysBeforeImproving).to.equal(4);
+      });
     });
 
     context('when the competence evaluation has never been started', () => {
@@ -157,20 +160,36 @@ describe('Unit | Domain | Models | Scorecard', () => {
       it('should have a dayBeforeReset at null', () => {
         expect(actualScorecard.remainingDaysBeforeReset).to.be.null;
       });
+
+      it('should have a dayBeforeImproving at null', () => {
+        expect(actualScorecard.remainingDaysBeforeImproving).to.be.null;
+      });
     });
 
     context('when the user level is beyond the upper limit allowed', () => {
+      let knowledgeElements;
       beforeEach(() => {
         // given
-        const knowledgeElements = [{ earnedPix: 50 }, { earnedPix: 70 }];
+        knowledgeElements = [{ earnedPix: 50 }, { earnedPix: 70 }];
         computeDaysSinceLastKnowledgeElementStub.withArgs(knowledgeElements).returns(0);
-        //when
-        actualScorecard = Scorecard.buildFrom({ userId, knowledgeElements, competenceEvaluation, competence });
       });
       // then
       it('should have the competence level capped at the maximum value', () => {
+        //when
+        actualScorecard = Scorecard.buildFrom({ userId, knowledgeElements, competenceEvaluation, competence });
+
         expect(actualScorecard.level).to.equal(5);
+        expect(actualScorecard.earnedPix).to.equal(40);
       });
+
+      it('should have the competence level not capped at the maximum value if we allow it', () => {
+        //when
+        actualScorecard = Scorecard.buildFrom({ userId, knowledgeElements, competenceEvaluation, competence, allowExcessLevel : true });
+
+        expect(actualScorecard.level).to.equal(15);
+        expect(actualScorecard.earnedPix).to.equal(40);
+      });
+
     });
 
     context('when the user pix score is higher than the max', () => {
@@ -180,41 +199,36 @@ describe('Unit | Domain | Models | Scorecard', () => {
         knowledgeElements = [{ earnedPix: 50 }, { earnedPix: 70 }];
         computeDaysSinceLastKnowledgeElementStub.withArgs(knowledgeElements).returns(0);
       });
-      it('should have the same number of pix if blockReachablePixAndLevel is not defined', () => {
-        //when
-        actualScorecard = Scorecard.buildFrom({ userId, knowledgeElements, competenceEvaluation, competence });
-        // then
-        expect(actualScorecard.earnedPix).to.equal(120);
-      });
-      it('should have the same number of pix if blockReachablePixAndLevel is false', () => {
+
+      it('should have the number of pix blocked', () => {
         //when
         actualScorecard = Scorecard.buildFrom({
           userId,
           knowledgeElements,
           competenceEvaluation,
           competence,
-          blockReachablePixAndLevel: false
-        });
-        // then
-        expect(actualScorecard.earnedPix).to.equal(120);
-      });
-      it('should have the number of pix blocked if blockReachablePixAndLevel is true', () => {
-        //when
-        actualScorecard = Scorecard.buildFrom({
-          userId,
-          knowledgeElements,
-          competenceEvaluation,
-          competence,
-          blockReachablePixAndLevel: true
         });
         // then
         expect(actualScorecard.earnedPix).to.equal(constants.MAX_REACHABLE_PIX_BY_COMPETENCE);
       });
 
+      it('should have the same number of pix if we allow it', () => {
+        //when
+        actualScorecard = Scorecard.buildFrom({
+          userId,
+          knowledgeElements,
+          competenceEvaluation,
+          competence,
+          allowExcessPix: true
+        });
+        // then
+        expect(actualScorecard.earnedPix).to.equal(120);
+      });
+
     });
 
     context('when there is no knowledge elements', () => {
-      it('should return null', () => {
+      it('should return null when looking for remainingDaysBeforeReset', () => {
         const knowledgeElements = [];
 
         // when
@@ -223,16 +237,36 @@ describe('Unit | Domain | Models | Scorecard', () => {
         // then
         expect(actualScorecard.remainingDaysBeforeReset).to.equal(null);
       });
+
+      it('should return null when looking for remainingDaysBeforeImproving', () => {
+        const knowledgeElements = [];
+
+        // when
+        actualScorecard = Scorecard.buildFrom({ userId, knowledgeElements, competenceEvaluation, competence });
+
+        // then
+        expect(actualScorecard.remainingDaysBeforeImproving).to.equal(null);
+      });
+
     });
   });
 
-  describe('#computeDaysSinceLastKnowledgeElement', () => {
+  describe('#computeRemainingDaysBeforeReset', () => {
 
     let testCurrentDate;
+    const originalConstantValue = constants.MINIMUM_DELAY_IN_DAYS_FOR_RESET;
 
     beforeEach(() => {
       testCurrentDate = new Date('2018-01-10T05:00:00Z');
       sinon.useFakeTimers(testCurrentDate.getTime());
+    });
+
+    before(() => {
+      constants.MINIMUM_DELAY_IN_DAYS_FOR_RESET = 7;
+    });
+
+    after(() => {
+      constants.MINIMUM_DELAY_IN_DAYS_FOR_RESET = originalConstantValue;
     });
 
     [
@@ -258,6 +292,49 @@ describe('Unit | Domain | Models | Scorecard', () => {
 
         // then
         expect(remainingDaysBeforeReset).to.equal(expectedDaysBeforeReset);
+      });
+    });
+  });
+
+  describe('#computeRemainingDaysBeforeImproving', () => {
+
+    let testCurrentDate;
+    const originalConstantValue = constants.MINIMUM_DELAY_IN_DAYS_BEFORE_IMPROVING;
+
+    beforeEach(() => {
+      testCurrentDate = new Date('2018-01-10T05:00:00Z');
+      sinon.useFakeTimers(testCurrentDate.getTime());
+    });
+
+    before(() => {
+      constants.MINIMUM_DELAY_IN_DAYS_BEFORE_IMPROVING = 4;
+    });
+
+    after(() => {
+      constants.MINIMUM_DELAY_IN_DAYS_BEFORE_IMPROVING = originalConstantValue;
+    });
+
+    [
+      { daysSinceLastKnowledgeElement: 0.0833, expectedDaysBeforeImproving: 4 },
+      { daysSinceLastKnowledgeElement: 0, expectedDaysBeforeImproving: 4 },
+      { daysSinceLastKnowledgeElement: 1, expectedDaysBeforeImproving: 3 },
+      { daysSinceLastKnowledgeElement: 1.5, expectedDaysBeforeImproving: 3 },
+      { daysSinceLastKnowledgeElement: 2.4583, expectedDaysBeforeImproving: 2 },
+      { daysSinceLastKnowledgeElement: 4, expectedDaysBeforeImproving: 0 },
+      { daysSinceLastKnowledgeElement: 7, expectedDaysBeforeImproving: 0 },
+      { daysSinceLastKnowledgeElement: 10, expectedDaysBeforeImproving: 0 },
+    ].forEach(({ daysSinceLastKnowledgeElement, expectedDaysBeforeImproving }) => {
+      it(`should return ${expectedDaysBeforeImproving} days when ${daysSinceLastKnowledgeElement} days passed since last knowledge element`, () => {
+        const date = moment(testCurrentDate).toDate();
+        const knowledgeElements = [{ createdAt: date }];
+
+        computeDaysSinceLastKnowledgeElementStub.returns(daysSinceLastKnowledgeElement);
+
+        // when
+        const remainingDaysBeforeImproving = Scorecard.computeRemainingDaysBeforeImproving(knowledgeElements);
+
+        // then
+        expect(remainingDaysBeforeImproving).to.equal(expectedDaysBeforeImproving);
       });
     });
   });

@@ -1,82 +1,112 @@
 import { createMembership } from './handlers/memberships';
-import { getOrganizationMemberships } from './handlers/organizations';
-import { getCertificationsBySessionId } from './handlers/certifications-by-session-id';
-import { upload } from 'ember-file-upload/mirage';
+import { attachTargetProfiles, getOrganizationTargetProfiles } from './handlers/target-profiles';
+import { getJuryCertificationSummariesBySessionId } from './handlers/get-jury-certification-summaries-by-session-id';
+import { findPaginatedAndFilteredSessions } from './handlers/find-paginated-and-filtered-sessions';
+import { findPaginatedOrganizationMemberships } from './handlers/organizations';
 
 export default function() {
-
-  // These comments are here to help you get started. Feel free to delete them.
-
-  /*
-    Config (with defaults).
-
-    Note: these only affect routes defined *after* them!
-  */
-
-  // this.urlPrefix = '';    // make this `http://localhost:8080`, for example, if your API is on a different server
-  // this.namespace = '';    // make this `/api`, for example, if your API is namespaced
-  // this.timing = 400;      // delay for each request, automatically set to 0 during testing
-
-  /*
-    Shorthand cheatsheet:
-
-    this.get('/posts');
-    this.post('/posts');
-    this.get('/posts/:id');
-    this.put('/posts/:id'); // or this.patch
-    this.del('/posts/:id');
-
-    http://www.ember-cli-mirage.com/docs/v0.4.x/shorthands/
-  */
   this.logging = true;
   this.urlPrefix = 'http://localhost:3000';
   this.namespace = 'api';
 
-  this.get('/users');
-  this.get('/certification-centers');
-
-  this.post('/memberships', createMembership);
-  this.get('/organizations');
-  this.get('/organizations/:id');
-  this.get('/organizations/:id/memberships', getOrganizationMemberships);
-
-  this.get('/sessions/:id');
-  this.get('/sessions/:id/certifications', getCertificationsBySessionId);
-  this.get('/admin/certifications/:id');
-
-  this.put('/sessions/:id/results-sent-to-prescriber', (schema, request) => {
+  this.get('/jury/sessions', findPaginatedAndFilteredSessions);
+  this.get('/jury/sessions/:id');
+  this.get('/jury/sessions/:id/jury-certification-summaries', getJuryCertificationSummariesBySessionId);
+  this.put('/jury/sessions/:id/results-sent-to-prescriber', (schema, request) => {
     const sessionId = request.params.id;
     const session = schema.sessions.findBy({ id: sessionId });
     session.update({ resultsSentToPrescriberAt: new Date() });
     return session;
   });
 
-  this.put('/sessions/:id/certifications/attendance-sheet-analysis', upload(function() {
-    return [
-      { lastName: 'Lantier',
-        firstName: 'Étienne',
-        birthdate: '1990-01-04',
-        birthplace: 'Ajaccio',
-        email: null,
-        externalId: 'ELAN123',
-        extraTimePercentage: null,
-        signature: 'x',
-        certificationId: '2',
-        lastScreen: 'x',
-        comments: null,
-      },
-      { lastName: 'Ranou',
-        firstName: 'Liam',
-        birthdate: '2000-10-22',
-        birthplace: null,
-        email: null,
-        externalId: null,
-        extraTimePercentage: null,
-        signature: null,
-        certificationId: '3',
-        lastScreen: 'x',
-        comments: 'Commentaire',
-      }];
-  }));
+  this.get('/users');
+  this.get('/users/me', (schema, request) => {
+    const userToken = request.requestHeaders.Authorization.replace('Bearer ', '');
+    const userId = JSON.parse(atob(userToken.split('.')[1])).user_id;
 
+    return schema.users.find(userId);
+  });
+  this.get('/admin/users/:id');
+  this.get('/certification-centers');
+  this.get('/certification-centers/:id');
+
+  this.post('/memberships', createMembership);
+  this.get('/organizations');
+  this.get('/organizations/:id');
+  this.get('/organizations/:id/memberships', findPaginatedOrganizationMemberships);
+  this.get('/organizations/:id/target-profiles', getOrganizationTargetProfiles);
+  this.post('/organizations/:id/target-profiles', attachTargetProfiles);
+
+  this.get('/admin/certifications/:id');
+
+  this.post('/organizations/:id/invitations', (schema, request) => {
+    const params = JSON.parse(request.requestBody);
+    const email = params.data.attributes.email;
+
+    schema.organizationInvitations.create({ email });
+
+    return schema.organizationInvitations.where({ email });
+  });
+
+  this.patch('/memberships/:id', (schema, request) => {
+    const membershipId = request.params.id;
+    const params = JSON.parse(request.requestBody);
+    const organizationRole = params.data.attributes['organization-role'];
+
+    const membership = schema.memberships.findBy({ id: membershipId });
+    return membership.update({ organizationRole });
+  });
+
+  this.post('/memberships/:id/disable', (schema, request) => {
+    const membershipId = request.params.id;
+
+    const membership = schema.memberships.findBy({ id: membershipId });
+    return membership.update({ disabledAt: new Date() });
+  });
+
+  this.patch('/organizations/:id', (schema, request) => {
+    const organizationId = request.params.id;
+    const params = JSON.parse(request.requestBody);
+    const name = params.data.attributes.name;
+    const externalId = params.data.attributes['external-id'];
+    const provinceCode = params.data.attributes['province-code'];
+
+    const organization = schema.organizations.findBy({ id: organizationId });
+    return organization.update({ name, externalId, provinceCode });
+  });
+
+  this.patch('/admin/users/:id', (schema, request) => {
+    const userId = request.params.id;
+    const params = JSON.parse(request.requestBody);
+
+    const userUpdated = {
+      'data': {
+        'type': 'users',
+        'id': userId,
+        'attributes': {
+          'first-name': params.data.attributes['first-name'],
+          'last-name': params.data.attributes['last-name'],
+          'email': params.data.attributes['email'],
+          'username': params.data.attributes['username'],
+          'cgu': params.data.attributes['cgu'],
+          'is-authenticated-from-gar': params.data.attributes['is-authenticated-from-gar'],
+          'pix-orga-terms-of-service-accepted': params.data.attributes['pix-orga-terms-of-service-accepted'],
+          'pix-certif-terms-of-service-accepted': params.data.attributes['pix-certif-terms-of-service-accepted']
+        }
+      }
+    };
+    return userUpdated;
+  });
+
+  this.post('/admin/users/:id/anonymize', (schema, request) => {
+    const userId = request.params.id;
+    const expectedUpdatedUser = {
+      firstName: `prenom_${userId}`,
+      lastName: `nom_${userId}`,
+      email: `email_${userId}@example.net`,
+    };
+
+    const organization = schema.users.findBy({ id: userId });
+    return organization.update(expectedUpdatedUser);
+  });
 }

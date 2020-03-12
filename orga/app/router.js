@@ -17,6 +17,7 @@ Router.map(function() {
   this.route('login', { path: 'connexion' });
 
   this.route('join', { path: 'rejoindre' });
+  this.route('join-request', { path: '/demande-administration-sco' });
   this.route('join-when-authenticated');
 
   this.route('terms-of-service', { path: '/cgu' });
@@ -33,12 +34,17 @@ Router.map(function() {
       this.route('list', { path: '/' });
       this.route('new', { path: '/creation' });
       this.route('update', { path: '/:campaign_id/modification' });
+      this.route('participant', { path: '/:campaign_id/participants/:campaign_participation_id' }, function() {
+        this.route('results', { path: '/resultats' });
+        this.route('analysis', { path: '/analyse' });
+      });
+      this.route('profile', { path: '/:campaign_id/profils/:campaign_participation_id' });
       this.route('details', { path: '/:campaign_id' }, function() {
         this.route('parameters', { path: '/' });
         this.route('collective-results', { path: '/resultats-collectifs' });
-        this.route('participants', function() {
-          this.route('results', { path: '/:campaign_participation_id' });
-        });
+        this.route('analysis', { path: '/analyse' });
+        this.route('participants');
+        this.route('profiles', { path: '/profils' });
       });
     });
   });

@@ -14,6 +14,7 @@ describe('Unit | UseCase | find-tutorials', () => {
   let skillRepository;
   let tubeRepository;
   let tutorialRepository;
+  let userTutorialRepository;
 
   beforeEach(() => {
     scorecardId = '1_recabC123';
@@ -23,7 +24,7 @@ describe('Unit | UseCase | find-tutorials', () => {
     knowledgeElementRepository = { findUniqByUserIdAndCompetenceId: sinon.stub() };
     skillRepository = { findByCompetenceId: sinon.stub() };
     tubeRepository = { findByNames: sinon.stub() };
-    tutorialRepository = { findByRecordIds: sinon.stub() };
+    tutorialRepository = { findByRecordIdsForCurrentUser: sinon.stub() };
   });
 
   afterEach(() => {
@@ -36,7 +37,7 @@ describe('Unit | UseCase | find-tutorials', () => {
       parseIdStub.withArgs(scorecardId).returns({ competenceId, userId: authenticatedUserId });
     });
 
-    context('And user asks for his own tutorials', () => {
+    context('And user asks for tutorials belonging to his scorecard', () => {
 
       it('should resolve', () => {
         // given
@@ -57,10 +58,14 @@ describe('Unit | UseCase | find-tutorials', () => {
       });
 
       context('when there is at least one invalidated knowledge element and two inferred knowledge element', () => {
-        it('should return the user tutorials related to the scorecard', async () => {
+        let expectedTutorialList;
+
+        beforeEach(async () => {
           // given
+          const userTutorial = { id: 1, userId: 'userId', tutorialId: 'tuto1' };
           const tutorial1 = domainBuilder.buildTutorial({ id: 'tuto1' });
           const tutorial2 = domainBuilder.buildTutorial({ id: 'tuto2' });
+          tutorial2.userTutorial = userTutorial;
           const tutorial3 = domainBuilder.buildTutorial({ id: 'tuto3' });
 
           const inferredTutorial = domainBuilder.buildTutorial({ id: 'tutoInferred' });
@@ -77,6 +82,7 @@ describe('Unit | UseCase | find-tutorials', () => {
             tubeName: '@wikipédia',
             tubePracticalTitle: 'Practical Title wikipédia',
             tubePracticalDescription: 'Practical Description wikipédia',
+            userTutorial
           };
 
           const expectedTutorial3 = {
@@ -86,7 +92,7 @@ describe('Unit | UseCase | find-tutorials', () => {
             tubePracticalDescription: 'Practical Description recherche',
           };
 
-          const expectedTutorialList = [
+          expectedTutorialList = [
             expectedTutorial3,
             expectedTutorial1,
             expectedTutorial2,
@@ -97,10 +103,10 @@ describe('Unit | UseCase | find-tutorials', () => {
 
           const inferredTutorialIdList = [inferredTutorial.id];
 
-          tutorialRepository.findByRecordIds.withArgs(tutorialIdList1).returns([tutorial1, tutorial2]);
-          tutorialRepository.findByRecordIds.withArgs(tutorialIdList2).returns([tutorial3]);
+          tutorialRepository.findByRecordIdsForCurrentUser.withArgs({ ids: tutorialIdList1, userId: authenticatedUserId }).returns([tutorial1, tutorial2]);
+          tutorialRepository.findByRecordIdsForCurrentUser.withArgs({ ids: tutorialIdList2, userId: authenticatedUserId }).returns([tutorial3]);
 
-          tutorialRepository.findByRecordIds.withArgs(inferredTutorialIdList).returns([inferredTutorial]);
+          tutorialRepository.findByRecordIdsForCurrentUser.withArgs({ ids: inferredTutorialIdList, userId: authenticatedUserId }).returns([inferredTutorial]);
 
           const skill_1 = domainBuilder.buildSkill({ name: '@wikipédia1', tutorialIds: tutorialIdList1, competenceId: competenceId });
           const skill_2 = domainBuilder.buildSkill({ name: '@wikipédia2', tutorialIds: tutorialIdList1, competenceId: competenceId });
@@ -155,7 +161,9 @@ describe('Unit | UseCase | find-tutorials', () => {
           ];
 
           tubeRepository.findByNames.withArgs(tubeNames).returns(tubeList);
+        });
 
+        it('should return the tutorials related to the scorecard', async () => {
           // when
           const result = await findTutorials({
             authenticatedUserId,
@@ -169,10 +177,11 @@ describe('Unit | UseCase | find-tutorials', () => {
           //then
           expect(result).to.deep.equal(expectedTutorialList);
         });
+
       });
 
       context('when there is no invalidated knowledge element', () => {
-        it('should return no tutorials', async () => {
+        it('should return no tutorial', async () => {
           // given
           const competenceId = 'recCompetenceWikipedia';
           const skill_1 = domainBuilder.buildSkill({ name: '@wikipédia1', competenceId: competenceId });
@@ -194,6 +203,7 @@ describe('Unit | UseCase | find-tutorials', () => {
             skillRepository,
             tubeRepository,
             tutorialRepository,
+            userTutorialRepository,
           });
 
           //then
@@ -217,6 +227,7 @@ describe('Unit | UseCase | find-tutorials', () => {
           skillRepository,
           tubeRepository,
           tutorialRepository,
+          userTutorialRepository,
         });
 
         // then

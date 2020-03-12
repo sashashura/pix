@@ -1,5 +1,14 @@
 'use strict';
 
+function _getEnvironmentVariableAsNumber({ environmentVariableName, defaultValue, minValue }) {
+  const valueToValidate = process.env[environmentVariableName] || defaultValue;
+  const number = parseInt(valueToValidate, 10);
+  if (!isNaN(number) && number >= minValue) {
+    return number;
+  }
+  throw new Error(`Invalid value '${valueToValidate}' for environment variable '${environmentVariableName}'. It should be a number greater than or equal ${minValue}.`);
+}
+
 module.exports = function(environment) {
   const ENV = {
     modulePrefix: 'pix-admin',
@@ -34,7 +43,10 @@ module.exports = function(environment) {
         UNAUTHORIZED: { CODE: '401', MESSAGE: 'L\'adresse e-mail et/ou le mot de passe saisis sont incorrects.' },
         FORBIDDEN: '403',
         NOT_FOUND: '404',
-      }
+      },
+      MAX_CONCURRENT_AJAX_CALLS: _getEnvironmentVariableAsNumber({ environmentVariableName: 'MAX_CONCURRENT_AJAX_CALLS', defaultValue: 8, minValue: 1 }),
+      ORGANIZATION_DASHBOARD_URL: process.env.ORGANIZATION_DASHBOARD_URL,
+      USER_DASHBOARD_URL: process.env.USER_DASHBOARD_URL
     },
 
     googleFonts: [
@@ -62,6 +74,14 @@ module.exports = function(environment) {
       url: 'https://stats.pix.fr/js/container_x4fRiAXl.js',
     },
 
+    fontawesome: {
+      warnIfNoIconsIncluded: true,
+    },
+
+    pagination: {
+      debounce: 250,
+    },
+
   };
 
   if (environment === 'development') {
@@ -70,7 +90,7 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
-    ENV.APP.API_HOST = process.env.API_HOST || 'http://localhost:3000';
+    ENV.matomo.url = 'https://stats.pix.fr/js/container_x4fRiAXl_dev_a6c96fc927042b6f6e773267.js';
     ENV.matomo.debug = true;
   }
 
@@ -89,9 +109,9 @@ module.exports = function(environment) {
     ENV['ember-cli-notifications'] = {
       clearDuration: 300
     };
-  }
 
-  ENV.APP.ODS_PARSING_URL = 'api/sessions/session_id/certifications/attendance-sheet-analysis';
+    ENV.pagination.debounce = 0;
+  }
 
   if (environment === 'production') {
     // here you can enable a production-specific feature

@@ -1,16 +1,19 @@
+const _ = require('lodash');
+
 const { catchErr, expect, knex, databaseBuilder } = require('../../../test-helper');
+
 const UserOrgaSettings = require('../../../../lib/domain/models/UserOrgaSettings');
 const BookshelfUserOrgaSettings = require('../../../../lib/infrastructure/data/user-orga-settings');
-const userOrgaSettingsRepository = require('../../../../lib/infrastructure/repositories/user-orga-settings-repository');
 const { UserOrgaSettingsCreationError } = require('../../../../lib/domain/errors');
-const _ = require('lodash');
+
+const userOrgaSettingsRepository = require('../../../../lib/infrastructure/repositories/user-orga-settings-repository');
 
 describe('Integration | Repository | UserOrgaSettings', function() {
 
-  const USER_OMITTED_PROPERTIES = ['campaignParticipations', 'certificationCenterMemberships', 'knowledgeElements',
-    'memberships', 'pixRoles', 'pixScore', 'samlId', 'scorecards', 'userOrgaSettings'];
+  const USER_PICKED_PROPERTIES = ['id', 'firstName', 'lastName', 'email', 'username', 'password', 'cgu',
+    'pixOrgaTermsOfServiceAccepted', 'pixCertifTermsOfServiceAccepted'];
 
-  const ORGANIZATION_OMITTED_PROPERTIES = ['memberships', 'organizationInvitations', 'students', 'targetProfileShares',
+  const ORGANIZATION_OMITTED_PROPERTIES = ['memberships', 'organizationInvitations', 'students', 'targetProfileShares', 'email',
     'createdAt', 'updatedAt'];
 
   let user;
@@ -54,7 +57,7 @@ describe('Integration | Repository | UserOrgaSettings', function() {
 
       // then
       expect(userOrgaSettingsSaved.id).to.not.be.undefined;
-      expect(_.omit(userOrgaSettingsSaved.user, USER_OMITTED_PROPERTIES)).to.deep.equal(_.omit(user, USER_OMITTED_PROPERTIES));
+      expect(_.pick(userOrgaSettingsSaved.user, USER_PICKED_PROPERTIES)).to.deep.equal(_.pick(user, USER_PICKED_PROPERTIES));
       expect(_.omit(userOrgaSettingsSaved.currentOrganization, ORGANIZATION_OMITTED_PROPERTIES)).to.deep.equal(_.omit(organization, ORGANIZATION_OMITTED_PROPERTIES));
     });
 
@@ -88,8 +91,44 @@ describe('Integration | Repository | UserOrgaSettings', function() {
 
       // then
       expect(updatedUserOrgaSettings.id).to.deep.equal(userOrgaSettingsId);
-      expect(_.omit(updatedUserOrgaSettings.user, USER_OMITTED_PROPERTIES)).to.deep.equal(_.omit(user, USER_OMITTED_PROPERTIES));
+      expect(_.pick(updatedUserOrgaSettings.user, USER_PICKED_PROPERTIES)).to.deep.equal(_.pick(user, USER_PICKED_PROPERTIES));
       expect(_.omit(updatedUserOrgaSettings.currentOrganization, ORGANIZATION_OMITTED_PROPERTIES)).to.deep.equal(_.omit(expectedOrganization, ORGANIZATION_OMITTED_PROPERTIES));
+    });
+  });
+
+  describe('#findOneByUserId', () => {
+
+    let userOrgaSettingsId;
+
+    beforeEach(async () => {
+      userOrgaSettingsId = databaseBuilder.factory.buildUserOrgaSettings({ userId: user.id, currentOrganizationId: organization.id }).id;
+      await databaseBuilder.commit();
+    });
+
+    it('should return an UserOrgaSettings domain object', async () => {
+      // when
+      const foundUserOrgaSettings = await userOrgaSettingsRepository.findOneByUserId(user.id);
+
+      // then
+      expect(foundUserOrgaSettings).to.be.an.instanceof(UserOrgaSettings);
+    });
+
+    it('should return the userOrgaSettings belonging to user', async () => {
+      // when
+      const foundUserOrgaSettings = await userOrgaSettingsRepository.findOneByUserId(user.id);
+
+      // then
+      expect(foundUserOrgaSettings.id).to.deep.equal(userOrgaSettingsId);
+      expect(_.pick(foundUserOrgaSettings.user, USER_PICKED_PROPERTIES)).to.deep.equal(_.pick(user, USER_PICKED_PROPERTIES));
+      expect(_.omit(foundUserOrgaSettings.currentOrganization, ORGANIZATION_OMITTED_PROPERTIES)).to.deep.equal(_.omit(organization, ORGANIZATION_OMITTED_PROPERTIES));
+    });
+
+    it('should return empty object when user-orga-settings doesn\'t exists', async () => {
+      // when
+      const foundUserOrgaSettings = await userOrgaSettingsRepository.findOneByUserId(user.id + 1);
+
+      // then
+      expect(foundUserOrgaSettings).to.deep.equal({});
     });
   });
 });

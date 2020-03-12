@@ -1,10 +1,15 @@
 const { Serializer } = require('jsonapi-serializer');
+const Membership = require('../../../domain/models/Membership');
 
 module.exports = {
 
-  serialize(membership) {
+  serialize(membership, meta) {
     return new Serializer('memberships', {
       transform(record) {
+        if (!record.user) {
+          delete record.user;
+        }
+
         // we add a 'campaigns' attr to the organization so that the serializer
         // can see there is a 'campaigns' attribute and add the relationship link.
         if (record.organization) {
@@ -13,6 +18,8 @@ module.exports = {
           record.organization.memberships = [];
           record.organization.students = [];
           record.organization.organizationInvitations = [];
+        } else {
+          delete record.organization;
         }
         return record;
       },
@@ -20,7 +27,7 @@ module.exports = {
       organization: {
         ref: 'id',
         included: true,
-        attributes: ['code', 'name', 'type', 'isManagingStudents', 'externalId', 'campaigns', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
+        attributes: ['code', 'name', 'type', 'isManagingStudents', 'canCollectProfiles', 'externalId', 'campaigns', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
         campaigns: {
           ref: 'id',
           ignoreRelationshipData: true,
@@ -71,7 +78,15 @@ module.exports = {
         ref: 'id',
         included: true,
         attributes: ['firstName', 'lastName', 'email']
-      }
+      },
+      meta
     }).serialize(membership);
+  },
+
+  deserialize(json) {
+    return new Membership({
+      id: json.data.id,
+      organizationRole: json.data.attributes['organization-role'],
+    });
   }
 };

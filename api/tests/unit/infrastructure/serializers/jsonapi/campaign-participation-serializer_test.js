@@ -6,28 +6,77 @@ describe('Unit | Serializer | JSONAPI | campaign-participation-serializer', func
 
   describe('#serialize', function() {
 
-    it('should convert a CampaignParticipation model object into JSON API data', function() {
-      // given
-      const campaign = { id: 1, code: 'LJA123', title: 'Désobéir' };
-      const user = { id: 1, firstName: 'Michel', lastName: 'Essentiel' };
-      const campaignParticipationResult = {
-        id: 1, isCompleted: true, totalSkillsCount: 10, testedSkillsCount: 5, validatedSkillsCount: 4,
-        competenceResults: ['dummy results']
-      };
-      const meta = {};
-      const campaignParticipation = new CampaignParticipation({
-        id: 5,
-        isShared: true,
-        participantExternalId: 'mail pro',
-        sharedAt: new Date('2018-02-06T14:12:44Z'),
-        createdAt: new Date('2018-02-05T14:12:44Z'),
-        campaign,
-        assessments: [{ id: 4, createdAt: new Date('2018-02-06T14:12:44Z') }],
-        campaignParticipationResult,
-        user,
-      });
+    const campaign = { id: 1, code: 'LJA123', title: 'Désobéir' };
+    const user = { id: 1, firstName: 'Michel', lastName: 'Essentiel' };
+    const competenceResults = [
+      {
+        id: '1',
+        isCompleted: true,
+        masteryPercentage: 40,
+        testedSkillsCount: 5,
+        totalSkillsCount: 10,
+        validatedSkillsCount: 4,
+      },
+      {
+        id: '2',
+        isCompleted: true,
+        masteryPercentage: 33,
+        testedSkillsCount: 5,
+        totalSkillsCount: 6,
+        validatedSkillsCount: 2,
+      }
+    ];
+    const partnerCompetenceResults = [
+      {
+        id: '1',
+        isCompleted: true,
+        masteryPercentage: 50,
+        testedSkillsCount: 5,
+        totalSkillsCount: 10,
+        validatedSkillsCount: 5,
+      },
+      {
+        id: '2',
+        isCompleted: true,
+        masteryPercentage: 66,
+        testedSkillsCount: 5,
+        totalSkillsCount: 6,
+        validatedSkillsCount: 4,
+      }
+    ];
+    const campaignParticipationBadge = {
+      id: 5,
+      partnerCompetenceResults: partnerCompetenceResults
+    };
+    const campaignParticipationResult = {
+      id: 1,
+      isCompleted: true,
+      masteryPercentage: 40,
+      totalSkillsCount: 10,
+      testedSkillsCount: 5,
+      validatedSkillsCount: 4,
+      progress: 1,
+      competenceResults,
+      campaignParticipationBadges: [campaignParticipationBadge],
+    };
+    const campaignAnalysis = {};
+    const campaignParticipation = new CampaignParticipation({
+      id: 5,
+      isShared: true,
+      participantExternalId: 'mail pro',
+      sharedAt: new Date('2018-02-06T14:12:44Z'),
+      createdAt: new Date('2018-02-05T14:12:44Z'),
+      campaign,
+      assessments: [{ id: 4, createdAt: new Date('2018-02-06T14:12:44Z') }],
+      campaignParticipationResult,
+      user,
+      campaignAnalysis,
+    });
 
-      const expectedSerializedCampaignParticipation = {
+    let expectedSerializedCampaignParticipation;
+
+    beforeEach(() => {
+      expectedSerializedCampaignParticipation = {
         data: {
           type: 'campaign-participations',
           id: '5',
@@ -55,6 +104,11 @@ describe('Unit | Serializer | JSONAPI | campaign-participation-serializer', func
                 related: `/api/assessments/${campaignParticipation.lastAssessment.id}`
               }
             },
+            'campaign-analysis': {
+              links: {
+                related: '/api/campaign-participations/5/analyses'
+              }
+            },
             'campaign-participation-result': {
               links: {
                 'related': '/api/campaign-participations/5/campaign-participation-result'
@@ -80,34 +134,102 @@ describe('Unit | Serializer | JSONAPI | campaign-participation-serializer', func
             type: 'users'
           },
           {
-            'attributes': {
-              'competence-results': [
-                'dummy results'
-              ],
-              id: 1,
-              'is-completed': true,
+            attributes: {
+              'mastery-percentage': 40,
               'tested-skills-count': 5,
               'total-skills-count': 10,
               'validated-skills-count': 4,
+            },
+            id: '1',
+            type: 'competenceResults'
+          },
+          {
+            attributes: {
+              'mastery-percentage': 33,
+              'tested-skills-count': 5,
+              'total-skills-count': 6,
+              'validated-skills-count': 2,
+            },
+            id: '2',
+            type: 'competenceResults'
+          },
+          {
+            attributes: {},
+            id: campaignParticipationBadge.id.toString(),
+            type: 'campaignParticipationBadges'
+          },
+          {
+            attributes: {
+              id: 1,
+              'is-completed': true,
+              'mastery-percentage': 40,
+              'tested-skills-count': 5,
+              'total-skills-count': 10,
+              'validated-skills-count': 4,
+              'progress': 1
+            },
+            relationships: {
+              'campaign-participation-badges': {
+                data: [
+                  {
+                    id: '5',
+                    type: 'campaignParticipationBadges'
+                  }
+                ]
+              },
+              'competence-results': {
+                data: [{
+                  id: '1',
+                  type: 'competenceResults',
+                },
+                {
+                  id: '2',
+                  type: 'competenceResults',
+                }]
+              }
             },
             id: '1',
             type: 'campaignParticipationResults'
           }
         ]
       };
+    });
 
-      const expectedRelationshipData = {
-        type: 'campaignParticipationResults',
-        id: '1'
-      };
-
+    it('should convert a CampaignParticipation model object into JSON API data', function() {
       // when
       const json = serializer.serialize(campaignParticipation);
-      const collection = serializer.serialize(campaignParticipation, meta, { ignoreCampaignParticipationResultsRelationshipData : false });
 
       // then
       expect(json).to.deep.equal(expectedSerializedCampaignParticipation);
-      expect(collection.data.relationships['campaign-participation-result'].data).to.deep.equal(expectedRelationshipData);
+    });
+
+    it('should convert a CampaignParticipation model object into JSON API data with ignoreCampaignParticipationResultsRelationshipData false', function() {
+      // given
+      const meta = {};
+      expectedSerializedCampaignParticipation.data.relationships['campaign-participation-result'].data = {
+        type: 'campaignParticipationResults',
+        id: '1'
+      };
+      expectedSerializedCampaignParticipation = { ...expectedSerializedCampaignParticipation, meta };
+
+      // when
+      const result = serializer.serialize(campaignParticipation, meta, { ignoreCampaignParticipationResultsRelationshipData : false });
+
+      // then
+      expect(result).to.deep.equal(expectedSerializedCampaignParticipation);
+    });
+
+    it('should not serialize user if user is undefined', function() {
+      // given
+      campaignParticipation.user = undefined;
+      delete expectedSerializedCampaignParticipation.data.relationships.user;
+      expectedSerializedCampaignParticipation.included = expectedSerializedCampaignParticipation.included.filter((included) => included.type !== 'users');
+
+      // when
+      const result = serializer.serialize(campaignParticipation);
+
+      // then
+      expect(result).to.deep.equal(expectedSerializedCampaignParticipation);
     });
 
   });

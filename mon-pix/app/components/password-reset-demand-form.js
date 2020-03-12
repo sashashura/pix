@@ -1,33 +1,49 @@
+import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
-import Component from '@ember/component';
-import ENV from 'mon-pix/config/environment';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 
-export default Component.extend({
+export default class PasswordResetDemandForm extends Component {
+  @service errors;
+  @service store;
+  @service url;
 
-  store: service(),
+  @tracked hasFailed = false;
+  @tracked hasSucceeded = false;
+  @tracked isButtonEnabled = true;
 
-  email: '',
-  _displayErrorMessage: false,
-  _displaySuccessMessage: false,
-  urlHome: ENV.APP.HOME_HOST,
+  email = '';
 
-  actions: {
+  get homeUrl() {
+    return this.url.homeUrl;
+  }
 
-    savePasswordResetDemand() {
-      this.set('_displayErrorMessage', false);
-      this.set('_displaySuccessMessage', false);
+  get error() {
+    return this.errors.shift();
+  }
 
-      const trimedEmail = this.email ? this.email.trim() : '';
+  get hasErrors() {
+    return this.hasFailed ? false : this.errors.hasErrors();
+  }
 
-      this.store.createRecord('password-reset-demand', { email: trimedEmail })
-        .save()
-        .then(() => {
-          this.set('_displaySuccessMessage', true);
-        })
-        .catch(() => {
-          this.set('_displayErrorMessage', true);
-        });
+  @action
+  async savePasswordResetDemand(event) {
+    event && event.preventDefault();
+    this.hasFailed = false;
+    this.hasSucceeded = false;
+    this.isButtonEnabled = false;
+
+    if (!this.email) {
+      return;
     }
 
+    try {
+      const passwordResetDemand = await this.store.createRecord('password-reset-demand', { email: this.email.trim() });
+      await passwordResetDemand.save();
+      this.hasSucceeded = true;
+    } catch (error) {
+      this.hasFailed = true;
+      this.isButtonEnabled = true;
+    }
   }
-});
+}

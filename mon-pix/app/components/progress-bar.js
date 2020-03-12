@@ -1,50 +1,32 @@
-import { computed } from '@ember/object';
-import Component from '@ember/component';
-import ENV from 'mon-pix/config/environment';
+import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
 import { htmlSafe } from '@ember/string';
 import colorGradient from 'mon-pix/utils/color-gradient';
-import { inject as service } from '@ember/service';
+import progressInAssessment from 'mon-pix/utils/progress-in-assessment';
 
-const { and } = computed;
+export default class ProgressBar extends Component {
+  @service media;
 
-const minWidthPercent = 1.7;
-const minWidthPixel = 16;
+  MINIMUM_WIDTH_STEP_IN_PERCENT = 1.7;
+  MINIMUM_WIDTH_STEP_IN_PIXEL = 16;
 
-export default Component.extend({
-  media: service(),
+  get showProgressBar() {
+    return this.args.assessment.showProgressBar && this.media.isDesktop;
+  }
 
-  showProgressBar: and('media.isDesktop', 'assessment.showProgressBar'),
+  get currentStepIndex() {
+    return progressInAssessment.getCurrentStepIndex(this.args.assessment, this.args.answerId);
+  }
 
-  currentStepIndex: computed('answerId', 'assessment.answers.[]', 'challengeId', 'maxStepsNumber', function() {
-    const persistedAnswersIds = this.assessment.hasMany('answers').ids().filter((id) => id != null);
-    const currentAnswerId = this.answerId;
+  get maxStepsNumber() {
+    return progressInAssessment.getMaxStepsNumber(this.args.assessment);
+  }
 
-    let index = persistedAnswersIds.indexOf(currentAnswerId);
+  get currentStepNumber() {
+    return progressInAssessment.getCurrentStepNumber(this.args.assessment, this.args.answerId);
+  }
 
-    if (index === -1) {
-      index = persistedAnswersIds.length;
-    }
-
-    return index % this.maxStepsNumber;
-  }),
-
-  maxStepsNumber: computed('assessment.{hasCheckpoints,certificationCourse.nbChallenges,course.nbChallenges}', function() {
-    if (this.get('assessment.hasCheckpoints')) {
-      return ENV.APP.NUMBER_OF_CHALLENGES_BETWEEN_TWO_CHECKPOINTS;
-    }
-
-    if (this.assessment.isCertification) {
-      return this.get('assessment.certificationCourse.nbChallenges');
-    }
-
-    return this.get('assessment.course.nbChallenges');
-  }),
-
-  currentStepNumber: computed('currentStepIndex', function() {
-    return this.currentStepIndex + 1;
-  }),
-
-  steps: computed('currentStepIndex', 'maxStepsNumber', function() {
+  get steps() {
     const steps = [];
 
     const gradient = colorGradient('#388AFF', '#985FFF', this.maxStepsNumber);
@@ -58,13 +40,13 @@ export default Component.extend({
     }
 
     return steps;
-  }),
+  }
 
-  progressionWidth: computed('currentStepIndex', 'maxStepsNumber', function() {
-    const widthPercent = minWidthPercent + (100 - minWidthPercent) * this.currentStepIndex  / (this.maxStepsNumber - 1);
+  get progressionWidth() {
+    const widthPercent = this.MINIMUM_WIDTH_STEP_IN_PERCENT + (100 - this.MINIMUM_WIDTH_STEP_IN_PERCENT) * this.currentStepIndex  / (this.maxStepsNumber - 1);
 
-    const width = this.currentStepIndex === 0 ? `${minWidthPixel}px` : `${widthPercent}%`;
+    const width = this.currentStepIndex === 0 ? `${this.MINIMUM_WIDTH_STEP_IN_PIXEL}px` : `${widthPercent}%`;
 
     return htmlSafe(`width: ${width};`);
-  }),
-});
+  }
+}

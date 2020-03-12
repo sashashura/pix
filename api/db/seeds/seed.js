@@ -9,6 +9,7 @@ const buildPixAileProfile = require('./data/pix-aile-profile-builder');
 const campaignParticipationsBuilder = require('./data/campaign-participations-builder');
 const campaignsBuilder = require('./data/campaigns-builder');
 const { certificationCandidatesBuilder } = require('./data/certification/certification-candidates-builder');
+const { badgeAcquisitionBuilder } = require('./data/certification/badge-acquisition-builder');
 const { certificationCentersBuilder } = require('./data/certification/certification-centers-builder');
 const { certificationCoursesBuilder } = require('./data/certification/certification-courses-builder');
 const certificationScoresBuilder = require('./data/certification/certification-scores-builder');
@@ -19,9 +20,10 @@ const certificationCenterMembershipsBuilder = require('./data/certification/cert
 const dragonAndCoBuilder = require('./data/dragon-and-co-builder');
 const organizationsBuilder = require('./data/organizations-builder');
 const pixAileBuilder = require('./data/pix-aile-builder');
-const pixEmploiTargetProfileBuilder = require('./data/pix-emploi-target-profile-builder');
+const { badgeTargetProfileBuilder } = require('./data/badge-target-profile-builder');
+const { pixEmploiTargetProfileBuilder } = require('./data/pix-emploi-target-profile-builder');
 const targetProfilesBuilder = require('./data/target-profiles-builder');
-const usersBuilder = require('./data/users-builder');
+const { usersBuilder } = require('./data/users-builder');
 const usersPixRolesBuilder = require('./data/users_pix_roles-builder');
 
 const SEQUENCE_RESTART_AT_NUMBER = 10000000;
@@ -44,15 +46,7 @@ exports.seed = (knex) => {
   // Target Profiles
   targetProfilesBuilder({ databaseBuilder });
   pixEmploiTargetProfileBuilder({ databaseBuilder });
-
-  // Éléments de parcours
-  campaignsBuilder({ databaseBuilder });
-  campaignParticipationsBuilder({ databaseBuilder });
-  assessmentsBuilder({ databaseBuilder });
-  answersBuilder({ databaseBuilder });
-
-  // Éléments de partcours pour l'utilisateur Pix Aile
-  buildPixAileProfile({ databaseBuilder });
+  badgeTargetProfileBuilder({ databaseBuilder });
 
   // Certifications
   certificationCentersBuilder({ databaseBuilder });
@@ -63,6 +57,16 @@ exports.seed = (knex) => {
   certificationCandidatesBuilder({ databaseBuilder });
   certificationCoursesBuilder({ databaseBuilder });
   certificationScoresBuilder({ databaseBuilder });
+  badgeAcquisitionBuilder({ databaseBuilder });
+
+  // Éléments de parcours
+  campaignsBuilder({ databaseBuilder });
+  campaignParticipationsBuilder({ databaseBuilder });
+  assessmentsBuilder({ databaseBuilder });
+  answersBuilder({ databaseBuilder });
+
+  // Éléments de parcours pour l'utilisateur Pix Aile
+  buildPixAileProfile({ databaseBuilder });
 
   return databaseBuilder.commit()
     .then(() => alterSequenceIfPG(knex));

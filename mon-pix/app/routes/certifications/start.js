@@ -1,12 +1,14 @@
-import Route from '@ember/routing/route';
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
+import classic from 'ember-classic-decorator';
 import { inject as service } from '@ember/service';
+import Route from '@ember/routing/route';
+import SecuredRouteMixin from 'mon-pix/mixins/secured-route-mixin';
 
-export default Route.extend(AuthenticatedRouteMixin, {
-  currentUser: service(),
+@classic
+export default class StartRoute extends Route.extend(SecuredRouteMixin) {
+  @service currentUser;
 
   model() {
     const user = this.currentUser.user;
     return user.belongsTo('certificationProfile').reload();
-  },
-});
+  }
+}

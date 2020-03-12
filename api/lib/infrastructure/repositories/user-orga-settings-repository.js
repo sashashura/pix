@@ -5,6 +5,19 @@ const { UserOrgaSettingsCreationError } = require('../../domain/errors');
 
 module.exports = {
 
+  findOneByUserId(userId) {
+    return BookshelfUserOrgaSettings
+      .where({ userId })
+      .fetch({ require: true, withRelated: ['user', 'currentOrganization'] })
+      .then((userOrgaSettings) => bookshelfToDomainConverter.buildDomainObject(BookshelfUserOrgaSettings, userOrgaSettings))
+      .catch((err) => {
+        if (err instanceof BookshelfUserOrgaSettings.NotFoundError) {
+          return {};
+        }
+        throw err;
+      });
+  },
+
   create(userId, currentOrganizationId) {
     return new BookshelfUserOrgaSettings({ userId, currentOrganizationId })
       .save()
@@ -18,11 +31,12 @@ module.exports = {
       });
   },
 
-  update(userId, organizationId) {
-    return BookshelfUserOrgaSettings
+  async update(userId, organizationId) {
+    const bookshelfUserOrgaSettings = await BookshelfUserOrgaSettings
       .where({ userId })
-      .save({ currentOrganizationId: organizationId }, { patch: true, method: 'update' })
-      .then((bookshelfUserOrgaSettings) => bookshelfUserOrgaSettings.refresh({ withRelated: ['user', 'currentOrganization'] }))
-      .then((userOrgaSettings) => bookshelfToDomainConverter.buildDomainObject(BookshelfUserOrgaSettings, userOrgaSettings));
+      .save({ currentOrganizationId: organizationId }, { patch: true, method: 'update', });
+    await bookshelfUserOrgaSettings.related('user').fetch();
+    await bookshelfUserOrgaSettings.related('currentOrganization').fetch();
+    return bookshelfToDomainConverter.buildDomainObject(BookshelfUserOrgaSettings, bookshelfUserOrgaSettings);
   }
 };

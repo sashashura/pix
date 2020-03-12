@@ -1,6 +1,5 @@
 const { expect, domainBuilder } = require('../../../test-helper');
 const Assessment = require('../../../../lib/domain/models/Assessment');
-const AssessmentResult = require('../../../../lib/domain/models/AssessmentResult');
 
 describe('Unit | Domain | Models | Assessment', () => {
 
@@ -8,7 +7,7 @@ describe('Unit | Domain | Models | Assessment', () => {
 
     it('should return true when its state is completed', () => {
       // given
-      const assessment = Assessment.fromAttributes({ state: 'completed' });
+      const assessment = new Assessment({ state: 'completed' });
 
       // when
       const isCompleted = assessment.isCompleted();
@@ -19,7 +18,7 @@ describe('Unit | Domain | Models | Assessment', () => {
 
     it('should return false when its state is not completed', () => {
       // given
-      const assessment = Assessment.fromAttributes({ state: '' });
+      const assessment = new Assessment({ state: '' });
 
       // when
       const isCompleted = assessment.isCompleted();
@@ -30,142 +29,11 @@ describe('Unit | Domain | Models | Assessment', () => {
 
   });
 
-  describe('#getLastAssessmentResult', () => {
-
-    it('should return the last assessment results', () => {
-      // given
-      const assessmentResultComputed = new AssessmentResult({
-        id: 1,
-        createdAt: new Date('2017-12-20T02:03:04Z'),
-        emitter: 'PIX-ALGO',
-      });
-      const assessmentResultJury = new AssessmentResult({
-        id: 2,
-        createdAt: new Date('2017-12-24T01:02:03Z'),
-        emitter: 'Michel',
-      });
-
-      const assessmentResultJuryOld = new AssessmentResult({
-        id: 3,
-        createdAt: new Date('2017-12-22T01:02:03Z'),
-        emitter: 'Gerard',
-      });
-
-      const assessment = Assessment.fromAttributes({
-        status: 'completed',
-        assessmentResults: [assessmentResultComputed, assessmentResultJury, assessmentResultJuryOld],
-      });
-
-      // when
-      const lastResult = assessment.getLastAssessmentResult();
-
-      // then
-      expect(lastResult.id).to.be.equal(2);
-      expect(lastResult.emitter).to.be.equal('Michel');
-    });
-
-    it('should return null when assessment has no result', () => {
-      // given
-      const assessment = Assessment.fromAttributes({ status: '' });
-
-      // when
-      const lastResult = assessment.getLastAssessmentResult();
-
-      // then
-      expect(lastResult).to.be.null;
-    });
-
-  });
-
-  describe('#getPixScore', () => {
-
-    it('should return the pixScore of last assessment results', () => {
-      // given
-      const assessmentResultComputed = new AssessmentResult({
-        id: 1,
-        createdAt: new Date('2017-12-20T01:02:03Z'),
-        pixScore: 12,
-        emitter: 'PIX-ALGO',
-      });
-      const assessmentResultJury = new AssessmentResult({
-        id: 2,
-        createdAt: new Date('2017-12-24T01:02:03Z'),
-        pixScore: 18,
-        emitter: 'Michel',
-      });
-
-      const assessment = Assessment.fromAttributes({
-        status: 'completed',
-        assessmentResults: [assessmentResultComputed, assessmentResultJury],
-      });
-
-      // when
-      const pixScore = assessment.getPixScore();
-
-      // then
-      expect(pixScore).to.be.equal(18);
-    });
-
-    it('should return null when assessment has no result', () => {
-      // given
-      const assessment = Assessment.fromAttributes({ status: '' });
-
-      // when
-      const pixScore = assessment.getPixScore();
-
-      // then
-      expect(pixScore).to.be.null;
-    });
-
-  });
-
-  describe('#getLevel', () => {
-
-    it('should return the pixScore of last assessment results', () => {
-      // given
-      const assessmentResultComputed = new AssessmentResult({
-        id: 1,
-        createdAt: new Date('2017-12-20T01:02:03Z'),
-        level: 1,
-        emitter: 'PIX-ALGO',
-      });
-      const assessmentResultJury = new AssessmentResult({
-        id: 2,
-        createdAt: new Date('2017-12-24T01:02:03Z'),
-        level: 5,
-        emitter: 'Michel',
-      });
-
-      const assessment = Assessment.fromAttributes({
-        status: 'completed',
-        assessmentResults: [assessmentResultComputed, assessmentResultJury],
-      });
-
-      // when
-      const level = assessment.getLevel();
-
-      // then
-      expect(level).to.be.equal(5);
-    });
-
-    it('should return null when assessment has no result', () => {
-      // given
-      const assessment = Assessment.fromAttributes({ status: '' });
-
-      // when
-      const level = assessment.getLevel();
-
-      // then
-      expect(level).to.be.null;
-    });
-
-  });
-
   describe('#setCompleted', () => {
 
     it('should return the same object with state completed', () => {
       // given
-      const assessment = Assessment.fromAttributes({ state: 'started', userId: 2 });
+      const assessment = new Assessment({ state: 'started', userId: 2 });
 
       // when
       assessment.setCompleted();
@@ -182,7 +50,7 @@ describe('Unit | Domain | Models | Assessment', () => {
 
     it('should return resolved promise when object is valid', () => {
       // given
-      assessment = Assessment.fromAttributes({ type: 'DEMO' });
+      assessment = new Assessment({ type: 'DEMO' });
 
       // when
       const promise = assessment.validate();
@@ -193,7 +61,7 @@ describe('Unit | Domain | Models | Assessment', () => {
 
     it('should return rejected promise when Certification assessment has no userId', () => {
       //given
-      assessment = Assessment.fromAttributes({ type: 'CERTIFICATION' });
+      assessment = new Assessment({ type: 'CERTIFICATION' });
 
       // when
       const promise = assessment.validate();
@@ -204,7 +72,7 @@ describe('Unit | Domain | Models | Assessment', () => {
 
     it('should return rejected promise when Competence evaluation assessment has no userId', () => {
       //given
-      assessment = Assessment.fromAttributes({ type: 'COMPETENCE_EVALUATION' });
+      assessment = new Assessment({ type: 'COMPETENCE_EVALUATION' });
 
       // when
       const promise = assessment.validate();
@@ -213,9 +81,9 @@ describe('Unit | Domain | Models | Assessment', () => {
       return expect(promise).to.be.rejected;
     });
 
-    it('should return rejected promise when Smart Placement assessment has no userId', () => {
+    it('should return rejected promise when Campaign assessment has no userId', () => {
       //given
-      assessment = Assessment.fromAttributes({ type: 'SMART_PLACEMENT' });
+      assessment = new Assessment({ type: 'CAMPAIGN' });
 
       // when
       const promise = assessment.validate();
@@ -225,38 +93,38 @@ describe('Unit | Domain | Models | Assessment', () => {
     });
   });
 
-  describe('#isSmartPlacement', () => {
-    it('should return true when the assessment is a SMART_PLACEMENT', () => {
+  describe('#isForCampaign', () => {
+    it('should return true when the assessment is for a CAMPAIGN', () => {
       // given
-      const assessment = Assessment.fromAttributes({ type: 'SMART_PLACEMENT' });
+      const assessment = new Assessment({ type: 'CAMPAIGN' });
 
       // when
-      const isSmartPlacementAssessment = assessment.isSmartPlacement();
+      const isForCampaign = assessment.isForCampaign();
 
       // then
-      expect(isSmartPlacementAssessment).to.be.true;
+      expect(isForCampaign).to.be.true;
     });
 
-    it('should return false when the assessment is not a SMART_PLACEMENT', () => {
+    it('should return false when the assessment is not a CAMPAIGN type', () => {
       // given
-      const assessment = Assessment.fromAttributes({ type: 'PLACEMENT' });
+      const assessment = new Assessment({ type: 'PLACEMENT' });
 
       // when
-      const isSmartPlacementAssessment = assessment.isSmartPlacement();
+      const isForCampaign = assessment.isForCampaign();
 
       // then
-      expect(isSmartPlacementAssessment).to.be.false;
+      expect(isForCampaign).to.be.false;
     });
 
     it('should return false when the assessment has no type', () => {
       // given
-      const assessment = Assessment.fromAttributes({});
+      const assessment = new Assessment({});
 
       // when
-      const isSmartPlacementAssessment = assessment.isSmartPlacement();
+      const isForCampaign = assessment.isForCampaign();
 
       // then
-      expect(isSmartPlacementAssessment).to.be.false;
+      expect(isForCampaign).to.be.false;
     });
   });
 
@@ -345,7 +213,7 @@ describe('Unit | Domain | Models | Assessment', () => {
 
     it('should return false when the assessment is not a CompetenceEvaluation', () => {
       // given
-      const assessment = domainBuilder.buildAssessment({ type: Assessment.types.SMARTPLACEMENT });
+      const assessment = domainBuilder.buildAssessment({ type: Assessment.types.CAMPAIGN });
 
       // when/then
       expect(assessment.isCompetenceEvaluation()).to.be.false;
@@ -370,15 +238,15 @@ describe('Unit | Domain | Models | Assessment', () => {
       expect(assessment.hasKnowledgeElements()).to.be.true;
     });
 
-    it('should return true when the assessment is a Smart Placement', () => {
+    it('should return true when the assessment is a Campaign assessment', () => {
       // given
-      const assessment = domainBuilder.buildAssessment({ type: Assessment.types.SMARTPLACEMENT });
+      const assessment = domainBuilder.buildAssessment({ type: Assessment.types.CAMPAIGN });
 
       // when/then
       expect(assessment.hasKnowledgeElements()).to.be.true;
     });
 
-    it('should return false when the assessment is not a CompetenceEvaluation nor SmartPlacement', () => {
+    it('should return false when the assessment is not a CompetenceEvaluation nor Campaign', () => {
       // given
       const assessment = domainBuilder.buildAssessment({ type: Assessment.types.CERTIFICATION });
 
@@ -392,49 +260,6 @@ describe('Unit | Domain | Models | Assessment', () => {
 
       // when/then
       expect(assessment.hasKnowledgeElements()).to.be.false;
-    });
-  });
-
-  describe('#isCertifiable', () => {
-
-    it('should return true when the last assessment has a level > 0', () => {
-      // given
-      const assessmentResultComputed = new AssessmentResult({
-        id: 3,
-        createdAt: new Date('2017-12-22T01:02:03Z'),
-        emitter: 'Gerard',
-        level: 3,
-      });
-
-      const assessment = Assessment.fromAttributes({
-        assessmentResults: [assessmentResultComputed]
-      });
-
-      // when
-      const isCompleted = assessment.isCertifiable();
-
-      // then
-      expect(isCompleted).to.be.true;
-    });
-
-    it('should return false when the last assessment has a level < 1', () => {
-      // given
-      const assessmentResultComputed = new AssessmentResult({
-        id: 3,
-        createdAt: new Date('2017-12-22T01:02:03Z'),
-        emitter: 'Gerard',
-        level: 0,
-      });
-
-      const assessment = Assessment.fromAttributes({
-        assessmentResults: [assessmentResultComputed]
-      });
-
-      // when
-      const isCompleted = assessment.isCertifiable();
-
-      // then
-      expect(isCompleted).to.be.false;
     });
   });
 

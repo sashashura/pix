@@ -1,0 +1,57 @@
+<div class="user-list content-text content-text--small">
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Prénom</th>
+        <th>Nom</th>
+        <th>Adresse électronique</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th>
+          <input id="firstName"
+                 type="text"
+                 value={{@firstName}}
+                 oninput={{perform @triggerFiltering 'firstName'}}
+                 class="table-admin-input" />
+        </th>
+        <th>
+          <input id="lastName"
+                 type="text"
+                 value={{@lastName}}
+                 oninput={{perform @triggerFiltering 'lastName'}}
+                 class="table-admin-input" />
+        </th>
+        <th>
+          <input id="email"
+                 type="text"
+                 value={{@email}}
+                 oninput={{perform @triggerFiltering 'email'}}
+                 class="table-admin-input" />
+        </th>
+      </tr>
+    </thead>
+
+      {{#if @users}}
+      <tbody>
+      {{#each @users as |user|}}
+        <tr>
+          <td><LinkTo @route="authenticated.users.get" @model={{user.id}}> {{user.id}} </LinkTo></td>
+          <td>{{user.firstName}}</td>
+          <td>{{user.lastName}}</td>
+          <td>{{user.email}}</td>
+        </tr>
+      {{/each}}
+      </tbody>
+    {{/if}}
+  </table>
+
+    {{#unless @users}}
+    <div class="table__empty content-text">Aucun résultat</div>
+  {{/unless}}
+</div>
+
+{{#if @users}}
+  <PaginationControl @pagination={{@users.meta}}/>
+{{/if}}

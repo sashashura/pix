@@ -13,9 +13,12 @@ class User {
     firstName,
     knowledgeElements,
     lastName,
+    lastTermsOfServiceValidatedAt,
     password,
     samlId,
     hasSeenAssessmentInstructions,
+    shouldChangePassword,
+    mustValidateTermsOfService,
     // includes
     memberships = [],
     certificationCenterMemberships = [],
@@ -34,11 +37,14 @@ class User {
     this.email = email ? _.toLower(email) : undefined;
     this.password = password;
     this.cgu = cgu;
+    this.lastTermsOfServiceValidatedAt = lastTermsOfServiceValidatedAt;
+    this.mustValidateTermsOfService = mustValidateTermsOfService;
     this.pixOrgaTermsOfServiceAccepted = pixOrgaTermsOfServiceAccepted;
     this.pixCertifTermsOfServiceAccepted = pixCertifTermsOfServiceAccepted;
     this.samlId = samlId;
     this.hasSeenAssessmentInstructions = hasSeenAssessmentInstructions;
     this.knowledgeElements = knowledgeElements;
+    this.shouldChangePassword = shouldChangePassword;
     // includes
     this.pixRoles = pixRoles;
     this.pixScore = pixScore;

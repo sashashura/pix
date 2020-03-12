@@ -1,0 +1,26 @@
+<header class="page-header">
+  <div class="page-title">Toutes les sessions</div>
+</header>
+
+<main class="page-body">
+  <section class="page-section">
+      <span class="session-list__self-toogle">
+          <p>Afficher uniquement mes sessions</p>
+          <XToggle
+            @size='small'
+            @theme='light'
+            @value={{this.assignedToSelfOnly}}
+            @onToggle={{perform this.triggerFiltering 'assignedToSelfOnly'}}
+          />
+      </span>
+      <Sessions::ListItems
+        @sessions={{this.model}}
+        @id={{this.id}}
+        @certificationCenterName={{this.certificationCenterName}}
+        @status={{this.status}}
+        @sessionStatusAndLabels={{this.sessionStatusAndLabels}}
+        @resultsSentToPrescriberAt={{this.resultsSentToPrescriberAt}}
+        @sessionResultsSentToPrescriberAtAndLabels={{this.sessionResultsSentToPrescriberAtAndLabels}}
+        @triggerFiltering={{this.triggerFiltering}} />
+  </section>
+</main>

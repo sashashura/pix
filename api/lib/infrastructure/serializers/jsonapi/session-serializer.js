@@ -11,7 +11,7 @@ module.exports = {
   serialize(sessions) {
     return new Serializer('session', {
       attributes: [
-        'certificationCenter',
+        'certificationCenterName',
         'address',
         'room',
         'examiner',
@@ -20,22 +20,14 @@ module.exports = {
         'status',
         'description',
         'accessCode',
-        'certifications',
-        'certificationCandidates',
-        'certificationReports',
         'examinerGlobalComment',
         'finalizedAt',
         'resultsSentToPrescriberAt',
+        'publishedAt',
+        'certificationCandidates',
+        'certificationReports',
+        'certificationCenter',
       ],
-      certifications : {
-        ref: 'id',
-        ignoreRelationshipData: true,
-        relationshipLinks: {
-          related(record, current, parent) {
-            return `/api/sessions/${parent.id}/certifications`;
-          }
-        }
-      },
       certificationCandidates: {
         ref: 'id',
         ignoreRelationshipData: true,
@@ -54,29 +46,39 @@ module.exports = {
           }
         }
       },
+      certificationCenter: {
+        ref: 'id',
+        ignoreRelationshipData: true,
+        relationshipLinks: {
+          related(record, current) {
+            return `/api/certification-centers/${current.id}`;
+          }
+        }
+      },
       transform(session) {
         const transformedSession = Object.assign({}, session);
-        transformedSession.certifications = [];
+        transformedSession.status = session.status;
         transformedSession.certificationReports = [];
+        transformedSession.certificationCenterName = session.certificationCenter;
+        delete transformedSession.certificationCenter;
+        if (session.certificationCenterId) {
+          transformedSession.certificationCenter = { id: session.certificationCenterId };
+        }
         return transformedSession;
-      }
+      },
     }).serialize(sessions);
+
   },
 
   serializeForFinalization(sessions) {
     return new Serializer('session', {
       attributes: [
-        'certificationCenter',
-        'address',
-        'room',
-        'examiner',
-        'date',
-        'time',
         'status',
-        'description',
-        'accessCode',
         'examinerGlobalComment',
       ],
+      transform(session) {
+        return { ...session, status: session.status };
+      },
     }).serialize(sessions);
   },
 
@@ -90,7 +92,6 @@ module.exports = {
 
     const result = new Session({
       id: json.data.id,
-      certificationCenter: attributes['certification-center'],
       certificationCenterId: certificationCenterId ? parseInt(certificationCenterId) : null,
       address: attributes.address,
       room: attributes.room,

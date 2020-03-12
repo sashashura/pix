@@ -1,7 +1,8 @@
-import Service, { inject as service } from '@ember/service';
 import json2csv from 'json2csv';
 import _ from 'lodash';
 import moment from 'moment';
+
+import Service, { inject as service } from '@ember/service';
 
 const competenceIndexes = [
   '1.1', '1.2', '1.3',
@@ -11,47 +12,35 @@ const competenceIndexes = [
   '5.1', '5.2'
 ];
 
-export default Service.extend({
+export default class SessionInfoServiceService extends Service {
 
-  fileSaver: service(),
-  csvService: service(),
+  @service fileSaver;
+  @service csvService;
 
-  async updateCertificationsStatus(certifications, isPublished) {
-    const promises = certifications.map((certification) => {
-      certification.set('isPublished', isPublished);
-      return certification.save({ adapterOptions: { updateMarks: false } });
-    });
-
-    await Promise.all(promises);
-  },
-
-  downloadSessionExportFile(session) {
-    const data = this.buildSessionExportFileData(session);
+  downloadSessionExportFile({ session, certifications }) {
+    const fileTitle = 'resultats_session';
+    const data = this.buildSessionExportFileData({ session, certifications });
     const fileHeaders = _buildSessionExportFileHeaders();
     const csv = json2csv.parse(data, { fields: fileHeaders, delimiter: ';', withBOM: true });
-    const sessionDateTime = moment(session.date + ' ' + session.time, 'YYYY-MM-DD HH:mm');
-    const { day, month, year, hour, minute } = {
-      day: sessionDateTime.format('DD'),
-      month: sessionDateTime.format('MM'),
-      year: sessionDateTime.format('YYYY'),
-      hour: sessionDateTime.format('HH'),
-      minute: sessionDateTime.format('mm'),
-    };
-    const fileName = `${year}${month}${day}_${hour}${minute}_resultats_session_${session.id}.csv`;
+    const dateWithTime = moment(session.date + ' ' + session.time, 'YYYY-MM-DD HH:mm');
+    const fileName = _createFileNameWithDate(dateWithTime, fileTitle, session.id);
     this.fileSaver.saveAs(csv + '\n', fileName);
-  },
+  }
 
-  downloadJuryFile(sessionId, certifications) {
+  downloadJuryFile({ sessionId, certifications }) {
+    const fileTitle = 'jury_session';
     const certificationsForJury = _filterCertificationsEligibleForJury(certifications);
     const data = this.buildJuryFileData(certificationsForJury);
     const fileHeaders = _buildJuryFileHeaders();
     const csv = json2csv.parse(data, { fields: fileHeaders, delimiter: ';', withBOM: true, });
-    const fileName = 'jury_session_' + sessionId + ' ' + (new Date()).toLocaleString('fr-FR') + '.csv';
+    const dateWithTime = moment();
+    const fileName = _createFileNameWithDate(dateWithTime, fileTitle, sessionId);
     this.fileSaver.saveAs(`${csv}\n`, fileName);
-  },
+  }
 
-  buildSessionExportFileData(session) {
-    return session.certifications.map((certification) => {
+  buildSessionExportFileData({ session, certifications }) {
+    return certifications.map((certification) => {
+      const isCertifRejected = certification.status === 'rejected';
       const rowItem = {
         'Numéro de certification': certification.id,
         'Prénom': this.csvService.sanitize(certification.firstName),
@@ -59,26 +48,28 @@ export default Service.extend({
         'Date de naissance': moment(certification.birthdate).format('DD/MM/YYYY'),
         'Lieu de naissance': this.csvService.sanitize(certification.birthplace),
         'Identifiant Externe': this.csvService.sanitize(certification.externalId),
-        'Nombre de Pix': certification.pixScore,
+        'Nombre de Pix': !isCertifRejected ? certification.pixScore : '0',
         'Session': session.id,
-        'Centre de certification': this.csvService.sanitize(session.certificationCenter)  ,
+        'Centre de certification': this.csvService.sanitize(session.certificationCenterName)  ,
         'Date de passage de la certification': moment(certification.createdAt).format('DD/MM/YYYY'),
       };
 
       const certificationIndexedCompetences = certification.indexedCompetences;
-      competenceIndexes.forEach((competence) => {
-        if (!certificationIndexedCompetences[competence]) {
-          rowItem[competence] = '-';
-        } else if (certificationIndexedCompetences[competence].level === 0 || certificationIndexedCompetences[competence].level === -1) {
-          rowItem[competence] = '0';
+      competenceIndexes.forEach((competenceIndex) => {
+        const competenceValue = certificationIndexedCompetences[competenceIndex];
+        const _competenceIsFailedOrCertifRejected = (competence) => competence.level === 0 || competence.level === -1 || isCertifRejected;
+        if (!competenceValue) {
+          rowItem[competenceIndex] = '-';
+        } else if (_competenceIsFailedOrCertifRejected(competenceValue)) {
+          rowItem[competenceIndex] = '0';
         } else {
-          rowItem[competence] = certificationIndexedCompetences[competence].level;
+          rowItem[competenceIndex] = competenceValue.level;
         }
       });
 
       return rowItem;
     });
-  },
+  }
 
   buildJuryFileData(certifications) {
     return certifications.map((certification) => {
@@ -101,9 +92,9 @@ export default Service.extend({
 
       return rowItem;
     });
-  },
+  }
 
-});
+}
 
 function _buildSessionExportFileHeaders() {
   return _.concat(
@@ -146,4 +137,8 @@ function _buildJuryFileHeaders() {
     ],
     competenceIndexes
   );
+}
+
+function _createFileNameWithDate(dateWithTime, fileTitle, sessionId) {
+  return `${dateWithTime.format('YYYYMMDD_HHmm')}_${fileTitle}_${sessionId}.csv`;
 }

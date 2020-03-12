@@ -1,6 +1,6 @@
 .qcm-panel__proposals {
   margin: 0 0 15px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .qcm-panel__proposal-item {
@@ -17,7 +17,7 @@ input.qcm-panel__proposal-checkbox {
 }
 
 .qcm-proposal-label__oracle[data-goodness='good'] {
-  color: $caribbean-green;
+  color: $green;
   font-weight: $font-heavy;
 }
 

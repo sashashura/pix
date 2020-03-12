@@ -7,25 +7,26 @@ describe('Unit | UseCase | getUserCertificationWithResultTree', () => {
 
   const userId = 2;
   const certificationId = '23';
+  const cleaCertificationStatus = 'someStatus';
 
-  const assessmentRepository = {
-    getByCertificationCourseId: () => undefined,
-  };
   const certificationRepository = {
     getByCertificationCourseId: () => undefined,
   };
-  const competenceMarkRepository = {
-    findByAssessmentResultId: () => undefined,
+  const assessmentResultRepository = {
+    findLatestByCertificationCourseIdWithCompetenceMarks: () => undefined,
   };
   const competenceTreeRepository = {
     get: () => undefined,
   };
+  const cleaCertificationStatusRepository = {
+    getCleaCertificationStatus: () => undefined,
+  };
 
   beforeEach(() => {
-    assessmentRepository.getByCertificationCourseId = sinon.stub();
     certificationRepository.getByCertificationCourseId = sinon.stub();
-    competenceMarkRepository.findByAssessmentResultId = sinon.stub();
+    assessmentResultRepository.findLatestByCertificationCourseIdWithCompetenceMarks = sinon.stub();
     competenceTreeRepository.get = sinon.stub();
+    cleaCertificationStatusRepository.getCleaCertificationStatus = sinon.stub().resolves(cleaCertificationStatus);
   });
 
   context('when the user is not owner of the certification', () => {
@@ -41,10 +42,10 @@ describe('Unit | UseCase | getUserCertificationWithResultTree', () => {
 
       // when
       promise = getUserCertificationWithResultTree({
-        assessmentRepository,
         certificationId,
         certificationRepository,
-        competenceMarkRepository,
+        cleaCertificationStatusRepository,
+        assessmentResultRepository,
         competenceTreeRepository,
         userId,
       });
@@ -65,32 +66,29 @@ describe('Unit | UseCase | getUserCertificationWithResultTree', () => {
 
   context('when the user is owner of the certification', () => {
 
-    let assessment;
+    let assessmentResult;
     let certification;
-    let competenceMarks;
     let competenceTree;
     let promise;
 
     beforeEach(() => {
       // given
-      assessment = domainBuilder.buildAssessment();
-      assessmentRepository.getByCertificationCourseId.resolves(assessment);
-
       certification = domainBuilder.buildCertification({ userId });
       certificationRepository.getByCertificationCourseId.resolves(certification);
 
-      competenceMarks = [domainBuilder.buildCompetenceMark()];
-      competenceMarkRepository.findByAssessmentResultId.resolves(competenceMarks);
+      assessmentResult = domainBuilder.buildAssessmentResult();
+      assessmentResult.competenceMarks = [domainBuilder.buildCompetenceMark()];
+      assessmentResultRepository.findLatestByCertificationCourseIdWithCompetenceMarks.resolves(assessmentResult);
 
       competenceTree = domainBuilder.buildCompetenceTree();
       competenceTreeRepository.get.resolves(competenceTree);
 
       // when
       promise = getUserCertificationWithResultTree({
-        assessmentRepository,
         certificationId,
         certificationRepository,
-        competenceMarkRepository,
+        cleaCertificationStatusRepository,
+        assessmentResultRepository,
         competenceTreeRepository,
         userId,
       });
@@ -100,13 +98,6 @@ describe('Unit | UseCase | getUserCertificationWithResultTree', () => {
       // then
       return promise.then(() => {
         expect(certificationRepository.getByCertificationCourseId).to.have.been.calledWith({ id: certificationId });
-      });
-    });
-
-    it('should get the assessment from the repository', () => {
-      // then
-      return promise.then(() => {
-        expect(assessmentRepository.getByCertificationCourseId).to.have.been.calledWith(certificationId);
       });
     });
 
@@ -120,9 +111,9 @@ describe('Unit | UseCase | getUserCertificationWithResultTree', () => {
     it('should return the certification with the resultCompetenceTree', () => {
       const expectedResultCompetenceTree = ResultCompetenceTree.generateTreeFromCompetenceMarks({
         competenceTree,
-        competenceMarks,
+        competenceMarks: assessmentResult.competenceMarks,
       });
-      expectedResultCompetenceTree.id = `${certificationId}-${assessment.getLastAssessmentResult().id}`;
+      expectedResultCompetenceTree.id = `${certificationId}-${assessmentResult.id}`;
 
       // then
       return promise.then((certification) => {
@@ -132,11 +123,17 @@ describe('Unit | UseCase | getUserCertificationWithResultTree', () => {
     });
 
     it('should set the included resultCompetenceTree id to certificationID-assessmentResultId', () => {
-      const expectedId = `${certificationId}-${assessment.getLastAssessmentResult().id}`;
+      const expectedId = `${certificationId}-${assessmentResult.id}`;
 
       // then
       return promise.then((certification) => {
         expect(certification.resultCompetenceTree.id).to.equal(expectedId);
+      });
+    });
+
+    it('should set cleaCertificationStatus', () => {
+      return promise.then((certification) => {
+        expect(certification.cleaCertificationStatus).to.equal(cleaCertificationStatus);
       });
     });
   });

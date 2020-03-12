@@ -72,19 +72,19 @@ describe('Unit | UseCase | start-or-resume-competence-evaluation', () => {
       beforeEach(() => {
         competenceEvaluationRepository.getByCompetenceIdAndUserId.rejects(new NotFoundError);
 
-        assessmentRepository.save.withArgs(new Assessment({
+        assessmentRepository.save.withArgs({ assessment: new Assessment({
           courseId: Assessment.courseIdMessage.COMPETENCE_EVALUATION,
           type: Assessment.types.COMPETENCE_EVALUATION,
           userId, state: Assessment.states.STARTED,
           competenceId,
-        })).resolves({ id: assessmentId });
-
-        competenceEvaluationRepository.save.withArgs(new CompetenceEvaluation({
+        }) }).resolves({ id: assessmentId });
+        const competenceEvaluationToSave = new CompetenceEvaluation({
           status: CompetenceEvaluation.statuses.STARTED,
           assessmentId,
           competenceId,
           userId,
-        })).resolves(competenceEvaluation);
+        });
+        competenceEvaluationRepository.save.withArgs({ competenceEvaluation: competenceEvaluationToSave }).resolves(competenceEvaluation);
       });
       it('should return the created competence evaluation', async () => {
         const res = await usecases.startOrResumeCompetenceEvaluation({
@@ -115,12 +115,12 @@ describe('Unit | UseCase | start-or-resume-competence-evaluation', () => {
           .onFirstCall().resolves(resetCompetenceEvaluation)
           .onSecondCall().resolves(updatedCompetenceEvaluation);
 
-        assessmentRepository.save.withArgs(new Assessment({
+        assessmentRepository.save.withArgs({ assessment: new Assessment({
           courseId: Assessment.courseIdMessage.COMPETENCE_EVALUATION,
           type: Assessment.types.COMPETENCE_EVALUATION,
           userId, state: Assessment.states.STARTED,
           competenceId,
-        })).resolves({ id: newAssessmentId });
+        }) }).resolves({ id: newAssessmentId });
 
         competenceEvaluationRepository.updateStatusByUserIdAndCompetenceId.resolves();
         competenceEvaluationRepository.updateAssessmentId.resolves();

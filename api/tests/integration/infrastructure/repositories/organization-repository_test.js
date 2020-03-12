@@ -109,9 +109,39 @@ describe('Integration | Repository | Organization', function() {
     describe('success management', function() {
 
       let insertedOrganization;
+      const organizationAttributes = {
+        type: 'SCO',
+        name: 'Organization of the dark side',
+        logoUrl: 'some logo url',
+        credit: 154,
+        externalId: '100',
+        provinceCode: '75',
+        isManagingStudents: 'true',
+        canCollectProfiles: 'true',
+        email: 'sco.generic.account@example.net'
+      };
+
+      let expectedAttributes;
 
       beforeEach(async () => {
-        insertedOrganization = databaseBuilder.factory.buildOrganization();
+        insertedOrganization = databaseBuilder.factory.buildOrganization(organizationAttributes);
+        expectedAttributes = {
+          id:  insertedOrganization.id,
+          type: 'SCO',
+          name: 'Organization of the dark side',
+          logoUrl: 'some logo url',
+          credit: 154,
+          externalId: '100',
+          provinceCode: '75',
+          isManagingStudents: true,
+          canCollectProfiles: true,
+          email: 'sco.generic.account@example.net',
+          members: [],
+          memberships: [],
+          students: [],
+          targetProfileShares: [],
+          organizationInvitations: []
+        };
         await databaseBuilder.commit();
       });
 
@@ -120,11 +150,7 @@ describe('Integration | Repository | Organization', function() {
         const foundOrganization = await organizationRepository.get(insertedOrganization.id);
 
         // then
-        expect(foundOrganization).to.be.an.instanceof(Organization);
-        expect(foundOrganization.type).to.equal(insertedOrganization.type);
-        expect(foundOrganization.name).to.equal(insertedOrganization.name);
-        expect(foundOrganization.logoUrl).to.equal(insertedOrganization.logoUrl);
-        expect(foundOrganization.id).to.equal(insertedOrganization.id);
+        expect(foundOrganization).to.deep.equal(expectedAttributes);
       });
 
       it('should return a rejection when organization id is not found', function() {
@@ -141,7 +167,6 @@ describe('Integration | Repository | Organization', function() {
           expect(err.message).to.equal('Not found organization for ID 10083');
         });
       });
-
     });
 
     describe('when a target profile is shared with the organisation', () => {
@@ -162,7 +187,7 @@ describe('Integration | Repository | Organization', function() {
         await databaseBuilder.commit();
       });
 
-      it('should return an list of profile containing the shared profile', async () => {
+      it('should return a list of profile containing the shared profile', async () => {
         // when
         const organization = await organizationRepository.get(insertedOrganization.id);
 
@@ -172,6 +197,35 @@ describe('Integration | Repository | Organization', function() {
         expect(firstTargetProfileShare.organizationId).to.deep.equal(insertedOrganization.id);
 
         expect(firstTargetProfileShare.targetProfile).to.deep.equal(sharedProfile);
+      });
+    });
+
+    context('when organization have memberships', () => {
+
+      it('should return a list of active members', async () => {
+        // given
+        const organizationId = databaseBuilder.factory.buildOrganization().id;
+
+        const membershipActive = {
+          organizationId,
+          userId: databaseBuilder.factory.buildUser().id
+        };
+        const membershipDisabled = {
+          organizationId,
+          userId: databaseBuilder.factory.buildUser().id,
+          disabledAt: new Date(),
+        };
+        databaseBuilder.factory.buildMembership(membershipActive);
+        databaseBuilder.factory.buildMembership(membershipDisabled);
+
+        await databaseBuilder.commit();
+
+        // when
+        const foundOrganization = await organizationRepository.get(organizationId);
+
+        // then
+        expect(foundOrganization.members).to.have.lengthOf(1);
+        expect(foundOrganization.members[0].id).to.deep.equal(membershipActive.userId);
       });
     });
   });
@@ -243,7 +297,6 @@ describe('Integration | Repository | Organization', function() {
         expect(matchingOrganizations[0]).to.be.an.instanceOf(Organization);
         expect(pagination).to.deep.equal(expectedPagination);
       });
-
     });
 
     context('when there are lots of Organizations (> 10) in the database', () => {
@@ -319,24 +372,49 @@ describe('Integration | Repository | Organization', function() {
       });
     });
 
-    context('when there are multiple Organizations matching the fields "name", "type" search pattern', () => {
+    context('when there are multiple Organizations matching the same "externalId" search pattern', () => {
+
+      beforeEach(() => {
+        databaseBuilder.factory.buildOrganization({ externalId: '1234567A' });
+        databaseBuilder.factory.buildOrganization({ externalId: '1234567B' });
+        databaseBuilder.factory.buildOrganization({ externalId: '1234567C' });
+        databaseBuilder.factory.buildOrganization({ externalId: '123456AD' });
+        return databaseBuilder.commit();
+      });
+
+      it('should return only Organizations matching "externalId" if given in filters', async () => {
+        // given
+        const filter = { externalId: 'a' };
+        const page = { number: 1, size: 10 };
+        const expectedPagination = { page: page.number, pageSize: page.size, pageCount: 1, rowCount: 2 };
+
+        // when
+        const { models: matchingOrganizations, pagination } = await organizationRepository.findPaginatedFiltered({ filter, page });
+
+        // then
+        expect(_.map(matchingOrganizations, 'externalId')).to.have.members(['1234567A', '123456AD']);
+        expect(pagination).to.deep.equal(expectedPagination);
+      });
+    });
+
+    context('when there are multiple Organizations matching the fields "name", "type" and "externalId" search pattern', () => {
 
       beforeEach(() => {
         // Matching organizations
-        databaseBuilder.factory.buildOrganization({ name: 'name_ok_1', type: 'SCO' });
-        databaseBuilder.factory.buildOrganization({ name: 'name_ok_2', type: 'SCO' });
-        databaseBuilder.factory.buildOrganization({ name: 'name_ok_3', type: 'SCO' });
+        databaseBuilder.factory.buildOrganization({ name: 'name_ok_1', type: 'SCO', externalId: '1234567A' });
+        databaseBuilder.factory.buildOrganization({ name: 'name_ok_2', type: 'SCO', externalId: '1234568A' });
+        databaseBuilder.factory.buildOrganization({ name: 'name_ok_3', type: 'SCO', externalId: '1234569A' });
 
         // Unmatching organizations
-        databaseBuilder.factory.buildOrganization({ name: 'name_ko_4', type: 'SCO' });
-        databaseBuilder.factory.buildOrganization({ name: 'name_ok_5', type: 'SUP' });
+        databaseBuilder.factory.buildOrganization({ name: 'name_ko_4', type: 'SCO', externalId: '1234567B' });
+        databaseBuilder.factory.buildOrganization({ name: 'name_ok_5', type: 'SUP', externalId: '1234567C' });
 
         return databaseBuilder.commit();
       });
 
-      it('should return only Organizations matching "name" AND "type" if given in filters', async () => {
+      it('should return only Organizations matching "name" AND "type" "AND" "externalId" if given in filters', async () => {
         // given
-        const filter = { name: 'name_ok', type: 'SCO' };
+        const filter = { name: 'name_ok', type: 'SCO', externalId: 'a' };
         const page = { number: 1, size: 10 };
         const expectedPagination = { page: page.number, pageSize: page.size, pageCount: 1, rowCount: 3 };
 
@@ -346,6 +424,7 @@ describe('Integration | Repository | Organization', function() {
         // then
         expect(_.map(matchingOrganizations, 'name')).to.have.members(['name_ok_1', 'name_ok_2', 'name_ok_3']);
         expect(_.map(matchingOrganizations, 'type')).to.have.members(['SCO', 'SCO', 'SCO']);
+        expect(_.map(matchingOrganizations, 'externalId')).to.have.members(['1234567A', '1234568A', '1234569A']);
         expect(pagination).to.deep.equal(expectedPagination);
       });
     });

@@ -1,25 +1,26 @@
+import classic from 'ember-classic-decorator';
+import { action } from '@ember/object';
 import Route from '@ember/routing/route';
 import ENV from 'mon-pix/config/environment';
 
-export default Route.extend({
-
-  hasSeenCheckpoint: false,
-  campaignCode: null,
-  newLevel: null,
-  competenceLeveled: null,
+@classic
+export default class ResumeRoute extends Route {
+  hasSeenCheckpoint = false;
+  campaignCode = null;
+  newLevel = null;
+  competenceLeveled = null;
 
   beforeModel(transition) {
     this.set('hasSeenCheckpoint', transition.to.queryParams.hasSeenCheckpoint);
     this.set('campaignCode', transition.to.queryParams.campaignCode);
     this.set('newLevel', transition.to.queryParams.newLevel || null);
     this.set('competenceLeveled', transition.to.queryParams.competenceLeveled || null);
-  },
+  }
 
-  async afterModel(assessment) {
+  async redirect(assessment) {
     if (assessment.isCompleted) {
       return this._routeToResults(assessment);
     }
-
     const nextChallenge = await this.store.queryRecord('challenge', { assessmentId: assessment.id });
 
     if (assessment.hasCheckpoints) {
@@ -27,14 +28,13 @@ export default Route.extend({
     } else {
       return this._resumeAssessmentWithoutCheckpoint(assessment, nextChallenge);
     }
-  },
+  }
 
-  actions: {
-    loading(transition, originRoute) {
-      // allows the loading template to be shown or not
-      return originRoute._router.currentRouteName !== 'assessments.challenge';
-    }
-  },
+  @action
+  loading(transition, originRoute) {
+    // allows the loading template to be shown or not
+    return originRoute._router.currentRouteName !== 'assessments.challenge';
+  }
 
   _resumeAssessmentWithoutCheckpoint(assessment, nextChallenge) {
     const {
@@ -47,7 +47,7 @@ export default Route.extend({
       return this._rateAssessment(assessment);
     }
     return this._routeToNextChallenge(assessment, nextChallengeId);
-  },
+  }
 
   _resumeAssessmentWithCheckpoint(assessment, nextChallenge) {
     const {
@@ -74,7 +74,7 @@ export default Route.extend({
       return this._routeToNextChallenge(assessment, nextChallengeId);
     }
     return this._routeToNextChallenge(assessment, nextChallengeId);
-  },
+  }
 
   _parseState(assessment, nextChallenge) {
     const assessmentHasNoMoreQuestions = !nextChallenge;
@@ -91,36 +91,36 @@ export default Route.extend({
       nextChallenge,
       assessmentIsCompleted
     };
-  },
+  }
 
   _routeToNextChallenge(assessment, nextChallengeId) {
     return this.replaceWith('assessments.challenge', assessment.id, nextChallengeId, { queryParams: { newLevel: this.newLevel, competenceLeveled: this.competenceLeveled } });
-  },
+  }
 
   async _rateAssessment(assessment) {
     await assessment.save({ adapterOptions: { completeAssessment: true } });
 
     return this._routeToResults(assessment);
-  },
+  }
 
   _routeToResults(assessment) {
     if (assessment.isCertification) {
       return this.replaceWith('certifications.results', assessment.certificationNumber);
     }
-    if (assessment.isSmartPlacement) {
-      return this.replaceWith('campaigns.skill-review', assessment.codeCampaign, assessment.id);
+    if (assessment.isForCampaign) {
+      return this.replaceWith('campaigns.assessment.skill-review', assessment.codeCampaign, assessment.id);
     }
     if (assessment.isCompetenceEvaluation) {
       return this.replaceWith('competences.results', assessment.competenceId, assessment.id);
     }
     return this.replaceWith('assessments.results', assessment.id);
-  },
+  }
 
   _routeToCheckpoint(assessment) {
     return this.replaceWith('assessments.checkpoint', assessment.id, { queryParams: { newLevel: this.newLevel, competenceLeveled: this.competenceLeveled } });
-  },
+  }
 
   _routeToFinalCheckpoint(assessment) {
     return this.replaceWith('assessments.checkpoint', assessment.id, { queryParams: { finalCheckpoint: true, newLevel: this.newLevel, competenceLeveled: this.competenceLeveled } });
-  },
-});
+  }
+}

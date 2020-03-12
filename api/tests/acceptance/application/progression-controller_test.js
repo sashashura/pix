@@ -29,21 +29,21 @@ describe('Acceptance | API | Progressions', () => {
         .reply(200, {});
 
       userId = databaseBuilder.factory.buildUser({}).id;
-      assessmentId = databaseBuilder.factory.buildAssessment(
-        {
-          userId: userId,
-          type: 'SMART_PLACEMENT',
-          state: 'completed',
-        }).id;
+      const targetProfileId = databaseBuilder.factory.buildTargetProfile().id;
+      databaseBuilder.factory.buildTargetProfileSkill({ targetProfileId }).id;
       const campaignId = databaseBuilder.factory.buildCampaign(
         {
           name: 'Campaign',
+          targetProfileId,
         }).id;
-      databaseBuilder.factory.buildCampaignParticipation(
+      const campaignParticipationId = databaseBuilder.factory.buildCampaignParticipation({ campaignId }).id;
+      assessmentId = databaseBuilder.factory.buildAssessment(
         {
-          campaignId,
-          assessmentId,
-        });
+          userId: userId,
+          type: 'CAMPAIGN',
+          state: 'completed',
+          campaignParticipationId,
+        }).id;
       await databaseBuilder.commit();
     });
 

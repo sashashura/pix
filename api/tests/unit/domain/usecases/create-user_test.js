@@ -10,6 +10,9 @@ describe('Unit | UseCase | create-user', () => {
     isEmailAvailable: () => undefined,
     create: () => undefined,
   };
+  const campaignRepository = {
+    getByCode: () => undefined
+  };
   const encryptionService = { hashPassword: () => undefined };
   const mailService = { sendAccountCreationEmail: () => undefined };
   const reCaptchaValidator = { verify: () => undefined };
@@ -25,6 +28,7 @@ describe('Unit | UseCase | create-user', () => {
   beforeEach(() => {
     sinon.stub(userRepository, 'isEmailAvailable');
     sinon.stub(userRepository, 'create');
+    sinon.stub(campaignRepository, 'getByCode');
     sinon.stub(userValidator, 'validate');
     sinon.stub(encryptionService, 'hashPassword');
     sinon.stub(mailService, 'sendAccountCreationEmail');
@@ -198,6 +202,22 @@ describe('Unit | UseCase | create-user', () => {
     });
   });
 
+  context('when user\'s email is not defined', () => {
+
+    it('should not check the absence of email in UserRepository', async () => {
+      // given
+      const user = { email: null };
+
+      // when
+      await createUser({
+        user, reCaptchaToken, userRepository, reCaptchaValidator, encryptionService, mailService
+      });
+
+      // then
+      expect(userRepository.isEmailAvailable).to.not.have.been.called;
+    });
+  });
+
   context('when user is valid', () => {
 
     context('step hash password and save user', () => {
@@ -212,9 +232,9 @@ describe('Unit | UseCase | create-user', () => {
         expect(encryptionService.hashPassword).to.have.been.calledWith(password);
       });
 
-      it('should check if the password has been correctly encrypted, because we have a bug on this', async () => {
+      it('should throw Error when hash password function fails', async () => {
         // given
-        encryptionService.hashPassword.resolves(password);
+        encryptionService.hashPassword.rejects(new Error());
 
         // when
         const error = await catchErr(createUser)({
@@ -223,7 +243,6 @@ describe('Unit | UseCase | create-user', () => {
 
         // then
         expect(error).to.be.instanceOf(Error);
-        expect(error.message).to.equal('Erreur lors de l‘encryption du mot passe de l‘utilisateur');
       });
 
       it('should save the user with a properly encrypted password', async () => {
@@ -244,18 +263,80 @@ describe('Unit | UseCase | create-user', () => {
       const user = new User({ email: userEmail });
 
       it('should send the account creation email', async () => {
+        // given
+        const locale = 'fr-fr';
+        const campaignCode = 'AZERTY123';
+        campaignRepository.getByCode.resolves({ organizationId: 1 });
+        const expectedRedirectionUrl = `https://app.pix.fr/campagnes/${campaignCode}`;
+
         // when
         await createUser({
           user,
           reCaptchaToken,
+          locale,
+          campaignCode,
           userRepository,
+          campaignRepository,
           reCaptchaValidator,
           encryptionService,
           mailService,
         });
 
         // then
-        expect(mailService.sendAccountCreationEmail).to.have.been.calledWith(userEmail);
+        expect(mailService.sendAccountCreationEmail).to.have.been.calledWith(userEmail, locale, expectedRedirectionUrl);
+      });
+
+      describe('when campaignCode is null', () => {
+        const campaignCode = null;
+
+        it('should send the account creation email with null redirectionUrl', async () => {
+          // given
+          const locale = 'fr-fr';
+          const expectedRedirectionUrl = null;
+
+          // when
+          await createUser({
+            user,
+            reCaptchaToken,
+            locale,
+            campaignCode,
+            userRepository,
+            campaignRepository,
+            reCaptchaValidator,
+            encryptionService,
+            mailService,
+          });
+
+          // then
+          expect(mailService.sendAccountCreationEmail).to.have.been.calledWith(userEmail, locale, expectedRedirectionUrl);
+        });
+      });
+
+      describe('when campaignCode is not valid', () => {
+        const campaignCode = 'NOT-VALID';
+
+        it('should send the account creation email with null redirectionUrl', async () => {
+          // given
+          const locale = 'fr-fr';
+          const expectedRedirectionUrl = null;
+          campaignRepository.getByCode.resolves(null);
+
+          // when
+          await createUser({
+            user,
+            reCaptchaToken,
+            locale,
+            campaignCode,
+            userRepository,
+            campaignRepository,
+            reCaptchaValidator,
+            encryptionService,
+            mailService,
+          });
+
+          // then
+          expect(mailService.sendAccountCreationEmail).to.have.been.calledWith(userEmail, locale, expectedRedirectionUrl);
+        });
       });
     });
 

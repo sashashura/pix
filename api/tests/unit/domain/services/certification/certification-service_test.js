@@ -1,22 +1,19 @@
 const { expect, sinon } = require('../../../../test-helper');
 const certificationService = require('../../../../../lib/domain/services/certification-service');
 
-const Assessment = require('../../../../../lib/domain/models/Assessment');
 const AssessmentResult = require('../../../../../lib/domain/models/AssessmentResult');
 const CompetenceMarks = require('../../../../../lib/domain/models/CompetenceMark');
 const CertificationCourse = require('../../../../../lib/domain/models/CertificationCourse');
 
 const assessmentRepository = require('../../../../../lib/infrastructure/repositories/assessment-repository');
 const assessmentResultRepository = require('../../../../../lib/infrastructure/repositories/assessment-result-repository');
-const answersRepository = require('../../../../../lib/infrastructure/repositories/answer-repository');
-const certificationChallengesRepository = require('../../../../../lib/infrastructure/repositories/certification-challenge-repository');
+const certificationAssessmentRepository = require('../../../../../lib/infrastructure/repositories/certification-assessment-repository');
 const certificationCourseRepository = require('../../../../../lib/infrastructure/repositories/certification-course-repository');
-const competenceRepository = require('../../../../../lib/infrastructure/repositories/competence-repository');
-const challengeRepository = require('../../../../../lib/infrastructure/repositories/challenge-repository');
-const userService = require('../../../../../lib/domain/services/user-service');
+const certificationResultService = require('../../../../../lib/domain/services/certification-result-service');
+const cleaCertificationStatusRepository = require('../../../../../lib/infrastructure/repositories/clea-certification-status-repository');
 
-function _buildCompetenceMarks(level, score, area_code, competence_code) {
-  return new CompetenceMarks({ level, score, area_code, competence_code });
+function _buildCompetenceMarks(level, score, area_code, competence_code, competenceId) {
+  return new CompetenceMarks({ level, score, area_code, competence_code, competenceId });
 }
 
 function _buildAssessmentResult(pixScore, level) {
@@ -31,80 +28,48 @@ function _buildAssessmentResult(pixScore, level) {
 describe('Unit | Service | Certification Service', function() {
 
   describe('Certification Result computations', () => {
-    const dateCreationCertif = new Date('2018-01-01T01:02:03Z');
-
-    const certificationAssessment = new Assessment({
-      id: 'assessment_id',
-      userId: 'user_id',
-      courseId: 'course_id',
-      createdAt: dateCreationCertif,
-      state: 'completed',
-    });
-
-    const certificationCourseV1 = new CertificationCourse({
-      id: 'course_id',
-      status: 'completed',
-      completedAt: dateCreationCertif,
-      isV2Certification: false
-    });
+    const certificationAssessment = Symbol('certificationAssessment');
 
     beforeEach(() => {
-      sinon.stub(assessmentRepository, 'getByCertificationCourseId').resolves(certificationAssessment);
-      sinon.stub(answersRepository, 'findByAssessment').resolves([]);
-      sinon.stub(certificationChallengesRepository, 'findByCertificationCourseId').resolves([]);
-      sinon.stub(competenceRepository, 'list').resolves([]);
-      sinon.stub(challengeRepository, 'list').resolves([]);
-      sinon.stub(userService, 'getCertificationProfile').withArgs({
-        userId: 'user_id',
-        limitDate: dateCreationCertif,
-        isV2Certification: certificationCourseV1.isV2Certification,
-      }).resolves([]);
-      sinon.stub(certificationCourseRepository, 'get').resolves(certificationCourseV1);
-    });
-
-    describe('#calculateCertificationResultByAssessmentId', () => {
-
-      it('should call Assessment Repository to get Assessment by CertificationCourseId', function() {
-        // when
-        const promise = certificationService.calculateCertificationResultByCertificationCourseId('course_id');
-
-        // then
-        return promise.then(() => {
-          sinon.assert.calledOnce(assessmentRepository.getByCertificationCourseId);
-          sinon.assert.calledWith(assessmentRepository.getByCertificationCourseId, 'course_id');
-        });
-      });
+      sinon.stub(certificationAssessmentRepository, 'getByCertificationCourseId').resolves(certificationAssessment);
+      sinon.stub(certificationResultService, 'getCertificationResult').resolves();
     });
 
     describe('#calculateCertificationResultByCertificationCourseId', () => {
 
-      it('should call Assessment Repository to get Assessment by CertificationCourseId', function() {
+      it('should call Certification Assessment Repository to get CertificationAssessment by CertificationCourseId', async () => {
         // when
-        const promise = certificationService.calculateCertificationResultByCertificationCourseId('course_id');
+        await certificationService.calculateCertificationResultByCertificationCourseId('course_id');
 
         // then
-        return promise.then(() => {
-          sinon.assert.calledOnce(assessmentRepository.getByCertificationCourseId);
-          sinon.assert.calledWith(assessmentRepository.getByCertificationCourseId, 'course_id');
-        });
+        sinon.assert.calledOnce(certificationAssessmentRepository.getByCertificationCourseId);
+        sinon.assert.calledWith(certificationAssessmentRepository.getByCertificationCourseId, 'course_id');
+      });
+
+      it('should call CertificationResultService with appropriate arguments', async () => {
+        // when
+        await certificationService.calculateCertificationResultByCertificationCourseId('course_id');
+
+        // then
+        sinon.assert.calledWith(certificationResultService.getCertificationResult, { certificationAssessment, continueOnError: true });
       });
     });
   });
 
   describe('#getCertificationResult', () => {
     const certificationCourseId = 1;
+    const cleaCertificationStatus = 'someStatus';
+
+    beforeEach(() => {
+      sinon.stub(cleaCertificationStatusRepository, 'getCleaCertificationStatus').resolves(cleaCertificationStatus);
+    });
 
     context('when certification is finished', () => {
+      let certificationCourse;
+      const assessmentId = Symbol('assessmentId');
 
       beforeEach(() => {
-        const assessmentResult = _buildAssessmentResult(20, 3);
-        sinon.stub(assessmentRepository, 'getByCertificationCourseId').resolves(new Assessment({
-          state: 'completed',
-          assessmentResults: [
-            _buildAssessmentResult(20, 3),
-          ],
-        }));
-        sinon.stub(certificationCourseRepository, 'get').resolves(new CertificationCourse({
+        certificationCourse = new CertificationCourse({
           id: certificationCourseId,
           createdAt: new Date('2017-12-23T15:23:12Z'),
           completedAt: new Date('2017-12-23T16:23:12Z'),
@@ -116,11 +81,14 @@ describe('Unit | Service | Certification Service', function() {
           externalId: 'TimonsFriend',
           examinerComment: '',
           hasSeenEndTestScreen: true,
-        }));
-        assessmentResult.competenceMarks = [_buildCompetenceMarks(3, 27, '2', '2.1')];
-        sinon.stub(assessmentResultRepository, 'get').resolves(
-          assessmentResult,
-        );
+        });
+        sinon.stub(certificationCourseRepository, 'get').resolves(certificationCourse);
+        const assessmentResult = _buildAssessmentResult(20, 3);
+        assessmentResult.competenceMarks = [_buildCompetenceMarks(3, 27, '2', '2.1', 'rec2.1')];
+        sinon.stub(assessmentResultRepository, 'findLatestByCertificationCourseIdWithCompetenceMarks')
+          .withArgs({ certificationCourseId }).resolves(assessmentResult);
+        sinon.stub(assessmentRepository, 'getIdByCertificationCourseId')
+          .withArgs(certificationCourseId).resolves(assessmentId);
       });
 
       it('should return certification results with pix score, date and certified competences levels', async () => {
@@ -128,6 +96,7 @@ describe('Unit | Service | Certification Service', function() {
         const certification = await certificationService.getCertificationResult(certificationCourseId);
 
         // then
+        expect(certification.assessmentId).to.equal(assessmentId);
         expect(certification.pixScore).to.deep.equal(20);
         expect(certification.createdAt).to.deep.equal(new Date('2017-12-23T15:23:12Z'));
         expect(certification.completedAt).to.deep.equal(new Date('2017-12-23T16:23:12Z'));
@@ -135,6 +104,7 @@ describe('Unit | Service | Certification Service', function() {
           area_code: '2',
           assessmentResultId: undefined,
           competence_code: '2.1',
+          competenceId: 'rec2.1',
           id: undefined,
           level: 3,
           score: 27,
@@ -156,17 +126,16 @@ describe('Unit | Service | Certification Service', function() {
           expect(certification.externalId).to.deep.equal('TimonsFriend');
           expect(certification.examinerComment).to.deep.equal('');
           expect(certification.hasSeenEndTestScreen).to.deep.equal(true);
+          expect(certification.cleaCertificationStatus).to.deep.equal(cleaCertificationStatus);
         });
       });
-
     });
 
     context('when certification is not finished', () => {
 
       beforeEach(() => {
-        sinon.stub(assessmentRepository, 'getByCertificationCourseId').resolves(new Assessment({
-          state: 'started',
-        }));
+        sinon.stub(assessmentResultRepository, 'findLatestByCertificationCourseIdWithCompetenceMarks')
+          .withArgs({ certificationCourseId }).resolves(null);
         sinon.stub(certificationCourseRepository, 'get').resolves(new CertificationCourse({
           id: certificationCourseId,
           createdAt: new Date('2017-12-23T15:23:12Z'),
@@ -179,7 +148,6 @@ describe('Unit | Service | Certification Service', function() {
           examinerComment: 'Hakuna matata',
           hasSeenEndTestScreen: false,
         }));
-        sinon.stub(assessmentResultRepository, 'get').resolves(null);
       });
 
       it('should return certification results with state at started, empty marks and undefined for information not yet valid', () => {

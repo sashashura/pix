@@ -1,7 +1,7 @@
 const { using } = require('bluebird');
 const Redlock = require('redlock');
 const Cache = require('./Cache');
-const RedisClient = require('./RedisClient');
+const RedisClient = require('../utils/RedisClient');
 const logger = require('../logger');
 const settings = require('../../config');
 
@@ -61,7 +61,7 @@ class RedisCache extends Cache {
   }
 
   flushAll() {
-    logger.info('Flusing Redis database');
+    logger.info('Flushing Redis database');
 
     return this._client.flushall();
   }

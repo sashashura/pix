@@ -1,3 +1,6 @@
+/* eslint ember/no-classic-classes: 0 */
+/* eslint ember/require-tagless-components: 0 */
+
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import { setupRenderingTest } from 'ember-mocha';
@@ -65,7 +68,7 @@ describe('Integration | Component | Profile-content', function() {
         // then
         expect(find('.competence-card')).to.exist;
         expect(find('.score-label')).to.exist;
-        expect(find('.competence-card__footer')).to.exist;
+        expect(find('.competence-card__interactions')).to.exist;
       });
     });
 
@@ -80,7 +83,7 @@ describe('Integration | Component | Profile-content', function() {
         // then
         expect(find('.competence-card')).to.exist;
         expect(find('.score-label')).to.not.exist;
-        expect(find('.competence-card__footer')).to.not.exist;
+        expect(find('.competence-card__interactions')).to.not.exist;
       });
     });
   });

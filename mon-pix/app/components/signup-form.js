@@ -1,47 +1,57 @@
-import { later } from '@ember/runloop';
+/* eslint ember/no-actions-hash: 0 */
+/* eslint ember/no-classic-classes: 0 */
+/* eslint ember/no-classic-components: 0 */
+/* eslint ember/require-tagless-components: 0 */
+
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import isEmailValid from 'mon-pix/utils/email-validator';
 import isPasswordValid from '../utils/password-validator';
 import ENV from 'mon-pix/config/environment';
+const _ = require('lodash');
 
 const ERROR_INPUT_MESSAGE_MAP = {
-  firstName: 'Votre prénom n’est pas renseigné.',
-  lastName: 'Votre nom n’est pas renseigné.',
-  email: 'Votre adresse e-mail n’est pas valide.',
-  password: 'Votre mot de passe doit contenir 8 caractères au minimum et comporter au moins une majuscule, une minuscule et un chiffre.'
+  firstName: 'signup-form.fields.firstname.error',
+  lastName: 'signup-form.fields.lastname.error',
+  email: 'signup-form.fields.email.error',
+  password: 'signup-form.fields.password.error'
 };
-const TEMPORARY_DIV_CLASS_MAP = {
-  error: 'signup-form__temporary-msg--error',
-  success: 'signup-form__temporary-msg--success'
-};
-
-function getErrorMessage(status, key) {
-  return (status === 'error') ? ERROR_INPUT_MESSAGE_MAP[key] : null;
-}
-
-function getValidationStatus(isValidField) {
-  return (isValidField) ? 'error' : 'success';
-}
-
-function isValuePresent(value) {
-  return value.trim() ? true : false;
-}
 
 export default Component.extend({
 
   session: service(),
+  intl: service(),
+  url: service(),
 
   _notificationMessage: null,
   validation: null,
   _tokenHasBeenUsed: null,
-  urlHome: ENV.APP.HOME_HOST,
   isRecaptchaEnabled: ENV.APP.IS_RECAPTCHA_ENABLED,
   isLoading: false,
 
   init() {
     this._super(...arguments);
     this._resetValidationFields();
+  },
+
+  get homeUrl() {
+    return this.url.homeUrl;
+  },
+
+  get cguUrl() {
+    return this.url.cguUrl;
+  },
+
+  _getErrorMessage(status, key) {
+    return (status === 'error') ? this.intl.t(ERROR_INPUT_MESSAGE_MAP[key]) : null;
+  },
+
+  _getValidationStatus(isValidField) {
+    return (isValidField) ? 'error' : 'success';
+  },
+
+  _isValuePresent(value) {
+    return value.trim() ? true : false;
   },
 
   _updateValidationStatus(key, status, message) {
@@ -54,15 +64,6 @@ export default Component.extend({
   _getModelAttributeValueFromKey(key) {
     const userModel = this.user;
     return userModel.get(key);
-  },
-
-  _toggleConfirmation(status, message) {
-    this.set('temporaryAlert', { status: TEMPORARY_DIV_CLASS_MAP[status], message });
-    if (ENV.APP.isMessageStatusTogglingEnabled) {
-      later(() => {
-        this.set('temporaryAlert', { status: 'default', message: '' });
-      }, ENV.APP.MESSAGE_DISPLAY_DURATION);
-    }
   },
 
   _resetValidationFields() {
@@ -97,7 +98,7 @@ export default Component.extend({
   },
 
   _updateInputsStatus() {
-    const errors = this.get('user.errors');
+    const errors = this.user.errors;
     errors.forEach(({ attribute, message }) => {
       this._updateValidationStatus(attribute, 'error', message);
     });
@@ -106,8 +107,8 @@ export default Component.extend({
   _executeFieldValidation(key, isValid) {
     const modelAttrValue = this._getModelAttributeValueFromKey(key);
     const isValidInput = !isValid(modelAttrValue);
-    const status = getValidationStatus(isValidInput);
-    const message = getErrorMessage(status, key);
+    const status = this._getValidationStatus(isValidInput);
+    const message = this._getErrorMessage(status, key);
     this._updateValidationStatus(key, status, message);
   },
 
@@ -125,7 +126,7 @@ export default Component.extend({
     },
 
     validateInput(key) {
-      this._executeFieldValidation(key, isValuePresent);
+      this._executeFieldValidation(key, this._isValuePresent);
     },
 
     validateInputEmail(key) {
@@ -142,8 +143,10 @@ export default Component.extend({
 
       this._trimNamesAndEmailOfUser();
 
-      this.user.save().then(() => {
-        const credentials = { login: this.get('user.email'), password: this.get('user.password') };
+      const campaignCode = _.get(this.session, 'attemptedTransition.from.parent.params.code');
+
+      this.user.save({ adapterOptions: { campaignCode } }).then(() => {
+        const credentials = { login: this.user.email, password: this.user.password };
         this.authenticateUser(credentials);
         this.set('_tokenHasBeenUsed', true);
         this.set('user.password', null);

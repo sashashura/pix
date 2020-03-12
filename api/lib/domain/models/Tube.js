@@ -11,9 +11,9 @@ class Tube {
     practicalTitle,
     practicalDescription,
     // includes
-    skills = []
+    skills = [],
     // references
-
+    competenceId,
   } = {}) {
     // attributes
     this.id = id;
@@ -24,11 +24,12 @@ class Tube {
     // includes
     this.skills = skills;
     // references
+    this.competenceId = competenceId;
 
     if (name) {
       this.name = name;
     } else if (skills.length > 0) {
-      this.name = skills[0].tubeName;
+      this.name = skills[0].tubeNameWithoutPrefix;
     } else {
       this.name = '';
     }

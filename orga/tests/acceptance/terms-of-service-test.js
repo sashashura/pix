@@ -5,20 +5,16 @@ import {
   authenticateSession,
   currentSession
 } from 'ember-simple-auth/test-support';
-import {
-  createUserWithMembership,
-  createUserWithMembershipAndTermsOfServiceAccepted
-} from '../helpers/test-init';
-import { Response } from 'ember-cli-mirage';
-
 import setupMirage from 'ember-cli-mirage/test-support/setup-mirage';
+
+import { createPrescriberWithPixOrgaTermsOfService } from '../helpers/test-init';
 
 module('Acceptance | terms-of-service', function(hooks) {
 
   setupApplicationTest(hooks);
   setupMirage(hooks);
 
-  let user;
+  let prescriber;
 
   test('it should redirect user to login page if not logged in', async function(assert) {
     // when
@@ -29,40 +25,17 @@ module('Acceptance | terms-of-service', function(hooks) {
     assert.notOk(currentSession(this.application).get('isAuthenticated'), 'The user is still unauthenticated');
   });
 
-  module('When user has not accepted terms of service yet', function(hooks) {
+  module('When prescriber has not accepted terms of service yet', function(hooks) {
 
     hooks.beforeEach(async () => {
-      user = createUserWithMembership();
+      prescriber = createPrescriberWithPixOrgaTermsOfService({ pixOrgaTermsOfServiceAccepted: false });
 
       await authenticateSession({
-        user_id: user.id,
-        access_token: 'aaa.' + btoa(`{"user_id":${user.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
+        user_id: prescriber.id,
+        access_token: 'aaa.' + btoa(`{"user_id":${prescriber.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
         expires_in: 3600,
         token_type: 'Bearer token type',
       });
-    });
-
-    test('it should send request for saving Pix-orga terms of service acceptation when submitting', async function(assert) {
-      // given
-      let pixOrgaTermsOfServiceAccepted = null;
-      server.patch('/users/:id/pix-orga-terms-of-service-acceptance', () => {
-        pixOrgaTermsOfServiceAccepted = true;
-        return new Response(200, { some: 'header' }, {
-          data: [{
-            type: 'users',
-            id: user.id,
-            attributes: { 'pix-orga-terms-of-service-accepted': pixOrgaTermsOfServiceAccepted }
-          }]
-        });
-      });
-
-      await visit('/cgu');
-
-      // when
-      await click('button[type=submit]');
-
-      // then
-      assert.equal(pixOrgaTermsOfServiceAccepted, true);
     });
 
     test('it should redirect to campaign list after saving terms of service acceptation', async function(assert) {
@@ -97,49 +70,16 @@ module('Acceptance | terms-of-service', function(hooks) {
       // then
       assert.equal(currentURL(), '/cgu');
     });
-
-    module('When user has no user-orga-settings', () => {
-
-      test('it should create the user-orga-settings', async function(assert) {
-        // given
-        await visit('/cgu');
-        const previousSettingsCount = server.schema.userOrgaSettings.all().length;
-
-        // when
-        await click('button[type=submit]');
-
-        // then
-        const actualSettingsCount = server.schema.userOrgaSettings.all().length;
-        assert.equal(actualSettingsCount, previousSettingsCount + 1);
-      });
-
-      test('it should reload the currentUser service', async function(assert) {
-        const currentUser = this.owner.lookup('service:currentUser');
-
-        // given
-        await visit('/cgu');
-        const previousOrganization = currentUser.organization;
-
-        // when
-        await click('button[type=submit]');
-
-        // then
-        const actualOrganization = currentUser.organization;
-        assert.notOk(previousOrganization);
-        const firstOrganization = currentUser.user.memberships.firstObject.organization;
-        assert.equal(actualOrganization.id, firstOrganization.get('id'));
-      });
-    });
   });
 
-  module('When user has already accepted terms of service', function(hooks) {
+  module('When prescriber has already accepted terms of service', function(hooks) {
 
     hooks.beforeEach(async () => {
-      user = createUserWithMembershipAndTermsOfServiceAccepted();
+      prescriber = createPrescriberWithPixOrgaTermsOfService({ pixOrgaTermsOfServiceAccepted: true });
 
       await authenticateSession({
-        user_id: user.id,
-        access_token: 'aaa.' + btoa(`{"user_id":${user.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
+        user_id: prescriber.id,
+        access_token: 'aaa.' + btoa(`{"user_id":${prescriber.id},"source":"pix","iat":1545321469,"exp":4702193958}`) + '.bbb',
         expires_in: 3600,
         token_type: 'Bearer token type',
       });

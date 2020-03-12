@@ -1,3 +1,4 @@
+const Joi = require('@hapi/joi');
 const campaignParticipationController = require('./campaign-participation-controller');
 
 exports.register = async function(server) {
@@ -9,7 +10,8 @@ exports.register = async function(server) {
         handler: campaignParticipationController.find,
         notes: [
           '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
-          '- Récupération des campaign-participation par assessment ou par campagne',
+          '- Récupération des campaign-participation par assessment ou par campagne' +
+          '- L\'utilisation de cette route avec  le paramètre campaign-participation-result est dépréciée. Utiliser /api/campaigns/{id}/assessment-participations à la place',
         ],
         tags: ['api', 'campaign-participation']
       }
@@ -62,7 +64,44 @@ exports.register = async function(server) {
         ],
         tags: ['api', 'campaign-participation']
       }
-    }
+    },
+    {
+      method: 'GET',
+      path: '/api/campaign-participations/{id}/analyses',
+      config: {
+        validate: {
+          params: Joi.object({
+            id: Joi.number().integer().required()
+          }),
+        },
+        handler: campaignParticipationController.getAnalysis,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
+          '- L‘utilisateur doit avoir les droits d‘accès à l‘organisation liée à la participation à la campagne',
+          '- Récupération de l\'analyse d\'un participant pour la participation à la campagne',
+        ],
+        tags: ['api', 'campaign-participation']
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/campaigns/{campaignId}/profiles-collection-participations/{campaignParticipationId}',
+      config: {
+        validate: {
+          params: Joi.object({
+            campaignId: Joi.number().integer().required(),
+            campaignParticipationId: Joi.number().integer().required()
+          }),
+        },
+        handler: campaignParticipationController.getCampaignProfile,
+        notes: [
+          '- **Cette route est restreinte aux utilisateurs authentifiés**\n' +
+          '- L‘utilisateur doit avoir les droits d‘accès à l‘organisation liée à la participation à la campagne',
+          '- Récupération du profil d\'un participant pour la participation à la campagne',
+        ],
+        tags: ['api', 'campaign-participation']
+      }
+    },
   ]);
 };
 

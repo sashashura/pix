@@ -1,32 +1,28 @@
-<div class="logged-user-summary content-text content-text--small" aria-haspopup="true" aria-expanded="{{isMenuOpen}}">
-  <a href="#" class="link logged-user-summary__link" {{action 'toggleUserMenu'}}>
+<div class="dropdown logged-user-summary content-text content-text--small" aria-label="Résumé utilisateur">
+  <a href="#" class="link logged-user-summary__link" {{on 'click' this.toggleUserMenu}} aria-haspopup="listbox" aria-expanded="{{this.isMenuOpen}}">
     <div>
-      <div class="logged-user-summary__name">{{currentUser.user.firstName}} {{currentUser.user.lastName}}</div>
-      <div class="logged-user-summary__organization">{{organizationNameAndExternalId}}</div>
+      <div class="logged-user-summary__name">{{this.currentUser.prescriber.firstName}} {{this.currentUser.prescriber.lastName}}</div>
+      <div class="logged-user-summary__organization">{{this.organizationNameAndExternalId}}</div>
     </div>
-    {{#if isMenuOpen}}
-      <FaIcon @icon="chevron-up" class="logged-user-summary__chevron logged-user-summary__chevron-up"></FaIcon>
+    {{#if this.isMenuOpen}}
+      <FaIcon @icon="chevron-up" @class="logged-user-summary__chevron logged-user-summary__chevron-up"></FaIcon>
     {{else}}
-      <FaIcon @icon="chevron-down" class="logged-user-summary__chevron"></FaIcon>
+      <FaIcon @icon="chevron-down" @class="logged-user-summary__chevron"></FaIcon>
     {{/if}}
   </a>
 </div>
 
-{{#if isMenuOpen}}
-  <ClickOutside @onClickOutside={{action "closeMenu"}}>
-    <div class="logged-user-menu">
-      {{#each eligibleOrganizations as |organization|}}
-        <div class="logged-user-menu-item" title="{{organization.name}}" onclick={{action 'onOrganizationChange' organization}}>
-          <span class="logged-user-menu-item__organization-name">{{organization.name}}</span>
-          {{#if organization.externalId}}
-            <span class="logged-user-menu-item__organization-externalId">({{organization.externalId}})</span>
-          {{/if}}
-        </div>
-      {{/each}}
-      <LinkTo @route="logout" class="link logged-user-menu-item logged-user-menu-item__last">
-        <FaIcon @icon="power-off" class="logged-user-menu-item__icon"></FaIcon>
-        Se déconnecter
-      </LinkTo>
-    </div>
-  </ClickOutside>
-{{/if}}
+<Dropdown::Content @display={{this.isMenuOpen}} @close={{this.closeMenu}} class="logged-user-menu" aria-label="Menu utilisateur">
+  {{#each this.eligibleOrganizations as |organization|}}
+    <Dropdown::Item @onClick={{fn this.onOrganizationChange organization}} title="{{organization.name}}" class="logged-user-menu-item">
+      <span class="logged-user-menu-item__organization-name">{{organization.name}}</span>
+      {{#if organization.externalId}}
+        <span class="logged-user-menu-item__organization-externalId">({{organization.externalId}})</span>
+      {{/if}}
+    </Dropdown::Item>
+  {{/each}}
+  <Dropdown::ItemLink @linkTo="logout" class="logged-user-menu-item logged-user-menu-item__last">
+      <FaIcon @icon="power-off" @class="logged-user-menu-item__icon"></FaIcon>
+      Se déconnecter
+  </Dropdown::ItemLink>
+</Dropdown::Content>

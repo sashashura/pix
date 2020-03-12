@@ -4,11 +4,12 @@ const bcrypt = require('bcrypt');
 const _ = require('lodash');
 
 const {
-  AlreadyRegisteredEmailError, AlreadyRegisteredUsernameError, OrganizationStudentAlreadyLinkedToUserError,
+  AlreadyRegisteredEmailError, AlreadyRegisteredUsernameError, SchoolingRegistrationAlreadyLinkedToUserError,
   NotFoundError, UserNotFoundError
 } = require('../../../../lib/domain/errors');
 const userRepository = require('../../../../lib/infrastructure/repositories/user-repository');
 const User = require('../../../../lib/domain/models/User');
+const UserDetailsForAdmin = require('../../../../lib/domain/models/UserDetailsForAdmin');
 const Membership = require('../../../../lib/domain/models/Membership');
 const UserOrgaSettings = require('../../../../lib/domain/models/UserOrgaSettings');
 const CertificationCenter = require('../../../../lib/domain/models/CertificationCenter');
@@ -24,6 +25,7 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
     password: bcrypt.hashSync('A124B2C3#!', 1),
     cgu: true,
     samlId: 'some-saml-id',
+    shouldChangePassword: false,
   };
 
   let userInDB;
@@ -177,7 +179,7 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
       });
     });
 
-    describe('#getByUsernameWithRoles', () => {
+    describe('#getByUsernameOrEmailWithRoles', () => {
 
       beforeEach(() => {
         return _insertUserWithOrganizationsAndCertificationCenterAccesses();
@@ -253,6 +255,28 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
         expect(associatedOrganization.type).to.equal(organizationInDB.type);
 
         expect(firstMembership.organizationRole).to.equal(membershipInDB.organizationRole);
+      });
+
+      context('when the membership associated to the user has been disabled', () => {
+
+        it('should not return the membership', async () => {
+          // given
+          const userInDB = databaseBuilder.factory.buildUser();
+          const organizationId = databaseBuilder.factory.buildOrganization().id;
+          databaseBuilder.factory.buildMembership({
+            userId: userInDB.id,
+            organizationId,
+            disabledAt: new Date(),
+          });
+          await databaseBuilder.commit();
+
+          // when
+          const user = await userRepository.getByUsernameOrEmailWithRoles(userInDB.email);
+
+          // then
+          expect(user.memberships).to.be.an('array');
+          expect(user.memberships).to.be.empty;
+        });
       });
 
       it('should return certification center membership associated to the user', async () => {
@@ -334,6 +358,28 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
         expect(associatedOrganization.type).to.equal(organizationInDB.type);
 
         expect(membership.organizationRole).to.equal(membershipInDB.organizationRole);
+      });
+
+      context('when the membership associated to the user has been disabled', () => {
+
+        it('should not return the membership', async () => {
+          // given
+          const userId = databaseBuilder.factory.buildUser().id;
+          const organizationId = databaseBuilder.factory.buildOrganization().id;
+          databaseBuilder.factory.buildMembership({
+            userId,
+            organizationId,
+            disabledAt: new Date(),
+          });
+          await databaseBuilder.commit();
+
+          // when
+          const user = await userRepository.getWithMemberships(userId);
+
+          // then
+          expect(user.memberships).to.be.an('array');
+          expect(user.memberships).to.be.empty;
+        });
       });
 
       it('should reject with a UserNotFound error when no user was found with the given id', async () => {
@@ -457,6 +503,92 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
     });
   });
 
+  describe('get user details for administration usage', () => {
+
+    describe('#getUserDetailsForAdmin', () => {
+
+      let userInDb;
+
+      beforeEach(async () => {
+        userInDb = databaseBuilder.factory.buildUser(userToInsert);
+        await databaseBuilder.commit();
+      });
+
+      it('should return the found user', async () => {
+        // when
+        const userDetailsForAdmin = await userRepository.getUserDetailsForAdmin(userInDb.id);
+
+        // then
+        expect(userDetailsForAdmin).to.be.an.instanceOf(UserDetailsForAdmin);
+        expect(userDetailsForAdmin.id).to.equal(userInDb.id);
+        expect(userDetailsForAdmin.firstName).to.equal(userInDb.firstName);
+        expect(userDetailsForAdmin.lastName).to.equal(userInDb.lastName);
+        expect(userDetailsForAdmin.email).to.equal(userInDb.email);
+        expect(userDetailsForAdmin.cgu).to.be.true;
+      });
+
+      it('should return a UserNotFoundError if no user is found', async () => {
+        // given
+        const nonExistentUserId = 678;
+
+        // when
+        const result = await catchErr(userRepository.getUserDetailsForAdmin)(nonExistentUserId);
+
+        // then
+        expect(result).to.be.instanceOf(UserNotFoundError);
+      });
+    });
+
+    context('when user is authenticated from GAR', () => {
+
+      let userInDb;
+
+      beforeEach(() => {
+        userInDb = databaseBuilder.factory.buildUser(userToInsert);
+        return databaseBuilder.commit();
+      });
+
+      it('should return the "isAuthenticatedFromGAR" property to true', async () => {
+        // when
+        const userDetailsForAdmin = await userRepository.getUserDetailsForAdmin(userInDb.id);
+
+        // then
+        expect(userDetailsForAdmin).to.be.an.instanceOf(UserDetailsForAdmin);
+        expect(userDetailsForAdmin.cgu).to.be.true;
+      });
+
+    });
+
+    context('when user is not authenticated from GAR', () => {
+
+      let userInDb;
+      const userNotAuthenticatedFromGAR = {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        email: faker.internet.exampleEmail().toLowerCase(),
+        password: bcrypt.hashSync('A124B2C3#!', 1),
+        cgu: true,
+        samlId: null,
+      };
+
+      beforeEach(() => {
+        userInDb = databaseBuilder.factory.buildUser(userNotAuthenticatedFromGAR);
+        return databaseBuilder.commit();
+      });
+
+      it('should return the "isAuthenticatedFromGAR" property to false', async () => {
+        // when
+        const userDetailsForAdmin = await userRepository.getUserDetailsForAdmin(userInDb.id);
+
+        // then
+        expect(userDetailsForAdmin).to.be.an.instanceOf(UserDetailsForAdmin);
+        expect(userDetailsForAdmin.isAuthenticatedFromGAR).to.be.false;
+      });
+
+    });
+
+  });
+
   describe('#create', () => {
 
     afterEach(async () => {
@@ -544,6 +676,53 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
     });
   });
 
+  describe('#isEmailAllowedToUseForCurrentUser', () => {
+
+    let firstUser;
+    let secondUser;
+
+    const secondUserToInsert = {
+      firstName: faker.name.firstName(),
+      lastName: faker.name.lastName(),
+      email: 'alreadyexist@example.net',
+      cgu: true,
+      shouldChangePassword: false,
+    };
+
+    beforeEach(async () => {
+      firstUser = databaseBuilder.factory.buildUser(userToInsert);
+      secondUser = databaseBuilder.factory.buildUser(secondUserToInsert);
+      await databaseBuilder.commit();
+    });
+
+    it('should return true when the email is not registered', async () => {
+      // when
+      const email = await userRepository.isEmailAllowedToUseForCurrentUser(firstUser.id, firstUser.email);
+
+      // then
+      expect(email).to.equal(true);
+    });
+
+    it('should reject an AlreadyRegisteredEmailError when it already exists for another user', async () => {
+      // when
+      const result = await catchErr(userRepository.isEmailAllowedToUseForCurrentUser)(firstUser.id, secondUser.email);
+
+      // then
+      expect(result).to.be.instanceOf(AlreadyRegisteredEmailError);
+    });
+
+    it('should reject an AlreadyRegisteredEmailError when email case insensitive already exists', async () => {
+      // given
+      const uppercaseEmailAlreadyInDb = secondUserToInsert.email.toUpperCase();
+
+      // when
+      const result = await catchErr(userRepository.isEmailAllowedToUseForCurrentUser)(firstUser.id,uppercaseEmailAlreadyInDb);
+
+      // then
+      expect(result).to.be.instanceOf(AlreadyRegisteredEmailError);
+    });
+  });
+
   describe('#updatePassword', () => {
 
     let userInDb;
@@ -576,6 +755,100 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
       // then
       expect(error).to.be.instanceOf(UserNotFoundError);
     });
+  });
+
+  describe('#updateTemporaryPassword', () => {
+
+    let userInDb;
+
+    beforeEach(async () => {
+      userInDb = databaseBuilder.factory.buildUser(userToInsert);
+      await databaseBuilder.commit();
+    });
+
+    it('should save the user', async () => {
+      // given
+      const generatedPassword = '1235Pix!';
+
+      // when
+      const updatedUser = await userRepository.updatePasswordThatShouldBeChanged(userInDb.id, generatedPassword);
+
+      // then
+      expect(updatedUser).to.be.an.instanceOf(User);
+      expect(updatedUser.password).to.equal(generatedPassword);
+      expect(updatedUser.shouldChangePassword).to.be.true;
+    });
+
+    it('should throw UserNotFoundError when user id not found', async () => {
+      // given
+      const wrongUserId = 0;
+      const generatedPassword = '1235Pix!';
+
+      // when
+      const error = await catchErr(userRepository.updatePasswordThatShouldBeChanged)(wrongUserId, generatedPassword);
+
+      // then
+      expect(error).to.be.instanceOf(UserNotFoundError);
+    });
+  });
+
+  describe('#updateUserDetailsForAdministration', () => {
+
+    let userInDb;
+
+    beforeEach(async () => {
+      userInDb = databaseBuilder.factory.buildUser(userToInsert);
+      await databaseBuilder.commit();
+    });
+
+    it('should update firstName,lastName,email of the user', async () => {
+      // given
+      const patchUserFirstNameLastNameEmail = {
+        id : userInDb.id,
+        firstName : 'firstname',
+        lastName : 'lastname',
+        email : 'firstname.lastname@example.net',
+      };
+
+      // when
+      const updatedUser = await userRepository.updateUserDetailsForAdministration(userInDb.id, patchUserFirstNameLastNameEmail);
+
+      // then
+      expect(updatedUser).to.be.an.instanceOf(UserDetailsForAdmin);
+      expect(updatedUser.firstName).to.equal(patchUserFirstNameLastNameEmail.firstName);
+      expect(updatedUser.lastName).to.equal(patchUserFirstNameLastNameEmail.lastName);
+      expect(updatedUser.email).to.equal(patchUserFirstNameLastNameEmail.email);
+    });
+
+    it('should update email of the user', async () => {
+      // given
+      const patchUserFirstNameLastNameEmail = {
+        id : userInDb.id,
+        email : 'partielupdate@hotmail.com',
+      };
+
+      // when
+      const updatedUser = await userRepository.updateUserDetailsForAdministration(userInDb.id, patchUserFirstNameLastNameEmail);
+
+      // then
+      expect(updatedUser).to.be.an.instanceOf(UserDetailsForAdmin);
+      expect(updatedUser.email).to.equal(patchUserFirstNameLastNameEmail.email);
+    });
+
+    it('should throw UserNotFoundError when user id not found', async () => {
+      // given
+      const wrongUserId = 0;
+      const patchUserFirstNameLastNameEmail = {
+        email : 'partielupdate@hotmail.com',
+      };
+
+      // when
+      const error = await catchErr(userRepository.updateUserDetailsForAdministration)(wrongUserId, patchUserFirstNameLastNameEmail);
+
+      // then
+      expect(error).to.be.instanceOf(UserNotFoundError);
+    });
+
   });
 
   describe('#isUserExistingByEmail', () => {
@@ -867,6 +1140,27 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
 
   });
 
+  describe('#acceptPixLastTermsOfService', () => {
+    let userId;
+
+    beforeEach(() => {
+      userId = databaseBuilder.factory.buildUser({ mustValidateTermsOfService: true , lastTermsOfServiceValidatedAt: null }).id;
+      return databaseBuilder.commit();
+    });
+
+    it('should validate the last terms of service and save the date of acceptance ', async () => {
+      // when
+      const actualUser = await userRepository.acceptPixLastTermsOfService(userId);
+
+      // then
+      expect(actualUser.lastTermsOfServiceValidatedAt).to.be.exist;
+      expect(actualUser.lastTermsOfServiceValidatedAt).to.be.a('Date');
+      expect(actualUser.mustValidateTermsOfService).to.be.false;
+
+    });
+
+  });
+
   describe('#updatePixOrgaTermsOfServiceAcceptedToTrue', () => {
     let userId;
 
@@ -903,23 +1197,23 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
 
   });
 
-  describe('#createAndAssociateUserToStudent', () => {
+  describe('#createAndAssociateUserToSchoolingRegistration', () => {
     const email = 'jojo.lapointe@example.net';
-    let studentId;
+    let schoolingRegistrationId;
     let organizationId;
     let domainUser;
 
     beforeEach(() => {
       // given
       organizationId = databaseBuilder.factory.buildOrganization().id;
-      studentId = databaseBuilder.factory.buildStudent({ userId: null, organizationId }).id;
+      schoolingRegistrationId = databaseBuilder.factory.buildSchoolingRegistration({ userId: null, organizationId }).id;
       domainUser = domainBuilder.buildUser({ email });
 
       return databaseBuilder.commit();
     });
 
     afterEach(async () => {
-      await knex('students').delete();
+      await knex('schooling-registrations').delete();
       await knex('users').delete();
     });
 
@@ -927,7 +1221,7 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
 
       it('should create user', async () => {
         // when
-        const result = await userRepository.createAndAssociateUserToStudent({ domainUser, studentId });
+        const result = await userRepository.createAndAssociateUserToSchoolingRegistration({ domainUser, schoolingRegistrationId });
 
         // then
         const foundUser = await knex('users').where({ email });
@@ -937,11 +1231,11 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
 
       it('should associate user to student', async () => {
         // when
-        await userRepository.createAndAssociateUserToStudent({ domainUser, studentId });
+        await userRepository.createAndAssociateUserToSchoolingRegistration({ domainUser, schoolingRegistrationId });
 
         // then
-        const foundStudents = await knex('students').where('id', studentId);
-        expect(foundStudents[0].userId).to.not.be.undefined;
+        const foundSchoolingRegistrations = await knex('schooling-registrations').where('id', schoolingRegistrationId);
+        expect(foundSchoolingRegistrations[0].userId).to.not.be.undefined;
       });
     });
 
@@ -950,16 +1244,16 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
       it('should rollback after association fails', async () => {
         // given
         const userId = databaseBuilder.factory.buildUser().id;
-        studentId = databaseBuilder.factory.buildStudent({ userId, organizationId }).id;
+        schoolingRegistrationId = databaseBuilder.factory.buildSchoolingRegistration({ userId, organizationId }).id;
         await databaseBuilder.commit();
 
         // when
-        const error = await catchErr(userRepository.createAndAssociateUserToStudent)({ domainUser, studentId });
+        const error = await catchErr(userRepository.createAndAssociateUserToSchoolingRegistration)({ domainUser, schoolingRegistrationId });
 
         // then
-        expect(error).to.be.instanceOf(OrganizationStudentAlreadyLinkedToUserError);
-        const foundStudents = await knex('students').where('id', studentId);
-        expect(foundStudents[0].userId).to.equal(userId);
+        expect(error).to.be.instanceOf(SchoolingRegistrationAlreadyLinkedToUserError);
+        const foundSchoolingRegistrations = await knex('schooling-registrations').where('id', schoolingRegistrationId);
+        expect(foundSchoolingRegistrations[0].userId).to.equal(userId);
         const foundUser = await knex('users').where({ email });
         expect(foundUser).to.have.lengthOf(0);
       });
@@ -990,6 +1284,41 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
 
       // then
       expect(error).to.be.instanceOf(AlreadyRegisteredUsernameError);
+    });
+  });
+
+  describe('#updateExpiredPassword', () => {
+
+    let userId;
+
+    beforeEach(async () => {
+      userId = databaseBuilder.factory.buildUser({ shouldChangePassword: true }).id;
+      await databaseBuilder.commit();
+    });
+
+    it('should update the user\'s password and shouldChangePassword', async () => {
+      // given
+      const hashedNewPassword = '1235Pix!';
+
+      // when
+      const updatedUser = await userRepository.updateExpiredPassword({ userId, hashedNewPassword });
+
+      // then
+      expect(updatedUser).to.be.an.instanceOf(User);
+      expect(updatedUser.password).to.equal(hashedNewPassword);
+      expect(updatedUser.shouldChangePassword).to.false;
+    });
+
+    it('should throw UserNotFoundError when user id is not found', async () => {
+      // given
+      const wrongUserId = 0;
+      const hashedNewPassword = '1235Pix!';
+
+      // when
+      const error = await catchErr(userRepository.updateExpiredPassword)({ userId: wrongUserId, hashedNewPassword });
+
+      // then
+      expect(error).to.be.instanceOf(UserNotFoundError);
     });
   });
 

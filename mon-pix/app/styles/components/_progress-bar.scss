@@ -8,13 +8,13 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-size: 1.5rem;
+  font-size: 0.938rem;
   padding: 0px 4px;
 }
 
 .progress-bar-stepnum {
   opacity: 0.3;
-  color: $black;
+  color: $grey-200;
 
   &.active {
     opacity: 1;
@@ -63,7 +63,7 @@
   }
 
   &__value {
-    font-size: 3rem;
+    font-size: 1.875rem;
     font-weight: bold;
   }
 }

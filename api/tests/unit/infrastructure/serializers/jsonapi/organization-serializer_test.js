@@ -7,7 +7,7 @@ describe('Unit | Serializer | organization-serializer', () => {
 
     it('should return a JSON API serialized organization', () => {
       // given
-      const organization = domainBuilder.buildOrganization();
+      const organization = domainBuilder.buildOrganization({ email: 'sco.generic.account@example.net' });
       const meta = { some: 'meta' };
       // when
       const serializedOrganization = serializer.serialize(organization, meta);
@@ -24,6 +24,9 @@ describe('Unit | Serializer | organization-serializer', () => {
             'external-id': organization.externalId,
             'province-code': organization.provinceCode,
             'is-managing-students': organization.isManagingStudents,
+            'credit': organization.credit,
+            'can-collect-profiles': organization.canCollectProfiles,
+            'email': organization.email
           },
           relationships: {
             memberships: {
@@ -35,6 +38,11 @@ describe('Unit | Serializer | organization-serializer', () => {
               links: {
                 related: `/api/organizations/${organization.id}/students`
               }
+            },
+            'target-profiles': {
+              links: {
+                related: `/api/organizations/${organization.id}/target-profiles`
+              }
             }
           }
         },
@@ -44,9 +52,9 @@ describe('Unit | Serializer | organization-serializer', () => {
       });
     });
 
-    it('should include serialized student data when organization has student', () => {
+    it('should include serialized student data when organization has schoolingRegistration', () => {
       // given
-      const organization = domainBuilder.buildOrganization.withStudents();
+      const organization = domainBuilder.buildOrganization.withSchoolingRegistrations();
 
       // when
       const serializedOrganization = serializer.serialize(organization);

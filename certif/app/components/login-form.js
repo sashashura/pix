@@ -3,24 +3,17 @@ import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import ENV from 'pix-certif/config/environment';
+import _ from 'lodash';
 
 export default class LoginForm extends Component {
 
   @service session;
-  @tracked isPasswordVisible;
-  @tracked isErrorMessagePresent;
 
-  @tracked errorMessage;
-
-  constructor() {
-    super(...arguments);
-
-    this.email = null;
-    this.password = null;
-    this.isPasswordVisible = false;
-    this.isErrorMessagePresent = false;
-    this.errorMessage = null;
-  }
+  email = null;
+  password = null;
+  @tracked isPasswordVisible = false;
+  @tracked isErrorMessagePresent = false;
+  @tracked errorMessage = null;
 
   get passwordInputType() {
     return this.isPasswordVisible ? 'text' : 'password';
@@ -45,10 +38,12 @@ export default class LoginForm extends Component {
     this.isPasswordVisible = !this.isPasswordVisible;
   }
 
-  _manageErrorsApi(response) {
+  _manageErrorsApi(response = {}) {
 
-    if (response && response.errors && response.errors.length > 0) {
-      const firstError = response.errors[0];
+    const nbErrors = _.get(response, 'responseJSON.errors.length', 0);
+
+    if (nbErrors > 0) {
+      const firstError = response.responseJSON.errors[0];
       const messageError = this._showErrorMessages(firstError.status, firstError.detail);
       this.errorMessage = messageError;
     } else {
@@ -56,7 +51,7 @@ export default class LoginForm extends Component {
     }
   }
 
-  _showErrorMessages(statusCode, error) {
+  _showErrorMessages(statusCode,apiError) {
     const httpStatusCodeMessages = {
 
       '400': ENV.APP.API_ERROR_MESSAGES.BAD_REQUEST.MESSAGE,
@@ -64,8 +59,8 @@ export default class LoginForm extends Component {
       '422': ENV.APP.API_ERROR_MESSAGES.BAD_REQUEST.MESSAGE,
       '502': ENV.APP.API_ERROR_MESSAGES.INTERNAL_SERVER_ERROR.MESSAGE,
       '504': ENV.APP.API_ERROR_MESSAGES.GATEWAY_TIMEOUT.MESSAGE,
-      '401': error,
-      '403': error,
+      '401': apiError,
+      '403': apiError,
       'default': ENV.APP.API_ERROR_MESSAGES.INTERNAL_SERVER_ERROR.MESSAGE,
 
     };

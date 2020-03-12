@@ -1,6 +1,6 @@
 const { expect, sinon, HttpTestServer } = require('../../../test-helper');
 
-const securityController = require('../../../../lib/interfaces/controllers/security-controller');
+const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
 const organizationController = require('../../../../lib/application/organizations/organization-controller');
 const moduleUnderTest = require('../../../../lib/application/organizations');
 
@@ -9,19 +9,20 @@ describe('Integration | Application | Organizations | Routes', () => {
   let httpTestServer;
 
   beforeEach(() => {
-    sinon.stub(securityController, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
-    sinon.stub(securityController, 'checkUserIsAdminInScoOrganizationAndManagesStudents').callsFake((request, h) => h.response(true));
-    sinon.stub(securityController, 'checkUserIsAdminInOrganizationOrHasRolePixMaster').callsFake((request, h) => h.response(true));
-    sinon.stub(securityController, 'checkUserIsAdminInOrganization').callsFake((request, h) => h.response(true));
-    sinon.stub(securityController, 'checkUserBelongsToScoOrganizationAndManagesStudents').callsFake((request, h) => h.response(true));
+    sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
+    sinon.stub(securityPreHandlers, 'checkUserIsAdminInScoOrganizationAndManagesStudents').callsFake((request, h) => h.response(true));
+    sinon.stub(securityPreHandlers, 'checkUserIsAdminInOrganizationOrHasRolePixMaster').callsFake((request, h) => h.response(true));
+    sinon.stub(securityPreHandlers, 'checkUserIsAdminInOrganization').callsFake((request, h) => h.response(true));
+    sinon.stub(securityPreHandlers, 'checkUserBelongsToScoOrganizationAndManagesStudents').callsFake((request, h) => h.response(true));
 
     sinon.stub(organizationController, 'create').returns('ok');
     sinon.stub(organizationController, 'findPaginatedFilteredOrganizations').returns('ok');
     sinon.stub(organizationController, 'findPaginatedFilteredCampaigns').returns('ok');
-    sinon.stub(organizationController, 'importStudentsFromSIECLE').callsFake((request, h) => h.response('ok').code(201));
+    sinon.stub(organizationController, 'importSchoolingRegistrationsFromSIECLE').callsFake((request, h) => h.response('ok').code(201));
     sinon.stub(organizationController, 'sendInvitations').callsFake((request, h) => h.response().created());
     sinon.stub(organizationController, 'findPendingInvitations').returns('ok');
-    sinon.stub(organizationController, 'findStudents').callsFake((request, h) => h.response('ok').code(200));
+    sinon.stub(organizationController, 'findPaginatedFilteredSchoolingRegistrations').callsFake((request, h) => h.response('ok').code(200));
+    sinon.stub(organizationController, 'attachTargetProfiles').callsFake((request, h) => h.response('ok').code(204));
 
     httpTestServer = new HttpTestServer(moduleUnderTest);
   });
@@ -74,7 +75,7 @@ describe('Integration | Application | Organizations | Routes', () => {
 
   describe('POST /api/organizations/:id/import-students', () => {
 
-    it('should call the organization controller to import students', async () => {
+    it('should call the organization controller to import schoolingRegistrations', async () => {
       // given
       const method = 'POST';
       const url = '/api/organizations/:id/import-students';
@@ -85,7 +86,7 @@ describe('Integration | Application | Organizations | Routes', () => {
 
       // then
       expect(response.statusCode).to.equal(201);
-      expect(organizationController.importStudentsFromSIECLE).to.have.been.calledOnce;
+      expect(organizationController.importSchoolingRegistrationsFromSIECLE).to.have.been.calledOnce;
     });
   });
 
@@ -141,7 +142,57 @@ describe('Integration | Application | Organizations | Routes', () => {
 
       // then
       expect(response.statusCode).to.equal(200);
-      expect(organizationController.findStudents).to.have.been.calledOnce;
+      expect(organizationController.findPaginatedFilteredSchoolingRegistrations).to.have.been.calledOnce;
+    });
+
+    describe('When page parameters are not valid', () => {
+
+      it('should throw an error when page size is invalid', async () => {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/:id/students?page[size]=blabla';
+  
+        // when
+        const response = await httpTestServer.request(method, url);
+  
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+
+      it('should throw an error when page number is invalid', async () => {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/:id/students?page[number]=blabla';
+  
+        // when
+        const response = await httpTestServer.request(method, url);
+  
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+    });
+  });
+
+  describe('POST /api/organizations/:id/target-profiles', () => {
+
+    it('should resolve with a 204 status code', async () => {
+      // given
+      const method = 'POST';
+      const url = '/api/organizations/:id/target-profiles';
+      const payload = {
+        data: {
+          type: 'target-profile-shares',
+          attributes: {
+            'target-profiles-to-attach': [1, 2]
+          },
+        }
+      };
+
+      // when
+      const response = await httpTestServer.request(method, url, payload);
+
+      // then
+      expect(response.statusCode).to.equal(204);
     });
   });
 

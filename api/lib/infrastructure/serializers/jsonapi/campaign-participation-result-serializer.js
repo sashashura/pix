@@ -9,17 +9,48 @@ module.exports = {
         'testedSkillsCount',
         'validatedSkillsCount',
         'isCompleted',
-        'areBadgeCriteriaFulfilled',
-        'badge',
-        'competenceResults'
+        'campaignParticipationBadges',
+        'competenceResults',
+        'progress'
       ],
-      badge: {
+      campaignParticipationBadges: {
         ref: 'id',
-        attributes: ['altMessage', 'message', 'imageUrl'],
+        included: true,
+        attributes: [
+          'altMessage',
+          'message',
+          'title',
+          'imageUrl',
+          'key',
+          'isAcquired',
+          'partnerCompetenceResults',
+        ],
+        partnerCompetenceResults: {
+          ref: 'id',
+          typeKeyForModel: 'resultCompetences',
+          included: true,
+          attributes: [
+            'name',
+            'index',
+            'areaColor',
+            'masteryPercentage',
+            'totalSkillsCount',
+            'testedSkillsCount',
+            'validatedSkillsCount'
+          ],
+        }
       },
       competenceResults: {
         ref: 'id',
-        attributes: ['name', 'index', 'areaColor', 'totalSkillsCount', 'testedSkillsCount', 'validatedSkillsCount'],
+        attributes: [
+          'name',
+          'index',
+          'areaColor',
+          'masteryPercentage',
+          'totalSkillsCount',
+          'testedSkillsCount',
+          'validatedSkillsCount'
+        ],
       },
     }).serialize(results);
   },

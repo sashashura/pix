@@ -1,4 +1,16 @@
 'use strict';
+const _ = require('lodash');
+
+function _getEnvironmentVariableAsNumber({ environmentVariableName, defaultValue, minValue }) {
+  const valueToValidate = process.env[environmentVariableName] || defaultValue;
+  const number = parseInt(valueToValidate, 10);
+  if (!isNaN(number) && number >= minValue) {
+    return number;
+  }
+  throw new Error(`Invalid value '${valueToValidate}' for environment variable '${environmentVariableName}'. It should be a number greater than or equal ${minValue}.`);
+}
+
+const ACTIVE_FEATURE_TOGGLES = [];
 
 module.exports = function(environment) {
   const ENV = {
@@ -19,7 +31,6 @@ module.exports = function(environment) {
 
     APP: {
       API_HOST: process.env.API_HOST || '',
-      isSessionFinalizationActive: process.env.FT_IS_SESSION_FINALIZATION_ACTIVE === 'true',
       API_ERROR_MESSAGES : {
         BAD_REQUEST: { CODE: '400', MESSAGE: 'Les données envoyées ne sont pas au bon format.' },
         INTERNAL_SERVER_ERROR: {
@@ -33,7 +44,8 @@ module.exports = function(environment) {
         UNAUTHORIZED: { CODE: '401', MESSAGE: 'L\'adresse e-mail et/ou le mot de passe saisis sont incorrects.' },
         FORBIDDEN: '403',
         NOT_FOUND: '404',
-      }
+      },
+      MAX_CONCURRENT_AJAX_CALLS: _getEnvironmentVariableAsNumber({ environmentVariableName: 'MAX_CONCURRENT_AJAX_CALLS', defaultValue: 8, minValue: 1 }),
     },
 
     googleFonts: [
@@ -71,12 +83,12 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    ENV.APP.API_HOST = 'http://localhost:3000';
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV.matomo.url = 'https://stats.pix.fr/js/container_cMIdKogu_dev_ace719fc09829675a21c66df.js';
     ENV.matomo.debug = true;
   }
 
@@ -101,6 +113,13 @@ module.exports = function(environment) {
     // here you can enable a production-specific feature
     //ENV.APP.API_HOST = 'https://pix.fr/api';
   }
+
+  // Warn for unknown feature toggles
+  _.each(process.env, (value, key) => {
+    if (key.startsWith('FT_') && _.indexOf(ACTIVE_FEATURE_TOGGLES, key) === -1) {
+      console.warn(`Unknown feature toggle ${key}. Please remove it from your environment variables.`);
+    }
+  });
 
   return ENV;
 };

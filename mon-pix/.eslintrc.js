@@ -16,13 +16,14 @@ module.exports = {
   ],
   extends: [
     ...(fs.existsSync('../.eslintrc.yaml') ? ['../.eslintrc.yaml'] : []),
-    'plugin:ember/recommended'
+    'plugin:ember/octane'
   ],
   env: {
     browser: true
   },
   rules: {
     'ember/avoid-leaking-state-in-ember-objects': 'off',
+    'ember/no-get': ['error'],
     'ember/no-empty-attrs': 'error',
     'ember/no-new-mixins': 'off',
     'ember/no-restricted-resolver-tests': 'off',
@@ -34,7 +35,10 @@ module.exports = {
         'single-line-function',
         'multi-line-function',
       ]
-    }]
+    }],
+    /* Recommended rules */
+    'ember/no-mixins': 'off',
+    'ember/no-jquery': 'off',
   },
   overrides: [
     // node files

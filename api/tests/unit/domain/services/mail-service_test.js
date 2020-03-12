@@ -1,8 +1,12 @@
-const { sinon } = require('../../../test-helper');
-const mailer = require('../../../../lib/infrastructure/mailers/mailer');
+const { sinon, expect } = require('../../../test-helper');
+
 const mailService = require('../../../../lib/domain/services/mail-service');
+const mailer = require('../../../../lib/infrastructure/mailers/mailer');
 
 describe('Unit | Service | MailService', () => {
+
+  const senderEmailAddress = 'ne-pas-repondre@pix.fr';
+  const userEmailAddress = 'user@example.net';
 
   beforeEach(() => {
     sinon.stub(mailer, 'sendEmail').resolves();
@@ -10,78 +14,222 @@ describe('Unit | Service | MailService', () => {
 
   describe('#sendAccountCreationEmail', () => {
 
-    it('should use mailer to send an email', async () => {
+    it('should use mailer to send an email with locale', async () => {
       // given
-      const email = 'text@example.net';
+      const locale = 'fr-fr';
+      const domainFr = 'pix.fr';
+      const expectedOptions = {
+        from: senderEmailAddress,
+        fromName: 'PIX - Ne pas répondre',
+        to: userEmailAddress,
+        subject: 'Création de votre compte PIX',
+        template: 'test-account-creation-template-id',
+        variables: {
+          homeName: `${domainFr}`,
+          homeUrl: `https://${domainFr}`,
+          redirectionUrl: `https://app.${domainFr}/connexion`,
+          locale
+        }
+      };
 
       // when
-      await mailService.sendAccountCreationEmail(email);
+      await mailService.sendAccountCreationEmail(userEmailAddress, locale);
 
       // then
-      sinon.assert.calledWith(mailer.sendEmail, {
-        to: email,
-        template: 'test-account-creation-template-id',
-        from: 'ne-pas-repondre@pix.fr',
+      expect(mailer.sendEmail).to.have.been.calledWithExactly(expectedOptions);
+    });
+
+    it('should use mailer to send an email with redirectionUrl from parameters', async () => {
+      // given
+      const redirectionUrl = 'https://pix.fr';
+      const locale = 'fr-fr';
+      const domainFr = 'pix.fr';
+      const expectedOptions = {
+        from: senderEmailAddress,
         fromName: 'PIX - Ne pas répondre',
-        subject: 'Création de votre compte PIX'
-      });
+        to: userEmailAddress,
+        subject: 'Création de votre compte PIX',
+        template: 'test-account-creation-template-id',
+        variables: {
+          homeName: `${domainFr}`,
+          homeUrl: `https://${domainFr}`,
+          redirectionUrl,
+          locale
+        }
+      };
+
+      // when
+      await mailService.sendAccountCreationEmail(userEmailAddress, locale, redirectionUrl);
+
+      // then
+      expect(mailer.sendEmail).to.have.been.calledWithExactly(expectedOptions);
     });
   });
 
-  describe('#sendResetPasswordDemandEmail', async () => {
+  describe('#sendResetPasswordDemandEmail', () => {
 
-    describe('when provided passwordResetDemandBaseUrl is not production', () => {
+    context('when provided passwordResetDemandBaseUrl is not production', () => {
 
-      it('should call Mailjet with a sub-domain prefix', async () => {
+      it('should call mailer', async () => {
         // given
-        const email = 'text@example.net';
         const fakeTemporaryKey = 'token';
-        const passwordResetDemandBaseUrl = 'http://dev.pix.fr';
+        const locale = 'fr-fr';
+        const domainFr = 'pix.fr';
+
+        const expectedOptions = {
+          from: senderEmailAddress,
+          fromName: 'PIX - Ne pas répondre',
+          to: userEmailAddress,
+          subject: 'Demande de réinitialisation de mot de passe PIX',
+          template: 'test-password-reset-template-id',
+          variables: {
+            resetUrl: `https://app.${domainFr}/changer-mot-de-passe/${fakeTemporaryKey}`,
+            homeName: `${domainFr}`,
+            homeUrl: `https://${domainFr}`,
+            locale
+          }
+        };
 
         // when
-        await mailService.sendResetPasswordDemandEmail(email, passwordResetDemandBaseUrl, fakeTemporaryKey);
+        await mailService.sendResetPasswordDemandEmail(userEmailAddress, locale, fakeTemporaryKey);
 
         // then
-        sinon.assert.calledWith(mailer.sendEmail, {
-          to: email,
-          template: 'test-password-reset-template-id',
-          from: 'ne-pas-repondre@pix.fr',
+        expect(mailer.sendEmail).to.have.been.calledWithExactly(expectedOptions);
+      });
+
+      it('should call mailer with locale fr', async () => {
+        // given
+        const fakeTemporaryKey = 'token';
+        const locale = 'fr';
+        const domainOrg = 'pix.org';
+
+        const expectedOptions = {
+          from: senderEmailAddress,
           fromName: 'PIX - Ne pas répondre',
+          to: userEmailAddress,
           subject: 'Demande de réinitialisation de mot de passe PIX',
+          template: 'test-password-reset-template-id',
           variables: {
-            resetUrl: `${passwordResetDemandBaseUrl}/changer-mot-de-passe/${fakeTemporaryKey}`
+            resetUrl: `https://app.${domainOrg}/changer-mot-de-passe/${fakeTemporaryKey}`,
+            homeName: `${domainOrg}`,
+            homeUrl: `https://${domainOrg}`,
+            locale
           }
-        });
+        };
+
+        // when
+        await mailService.sendResetPasswordDemandEmail(userEmailAddress, locale, fakeTemporaryKey);
+
+        // then
+        expect(mailer.sendEmail).to.have.been.calledWithExactly(expectedOptions);
       });
     });
   });
 
   describe('#sendOrganizationInvitationEmail', () => {
 
-    it('should call Mailjet with pix-orga url, organization-invitation id and code', async () => {
-      // given
-      const email = 'user@organization.org';
-      const organizationName = 'Organization Name';
-      const pixOrgaBaseUrl = 'http://dev.pix-orga.fr';
-      const organizationInvitationId = 1;
-      const code = 'ABCDEFGH01';
+    const fromName = 'Pix Orga - Ne pas répondre';
 
-      // when
-      await mailService.sendOrganizationInvitationEmail({
-        email, organizationName, organizationInvitationId, code
+    const subject = 'Invitation à rejoindre Pix Orga';
+    const template = 'test-organization-invitation-demand-template-id';
+
+    const organizationName = 'Organization Name';
+    const pixHomeName = 'pix.fr';
+    const pixHomeUrl = 'https://pix.fr';
+    const pixOrgaUrl = 'https://orga.pix.fr';
+    const organizationInvitationId = 1;
+    const code = 'ABCDEFGH01';
+
+    context('When tags property is not provided', () => {
+
+      it('should call mail provider with pix-orga url, organization-invitation id, code and null tags', async () => {
+        // given
+        const expectedOptions = {
+          from: senderEmailAddress,
+          fromName,
+          to: userEmailAddress,
+          subject, template,
+          variables: {
+            organizationName,
+            pixHomeName,
+            pixHomeUrl,
+            pixOrgaHomeUrl: pixOrgaUrl,
+            locale: 'fr-fr',
+            redirectionUrl: `${pixOrgaUrl}/rejoindre?invitationId=${organizationInvitationId}&code=${code}`
+          },
+          tags: null
+        };
+
+        // when
+        await mailService.sendOrganizationInvitationEmail({
+          email: userEmailAddress, organizationName, organizationInvitationId, code
+        });
+
+        // then
+        expect(mailer.sendEmail).to.have.been.calledWithExactly(expectedOptions);
       });
 
-      // then
-      sinon.assert.calledWith(mailer.sendEmail, {
-        to: email,
-        template: 'test-organization-invitation-demand-template-id',
-        from: 'ne-pas-repondre@pix.fr',
-        fromName: 'Pix Orga - Ne pas répondre',
-        subject: 'Invitation à rejoindre Pix Orga',
-        variables: {
-          organizationName,
-          responseUrl: `${pixOrgaBaseUrl}/rejoindre?invitationId=${organizationInvitationId}&code=${code}`
-        }
+      it('should use locale pass in paramaters to construct url', async () => {
+        // given
+        const locale = 'fr';
+        const pixHomeName = 'pix.org';
+        const pixHomeUrl = 'https://pix.org';
+        const pixOrgaUrl = 'https://orga.pix.org';
+        const expectedOptions = {
+          from: senderEmailAddress,
+          fromName,
+          to: userEmailAddress,
+          subject, template,
+          variables: {
+            organizationName,
+            pixHomeName,
+            pixHomeUrl,
+            pixOrgaHomeUrl: pixOrgaUrl,
+            locale: 'fr',
+            redirectionUrl: `${pixOrgaUrl}/rejoindre?invitationId=${organizationInvitationId}&code=${code}`
+          },
+          tags: null
+        };
+
+        // when
+        await mailService.sendOrganizationInvitationEmail({
+          email: userEmailAddress, organizationName, organizationInvitationId, code, locale
+        });
+
+        // then
+        expect(mailer.sendEmail).to.have.been.calledWithExactly(expectedOptions);
+      });
+    });
+
+    context('When tags property is provided', () => {
+
+      it('should call mail provider with correct tags', async () => {
+        // given
+        const tags = ['JOIN_ORGA'];
+
+        const expectedOptions = {
+          from: senderEmailAddress,
+          fromName,
+          to: userEmailAddress,
+          subject, template,
+          variables: {
+            organizationName,
+            pixHomeName,
+            pixHomeUrl,
+            pixOrgaHomeUrl: pixOrgaUrl,
+            locale: 'fr-fr',
+            redirectionUrl: `${pixOrgaUrl}/rejoindre?invitationId=${organizationInvitationId}&code=${code}`
+          },
+          tags
+        };
+
+        // when
+        await mailService.sendOrganizationInvitationEmail({
+          email: userEmailAddress, organizationName, organizationInvitationId, code, tags
+        });
+
+        // then
+        expect(mailer.sendEmail).to.have.been.calledWithExactly(expectedOptions);
       });
     });
   });

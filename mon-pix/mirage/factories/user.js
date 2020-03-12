@@ -33,6 +33,7 @@ function _addDefaultScorecards(user, server) {
       competenceId: 'competence_1_1_id',
       index : `${areas[0].code}.1`,
       remainingDaysBeforeReset: 0,
+      remainingDaysBeforeImproving: 0,
       status: 'STARTED',
       tutorials: [tutorial],
     }));
@@ -47,6 +48,7 @@ function _addDefaultScorecards(user, server) {
       competenceId: 'competence_2_1_id',
       index : `${areas[1].code}.1`,
       remainingDaysBeforeReset: 5,
+      remainingDaysBeforeImproving: 0,
       status: 'STARTED',
     }));
     scorecards.push(server.create('scorecard', {
@@ -60,6 +62,7 @@ function _addDefaultScorecards(user, server) {
       competenceId: 'competence_2_2_id',
       index : `${areas[1].code}.2`,
       remainingDaysBeforeReset: null,
+      remainingDaysBeforeImproving: null,
       status: 'NOT_STARTED',
     }));
     scorecards.push(server.create('scorecard', {
@@ -73,6 +76,35 @@ function _addDefaultScorecards(user, server) {
       competenceId: 'competence_3_1_id',
       index : `${areas[1].code}.1`,
       remainingDaysBeforeReset: 0,
+      remainingDaysBeforeImproving: 0,
+      status: 'COMPLETED',
+    }));
+    scorecards.push(server.create('scorecard', {
+      id: `${user.id}_competence_4_1_id`,
+      name: 'Area_4_Competence_1_name',
+      description : 'Area_4_Competence_1_description',
+      earnedPix: 0,
+      level: 0,
+      pixScoreAheadOfNextLevel: 0,
+      area: areas[3],
+      competenceId: 'competence_4_1_id',
+      index : `${areas[3].code}.1`,
+      remainingDaysBeforeReset: 0,
+      remainingDaysBeforeImproving: 3,
+      status: 'COMPLETED',
+    }));
+    scorecards.push(server.create('scorecard', {
+      id: `${user.id}_competence_4_2_id`,
+      name: 'Area_4_Competence_2_name',
+      description : 'Area_4_Competence_2_description',
+      earnedPix: 0,
+      level: 0,
+      pixScoreAheadOfNextLevel: 0,
+      area: areas[3],
+      competenceId: 'competence_4_2_id',
+      index : `${areas[3].code}.2`,
+      remainingDaysBeforeReset: 0,
+      remainingDaysBeforeImproving: 0,
       status: 'COMPLETED',
     }));
     user.update({ scorecards });
@@ -84,6 +116,7 @@ function _createAreas(server) {
   areas.push(server.create('area', { code: 1, title: 'Area_1_title', color: 'jaffa' }));
   areas.push(server.create('area', { code: 2, title: 'Area_2_title', color: 'emerald' }));
   areas.push(server.create('area', { code: 3, title: 'Area_3_title', color: 'cerulean' }));
+  areas.push(server.create('area', { code: 4, title: 'Area_4_title', color: 'wild-strawberry' }));
   return areas;
 }
 
@@ -110,6 +143,9 @@ export default Factory.extend({
   cgu() {
     return false;
   },
+  shouldChangePassword: trait({
+    shouldChangePassword: true,
+  }),
   withEmail: trait({
     email: faker.internet.exampleEmail(),
     password: faker.internet.password(),
@@ -139,9 +175,39 @@ export default Factory.extend({
       user.update({ certificationProfile: server.create('certification-profile', { 'is-certifiable': false }) });
     }
   }),
+  withSomeCertificates: trait({
+    afterCreate(user, server) {
+      const rejectedCertificate = server.create('certification', {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        birthdate: '2000-01-01',
+        certificationCenter: 'Université de Pix',
+        commentForCandidate: 'Ceci est un commentaire jury à destination du candidat.',
+        date: new Date('2018-07-20T14:23:56Z'),
+        status: 'rejected',
+        pixScore: '50',
+        isPublished: true,
+        user,
+      });
+      const validatedCertificate = server.create('certification', {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        birthdate: '2000-01-01',
+        certificationCenter: 'Université de Pix',
+        commentForCandidate: 'Ceci est un commentaire jury à destination du candidat.',
+        date: new Date('2018-07-20T14:33:56Z'),
+        status: 'validated',
+        pixScore: '777',
+        isPublished: true,
+        user,
+      });
+      const certificates = [rejectedCertificate, validatedCertificate];
+      user.update({ certifications: certificates });
+    }
+  }),
   afterCreate(user, server) {
     _addDefaultCertificationProfile(user, server);
     _addDefaultScorecards(user, server);
     _addDefaultPixscore(user, server);
-  }
+  },
 });

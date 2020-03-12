@@ -1,8 +1,7 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 
-export default Component.extend({
-  classNames: ['user-certifications-detail-competence'],
-  competence: null,
-  levels: [1,2,3,4,5,6,7,8],
-
-});
+export default class UserCertificationsDetailCompetence extends Component {
+  get sortedCompetences() {
+    return this.args.area.resultCompetences.sortBy('index');
+  }
+}

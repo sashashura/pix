@@ -1,46 +1,52 @@
-import { on } from '@ember/object/evented';
-import { computed } from '@ember/object';
+/* eslint ember/no-classic-components: 0 */
+/* eslint ember/require-tagless-components: 0 */
+/* eslint ember/no-private-routing-service: 0 */
+/* eslint ember/require-computed-property-dependencies: 0 */
+
+import { classNames } from '@ember-decorators/component';
+import { action, computed } from '@ember/object';
+import { on } from '@ember-decorators/object';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
+import classic from 'ember-classic-decorator';
 import {
   EKMixin as EmberKeyboardMixin,
   keyDown
 } from 'ember-keyboard';
 
-import config from 'mon-pix/config/environment';
+@classic
+@classNames('logged-user-details')
+export default class UserLoggedMenu extends Component.extend(EmberKeyboardMixin) {
+  @service currentUser;
+  @service('-routing') routing;
 
-export default Component.extend(EmberKeyboardMixin, {
+  keyboardActivated = true;
+  _canDisplayMenu = false;
 
-  currentUser: service(),
-  routing: service('-routing'),
-
-  classNames: ['logged-user-details'],
-
-  keyboardActivated: true,
-  _canDisplayMenu: false,
-  showUserTutorialsInMenu: config.APP.SHOW_USER_TUTORIALS_IN_MENU,
-
-  canDisplayLinkToProfile: computed('routing.currentRouteName', function() {
-    const currentRouteName = this.get('routing.currentRouteName');
+  @computed('routing.currentRouteName')
+  get canDisplayLinkToProfile() {
+    const currentRouteName = this.routing.currentRouteName;
 
     return currentRouteName !== 'profile';
-  }),
-
-  displayedIdentifier: computed('currentUser.user.email', function() {
-    return this.currentUser.user.email ? this.currentUser.user.email : this.currentUser.user.username;
-  }),
-
-  closeOnEsc: on(keyDown('Escape'), function() {
-    this.set('_canDisplayMenu', false);
-  }),
-
-  actions: {
-    toggleUserMenu() {
-      this.toggleProperty('_canDisplayMenu');
-    },
-
-    closeMenu() {
-      this.set('_canDisplayMenu', false);
-    }
   }
-});
+
+  @computed('currentUser.user.email')
+  get displayedIdentifier() {
+    return this.currentUser.user.email ? this.currentUser.user.email : this.currentUser.user.username;
+  }
+
+  @on(keyDown('Escape'))
+  closeOnEsc() {
+    this.set('_canDisplayMenu', false);
+  }
+
+  @action
+  toggleUserMenu() {
+    this.toggleProperty('_canDisplayMenu');
+  }
+
+  @action
+  closeMenu() {
+    this.set('_canDisplayMenu', false);
+  }
+}
