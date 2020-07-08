@@ -1,12 +1,81 @@
-<div class="certification-list">
+<div class="certification-list content-text content-text--small">
+  <div class="table-admin">
+    <table>
+      <thead>
+      <tr>
+        <th>Id</th>
+        <th>Prénom</th>
+        <th>Nom</th>
+        <th>Statut</th>
+        <th>Score</th>
+        <th>Début</th>
+        <th>Fin</th>
+        <th>Publiée</th>
+      </tr>
+      <tr>
+        <th>
+          <input id="id"
+                 type="text"
+                 value={{@id}}
+                 oninput={{fn @triggerFiltering 'id'}}
+                 class="table-admin-input form-control" />
+        </th>
+        <th>
+          <input id="firstName"
+                 type="text"
+                 value={{@firstName}}
+                 oninput={{fn @triggerFiltering 'firstName'}}
+                 class="table-admin-input form-control" />
+        </th>
+        <th>
+          <input id="lastName"
+                 type="text"
+                 value={{@lastName}}
+                 oninput={{fn @triggerFiltering 'lastName'}}
+                 class="table-admin-input form-control" />
+        </th>
+        <th></th>
+        <th>
+          <input id="pixScore"
+                 type="text"
+                 value={{@pixScore}}
+                 oninput={{fn @triggerFiltering 'pixScore'}}
+                 class="table-admin-input form-control" />
+        </th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+      </thead>
 
-  <ModelsTable @data={{@certifications}}
-               @columns={{this.columns}}
-               @showColumnsDropdown={{false}}
-               @showGlobalFilter={{false}}
-               @useNumericPagination={{true}}
-               @multipleSelect={{true}}
-               @pageSize={{25}}
-               @pageSizeValues={{this.pageValues}} />
+      {{#if @certifications}}
+        <tbody>
+        {{#each @certifications as |certification|}}
+          <tr aria-label="Certification">
+            <td>
+              <LinkTo @route="authenticated.certifications.certification.informations" @model={{certification.id}}>{{certification.id}}</LinkTo>
+            </td>
+            <td>{{certification.firstName}}</td>
+            <td>{{certification.lastName}}</td>
+            <td>{{certification.status}}</td>
+            <td>{{certification.pixScore}}</td>
+            <td>{{certification.creationDate}}</td>
+            <td>{{certification.completionDate}}</td>
+            <td>
+              <CertificationInfoPublished @record={{certification}}/>
+            </td>
+          </tr>
+        {{/each}}
+        </tbody>
+      {{/if}}
+    </table>
 
+    {{#unless @certifications}}
+      <div class="table__empty content-text">Aucun résultat</div>
+    {{/unless}}
+  </div>
 </div>
+
+{{#if @certifications}}
+  <PaginationControl @pagination={{@certifications.meta}} />
+{{/if}}

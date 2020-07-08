@@ -115,32 +115,42 @@ module('Acceptance | Session pages', function(hooks) {
       });
     });
 
-    module('Certifications tab', function(hooks) {
-
-      let juryCertificationSummary;
+    module('Certifications tab', function() {
 
       hooks.beforeEach(async () => {
-        // given
-        juryCertificationSummary = server.create('jury-certification-summary', {
-          firstName: 'Anne',
-          lastName: 'Pix1',
-          isPublished: true,
-        });
-        session.update({ juryCertificationSummaries: [juryCertificationSummary] });
-
-        // when
-        await visit('/sessions/1/certifications');
+        server.createList('jury-certification-summary', 12);
       });
 
-      module('Certification section', function() {
+      test('it should display the current filter when jury certification summaries are filtered by firstName', async function(assert) {
+        // when
+        await visit(`/sessions/${session.id}/certifications?firstName=sav`);
 
-        test('it shows certifications informations', function(assert) {
-          // then
-          const circle = document.querySelector('.certification-list tbody tr td:last-child div svg circle');
-          assert.dom('.certification-list tbody tr td:nth-child(2)').hasText(juryCertificationSummary.firstName);
-          assert.dom('.certification-list tbody tr td:nth-child(3)').hasText(juryCertificationSummary.lastName);
-          assert.equal(circle.attributes.fill.value, '#39B97A');
-        });
+        // then
+        assert.dom('#firstName').hasValue('sav');
+      });
+
+      test('it should display the current filter when jury certification summaries are filtered by lastName', async function(assert) {
+        // when
+        await visit(`/sessions/${session.id}/certifications?lastName=tro`);
+
+        // then
+        assert.dom('#lastName').hasValue('tro');
+      });
+
+      test('it should display the current filter when jury certification summaries are filtered by email', async function(assert) {
+        // when
+        await visit(`/sessions/${session.id}/certifications?id=1`);
+
+        // then
+        assert.dom('#id').hasValue('1');
+      });
+
+      test('it should display the current filter when jury certification summaries are filtered by role', async function(assert) {
+        // when
+        await visit(`/sessions/${session.id}/certifications?pixScore=35`);
+
+        // then
+        assert.dom('#pixScore').hasValue('35');
       });
     });
   });

@@ -27,7 +27,14 @@
   </header>
 
   <div class="certification-list-page__body">
-    <CertificationList @certifications={{this.model.juryCertificationSummaries}} />
+    <CertificationList
+      @certifications={{this.model.juryCertificationSummaries}}
+      @firstName={{this.firstName}}
+      @lastName={{this.lastName}}
+      @id={{this.id}}
+      @pixScore={{this.pixScore}}
+      @triggerFiltering={{this.triggerFiltering}}
+    />
   </div>
 </div>
 

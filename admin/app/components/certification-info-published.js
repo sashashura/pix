@@ -11,4 +11,10 @@ export default class CertificationInfoPublished extends Component {
     const value = this.record.isPublished;
     return value ? '#39B97A' : '#8090A5';
   }
+
+  @computed('record.isPublished')
+  get label() {
+    const value = this.record.isPublished;
+    return value ? 'publiée' : 'non publiée';
+  }
 }
