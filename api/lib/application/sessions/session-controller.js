@@ -98,12 +98,13 @@ module.exports = {
     return null;
   },
 
-  async getJuryCertificationSummaries(request) {
+  async findPaginatedFilteredJuryCertificationSummaries(request) {
     const sessionId = request.params.id;
+    const { filter, page } = queryParamsUtils.extractParameters(request.query);
 
-    const juryCertificationSummaries = await juryCertificationSummaryRepository.findBySessionId(sessionId);
+    const juryCertificationSummariesForPaginatedList = await juryCertificationSummaryRepository.findPaginatedFilteredBySessionId({ sessionId, filter, page });
 
-    return juryCertificationSummarySerializer.serialize(juryCertificationSummaries);
+    return juryCertificationSummarySerializer.serializeForPaginatedList(juryCertificationSummariesForPaginatedList);
   },
 
   async getCertificationReports(request) {

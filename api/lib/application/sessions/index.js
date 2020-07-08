@@ -232,7 +232,7 @@ exports.register = async (server) => {
           method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster'
         }],
-        handler: sessionController.getJuryCertificationSummaries,
+        handler: sessionController.findPaginatedFilteredJuryCertificationSummaries,
         tags: ['api', 'sessions', 'jury-certification-summary'],
         notes: [
           'Cette route est restreinte aux utilisateurs ayant le rôle PIXMASTER',

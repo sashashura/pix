@@ -2,7 +2,12 @@ const { Serializer } = require('jsonapi-serializer');
 
 module.exports = {
 
-  serialize(juryCertificationSummary) {
+  serializeForPaginatedList(juryCertificationSummariesForPaginatedList) {
+    const { juryCertificationSummaries, pagination } = juryCertificationSummariesForPaginatedList;
+    return this.serialize(juryCertificationSummaries, pagination);
+  },
+
+  serialize(juryCertificationSummary, meta) {
     return new Serializer('jury-certification-summary', {
       attributes: [
         'firstName',
@@ -15,6 +20,7 @@ module.exports = {
         'examinerComment',
         'hasSeenEndTestScreen',
       ],
+      meta
     }).serialize(juryCertificationSummary);
   },
 };

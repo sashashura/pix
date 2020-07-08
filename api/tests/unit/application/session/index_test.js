@@ -25,7 +25,7 @@ describe('Unit | Application | Sessions | Routes', () => {
     sinon.stub(sessionController, 'getCertificationCandidates').returns('ok');
     sinon.stub(sessionController, 'addCertificationCandidate').returns('ok');
     sinon.stub(sessionController, 'deleteCertificationCandidate').returns('ok');
-    sinon.stub(sessionController, 'getJuryCertificationSummaries').returns('ok');
+    sinon.stub(sessionController, 'findPaginatedFilteredJuryCertificationSummaries').returns('ok');
     sinon.stub(sessionController, 'createCandidateParticipation').returns('ok');
     sinon.stub(sessionController, 'finalize').returns('ok');
     sinon.stub(sessionController, 'updatePublication').returns('ok');

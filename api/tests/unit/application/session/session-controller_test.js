@@ -295,7 +295,7 @@ describe('Unit | Controller | sessionController', () => {
 
   });
 
-  describe('#addCertificationCandidate ', () => {
+  describe('#addCertificationCandidate', () => {
     let request;
     const sessionId = 1;
     const certificationCandidate = 'candidate';
@@ -323,7 +323,7 @@ describe('Unit | Controller | sessionController', () => {
 
   });
 
-  describe('#deleteCertificationCandidate ', () => {
+  describe('#deleteCertificationCandidate', () => {
     let request;
     const sessionId = 1;
     const certificationCandidateId = 1;
@@ -346,32 +346,37 @@ describe('Unit | Controller | sessionController', () => {
 
   });
 
-  describe('#getJuryCertificationSummaries ', () => {
+  describe('#findPaginatedFilteredJuryCertificationSummaries', () => {
     let request;
     const sessionId = 1;
-    const juryCertificationSummaries = 'someSummaries';
-    const juryCertificationSummariesJSONAPI = 'someSummariesJSONApi';
+    const juryCertificationSummaries = Symbol('juryCertificationSummaries');
+    const serializedJuryCertificationSummariesForPaginatedList = Symbol('serializedJurySessionsForPaginatedList');
+    const filter = Symbol('filter');
+    const page = Symbol('page');
 
     beforeEach(() => {
       // given
       request = {
         params: { id : sessionId },
+        query: {},
         auth: {
           credentials : {
             userId,
           }
         },
       };
-      sinon.stub(juryCertificationSummaryRepository, 'findBySessionId').withArgs(sessionId).resolves(juryCertificationSummaries);
-      sinon.stub(juryCertificationSummarySerializer, 'serialize').withArgs(juryCertificationSummaries).returns(juryCertificationSummariesJSONAPI);
+      sinon.stub(queryParamsUtils, 'extractParameters').withArgs(request.query).returns({ filter, page });
+
+      sinon.stub(juryCertificationSummaryRepository, 'findPaginatedFilteredBySessionId').withArgs({ sessionId, filter, page }).resolves(juryCertificationSummaries);
+      sinon.stub(juryCertificationSummarySerializer, 'serializeForPaginatedList').withArgs(juryCertificationSummaries).returns(serializedJuryCertificationSummariesForPaginatedList);
     });
 
     it('should return jury certification summaries', async () => {
       // when
-      const response = await sessionController.getJuryCertificationSummaries(request, hFake);
+      const response = await sessionController.findPaginatedFilteredJuryCertificationSummaries(request, hFake);
 
       // then
-      expect(response).to.deep.equal(juryCertificationSummariesJSONAPI);
+      expect(response).to.deep.equal(serializedJuryCertificationSummariesForPaginatedList);
     });
 
   });
