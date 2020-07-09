@@ -56,7 +56,7 @@ function _toDomain(juryCertificationSummaryFromDB) {
 }
 
 function _setupFilters(query, filters) {
-  const { id, firstName, lastName, pixScore } = filters;
+  const { id, firstName, lastName, pixScore, status } = filters;
 
   if (id) {
     query.whereRaw('CAST(id as TEXT) LIKE ?', `%${id.toString().toLowerCase()}%`);
@@ -69,6 +69,9 @@ function _setupFilters(query, filters) {
   }
   if (pixScore) {
     query.whereRaw('CAST("pixScore" as TEXT) LIKE ?', `%${pixScore.toString().toLowerCase()}%`);
+  }
+  if (status) {
+    query.where('status', status.toLowerCase());
   }
 }
 

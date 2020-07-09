@@ -194,6 +194,23 @@ describe('Integration | Repository | JuryCertificationSummary', function() {
           expect(result.pagination.rowCount).to.equal(1);
         });
       });
+
+      context('when status filter asked', () => {
+
+        it('should return JuryCertificationSummaries filter by status', async () => {
+          // given
+          const filter = { status: 'VALIDATED' };
+          const page = {};
+
+          // when
+          const result = await juryCertificationSummaryRepository.findPaginatedFilteredBySessionId({ sessionId, filter, page });
+
+          // then
+          expect(result.juryCertificationSummaries.length).to.equal(1);
+          expect(result.juryCertificationSummaries[0].status).to.equal('validated');
+          expect(result.pagination.rowCount).to.equal(1);
+        });
+      });
     });
 
     context('when no pagination has been asked', () => {

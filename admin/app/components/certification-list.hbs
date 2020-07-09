@@ -3,48 +3,55 @@
     <table>
       <thead>
       <tr>
-        <th>Id</th>
-        <th>Prénom</th>
-        <th>Nom</th>
-        <th>Statut</th>
-        <th>Score</th>
-        <th>Début</th>
-        <th>Fin</th>
-        <th>Publiée</th>
+        <th class="table__column">Id</th>
+        <th class="table__column">Prénom</th>
+        <th class="table__column">Nom</th>
+        <th class="table__column">Statut</th>
+        <th class="table__column">Score</th>
+        <th class="table__column">Début</th>
+        <th class="table__column">Fin</th>
+        <th class="table__column">Publiée</th>
       </tr>
       <tr>
-        <th>
+        <th class="table__column">
           <input id="id"
                  type="text"
                  value={{@id}}
                  oninput={{fn @triggerFiltering 'id'}}
                  class="table-admin-input form-control" />
         </th>
-        <th>
+        <th class="table__column">
           <input id="firstName"
                  type="text"
                  value={{@firstName}}
                  oninput={{fn @triggerFiltering 'firstName'}}
                  class="table-admin-input form-control" />
         </th>
-        <th>
+        <th class="table__column">
           <input id="lastName"
                  type="text"
                  value={{@lastName}}
                  oninput={{fn @triggerFiltering 'lastName'}}
                  class="table-admin-input form-control" />
         </th>
-        <th></th>
-        <th>
+        <th class="table__column">
+          <select id="status" class="table-admin-input form-control" {{on 'change' this.selectStatus}} aria-label="Rechercher par status">
+            <option value="">Tous</option>
+            <option value="VALIDATED" selected={{eq @status "VALIDATED"}}>validated</option>
+            <option value="REJECTED" selected={{eq @status "REJECTED"}}>rejected</option>
+            <option value="STARTED" selected={{eq @status "STARTED"}}>started</option>
+          </select>
+        </th>
+        <th class="table__column">
           <input id="pixScore"
                  type="text"
                  value={{@pixScore}}
                  oninput={{fn @triggerFiltering 'pixScore'}}
                  class="table-admin-input form-control" />
         </th>
-        <th></th>
-        <th></th>
-        <th></th>
+        <th class="table__column"></th>
+        <th class="table__column"></th>
+        <th class="table__column"></th>
       </tr>
       </thead>
 

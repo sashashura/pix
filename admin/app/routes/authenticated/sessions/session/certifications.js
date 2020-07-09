@@ -8,6 +8,7 @@ export default class SessionCertificationsRoute extends Route {
     firstName: { refreshModel: true },
     lastName: { refreshModel: true },
     pixScore: { refreshModel: true },
+    status: { refreshModel: true },
   };
 
   async model(params) {
@@ -19,6 +20,7 @@ export default class SessionCertificationsRoute extends Route {
       'filter[lastName]': params.lastName,
       'filter[id]': params.id,
       'filter[pixScore]': params.pixScore,
+      'filter[status]': params.status,
     } });
     return session;
   }
@@ -31,6 +33,7 @@ export default class SessionCertificationsRoute extends Route {
       controller.firstName = null;
       controller.lastName = null;
       controller.pixScore = null;
+      controller.status = null;
     }
   }
 }

@@ -10,7 +10,7 @@ import config from 'pix-admin/config/environment';
 const DEFAULT_PAGE_NUMBER = 1;
 
 export default class ListController extends Controller {
-  queryParams = ['pageNumber', 'pageSize', 'id', 'firstName', 'lastName', 'pixScore'];
+  queryParams = ['pageNumber', 'pageSize', 'id', 'firstName', 'lastName', 'pixScore', 'status'];
   DEBOUNCE_MS = config.pagination.debounce;
 
   @service notifications;
@@ -24,6 +24,7 @@ export default class ListController extends Controller {
   @tracked firstName = null;
   @tracked lastName = null;
   @tracked pixScore = null;
+  @tracked status = null;
   pendingFilters = {};
 
   @computed('model.juryCertificationSummaries.@each.status')
@@ -39,6 +40,11 @@ export default class ListController extends Controller {
     const value = event.target.value;
     this.pendingFilters[fieldName] = value;
     debounce(this, this.updateFilters, this.DEBOUNCE_MS);
+  }
+
+  @action
+  selectStatusForSearch(selectedStatus) {
+    this.status = selectedStatus;
   }
 
   @action
