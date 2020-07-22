@@ -9,10 +9,9 @@ const secondKECreatedAt = new Date('2020-05-02');
 const participationSharedAt = new Date('2020-05-03');
 let lowRAMMode = false;
 let progression = 0;
-function _logProgression(totalCount) {
-  ++progression;
-  process.stdout.cursorTo(0);
-  process.stdout.write(`${Math.round(progression * 100 / totalCount, 2)} %`);
+
+module.exports = {
+  _do
 }
 
 function _resetProgression() {
@@ -251,7 +250,6 @@ async function _createAnswersAndKnowledgeElements({ targetProfile, userAndAssess
       });
     }
     knowledgeElementData.push(knowledgeElementDataForOneSkill);
-    _logProgression(targetProfile.skills.length);
   }
   _resetProgression();
   console.log('\t\tOK');
@@ -262,7 +260,6 @@ async function _createAnswersAndKnowledgeElements({ targetProfile, userAndAssess
   for (const chunk of chunkedKnowledgeElements) {
     await trx('knowledge-elements').insert(chunk);
     totalKeCount = totalKeCount + chunk.length;
-    _logProgression(chunkedKnowledgeElements.length);
   }
   console.log('\t\tOK');
   console.log(`\t${totalKeCount} knowledge-elements créés`);
