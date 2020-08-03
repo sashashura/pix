@@ -5,7 +5,6 @@
   font-size: 0.875rem;
 
   &--open {
-    margin-left: 16px;
     color: $grey-100;
     font-weight: 700;
   }
@@ -40,6 +39,7 @@
     font-weight: 400;
     font-family: $open-sans;
     font-size: 1rem;
+    margin-top: 0;
   }
 }
 
