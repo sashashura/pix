@@ -8,7 +8,7 @@ module.exports = {
         record.targetProfiles = [];
         return record;
       },
-      attributes: ['name', 'type', 'logoUrl', 'externalId', 'provinceCode', 'isManagingStudents', 'credit', 'canCollectProfiles', 'email', 'memberships', 'students', 'targetProfiles'],
+      attributes: ['areNewYearStudentsImported', 'name', 'type', 'logoUrl', 'externalId', 'provinceCode', 'isManagingStudents', 'credit', 'canCollectProfiles', 'email', 'memberships', 'students', 'targetProfiles'],
       memberships: {
         ref: 'id',
         ignoreRelationshipData: true,

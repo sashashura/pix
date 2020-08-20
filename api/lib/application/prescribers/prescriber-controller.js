@@ -8,6 +8,6 @@ module.exports = {
     const authenticatedUserId = request.auth.credentials.userId;
 
     return usecases.getPrescriber({ userId: authenticatedUserId })
-      .then((prescriber) => prescriberSerializer.serialize(prescriber));
+      .then((prescriber) => console.log(JSON.stringify(prescriberSerializer.serialize(prescriber).memberships, undefined, 2)) || prescriberSerializer.serialize(prescriber));
   }
 };

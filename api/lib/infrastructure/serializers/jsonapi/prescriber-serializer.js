@@ -6,17 +6,23 @@ module.exports = {
     return new Serializer('prescriber', {
 
       transform: (record) => {
-        record.userOrgaSettings.organization = { ...record.userOrgaSettings.currentOrganization };
-        record.userOrgaSettings.organization.targetProfiles = [];
-        record.userOrgaSettings.organization.memberships = [];
-        record.userOrgaSettings.organization.students = [];
-        record.userOrgaSettings.organization.organizationInvitations = [];
+        const recordWithoutClass = { ...record };
+        recordWithoutClass.userOrgaSettings = { ...recordWithoutClass.userOrgaSettings };
+        recordWithoutClass.userOrgaSettings.organization = { ...recordWithoutClass.userOrgaSettings.currentOrganization };
+        recordWithoutClass.userOrgaSettings.organization.targetProfiles = [];
+        recordWithoutClass.userOrgaSettings.organization.memberships = [];
+        recordWithoutClass.userOrgaSettings.organization.students = [];
+        recordWithoutClass.userOrgaSettings.organization.organizationInvitations = [];
 
-        record.memberships.forEach((membership) => {
-          membership.organization = { ...membership.organization };
+        delete recordWithoutClass.userOrgaSettings.currentOrganization;
+
+        recordWithoutClass.memberships = recordWithoutClass.memberships.map((membership) => ({ ...membership }));
+        recordWithoutClass.memberships.forEach((membership) => {
+          membership.organization = { ...membership.organization, areNewYearStudentsImported: false };
         });
 
-        return record;
+          console.log(recordWithoutClass)
+        return recordWithoutClass;
       },
 
       attributes: [
@@ -28,7 +34,7 @@ module.exports = {
         attributes: ['organizationRole', 'organization'],
         organization: {
           ref: 'id',
-          attributes: ['name', 'externalId', 'areNewYearStudentsImported', 'isManagingStudents', 'canCollectProfiles'],
+          attributes: ['name', 'externalId'],
         },
       },
       userOrgaSettings: {
@@ -36,7 +42,7 @@ module.exports = {
         attributes: ['organization', 'user'],
         organization: {
           ref: 'id',
-          attributes: ['name', 'type', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
+          attributes: ['name', 'type', 'areNewYearStudentsImported', 'isManagingStudents', 'canCollectProfiles', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
           memberships: {
             ref: 'id',
             ignoreRelationshipData: true,
