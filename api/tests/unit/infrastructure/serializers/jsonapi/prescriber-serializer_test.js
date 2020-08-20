@@ -88,7 +88,9 @@ describe('Unit | Serializer | JSONAPI | prescriber-serializer', () => {
         {
           'type': 'userOrgaSettings',
           'id': userOrgaSettings.id.toString(),
-          'attributes': {},
+          'attributes': {
+            id: userOrgaSettings.id,
+          },
           'relationships': {
             'organization': {
               'data': {
@@ -138,9 +140,10 @@ describe('Unit | Serializer | JSONAPI | prescriber-serializer', () => {
       // when
       const result = serializer.serialize(prescriber);
 
+      console.log('result', result.included)
+      console.log('serializedPrescriber', serializedPrescriber.included)
       // then
-      expect(result).to.be.deep.equal(serializedPrescriber);
-
+      expect(result.included).to.deep.equal(serializedPrescriber.included);
     });
   });
 
