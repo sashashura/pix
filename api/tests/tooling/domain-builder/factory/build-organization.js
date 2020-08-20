@@ -37,12 +37,13 @@ function buildOrganization(
     isManagingStudents = false,
     credit = 500,
     canCollectProfiles = false,
+    areNewYearStudentsImported = false,
     email = faker.internet.exampleEmail(),
     createdAt = new Date('2018-01-12T01:02:03Z'),
     memberships = [],
     targetProfileShares = []
   } = {}) {
-  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, email, canCollectProfiles, createdAt, memberships, targetProfileShares });
+  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, email, canCollectProfiles, areNewYearStudentsImported, createdAt, memberships, targetProfileShares });
 }
 
 buildOrganization.withMembers = function(
@@ -56,6 +57,7 @@ buildOrganization.withMembers = function(
     isManagingStudents = false,
     credit = 500,
     canCollectProfiles = false,
+    areNewYearStudentsImported = false,
     createdAt = new Date('2018-01-12T01:02:03Z'),
     members = [
       _buildMember({ id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com' }),
@@ -63,7 +65,7 @@ buildOrganization.withMembers = function(
     ]
   } = {}
 ) {
-  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, canCollectProfiles, createdAt, members });
+  return new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, canCollectProfiles,areNewYearStudentsImported, createdAt, members });
 };
 
 buildOrganization.withSchoolingRegistrations = function(
@@ -77,11 +79,12 @@ buildOrganization.withSchoolingRegistrations = function(
     isManagingStudents = true,
     credit = 500,
     canCollectProfiles = false,
+    areNewYearStudentsImported = false,
     createdAt = new Date('2018-01-12T01:02:03Z'),
     students = []
   } = {}
 ) {
-  const organization = new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, canCollectProfiles, createdAt, students });
+  const organization = new Organization({ id, name, type, logoUrl, externalId, provinceCode, isManagingStudents, credit, canCollectProfiles, areNewYearStudentsImported, createdAt, students });
 
   organization.students = [
     _buildSchoolingRegistration({ id: 1, lastName: 'Doe', firstName: 'John', organization }),

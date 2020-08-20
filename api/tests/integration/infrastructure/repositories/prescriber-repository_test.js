@@ -138,6 +138,39 @@ describe('Integration | Infrastructure | Repository | Prescriber', () => {
       // then
       expect(foundPrescriber).to.be.an.instanceOf(Prescriber);
     });
-  });
 
+    context('when there is a schooling registration after the date', () => {
+      it('should return areNewYearStudentsImported to true', async () => {
+        // given
+        const createdAt = new Date('2020-08-16');
+
+        databaseBuilder.factory.buildSchoolingRegistration({ organizationId: organization.id, createdAt });
+
+        await databaseBuilder.commit();
+
+        // when 
+        const foundPrescriber = await prescriberRepository.getPrescriber(user.id);
+
+        // then
+        expect(foundPrescriber.userOrgaSettings.currentOrganization.areNewYearStudentsImported).to.be.true;
+      });
+    });
+
+    context('when there is a schooling registration before the date', () => {
+      it('should return areNewYearStudentsImported to false', async () => {
+        // given
+        const createdAt = new Date('2020-08-15');
+
+        databaseBuilder.factory.buildSchoolingRegistration({ organizationId: organization.id, createdAt });
+
+        await databaseBuilder.commit();
+
+        // when 
+        const foundPrescriber = await prescriberRepository.getPrescriber(user.id);
+
+        // then
+        expect(foundPrescriber.userOrgaSettings.currentOrganization.areNewYearStudentsImported).to.be.false;
+      });
+    });
+  });
 });

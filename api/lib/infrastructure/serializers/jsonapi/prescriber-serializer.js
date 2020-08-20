@@ -6,18 +6,17 @@ module.exports = {
     return new Serializer('prescriber', {
 
       transform: (record) => {
-        const recordWithoutClass = { ... record };
-        recordWithoutClass.memberships.forEach((membership) => {
-          membership.organization = { ... membership.organization };
-          membership.organization.targetProfiles = [];
-          membership.organization.memberships = [];
-          membership.organization.students = [];
-          membership.organization.organizationInvitations = [];
-        });
-        recordWithoutClass.userOrgaSettings.organization = { ... recordWithoutClass.userOrgaSettings.currentOrganization };
-        delete recordWithoutClass.userOrgaSettings.currentOrganization;
+        record.userOrgaSettings.organization = { ...record.userOrgaSettings.currentOrganization };
+        record.userOrgaSettings.organization.targetProfiles = [];
+        record.userOrgaSettings.organization.memberships = [];
+        record.userOrgaSettings.organization.students = [];
+        record.userOrgaSettings.organization.organizationInvitations = [];
 
-        return recordWithoutClass;
+        record.memberships.forEach((membership) => {
+          membership.organization = { ...membership.organization };
+        });
+
+        return record;
       },
 
       attributes: [
@@ -29,7 +28,15 @@ module.exports = {
         attributes: ['organizationRole', 'organization'],
         organization: {
           ref: 'id',
-          attributes: ['code', 'name', 'type', 'isManagingStudents', 'canCollectProfiles', 'externalId', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
+          attributes: ['name', 'externalId', 'areNewYearStudentsImported', 'isManagingStudents', 'canCollectProfiles'],
+        },
+      },
+      userOrgaSettings: {
+        ref: 'id',
+        attributes: ['organization', 'user'],
+        organization: {
+          ref: 'id',
+          attributes: ['name', 'type', 'targetProfiles', 'memberships', 'students', 'organizationInvitations'],
           memberships: {
             ref: 'id',
             ignoreRelationshipData: true,
@@ -66,14 +73,6 @@ module.exports = {
               }
             }
           },
-        },
-      },
-      userOrgaSettings: {
-        ref: 'id',
-        attributes: ['organization', 'user'],
-        organization: {
-          ref: 'id',
-          attributes: ['name', 'type'],
         },
       },
     }).serialize(prescriber);

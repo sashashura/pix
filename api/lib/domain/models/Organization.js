@@ -18,6 +18,7 @@ class Organization {
     credit,
     canCollectProfiles,
     email,
+    areNewYearStudentsImported,
     // includes
     memberships = [],
     targetProfileShares = [],
@@ -36,6 +37,7 @@ class Organization {
     this.credit = credit;
     this.canCollectProfiles = canCollectProfiles;
     this.email = email;
+    this.areNewYearStudentsImported = areNewYearStudentsImported;
     // includes
     this.memberships = memberships;
     this.targetProfileShares = targetProfileShares;

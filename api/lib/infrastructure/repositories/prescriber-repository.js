@@ -7,6 +7,7 @@ const Organization = require('../../domain/models/Organization');
 
 function _toPrescriberDomain(bookshelfUser) {
   const { id, firstName, lastName, pixOrgaTermsOfServiceAccepted } = bookshelfUser.toJSON();
+
   return new Prescriber({
     id,
     firstName,
@@ -38,6 +39,8 @@ function _toMembershipsDomain(membershipsBookshelf) {
 
 function _toUserOrgaSettingsDomain(userOrgaSettingsBookshelf) {
   const { id, code, name, type, isManagingStudents, canCollectProfiles, externalId } = userOrgaSettingsBookshelf.related('currentOrganization').attributes;
+  const userOrgaSettings = userOrgaSettingsBookshelf.related('currentOrganization');
+  const areNewYearStudentsImported = userOrgaSettings.related('schoolingRegistrations') && userOrgaSettings.related('schoolingRegistrations').length > 0 ;
   return new UserOrgaSettings({
     id: userOrgaSettingsBookshelf.get('id'),
     currentOrganization: new Organization({
@@ -47,7 +50,8 @@ function _toUserOrgaSettingsDomain(userOrgaSettingsBookshelf) {
       type,
       isManagingStudents: Boolean(isManagingStudents),
       canCollectProfiles: Boolean(canCollectProfiles),
-      externalId
+      externalId,
+      areNewYearStudentsImported
     }),
   });
 }
@@ -65,6 +69,7 @@ module.exports = {
             'memberships.organization',
             'userOrgaSettings',
             'userOrgaSettings.currentOrganization',
+            { 'userOrgaSettings.currentOrganization.schoolingRegistrations': (qb) => qb.where('createdAt', '>', new Date('2020-08-15')) }
           ] });
       return _toPrescriberDomain(prescriber);
     } catch (err) {

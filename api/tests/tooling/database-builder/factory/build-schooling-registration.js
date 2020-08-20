@@ -29,6 +29,7 @@ module.exports = function buildSchoolingRegistration({
   diploma = faker.name.jobType(),
   organizationId,
   userId,
+  createdAt,
 } = {}) {
   organizationId = _.isUndefined(organizationId) ? buildOrganization().id : organizationId;
   userId = _.isUndefined(userId) ? buildUser().id : userId;
@@ -57,6 +58,7 @@ module.exports = function buildSchoolingRegistration({
     diploma,
     organizationId,
     userId,
+    createdAt
   };
 
   return databaseBuffer.pushInsertable({

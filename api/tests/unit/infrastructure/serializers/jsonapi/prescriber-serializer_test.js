@@ -5,138 +5,142 @@ const Membership = require('../../../../../lib/domain/models/Membership');
 
 describe('Unit | Serializer | JSONAPI | prescriber-serializer', () => {
 
-  function createExpectedPrescriberSerialized({ prescriber, membership, userOrgaSettings, organization }) {
-    return {
-      data: {
-        id: prescriber.id.toString(),
-        type: 'prescribers',
-        attributes: {
-          'first-name': prescriber.firstName,
-          'last-name': prescriber.lastName,
-          'pix-orga-terms-of-service-accepted': prescriber.pixOrgaTermsOfServiceAccepted,
-        },
-        relationships: {
-          memberships: {
-            data: [{
-              id: membership.id.toString(),
-              type: 'memberships'
-            }]
-          },
-          'user-orga-settings': {
-            data: {
-              id: userOrgaSettings.id.toString(),
-              type: 'userOrgaSettings'
-            }
-          }
-        }
-      },
-      included: [
-        {
-          id: organization.id.toString(),
-          type: 'organizations',
-          attributes: {
-            'can-collect-profiles': organization.canCollectProfiles,
-            'external-id': organization.externalId,
-            'is-managing-students': organization.isManagingStudents,
-            'name': organization.name,
-            'type': organization.type,
-          },
-          relationships: {
-            memberships: {
-              links: {
-                related: `/api/organizations/${organization.id}/memberships`
-              }
-            },
-            'organization-invitations': {
-              links: {
-                related: `/api/organizations/${organization.id}/invitations`
-              }
-            },
-            students: {
-              links: {
-                related: `/api/organizations/${organization.id}/students`
-              }
-            },
-            'target-profiles': {
-              links: {
-                related: `/api/organizations/${organization.id}/target-profiles`
-              }
-            }
-          }
-        },
-        {
-          id: membership.id.toString(),
-          type: 'memberships',
-          attributes: {
-            'organization-role': membership.organizationRole,
-          },
-          relationships: {
-            organization: {
-              data: {
-                id: organization.id.toString(),
-                type: 'organizations'
-              }
-            }
-          }
-        },
-        {
-          id: userOrgaSettings.id.toString(),
-          type: 'userOrgaSettings',
-          attributes: {
-            user: null
-          },
-          relationships: {
-            organization: {
-              data: null
-            }
-          }
-        }
-      ]
-    };
-  }
+  describe.only('#serialize', () => {
 
-  describe('#serialize', () => {
+    let organization;
+    let user;
+    let membership;
+    let userOrgaSettings;
+    let serializedPrescriber;
 
-    it('should return a JSON API serialized prescriber', () => {
-      // given
-      const user = domainBuilder.buildUser({
+    beforeEach(() => {
+      organization = domainBuilder.buildOrganization();
+      user = domainBuilder.buildUser({
         pixOrgaTermsOfServiceAccepted: true,
         memberships: [],
         certificationCenterMemberships: [],
       });
 
-      const organization = domainBuilder.buildOrganization();
-
-      const membership = domainBuilder.buildMembership({
+      membership = domainBuilder.buildMembership({
         organization,
         organizationRole: Membership.roles.MEMBER,
         user
       });
 
       user.memberships.push(membership);
-
       organization.memberships.push(membership);
 
-      const userOrgaSettings = domainBuilder.buildUserOrgaSettings({
-        currentOrganization: {},
+      userOrgaSettings = domainBuilder.buildUserOrgaSettings({
+        currentOrganization: organization,
       });
-      userOrgaSettings.user = null;
+      delete userOrgaSettings.user;
 
+      serializedPrescriber = {
+        'included': [{
+          'type': 'organizations',
+          'id': organization.id.toString(),
+          'attributes': {
+            'name': organization.name,
+            'type': organization.type,
+            'is-managing-students': organization.isManagingStudents,
+            'can-collect-profiles': organization.canCollectProfiles,
+            'external-id': organization.externalId,
+            'are-new-year-students-imported': organization.areNewYearStudentsImported
+          },
+          'relationships': {
+            'target-profiles': {
+              'links': {
+                'related': `/api/organizations/${organization.id}/target-profiles`
+              }
+            },
+            'memberships': {
+              'links': {
+                'related': `/api/organizations/${organization.id}/memberships`
+              }
+            },
+            'students': {
+              'links': {
+                'related': `/api/organizations/${organization.id}/students`
+              }
+            },
+            'organization-invitations': {
+              'links': {
+                'related': `/api/organizations/${organization.id}/invitations`
+              }
+            }
+          }
+        },
+        {
+          'type': 'memberships',
+          'id': membership.id.toString(),
+          'attributes': {
+            'organization-role': membership.organizationRole
+          },
+          'relationships': {
+            'organization': {
+              'data': {
+                'type': 'organizations',
+                'id': organization.id.toString()
+              }
+            }
+          }
+        },
+        {
+          'type': 'userOrgaSettings',
+          'id': userOrgaSettings.id.toString(),
+          'attributes': {},
+          'relationships': {
+            'organization': {
+              'data': {
+                'type': 'organizations',
+                'id': organization.id.toString()
+              }
+            }
+          }
+        }],
+        'data': {
+          'type': 'prescribers',
+          'id': user.id.toString(),
+          'attributes': {
+            'first-name': user.firstName,
+            'last-name': user.lastName,
+            'pix-orga-terms-of-service-accepted': user.pixOrgaTermsOfServiceAccepted
+          },
+          'relationships': {
+            'memberships': {
+              'data': [{
+                'type': 'memberships',
+                'id': membership.id.toString()
+              }]
+            },
+            'user-orga-settings': {
+              'data': {
+                'type': 'userOrgaSettings',
+                'id': userOrgaSettings.id.toString()
+              }
+            }
+          }
+        }
+      };
+    });
+
+    it('should return a JSON API serialized prescriber', () => {
+      // given
       const prescriber = domainBuilder.buildPrescriber({
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
-        pixOrgaTermsOfServiceAccepted:  user.pixOrgaTermsOfServiceAccepted,
+        pixOrgaTermsOfServiceAccepted: user.pixOrgaTermsOfServiceAccepted,
         memberships: [membership],
         userOrgaSettings
       });
-
-      const expectedPrescriberSerialized = createExpectedPrescriberSerialized({ prescriber, membership, userOrgaSettings, organization });
 
       // when
       const result = serializer.serialize(prescriber);
 
       // then
-      expect(result).to.be.deep.equal(expectedPrescriberSerialized);
+      expect(result).to.be.deep.equal(serializedPrescriber);
+
     });
   });
 
