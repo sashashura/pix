@@ -37,7 +37,7 @@ module.exports = {
 
       const userCompetence = _getUserCompetenceByChallengeCompetenceId(placementProfile.userCompetences, challenge);
 
-      if (!userCompetence || !userCompetence.isCertifiable()) {
+      if (!userCompetence.isCertifiable()) {
         return;
       }
 
