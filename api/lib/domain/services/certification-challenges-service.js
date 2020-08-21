@@ -23,12 +23,12 @@ module.exports = {
     const challengeIdsCorrectlyAnswered = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
 
     const allChallenges = await challengeRepository.findFrenchFranceOperative();
-    const challengesAlreadyAnswered = _(challengeIdsCorrectlyAnswered).map((challengeId) => Challenge.findById(allChallenges, challengeId)).value();
+    const challengesAlreadyAnswered = _(challengeIdsCorrectlyAnswered)
+      .map((challengeId) => Challenge.findById(allChallenges, challengeId))
+      .compact()
+      .value();
 
     challengesAlreadyAnswered.forEach((challenge) => {
-      if (!challenge) {
-        return;
-      }
 
       const userCompetence = _getUserCompetenceByChallengeCompetenceId(placementProfile.userCompetences, challenge);
 
