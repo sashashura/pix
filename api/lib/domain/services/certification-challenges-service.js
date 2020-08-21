@@ -8,6 +8,7 @@ const KnowledgeElement = require('../models/KnowledgeElement');
 const UserCompetence = require('../models/UserCompetence');
 const Challenge = require('../models/Challenge');
 const challengeRepository = require('../../infrastructure/repositories/challenge-repository');
+const competenceRepository = require('../../infrastructure/repositories/competence-repository');
 const answerRepository = require('../../infrastructure/repositories/answer-repository');
 const knowledgeElementRepository = require('../../infrastructure/repositories/knowledge-element-repository');
 
@@ -23,9 +24,13 @@ module.exports = {
     const challengeIdsCorrectlyAnswered = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
 
     const allChallenges = await challengeRepository.findFrenchFranceOperative();
+    const pixCompetences = await competenceRepository.listPixCompetencesOnly();
+    const pixCompetenceIds = pixCompetences.map((pixCompetence) => pixCompetence.id);
+
     const challengesAlreadyAnswered = _(challengeIdsCorrectlyAnswered)
       .map((challengeId) => Challenge.findById(allChallenges, challengeId))
       .compact()
+      .filter((challenge) => pixCompetenceIds.includes(challenge.competenceId))
       .value();
 
     challengesAlreadyAnswered.forEach((challenge) => {
