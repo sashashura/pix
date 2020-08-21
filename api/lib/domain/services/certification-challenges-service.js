@@ -27,13 +27,13 @@ module.exports = {
     const pixCompetences = await competenceRepository.listPixCompetencesOnly();
     const pixCompetenceIds = pixCompetences.map((pixCompetence) => pixCompetence.id);
 
-    const challengesAlreadyAnswered = _(challengeIdsCorrectlyAnswered)
+    const pixOperativeChallengesCorrectlyAnswered = _(challengeIdsCorrectlyAnswered)
       .map((challengeId) => Challenge.findById(allChallenges, challengeId))
       .compact()
       .filter((challenge) => pixCompetenceIds.includes(challenge.competenceId))
       .value();
 
-    challengesAlreadyAnswered.forEach((challenge) => {
+    pixOperativeChallengesCorrectlyAnswered.forEach((challenge) => {
 
       const userCompetence = _getUserCompetenceByChallengeCompetenceId(placementProfile.userCompetences, challenge);
 
@@ -53,7 +53,7 @@ module.exports = {
       userCompetence.skills.forEach((skill) => {
         if (!_hasCompetenceEnoughCertificationChallenges(userCompetence.id, certificationChallengesByCompetence)) {
           const challengesToValidateCurrentSkill = Challenge.findBySkill({ challenges: allChallenges, skill });
-          const challengesLeftToAnswer = _.difference(challengesToValidateCurrentSkill, challengesAlreadyAnswered);
+          const challengesLeftToAnswer = _.difference(challengesToValidateCurrentSkill, pixOperativeChallengesCorrectlyAnswered);
 
           const challengesPoolToPickChallengeFrom = (_.isEmpty(challengesLeftToAnswer)) ? challengesToValidateCurrentSkill : challengesLeftToAnswer;
           const challenge = _.sample(challengesPoolToPickChallengeFrom);
