@@ -23,7 +23,7 @@ module.exports = {
     const challengeIdsCorrectlyAnswered = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
 
     const allChallenges = await challengeRepository.findFrenchFranceOperative();
-    const challengesAlreadyAnswered = _.map(challengeIdsCorrectlyAnswered, (challengeId) => Challenge.findById(allChallenges, challengeId));
+    const challengesAlreadyAnswered = _(challengeIdsCorrectlyAnswered).map((challengeId) => Challenge.findById(allChallenges, challengeId)).value();
 
     challengesAlreadyAnswered.forEach((challenge) => {
       if (!challenge) {
