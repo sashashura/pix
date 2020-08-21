@@ -84,7 +84,7 @@ function _addUniqueCertificationChallengeForCompetence(certificationChallengesBy
 }
 
 function _getUserCompetenceByChallengeCompetenceId(userCompetences, challenge) {
-  return challenge ? userCompetences.find((userCompetence) => userCompetence.id === challenge.competenceId) : null;
+  return userCompetences.find((userCompetence) => userCompetence.id === challenge.competenceId);
 }
 
 function _skillHasAtLeastOneChallenge(skill, challenges) {
