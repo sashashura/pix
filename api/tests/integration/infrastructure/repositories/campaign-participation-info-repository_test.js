@@ -24,6 +24,7 @@ describe('Integration | Repository | Campaign Participation Info', () => {
         userId,
         isShared: true,
       });
+      databaseBuilder.factory.buildAssessment({ campaignParticipationId: campaignParticipation1.id, userId, state: 'started' });
       databaseBuilder.factory.buildCampaignParticipation({
         campaignId: campaign2.id,
         isShared: true,
@@ -70,7 +71,7 @@ describe('Integration | Repository | Campaign Participation Info', () => {
         await databaseBuilder.commit();
       });
 
-      it('Should return True for isCompleted', async () => {
+      it.only('Should return True for isCompleted', async () => {
         // given
         const campaignId = campaign1.id;
 
@@ -137,12 +138,13 @@ describe('Integration | Repository | Campaign Participation Info', () => {
       it('Should return null as shared date', async () => {
         // given
         const campaign = databaseBuilder.factory.buildCampaign({ sharedAt: null });
-        databaseBuilder.factory.buildCampaignParticipation({
+        const campaignParticipationId = databaseBuilder.factory.buildCampaignParticipation({
           campaignId: campaign.id,
           userId,
           isShared: false,
           sharedAt: null
-        });
+        }).id;
+        databaseBuilder.factory.buildAssessment({ campaignParticipationId, userId, state: 'started' });
 
         await databaseBuilder.commit();
 
@@ -160,12 +162,13 @@ describe('Integration | Repository | Campaign Participation Info', () => {
       it('should return the student number', async () => {
         // given
         const campaign = databaseBuilder.factory.buildCampaign({ sharedAt: null });
-        databaseBuilder.factory.buildCampaignParticipation({
+        const campaignParticipationId = databaseBuilder.factory.buildCampaignParticipation({
           campaignId: campaign.id,
           userId,
           isShared: false,
           sharedAt: null
-        });
+        }).id;
+        databaseBuilder.factory.buildAssessment({ campaignParticipationId, userId, state: 'started' });
         const studentNumber = databaseBuilder.factory.buildSchoolingRegistration({
           organizationId: campaign.organizationId,
           userId,
