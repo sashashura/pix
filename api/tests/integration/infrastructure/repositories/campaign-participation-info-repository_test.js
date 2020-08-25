@@ -24,7 +24,8 @@ describe('Integration | Repository | Campaign Participation Info', () => {
         userId,
         isShared: true,
       });
-      databaseBuilder.factory.buildAssessment({ campaignParticipationId: campaignParticipation1.id, userId, state: 'started' });
+      databaseBuilder.factory.buildAssessment({ campaignParticipationId: campaignParticipation1.id, userId, state: 'started', createdAt: new Date('2019-12-31'),
+      });
       databaseBuilder.factory.buildCampaignParticipation({
         campaignId: campaign2.id,
         isShared: true,
@@ -69,12 +70,13 @@ describe('Integration | Repository | Campaign Participation Info', () => {
           campaignParticipationId: campaignParticipation1.id,
           createdAt: new Date('2020-01-02'),
           state: 'completed',
-
+          userId
         });
         databaseBuilder.factory.buildAssessment({
           campaignParticipationId: campaignParticipation1.id,
           createdAt: new Date('2020-01-01'),
           state: 'started',
+          userId
         });
         await databaseBuilder.commit();
       });
