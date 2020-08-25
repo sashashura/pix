@@ -33,6 +33,14 @@ describe('Integration | Repository | Campaign Participation Info', () => {
     });
 
     it('should return all the campaign-participation links to the given campaign', async () => {
+      databaseBuilder.factory.buildAssessment({
+        campaignParticipationId: campaignParticipation1.id,
+        createdAt: new Date('2020-01-02'),
+        state: 'started',
+      });
+
+      await databaseBuilder.commit();
+
       // given
       const campaignId = campaign1.id;
 
@@ -71,7 +79,7 @@ describe('Integration | Repository | Campaign Participation Info', () => {
         await databaseBuilder.commit();
       });
 
-      it.only('Should return True for isCompleted', async () => {
+      it('Should return True for isCompleted', async () => {
         // given
         const campaignId = campaign1.id;
 
