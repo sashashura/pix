@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const bluebird = require('bluebird');
 const Challenge = require('../../domain/models/Challenge');
+const util = require('util');
+const fs = require('fs');
 
 const challengeDatasource = require('../datasources/airtable/challenge-datasource');
 const skillDatasource = require('../datasources/airtable/skill-datasource');
@@ -39,9 +41,17 @@ module.exports = {
   },
 
   async findFrenchFranceOperative() {
-    const challengeDataObjects = await challengeDatasource.findFrenchFranceOperative();
-    const operativeSkills = await skillDatasource.findOperative();
-    return _toDomainCollection({ challengeDataObjects, skills: operativeSkills });
+    // const challengeDataObjects = await challengeDatasource.findFrenchFranceOperative();
+    // fs.writeFileSync('challengeDataObjects.json', JSON.stringify(challengeDataObjects, null, '\t'));
+
+    // const operativeSkills = await skillDatasource.findOperative();
+    // fs.writeFileSync('operativeSkills.json', JSON.stringify(operativeSkills, null, '\t'));
+
+    // const result = _toDomainCollection({ challengeDataObjects, skills: operativeSkills });
+    // s.writeFileSync('result.json', JSON.stringify(result, null, '\t'));
+    const result = require('../../../../result.json');
+
+    return result.map((challenge) => new Challenge({ ...challenge }));
   },
 
   async findValidatedByCompetenceId(competenceId) {

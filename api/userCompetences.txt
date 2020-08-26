@@ -1,0 +1,1106 @@
+[
+  UserCompetence {
+    id: 'recsvLz0W2ShyfD63',
+    index: '1.1',
+    name: 'Mener une recherche et une veille d’information',
+    area: Area {
+      id: 'recvoGdo7z2z7pXWa',
+      code: '1',
+      name: undefined,
+      title: 'Information et données',
+      color: 'jaffa',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 42,
+    estimatedLevel: 5,
+    skills: [
+      Skill {
+        id: 'recIvmKAVY7ufrWZK',
+        name: '@sourceImage7',
+        pixValue: 4,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recWiqwt9e6jxU0Xb', [length]: 1 ],
+        tubeId: 'recpe7Y8Wq2D56q6I'
+      },
+      Skill {
+        id: 'recxqogrKZ9p8b1u8',
+        name: '@publi6',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recU4VnDwjosvX4qw', [length]: 1 ],
+        tubeId: 'recBbCIEKgrQi7eb6'
+      },
+      Skill {
+        id: 'recGu9jrbWTeQ9twT',
+        name: '@url6',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recqjSAxTnNej5zSQ'
+      },
+      Skill {
+        id: 'rec0aOgRFRJ1qPG0b',
+        name: '@utiliserserv6',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'reco2jX8IvtYatrRD', [length]: 1 ],
+        tubeId: 'rec5D8oOcnSVc1wb5'
+      },
+      Skill {
+        id: 'receCqeeb7z5X4nlK',
+        name: '@sourceImage6',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recwbI7e9rOEEH6yG', 'recWiqwt9e6jxU0Xb', [length]: 2 ],
+        tubeId: 'recpe7Y8Wq2D56q6I'
+      },
+      Skill {
+        id: 'recXxk1r86BkTkzV7',
+        name: '@web5',
+        pixValue: 0.8888888888888888,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recdEPULbQHw2Y6Gr', 'recs5lQdoqmMxKfsD', [length]: 2 ],
+        tubeId: 'recsNBzg6SqDUTVHa'
+      },
+      Skill {
+        id: 'recD01ptfJy7c4Sex',
+        name: '@requete5',
+        pixValue: 0.8888888888888888,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'reck0i8AZBT3Lv4ZB', 'recLouu4JK4lk9v7t', [length]: 2 ],
+        tubeId: 'recYmSqXBdRWCbTL6'
+      },
+      Skill {
+        id: 'recMOxOdfesur8E7L',
+        name: '@eval4',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recu8dHW40CB1kCZB', [length]: 1 ],
+        tubeId: 'recs1vdbHxX8X55G9'
+      },
+      Skill {
+        id: 'recUQSpjuDvwqKMst',
+        name: '@utiliserserv4',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recGjtsx53Y0xv0zY', [length]: 1 ],
+        tubeId: 'rec5D8oOcnSVc1wb5'
+      },
+      Skill {
+        id: 'recRV35kIeqUQj8cI',
+        name: '@url4',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recPKRtF0tM81Ecop', 'recPpoB0SKowhCWOC', [length]: 2 ],
+        tubeId: 'recqjSAxTnNej5zSQ'
+      },
+      Skill {
+        id: 'recV11ibSCXvaUzZd',
+        name: '@Moteur4',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recEwfuONfunc41Zg', 'recpVCiB3KFJ4CAud', [length]: 2 ],
+        tubeId: 'rec4RO6t7qai3ODuJ'
+      },
+      Skill {
+        id: 'recsPpUso9cY2u1I8',
+        name: '@sourceInfo4',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [
+          'recGpVlTS7EfvAuvW',
+          'recx1oRLcnWz6fmuo',
+          'recWiqwt9e6jxU0Xb',
+          [length]: 3
+        ],
+        tubeId: 'recPOjwrHFhM21yGE'
+      },
+      Skill {
+        id: 'recUDrCWD76fp5MsE',
+        name: '@modèleEco3',
+        pixValue: 0.8888888888888888,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'recR17mopxC9VAmGp', [length]: 1 ],
+        tubeId: 'reccqGUKgzIOK8f9U'
+      },
+      Skill {
+        id: 'reczOCGv8pz976Acl',
+        name: '@sourceImage2',
+        pixValue: 0.8,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [ 'reckylwcFuXufMiPH', [length]: 1 ],
+        tubeId: 'recpe7Y8Wq2D56q6I'
+      },
+      Skill {
+        id: 'rec9qal2FLjWysrfu',
+        name: '@rechinfo2',
+        pixValue: 0.8,
+        competenceId: 'recsvLz0W2ShyfD63',
+        tutorialIds: [
+          'recNDSguPw2fPZBtc',
+          'rec14IQBRgfTLxNbN',
+          'rec6IMz4soSJ4whTL',
+          [length]: 3
+        ],
+        tubeId: 'recsoZIZxVEr3h2og'
+      },
+      [length]: 15
+    ]
+  },
+  UserCompetence {
+    id: 'recIkYm646lrGvLNT',
+    index: '1.2',
+    name: 'Gérer des données',
+    area: Area {
+      id: 'recvoGdo7z2z7pXWa',
+      code: '1',
+      name: undefined,
+      title: 'Information et données',
+      color: 'jaffa',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 6,
+    estimatedLevel: 0,
+    skills: [ [length]: 0 ]
+  },
+  UserCompetence {
+    id: 'recNv8qhaY887jQb2',
+    index: '1.3',
+    name: 'Traiter des données',
+    area: Area {
+      id: 'recvoGdo7z2z7pXWa',
+      code: '1',
+      name: undefined,
+      title: 'Information et données',
+      color: 'jaffa',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 31,
+    estimatedLevel: 3,
+    skills: [
+      Skill {
+        id: 'rec36DB42w2Kgelul',
+        name: '@tri6',
+        pixValue: 0.6666666666666666,
+        competenceId: 'recNv8qhaY887jQb2',
+        tutorialIds: [ 'rechjZ7XqJutRsKfr', [length]: 1 ],
+        tubeId: 'recIEuCfChJpc8UyH'
+      },
+      Skill {
+        id: 'recpsLOOJDbvv6FFA',
+        name: '@extraire6',
+        pixValue: 0.6666666666666666,
+        competenceId: 'recNv8qhaY887jQb2',
+        tutorialIds: [
+          'rec0NuwGIE5vbvwxG',
+          'recdWBKgwxsZBXqkJ',
+          'recwLXiKsJ6sZTWmA',
+          [length]: 3
+        ],
+        tubeId: 'recpQLhHdOTQAx6UL'
+      },
+      Skill {
+        id: 'rec7dt6qpwHrvZ3sV',
+        name: '@tri5',
+        pixValue: 0.8888888888888888,
+        competenceId: 'recNv8qhaY887jQb2',
+        tutorialIds: [ 'recaBVkEDqeZeGVAI', [length]: 1 ],
+        tubeId: 'recIEuCfChJpc8UyH'
+      },
+      Skill {
+        id: 'recTvcFQRv5TmuzOC',
+        name: '@openData5',
+        pixValue: 0.8888888888888888,
+        competenceId: 'recNv8qhaY887jQb2',
+        tutorialIds: [ 'rec2o2bZLjAXq5ZcX', 'recBp02ZVJHo5DTSO', [length]: 2 ],
+        tubeId: 'reckFeg9YextW6q9P'
+      },
+      Skill {
+        id: 'reclDKLSXIsr4xoZp',
+        name: '@form_intero3',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recNv8qhaY887jQb2',
+        tutorialIds: [ 'recofORG34n3NCmHa', [length]: 1 ],
+        tubeId: 'recZ0A49dfpPvHvWd'
+      },
+      [length]: 5
+    ]
+  },
+  UserCompetence {
+    id: 'recDH19F7kKrfL3Ii',
+    index: '2.1',
+    name: 'Interagir',
+    area: Area {
+      id: 'recoB4JYOBS1PCxhh',
+      code: '2',
+      name: undefined,
+      title: 'Communication et collaboration',
+      color: 'emerald',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 31,
+    estimatedLevel: 3,
+    skills: [
+      Skill {
+        id: 'reck3MDtC6EiwZk9s',
+        name: '@champsCourriel5',
+        pixValue: 1.3333333333333333,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ 'recywSGYvY8Bv2hBY', [length]: 1 ],
+        tubeId: 'recf4znvmRGaGBUNQ'
+      },
+      Skill {
+        id: 'rec7xxKMKsGVYBG3q',
+        name: '@communicationAsynchrone5',
+        pixValue: 1.3333333333333333,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ 'recOdc81Ns0ZrDYiZ', [length]: 1 ],
+        tubeId: 'rec4rdlxGTmlbrNLb'
+      },
+      Skill {
+        id: 'recQ4d7qpGP0ovWtG',
+        name: '@outilsMsgélectronique5',
+        pixValue: 1.3333333333333333,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ 'recApqVHC7XqPqS1j', 'recb43wGbHuXBNUgn', [length]: 2 ],
+        tubeId: 'recBYMZcjBilDqnq6'
+      },
+      Skill {
+        id: 'rec8PgJLouOSZ17FG',
+        name: '@spam4',
+        pixValue: 1,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recyNCBKtjN1MN1mZ'
+      },
+      Skill {
+        id: 'reckDbjv0yHtNrnOA',
+        name: '@outilsMessagerie4',
+        pixValue: 1,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ 'recwddtxqRRcIG9Jj', [length]: 1 ],
+        tubeId: 'recpcdzdxDsnCjXZ6'
+      },
+      Skill {
+        id: 'recWXtN5cNP1JQUVx',
+        name: '@outilsMessagerie3',
+        pixValue: 1,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ 'recwddtxqRRcIG9Jj', [length]: 1 ],
+        tubeId: 'recpcdzdxDsnCjXZ6'
+      },
+      Skill {
+        id: 'recuiCzBk96GLsysI',
+        name: '@adresseElect3',
+        pixValue: 1,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ 'recb626UgDYEFqM8q', [length]: 1 ],
+        tubeId: 'recMaijlrK3flRbBs'
+      },
+      Skill {
+        id: 'recdnFCH9mBrDW06P',
+        name: '@spam2',
+        pixValue: 1,
+        competenceId: 'recDH19F7kKrfL3Ii',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recyNCBKtjN1MN1mZ'
+      },
+      [length]: 8
+    ]
+  },
+  UserCompetence {
+    id: 'recgxqQfz3BqEbtzh',
+    index: '2.2',
+    name: 'Partager et publier',
+    area: Area {
+      id: 'recoB4JYOBS1PCxhh',
+      code: '2',
+      name: undefined,
+      title: 'Communication et collaboration',
+      color: 'emerald',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 6,
+    estimatedLevel: 0,
+    skills: [ [length]: 0 ]
+  },
+  UserCompetence {
+    id: 'recMiZPNl7V1hyE1d',
+    index: '2.3',
+    name: 'Collaborer',
+    area: Area {
+      id: 'recoB4JYOBS1PCxhh',
+      code: '2',
+      name: undefined,
+      title: 'Communication et collaboration',
+      color: 'emerald',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 44,
+    estimatedLevel: 5,
+    skills: [
+      Skill {
+        id: 'recIyRA2zdCdlX6UD',
+        name: '@partageDroits6',
+        pixValue: 2.6666666666666665,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [ 'recgai3TJRYmwfZgD', [length]: 1 ],
+        tubeId: 'recd3rYCdpWLtHXLk'
+      },
+      Skill {
+        id: 'recQTOhx1DBPFWp1o',
+        name: '@editionEnLigne6',
+        pixValue: 2.6666666666666665,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recbH7WZIRE41pyVE'
+      },
+      Skill {
+        id: 'recndA9SGppAM2ClX',
+        name: '@modeRevision6',
+        pixValue: 2.6666666666666665,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [
+          'rechCtxCtVbgPduyC',
+          'recGihnGtyd6tn457',
+          'recueAhpLpNwd1KZf',
+          [length]: 3
+        ],
+        tubeId: 'rec9Ew6rFzzDq4nPc'
+      },
+      Skill {
+        id: 'rec4gk0caF0FsTUdU',
+        name: '@outilscollaboratifs5',
+        pixValue: 1.3333333333333333,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'rec1Z5gkirQNvtjrK'
+      },
+      Skill {
+        id: 'recHo6D1spbDR9C2N',
+        name: '@outilscollaboratifs4',
+        pixValue: 1,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'rec1Z5gkirQNvtjrK'
+      },
+      Skill {
+        id: 'recqSPZiRJYzfCDaS',
+        name: '@partageDroits4',
+        pixValue: 1,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recd3rYCdpWLtHXLk'
+      },
+      Skill {
+        id: 'recwOLZ8bzMQK9NF9',
+        name: '@editerDocEnLigne4',
+        pixValue: 1,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'reciWLZDyQmXNn6lc'
+      },
+      Skill {
+        id: 'rec7GcwMyDXNv7EM4',
+        name: '@sondage4',
+        pixValue: 1,
+        competenceId: 'recMiZPNl7V1hyE1d',
+        tutorialIds: [ 'recysXESFnFKv0YZz', 'recWLzemrhuaLIbJs', [length]: 2 ],
+        tubeId: 'recJrMm0g5kWTturR'
+      },
+      [length]: 8
+    ]
+  },
+  UserCompetence {
+    id: 'recFpYXCKcyhLI3Nu',
+    index: '2.4',
+    name: "S'insérer dans le monde numérique",
+    area: Area {
+      id: 'recoB4JYOBS1PCxhh',
+      code: '2',
+      name: undefined,
+      title: 'Communication et collaboration',
+      color: 'emerald',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 46,
+    estimatedLevel: 5,
+    skills: [
+      Skill {
+        id: 'recRfECOl9NBwk4qR',
+        name: '@identitenum5',
+        pixValue: 1.6,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ 'recmFJTi0BIOS032r', [length]: 1 ],
+        tubeId: 'recwoTBW9eVqCl7Vd'
+      },
+      Skill {
+        id: 'recowUXN3qQrfrOPN',
+        name: '@dematerialisation5',
+        pixValue: 1.6,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ 'rec6u18Z2K9gQBdHQ', [length]: 1 ],
+        tubeId: 'recHMYN8ZwOUX63ck'
+      },
+      Skill {
+        id: 'recuEZR8LtKVjxLrY',
+        name: '@dereferencement5',
+        pixValue: 0,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ 'recmbqMWYL7wW2fcl', [length]: 1 ],
+        tubeId: 'recT5TCTZo5TbXzu3'
+      },
+      Skill {
+        id: 'rec4zpx4oqPeZ4ZCp',
+        name: '@charteInfo5',
+        pixValue: 0,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ 'recTu8vBBocevNKmT', 'recjqMbtq6xFjfz9N', [length]: 2 ],
+        tubeId: 'recTNeDmFIhhWQZi9'
+      },
+      Skill {
+        id: 'recT2PmAAdSu024bX',
+        name: '@developperProjet5',
+        pixValue: 1.6,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recuvo92yAymf7l3r'
+      },
+      Skill {
+        id: 'rec20FAdFNyMSJVig',
+        name: '@apprendreEnLigne4',
+        pixValue: 1.3333333333333333,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ 'recRGEEaEk7rKf55m', [length]: 1 ],
+        tubeId: 'recMPzW9BRjRdOisX'
+      },
+      Skill {
+        id: 'recY83MJTaTD20yXO',
+        name: '@parametreConfidentialite3',
+        pixValue: 1,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ 'recUkqzy0tXzEQzTF', [length]: 1 ],
+        tubeId: 'recGTIO2R0edgARcA'
+      },
+      Skill {
+        id: 'recaMBgjv3EZnAlWO',
+        name: '@choixIdentifiant3',
+        pixValue: 1,
+        competenceId: 'recFpYXCKcyhLI3Nu',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recwDOoEMBYSmwF4H'
+      },
+      [length]: 8
+    ]
+  },
+  UserCompetence {
+    id: 'recOdC9UDVJbAXHAm',
+    index: '3.1',
+    name: 'Développer des documents textuels',
+    area: Area {
+      id: 'recs7Gpf90ln8NCv7',
+      code: '3',
+      name: undefined,
+      title: 'Création de contenu',
+      color: 'cerulean',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 34,
+    estimatedLevel: 4,
+    skills: [
+      Skill {
+        id: 'rec2qvj1HEtsMJS1N',
+        name: '@copierColler5',
+        pixValue: 0.8888888888888888,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [ 'recR3uthlYiNTcgwu', 'recf5Qf5IDJt8CUdC', [length]: 2 ],
+        tubeId: 'recrkpItPsNRg2OjJ'
+      },
+      Skill {
+        id: 'rec3VgJtxzmVol3BI',
+        name: '@outilsDiaporama5',
+        pixValue: 0.8888888888888888,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [ 'recasirBnCb1wTqXD', [length]: 1 ],
+        tubeId: 'recPS09GOFlMbp6dF'
+      },
+      Skill {
+        id: 'recghJRKeCNxdSleY',
+        name: '@outilsTexte4',
+        pixValue: 0.6153846153846154,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recdm5W4IJMW07SzW'
+      },
+      Skill {
+        id: 'recgDJuwchsgWlsV0',
+        name: '@outilsStdTexte4',
+        pixValue: 0.6153846153846154,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [
+          'recFU5xIiOcs4XzUW',
+          'recXmwwtsV5im2Njx',
+          'rec2NeAW1yEzBnF67',
+          [length]: 3
+        ],
+        tubeId: 'recEC92AOM3EAcse6'
+      },
+      Skill {
+        id: 'reckgdGuUyHtQvhRo',
+        name: '@miseEnFormeTexte3',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [ 'rec7ZtVmv6EmXpxVD', 'recQAByBoHzEzMbAX', [length]: 2 ],
+        tubeId: 'recgfnduLOzp90NdM'
+      },
+      Skill {
+        id: 'rec8YcEun7Ir0QCFt',
+        name: '@outilsDiaporama3',
+        pixValue: 0.7272727272727273,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [ 'recV6Dt6w7YeMHsUi', [length]: 1 ],
+        tubeId: 'recPS09GOFlMbp6dF'
+      },
+      Skill {
+        id: 'rec71e3PSct2zLEMj',
+        name: '@outilsTexte2',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recdm5W4IJMW07SzW'
+      },
+      Skill {
+        id: 'rec0J9OXaAj5v7w3r',
+        name: '@copierColler2',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recOdC9UDVJbAXHAm',
+        tutorialIds: [ 'recdfT9KusiqvdNIx', 'reccAilKHC193D5EL', [length]: 2 ],
+        tubeId: 'recrkpItPsNRg2OjJ'
+      },
+      [length]: 8
+    ]
+  },
+  UserCompetence {
+    id: 'recbDTF8KwupqkeZ6',
+    index: '3.2',
+    name: 'Développer des documents multimedia',
+    area: Area {
+      id: 'recs7Gpf90ln8NCv7',
+      code: '3',
+      name: undefined,
+      title: 'Création de contenu',
+      color: 'cerulean',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 1,
+    estimatedLevel: 0,
+    skills: [ [length]: 0 ]
+  },
+  UserCompetence {
+    id: 'recHmIWG6D0huq6Kx',
+    index: '3.3',
+    name: 'Adapter les documents à leur finalité',
+    area: Area {
+      id: 'recs7Gpf90ln8NCv7',
+      code: '3',
+      name: undefined,
+      title: 'Création de contenu',
+      color: 'cerulean',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 20,
+    estimatedLevel: 2,
+    skills: [
+      Skill {
+        id: 'rectVTDWtVIT59Dy1',
+        name: '@paramImpression4',
+        pixValue: 1,
+        competenceId: 'recHmIWG6D0huq6Kx',
+        tutorialIds: [ 'rec2PwxmZcLpLxTrm', 'recHQxzuHhbEJLi65', [length]: 2 ],
+        tubeId: 'recprH1OzWoAgWvw9'
+      },
+      [length]: 1
+    ]
+  },
+  UserCompetence {
+    id: 'rece6jYwH4WEw549z',
+    index: '3.4',
+    name: 'Programmer',
+    area: Area {
+      id: 'recs7Gpf90ln8NCv7',
+      code: '3',
+      name: undefined,
+      title: 'Création de contenu',
+      color: 'cerulean',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 8,
+    estimatedLevel: 1,
+    skills: [ [length]: 0 ]
+  },
+  UserCompetence {
+    id: 'rec6rHqas39zvLZep',
+    index: '4.1',
+    name: "Sécuriser l'environnement numérique",
+    area: Area {
+      id: 'recUcSnS2lsOhFIeE',
+      code: '4',
+      name: undefined,
+      title: 'Protection et sécurité',
+      color: 'wild-strawberry',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 38,
+    estimatedLevel: 4,
+    skills: [
+      Skill {
+        id: 'recJioC7FddCdp870',
+        name: '@sécuritéwifi6',
+        pixValue: 4,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recYFCpGlmwQwAONl'
+      },
+      Skill {
+        id: 'rec5tltwWOTXXxCBJ',
+        name: '@logprotection5',
+        pixValue: 1,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'recspiFWqHbSaoTSL', [length]: 1 ],
+        tubeId: 'recDLudOIi1rAjsFa'
+      },
+      Skill {
+        id: 'recacGBPjDxXf15h8',
+        name: '@choixmotdepasse5',
+        pixValue: 1,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'rec9ui0yUQUbfnKSF', [length]: 1 ],
+        tubeId: 'recgrxoIilcw9uj0U'
+      },
+      Skill {
+        id: 'recZeLScWhKwaMS4W',
+        name: '@outilsprotection5',
+        pixValue: 1,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recoEnE6MhlBbJI8B'
+      },
+      Skill {
+        id: 'recUgTQ0bHMSORqAz',
+        name: '@sécuritéwifi5',
+        pixValue: 1,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'recsw3qYs22Hmn1Xn', [length]: 1 ],
+        tubeId: 'recYFCpGlmwQwAONl'
+      },
+      Skill {
+        id: 'recyUjd6FqBGL9z3U',
+        name: '@sourcesinfection5',
+        pixValue: 1,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'recQLJ2VhRbNQ7TGE', 'rec1n4e7AjSkIPRh4', [length]: 2 ],
+        tubeId: 'recpP9Uaz1x6qq95e'
+      },
+      Skill {
+        id: 'recsJQl6GTyr5vOcw',
+        name: '@logmalveillant5',
+        pixValue: 1,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'rec3co76YIaN0wWSm', 'recUJBg7WBn3XXo2L', [length]: 2 ],
+        tubeId: 'recG7E3zypAJD3S05'
+      },
+      Skill {
+        id: 'rec1SAZROBmyXW8VQ',
+        name: '@outilsprotection4',
+        pixValue: 1.1428571428571428,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recoEnE6MhlBbJI8B'
+      },
+      Skill {
+        id: 'recAzV1ljhCdjrasn',
+        name: '@sourcesinfection4',
+        pixValue: 1.1428571428571428,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'recQLJ2VhRbNQ7TGE', 'rec1n4e7AjSkIPRh4', [length]: 2 ],
+        tubeId: 'recpP9Uaz1x6qq95e'
+      },
+      Skill {
+        id: 'reclCMZpPDx3eQ46q',
+        name: '@phishing3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'recinZ8W8LGlJPnjz', 'recT8hKFuDCvKFdjB', [length]: 2 ],
+        tubeId: 'rece5w6NqPCDo87zS'
+      },
+      Skill {
+        id: 'recx7WnZJCXVgCvN4',
+        name: '@sourcesinfection3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'recQLJ2VhRbNQ7TGE', 'rec1n4e7AjSkIPRh4', [length]: 2 ],
+        tubeId: 'recpP9Uaz1x6qq95e'
+      },
+      Skill {
+        id: 'recF9oTiR8fMSnQoo',
+        name: '@choixmotdepasse3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'rec1uAOuapHt5hfST', [length]: 1 ],
+        tubeId: 'recgrxoIilcw9uj0U'
+      },
+      Skill {
+        id: 'recyFujZQ6EXaqruH',
+        name: '@sécuritéweb3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'recYmKAFgL8X6UJ4w', [length]: 1 ],
+        tubeId: 'rec8lYF4iaCcI6Stl'
+      },
+      Skill {
+        id: 'recLXE4vlQ5vcGsLP',
+        name: '@logmalveillant2',
+        pixValue: 0.8888888888888888,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'reckd85rSOGs5y687', 'recf6Gj5B3JjsP9GX', [length]: 2 ],
+        tubeId: 'recG7E3zypAJD3S05'
+      },
+      Skill {
+        id: 'recfuk3QLAOzBQzSU',
+        name: '@sécuriseraccès2',
+        pixValue: 0.8888888888888888,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'rec0v6bus3NlllHZN', 'recg1NBAsDFoGpTmu', [length]: 2 ],
+        tubeId: 'recj0sjmdK7hszB2n'
+      },
+      Skill {
+        id: 'rec5pD8Z52C7wtkCh',
+        name: '@installogiciel2',
+        pixValue: 0.8888888888888888,
+        competenceId: 'rec6rHqas39zvLZep',
+        tutorialIds: [ 'reckGjEvwNIrbnsI2', [length]: 1 ],
+        tubeId: 'recpz9gZET6VJFeen'
+      },
+      [length]: 16
+    ]
+  },
+  UserCompetence {
+    id: 'recofJCxg0NqTqTdP',
+    index: '4.2',
+    name: 'Protéger les données personnelles et la vie privée',
+    area: Area {
+      id: 'recUcSnS2lsOhFIeE',
+      code: '4',
+      name: undefined,
+      title: 'Protection et sécurité',
+      color: 'wild-strawberry',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 5,
+    estimatedLevel: 0,
+    skills: [ [length]: 0 ]
+  },
+  UserCompetence {
+    id: 'recfr0ax8XrfvJ3ER',
+    index: '4.3',
+    name: "Protéger la santé, le bien-être et l'environnement",
+    area: Area {
+      id: 'recUcSnS2lsOhFIeE',
+      code: '4',
+      name: undefined,
+      title: 'Protection et sécurité',
+      color: 'wild-strawberry',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 37,
+    estimatedLevel: 4,
+    skills: [
+      Skill {
+        id: 'recgUaUfyMezKMFq4',
+        name: '@ergonomie6',
+        pixValue: 2.6666666666666665,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'recB4SgoXUk1Q7KGz', [length]: 1 ],
+        tubeId: 'recdeq78xuocLfLm1'
+      },
+      Skill {
+        id: 'recZNEhKdBKJm0gA4',
+        name: '@ondes6',
+        pixValue: 2.6666666666666665,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'recG352akJNjIvCzk', [length]: 1 ],
+        tubeId: 'recKjxbt8rif8SWdt'
+      },
+      Skill {
+        id: 'rec5F9Z9r8eoKE1Sx',
+        name: '@cyberdépendance5',
+        pixValue: 0,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'rec9B5rtE48H14peR', 'receJSTXMSicfh6jz', [length]: 2 ],
+        tubeId: 'recMvKBYMz7qjPn5o'
+      },
+      Skill {
+        id: 'rechOMv4ejlpZhNfk',
+        name: '@ondes5',
+        pixValue: 1.6,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'recuwToPKKEBsgPyI', [length]: 1 ],
+        tubeId: 'recKjxbt8rif8SWdt'
+      },
+      Skill {
+        id: 'recBNzm4qvyQYMXGo',
+        name: '@empreinteEco4',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recT17TO1XinYCD95'
+      },
+      Skill {
+        id: 'recZCvgQGtgyJPbpv',
+        name: '@cyberviolences4',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'recYd3oCC0pVO0rsW', [length]: 1 ],
+        tubeId: 'recDXjekxwm1Nh77T'
+      },
+      Skill {
+        id: 'recN5s1fpqI5E2a70',
+        name: '@ondes4',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'reczNkzfcnYq3vruW', 'rec6NbpzZCv3559WT', [length]: 2 ],
+        tubeId: 'recKjxbt8rif8SWdt'
+      },
+      Skill {
+        id: 'recNqowhyTrdnLxO8',
+        name: '@sommeil3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recLrLxZQJi5h9LHC'
+      },
+      Skill {
+        id: 'recvaR1JeSCutvz3z',
+        name: '@reduireImpact3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'recyHy2R2US8W3Fit', [length]: 1 ],
+        tubeId: 'recV8JUv5knzz7uwU'
+      },
+      Skill {
+        id: 'recEt62ZnDvmloFXJ',
+        name: '@pratiquesinternet3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'recw2Ex6WWikcZoSw', [length]: 1 ],
+        tubeId: 'recvalrsm02e63lw4'
+      },
+      Skill {
+        id: 'rec3wGKgBPZknWJCS',
+        name: '@pratiquesimpression3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recO7LXR9gQ2TOiDd'
+      },
+      Skill {
+        id: 'recwYvI6zTdqRHDmp',
+        name: '@ondes3',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'reczNkzfcnYq3vruW', 'rec6NbpzZCv3559WT', [length]: 2 ],
+        tubeId: 'recKjxbt8rif8SWdt'
+      },
+      Skill {
+        id: 'rect38JWziCbiiOQG',
+        name: '@pratiquesimpression2',
+        pixValue: 2,
+        competenceId: 'recfr0ax8XrfvJ3ER',
+        tutorialIds: [ 'recMDjY4NkcWT8y1J', [length]: 1 ],
+        tubeId: 'recO7LXR9gQ2TOiDd'
+      },
+      [length]: 13
+    ]
+  },
+  UserCompetence {
+    id: 'recIhdrmCuEmCDAzj',
+    index: '5.1',
+    name: 'Résoudre des problèmes techniques',
+    area: Area {
+      id: 'recnrCmBiPXGbgIyQ',
+      code: '5',
+      name: undefined,
+      title: 'Environnement numérique',
+      color: 'butterfly-bush',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 48,
+    estimatedLevel: 6,
+    skills: [
+      Skill {
+        id: 'recvBiIG0dvHJOe7i',
+        name: '@ouvertureFichiers6',
+        pixValue: 4,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ 'recA41YP7fHZbZvnD', 'recQK1ak6HcfsQJCh', [length]: 2 ],
+        tubeId: 'recFI6pu5oCeHXJ51'
+      },
+      Skill {
+        id: 'recIcL3GuLDaDgGAt',
+        name: '@problèmeClavier6',
+        pixValue: 4,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ 'recVHtV0RDsJOdnRR', 'rec9VkTAvlioAyys4', [length]: 2 ],
+        tubeId: 'rectOrHRTau047Kyc'
+      },
+      Skill {
+        id: 'rec8b2zEqznu1VdSu',
+        name: '@connaissanceConnex5',
+        pixValue: 1.6,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ 'recB2aRHDLXDVYWqA', [length]: 1 ],
+        tubeId: 'rech2lCPI0wfBSVkx'
+      },
+      Skill {
+        id: 'recW4iZCujkyyfCve',
+        name: '@connexionPeriph5',
+        pixValue: 1.6,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ 'recGmfWnPdtiur0Nv', [length]: 1 ],
+        tubeId: 'recDUhKauFlJ5vZXJ'
+      },
+      Skill {
+        id: 'recINVk1gM5DHCbs7',
+        name: '@connexionSmart5',
+        pixValue: 1.6,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ 'rec0FwwiggZywL8jP', [length]: 1 ],
+        tubeId: 'rec3iPp178OrYNlDW'
+      },
+      Skill {
+        id: 'recWalmeLbapvhX3K',
+        name: '@miseAJour5',
+        pixValue: 1.6,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recgkQz2lN1XR2dIi'
+      },
+      Skill {
+        id: 'recDZTKszXX02aXD1',
+        name: '@connexionSmart4',
+        pixValue: 1.6,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ 'recXvRaamgNTyI0cm', [length]: 1 ],
+        tubeId: 'rec3iPp178OrYNlDW'
+      },
+      Skill {
+        id: 'recEPgGwP6P3nZBbK',
+        name: '@bluetooth4',
+        pixValue: 1.6,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recbIJ6XY9LyRrzwk'
+      },
+      Skill {
+        id: 'recrxbonOSuEvsuor',
+        name: '@débloquerMachine3',
+        pixValue: 1,
+        competenceId: 'recIhdrmCuEmCDAzj',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recLpO7S6QBRZ5pM1'
+      },
+      [length]: 9
+    ]
+  },
+  UserCompetence {
+    id: 'recudHE5Omrr10qrx',
+    index: '5.2',
+    name: 'Construire un environnement numérique',
+    area: Area {
+      id: 'recnrCmBiPXGbgIyQ',
+      code: '5',
+      name: undefined,
+      title: 'Environnement numérique',
+      color: 'butterfly-bush',
+      competences: [ [length]: 0 ]
+    },
+    pixScore: 17,
+    estimatedLevel: 2,
+    skills: [
+      Skill {
+        id: 'rece8ECIMBhHXgwo9',
+        name: '@connectique5',
+        pixValue: 0.8,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ 'recv5eprcCxiEPDVu', [length]: 1 ],
+        tubeId: 'recoPAkxe29Ru3r3h'
+      },
+      Skill {
+        id: 'recXWlIrXF467cALf',
+        name: '@logicielLibre5',
+        pixValue: 0.8,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ 'recPyIpXKIFHQcjNQ', [length]: 1 ],
+        tubeId: 'recPXUEpkQWNTNtIy'
+      },
+      Skill {
+        id: 'recemvSVcBRVpdSL8',
+        name: '@connectique4',
+        pixValue: 0.8,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ 'recXR72XgdRfEIp8A', [length]: 1 ],
+        tubeId: 'recoPAkxe29Ru3r3h'
+      },
+      Skill {
+        id: 'reckLgGIitzPoZRq5',
+        name: '@logicielLibre4',
+        pixValue: 0.8,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ 'recLEivWeEBuk6YkD', 'rec6NKooL5OQU5lXm', [length]: 2 ],
+        tubeId: 'recPXUEpkQWNTNtIy'
+      },
+      Skill {
+        id: 'recueyx9JLiq97Veu',
+        name: '@choixSystème3',
+        pixValue: 1,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ 'recpVbaUB1BTnZiVf', 'recFdrOeHNXgw5hNo', [length]: 2 ],
+        tubeId: 'rec693JntZJg5fmpD'
+      },
+      Skill {
+        id: 'recbhCa10f0cXOdbD',
+        name: '@histoireInfo3',
+        pixValue: 1,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recdj5xs1qIji4Ov1'
+      },
+      Skill {
+        id: 'recLCYATl7TGrkZLh',
+        name: '@composantsMatériels2',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recc0vehnd9CuepzP'
+      },
+      Skill {
+        id: 'recfLjzQKBD8Umdcx',
+        name: '@fiche technique2',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'recInPPTW79jkUbEY'
+      },
+      Skill {
+        id: 'recxtb5aLs6OAAKIg',
+        name: '@environnementTravail2',
+        pixValue: 1.1428571428571428,
+        competenceId: 'recudHE5Omrr10qrx',
+        tutorialIds: [ [length]: 0 ],
+        tubeId: 'rec6Ic2FdcxSRYkdn'
+      },
+      [length]: 9
+    ]
+  },
+  [length]: 16
+]

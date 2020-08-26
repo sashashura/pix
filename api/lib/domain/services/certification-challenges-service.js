@@ -1,4 +1,7 @@
 const _ = require('lodash');
+const util = require('util');
+const fs = require('fs');
+
 const CertificationChallenge = require('../models/CertificationChallenge');
 const {
   MAX_CHALLENGES_PER_SKILL_FOR_CERTIFICATION,
@@ -17,7 +20,12 @@ module.exports = {
     const knowledgeElementsByCompetence = await knowledgeElementRepository
       .findUniqByUserIdGroupedByCompetenceId({ userId: placementProfile.userId, limitDate: placementProfile.profileDate });
 
+    // fs.writeFileSync('knowledgeElementsByCompetence.txt', util.inspect({ knowledgeElementsByCompetence },  { showHidden: true, depth: null }));
+
     const knowledgeElements = KnowledgeElement.findDirectlyValidatedFromGroups(knowledgeElementsByCompetence);
+
+    // fs.writeFileSync('knowledgeElements.txt', util.inspect({ knowledgeElements },  { showHidden: true, depth: null }));
+
     const answerIds = _.map(knowledgeElements, 'answerId');
 
     const challengeIdsCorrectlyAnswered = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
@@ -44,6 +52,8 @@ module.exports = {
     const userCompetences = UserCompetence.orderSkillsOfCompetenceByDifficulty(placementProfile.userCompetences);
     let certificationChallengesByCompetence = {};
 
+    // fs.writeFileSync('userCompetences.txt', util.inspect(userCompetences,  { showHidden: true, depth: null }));
+
     userCompetences.forEach((userCompetence) => {
       userCompetence.skills.forEach((skill) => {
         if (!_hasCompetenceEnoughCertificationChallenges(userCompetence.id, certificationChallengesByCompetence)) {
@@ -63,6 +73,8 @@ module.exports = {
         }
       });
     });
+
+    fs.writeFileSync('certificationChallengesByCompetence.txt', util.inspect(certificationChallengesByCompetence,  { showHidden: true, depth: null }));
 
     return _.flatten(Object.values(certificationChallengesByCompetence));
   },

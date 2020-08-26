@@ -1,0 +1,283 @@
+{
+  recsvLz0W2ShyfD63: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@sourceImage7',
+      associatedSkillId: 'recIvmKAVY7ufrWZK',
+      challengeId: 'recCGEqqWBQnzD3NZ',
+      competenceId: 'recsvLz0W2ShyfD63',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@publi6',
+      associatedSkillId: 'recxqogrKZ9p8b1u8',
+      challengeId: 'recvPQ9mXWw67exCt',
+      competenceId: 'recsvLz0W2ShyfD63',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@url6',
+      associatedSkillId: 'recGu9jrbWTeQ9twT',
+      challengeId: 'recu9M2bfpjUlacVo',
+      competenceId: 'recsvLz0W2ShyfD63',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recNv8qhaY887jQb2: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@tri6',
+      associatedSkillId: 'rec36DB42w2Kgelul',
+      challengeId: 'recwOfO8dvpwscVGl',
+      competenceId: 'recNv8qhaY887jQb2',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@extraire6',
+      associatedSkillId: 'recpsLOOJDbvv6FFA',
+      challengeId: 'recY2RBedsnJ0yQmC',
+      competenceId: 'recNv8qhaY887jQb2',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@tri5',
+      associatedSkillId: 'rec7dt6qpwHrvZ3sV',
+      challengeId: 'recoCZds1IyqLFUQR',
+      competenceId: 'recNv8qhaY887jQb2',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recDH19F7kKrfL3Ii: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@champsCourriel5',
+      associatedSkillId: 'reck3MDtC6EiwZk9s',
+      challengeId: 'recnAiXhUCoL7TVsO',
+      competenceId: 'recDH19F7kKrfL3Ii',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@communicationAsynchrone5',
+      associatedSkillId: 'rec7xxKMKsGVYBG3q',
+      challengeId: 'recDcxlBko27WASxW',
+      competenceId: 'recDH19F7kKrfL3Ii',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@outilsMsgélectronique5',
+      associatedSkillId: 'recQ4d7qpGP0ovWtG',
+      challengeId: 'recpVHw8Rm3l7y1mS',
+      competenceId: 'recDH19F7kKrfL3Ii',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recMiZPNl7V1hyE1d: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@partageDroits6',
+      associatedSkillId: 'recIyRA2zdCdlX6UD',
+      challengeId: 'recoJpStiLKU8OojJ',
+      competenceId: 'recMiZPNl7V1hyE1d',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@editionEnLigne6',
+      associatedSkillId: 'recQTOhx1DBPFWp1o',
+      challengeId: 'rectQkiJjO7HFm2Op',
+      competenceId: 'recMiZPNl7V1hyE1d',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@modeRevision6',
+      associatedSkillId: 'recndA9SGppAM2ClX',
+      challengeId: 'recwwxK29RT1vdXRG',
+      competenceId: 'recMiZPNl7V1hyE1d',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recFpYXCKcyhLI3Nu: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@identitenum5',
+      associatedSkillId: 'recRfECOl9NBwk4qR',
+      challengeId: 'recolau9EHiJ27VdJ',
+      competenceId: 'recFpYXCKcyhLI3Nu',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@dematerialisation5',
+      associatedSkillId: 'recowUXN3qQrfrOPN',
+      challengeId: 'rec1QkvqvKLrarE9O',
+      competenceId: 'recFpYXCKcyhLI3Nu',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@dereferencement5',
+      associatedSkillId: 'recuEZR8LtKVjxLrY',
+      challengeId: 'recfiXVLX3wwUNGrz',
+      competenceId: 'recFpYXCKcyhLI3Nu',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recOdC9UDVJbAXHAm: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@copierColler5',
+      associatedSkillId: 'rec2qvj1HEtsMJS1N',
+      challengeId: 'recu6m63lC633NLBR',
+      competenceId: 'recOdC9UDVJbAXHAm',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@outilsDiaporama5',
+      associatedSkillId: 'rec3VgJtxzmVol3BI',
+      challengeId: 'rec1gMiTC0yHwWCr3',
+      competenceId: 'recOdC9UDVJbAXHAm',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@outilsTexte4',
+      associatedSkillId: 'recghJRKeCNxdSleY',
+      challengeId: 'reciznBsSNTdxAARn',
+      competenceId: 'recOdC9UDVJbAXHAm',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recHmIWG6D0huq6Kx: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@paramImpression4',
+      associatedSkillId: 'rectVTDWtVIT59Dy1',
+      challengeId: 'reczFMQPhblWkwBPR',
+      competenceId: 'recHmIWG6D0huq6Kx',
+      courseId: undefined
+    },
+    [length]: 1
+  ],
+  rec6rHqas39zvLZep: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@sécuritéwifi6',
+      associatedSkillId: 'recJioC7FddCdp870',
+      challengeId: 'recDoV26aYHyiTQ3U',
+      competenceId: 'rec6rHqas39zvLZep',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@logprotection5',
+      associatedSkillId: 'rec5tltwWOTXXxCBJ',
+      challengeId: 'recZ7XBqkECfAe92N',
+      competenceId: 'rec6rHqas39zvLZep',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@choixmotdepasse5',
+      associatedSkillId: 'recacGBPjDxXf15h8',
+      challengeId: 'recHB8gIkF1q4YHkm',
+      competenceId: 'rec6rHqas39zvLZep',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recfr0ax8XrfvJ3ER: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@ergonomie6',
+      associatedSkillId: 'recgUaUfyMezKMFq4',
+      challengeId: 'reciRKZeAy2aZUOJs',
+      competenceId: 'recfr0ax8XrfvJ3ER',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@ondes6',
+      associatedSkillId: 'recZNEhKdBKJm0gA4',
+      challengeId: 'recIceOBfgoyYKXSo',
+      competenceId: 'recfr0ax8XrfvJ3ER',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@cyberdépendance5',
+      associatedSkillId: 'rec5F9Z9r8eoKE1Sx',
+      challengeId: 'recTN0KjnA5Igcuok',
+      competenceId: 'recfr0ax8XrfvJ3ER',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recIhdrmCuEmCDAzj: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@ouvertureFichiers6',
+      associatedSkillId: 'recvBiIG0dvHJOe7i',
+      challengeId: 'recfTotevNl1uEyPL',
+      competenceId: 'recIhdrmCuEmCDAzj',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@problèmeClavier6',
+      associatedSkillId: 'recIcL3GuLDaDgGAt',
+      challengeId: 'recUuLdYdKOoOh2W2',
+      competenceId: 'recIhdrmCuEmCDAzj',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@connaissanceConnex5',
+      associatedSkillId: 'rec8b2zEqznu1VdSu',
+      challengeId: 'recr8ACvFl8A38zBi',
+      competenceId: 'recIhdrmCuEmCDAzj',
+      courseId: undefined
+    },
+    [length]: 3
+  ],
+  recudHE5Omrr10qrx: [
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@connectique5',
+      associatedSkillId: 'rece8ECIMBhHXgwo9',
+      challengeId: 'recP5w2VLfwYHhHUU',
+      competenceId: 'recudHE5Omrr10qrx',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@logicielLibre5',
+      associatedSkillId: 'recXWlIrXF467cALf',
+      challengeId: 'recbRokUr61fmRl57',
+      competenceId: 'recudHE5Omrr10qrx',
+      courseId: undefined
+    },
+    CertificationChallenge {
+      id: undefined,
+      associatedSkillName: '@logicielLibre4',
+      associatedSkillId: 'reckLgGIitzPoZRq5',
+      challengeId: 'recpkWVqRspI2Lku3',
+      competenceId: 'recudHE5Omrr10qrx',
+      courseId: undefined
+    },
+    [length]: 3
+  ]
+}

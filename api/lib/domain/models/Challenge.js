@@ -151,7 +151,10 @@ class Challenge {
   }
 
   static findBySkill({ challenges, skill }) {
-    return _.filter(challenges, (challenge) => challenge.hasSkill(skill));
+    return _.filter(challenges, (challenge) => {
+      return challenge.hasSkill(skill);
+    }
+    );
   }
 }
 
