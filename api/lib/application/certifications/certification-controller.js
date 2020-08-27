@@ -8,6 +8,7 @@ module.exports = {
     const userId = request.auth.credentials.userId;
 
     await competenceRepository.listPixCompetencesOnly();
+    await challengeRepository.findFrenchFranceOperative();
 
     return usecases.findCompletedUserCertifications({ userId })
       .then((certifications) => certificationSerializer.serialize(certifications));

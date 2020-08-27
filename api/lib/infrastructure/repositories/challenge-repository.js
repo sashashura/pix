@@ -41,15 +41,16 @@ module.exports = {
   },
 
   async findFrenchFranceOperative() {
-    // const challengeDataObjects = await challengeDatasource.findFrenchFranceOperative();
-    // fs.writeFileSync('challengeDataObjects.json', JSON.stringify(challengeDataObjects, null, '\t'));
+    const challengeDataObjects = await challengeDatasource.findFrenchFranceOperative();
+    fs.writeFileSync('challengeDataObjects.json', JSON.stringify(challengeDataObjects, null, '\t'));
 
-    // const operativeSkills = await skillDatasource.findOperative();
-    // fs.writeFileSync('operativeSkills.json', JSON.stringify(operativeSkills, null, '\t'));
+    const operativeSkills = await skillDatasource.findOperative();
+    fs.writeFileSync('operativeSkills.json', JSON.stringify(operativeSkills, null, '\t'));
 
-    // const result = _toDomainCollection({ challengeDataObjects, skills: operativeSkills });
-    // s.writeFileSync('result.json', JSON.stringify(result, null, '\t'));
-    const result = require('../../../../result.json');
+    const result = _toDomainCollection({ challengeDataObjects, skills: operativeSkills });
+
+    fs.writeFileSync('result2.json', JSON.stringify(result, null, '\t'));
+    // const result = require('../../../../result.json');
 
     return result.map((challenge) => new Challenge({ ...challenge }));
   },
@@ -87,6 +88,8 @@ function _toDomain({ challengeDataObject, skillDataObjects }) {
   const skills = skillDataObjects.map((skillDataObject) => skillAdapter.fromAirtableDataObject(skillDataObject));
 
   const solution = solutionAdapter.fromChallengeAirtableDataObject(challengeDataObject);
+
+  console.log(challengeDataObject.competenceId, challengeDataObject.competenceId === 'rece6jYwH4WEw549z');
 
   const validator = Challenge.createValidatorForChallengeType({
     challengeType: challengeDataObject.type,

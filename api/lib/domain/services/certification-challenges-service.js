@@ -31,6 +31,10 @@ module.exports = {
     const challengeIdsCorrectlyAnswered = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
 
     const allChallenges = await challengeRepository.findFrenchFranceOperative();
+
+    // console.log('CORRECTLY ANSWRD',challengeIdsCorrectlyAnswered.includes('rec4sYwztLSdruxN6'));
+    // console.log('ALL CHLG',allChallenges.find((challenge) => challenge.id === 'rec4sYwztLSdruxN6'));
+
     const challengesAlreadyAnswered = challengeIdsCorrectlyAnswered.map((challengeId) => Challenge.findById(allChallenges, challengeId));
 
     challengesAlreadyAnswered.forEach((challenge) => {
@@ -39,6 +43,8 @@ module.exports = {
       }
 
       const userCompetence = _getUserCompetenceByChallengeCompetenceId(placementProfile.userCompetences, challenge);
+
+      // console.log(userCompetence ? userCompetence.id : null);
 
       if (!userCompetence || !userCompetence.isCertifiable()) {
         return;
