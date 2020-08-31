@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const HigherEducationRegistrationSet = require('../../../../lib/domain/models/HigherEducationRegistrationSet');
 const { expect, catchErr } = require('../../../test-helper');
 const {  EntityValidationError } = require('../../../../lib/domain/errors');
@@ -125,5 +126,207 @@ describe('Unit | Domain | Models | HigherEducationRegistrationSet', () => {
         expect(error).to.be.instanceOf(EntityValidationError);
       });
     });
+  });
+
+  context('#identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber', () => {
+    const existingSupernumerary = {
+      id: 123,
+      firstName: 'Laura',
+      lastName: 'Laplubelle',
+      birthdate: '2010-04-01',
+    };
+    const anotherSupernumerary = {
+      id: 789,
+      firstName: 'Estelle',
+      lastName: 'Unpoilmoinsbellequelaura',
+      birthdate: '2009-01-01',
+    };
+    const existingSupernumeraries = [anotherSupernumerary, existingSupernumerary];
+
+    context('no match found', () => {
+
+      it('should return an empty array', async () => {
+        // given
+        const higherEducationRegistrationSet = new HigherEducationRegistrationSet();
+        const registration1 = {
+          firstName: 'Arthur',
+          lastName: 'Leplublo',
+          birthdate: '2010-05-02',
+          organizationId: 1,
+          studentNumber: '456DEF',
+        };
+        higherEducationRegistrationSet.addRegistration(registration1);
+
+        // when
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber(existingSupernumeraries);
+
+        // then
+        expect(higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate).to.be.empty;
+      });
+    });
+
+    context('a match is found based on firstName, lastName and birthdate', () => {
+
+      it('should return the registration updated with info from set', async () => {
+        // given
+        const higherEducationRegistrationSet = new HigherEducationRegistrationSet();
+        const registration1 = {
+          firstName: 'Laura',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+          organizationId: 1,
+          studentNumber: '123ABC',
+        };
+        higherEducationRegistrationSet.addRegistration(registration1);
+
+        // when
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber(existingSupernumeraries);
+
+        // then
+        const registrationToUpdate = higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate[0];
+        expect(_.pick(registrationToUpdate, ['id', 'firstName', 'lastName', 'birthdate', 'organizationId', 'studentNumber'])).to.deep.equal({
+          ...registration1,
+          id: existingSupernumerary.id,
+        });
+      });
+    });
+
+    context('when the birthdate and lastName match and the firstName match using the levenshtein distance', () => {
+
+      it('should return the registration updated with info from set', async () => {
+        // given
+        const higherEducationRegistrationSet = new HigherEducationRegistrationSet();
+        const registration1 = {
+          firstName: 'Laure',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+          organizationId: 1,
+          studentNumber: '123ABC',
+        };
+        higherEducationRegistrationSet.addRegistration(registration1);
+
+        // when
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber(existingSupernumeraries);
+
+        // then
+        const registrationsToUpdate = higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate[0];
+
+        expect(_.pick(registrationsToUpdate, ['id', 'firstName', 'lastName', 'birthdate', 'organizationId', 'studentNumber'])).to.deep.equal({
+          ...registration1,
+          id: existingSupernumerary.id,
+        });
+      });
+    });
+
+    context('when the birthdate match and the lastName match using the levenshtein distance', () => {
+      it('should return the registration updated with info from set', async () => {
+        // given
+        const higherEducationRegistrationSet = new HigherEducationRegistrationSet();
+        const registration1 = {
+          firstName: 'Laura',
+          lastName: 'Laplubelleu',
+          birthdate: '2010-04-01',
+          organizationId: 1,
+          studentNumber: '123ABC',
+        };
+        higherEducationRegistrationSet.addRegistration(registration1);
+
+        // when
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber(existingSupernumeraries);
+
+        // then
+        const registrationsToUpdate = higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate[0];
+        expect(_.pick(registrationsToUpdate, ['id', 'firstName', 'lastName', 'birthdate', 'organizationId', 'studentNumber'])).to.deep.equal({
+          ...registration1,
+          id: existingSupernumerary.id,
+        });
+      });
+    });
+
+    context('when several supernumeraries match the same registration', () => {
+
+      it('should not include those matches in the supernumeraryRegistrationsToUpdate', async () => {
+        // given
+        const anotherExistingSupernumerary = {
+          id: 789,
+          firstName: 'Laura',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+        };
+        const higherEducationRegistrationSet = new HigherEducationRegistrationSet();
+        const registration1 = {
+          firstName: 'Laura',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+          organizationId: 1,
+          studentNumber: '123ABC',
+        };
+        higherEducationRegistrationSet.addRegistration(registration1);
+
+        // when
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber([...existingSupernumeraries, anotherExistingSupernumerary]);
+
+        // then
+        expect(higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate).to.be.empty;
+      });
+
+      it('should take into account successive calls to identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber', async () => {
+        // given
+        const higherEducationRegistrationSet = new HigherEducationRegistrationSet();
+        const registration1 = {
+          firstName: 'Laura',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+          organizationId: 1,
+          studentNumber: '123ABC',
+        };
+        higherEducationRegistrationSet.addRegistration(registration1);
+
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber(existingSupernumeraries);
+        const registrationToUpdate = higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate[0];
+        expect(_.pick(registrationToUpdate, ['id', 'firstName', 'lastName', 'birthdate', 'organizationId', 'studentNumber'])).to.deep.equal({
+          ...registration1,
+          id: existingSupernumerary.id,
+        });
+
+        const anotherExistingSupernumerary = {
+          id: 789,
+          firstName: 'Laura',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+        };
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber([anotherExistingSupernumerary]);
+        expect(higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate).to.be.empty;
+      });
+    });
+
+    context('when one supernumerary matches several registrations', () => {
+
+      it('should take into account successive calls to identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber', async () => {
+        // given
+        const higherEducationRegistrationSet = new HigherEducationRegistrationSet();
+        const registration1 = {
+          firstName: 'Laura',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+          organizationId: 1,
+          studentNumber: '123ABC',
+        };
+        const registration2 = {
+          firstName: 'Laura',
+          lastName: 'Laplubelle',
+          birthdate: '2010-04-01',
+          organizationId: 1,
+          studentNumber: '123DEF',
+        };
+        higherEducationRegistrationSet.addRegistration(registration1);
+        higherEducationRegistrationSet.addRegistration(registration2);
+
+        higherEducationRegistrationSet.identifyMatchesBetweenRegistrationsAndExistingRegistrationsWithoutStudentNumber(existingSupernumeraries);
+
+        expect(higherEducationRegistrationSet.supernumeraryRegistrationsToUpdate).to.be.empty;
+      });
+    });
+
   });
 });
