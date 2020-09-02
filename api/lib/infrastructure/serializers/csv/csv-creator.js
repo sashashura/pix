@@ -109,7 +109,7 @@ class CsvCreator {
       .value();
   }
 
-  extracted(campaignParticipationInfos) {
+  createLines(campaignParticipationInfos) {
     bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
       await this.createLine(campaignParticipationInfo);
     }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {

@@ -30,7 +30,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   // after this function's returned promise resolves. If we await the map
   // function, node will keep all the data in memory until the end of the
   // complete operation.
-  csvCreator.extracted(campaignParticipationInfos);
+  csvCreator.createLines(campaignParticipationInfos);
 
   const fileName = `Resultats-${campaign.name}-${campaign.id}-${moment.utc().format('YYYY-MM-DD-hhmm')}.csv`;
   return { fileName };
