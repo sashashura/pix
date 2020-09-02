@@ -18,14 +18,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
 
   //Create HEADER of CSV
   const csvCreator = new CsvCreator(writableStream, campaignId);
-  await csvCreator.fetchData();
-  csvCreator.createHeaderOfCSV();
-
-  // No return/await here, we need the writing to continue in the background
-  // after this function's returned promise resolves. If we await the map
-  // function, node will keep all the data in memory until the end of the
-  // complete operation.
-  csvCreator.createLines();
+  await csvCreator.startExport();
 
   const fileName = `Resultats-${campaign.name}-${campaign.id}-${moment.utc().format('YYYY-MM-DD-hhmm')}.csv`;
   return { fileName };

@@ -16,7 +16,12 @@ class CsvCreator {
   constructor(stream, campaignId) {
     this.stream = stream;
     this.campaignId = campaignId;
+  }
 
+  async startExport() {
+    await this.fetchData();
+    this.createHeaderOfCSV();
+    this.createLines();
   }
 
   async fetchData() {
@@ -77,7 +82,7 @@ class CsvCreator {
     return _.uniqBy(competences.map((competence) => competence.area), 'code');
   }
 
-  async createLine(campaignParticipationInfo) {
+  async _createLine(campaignParticipationInfo) {
     const participantKnowledgeElements = await knowledgeElementRepository.findUniqByUserId({
       userId: campaignParticipationInfo.userId,
       limitDate: campaignParticipationInfo.sharedAt,
@@ -111,7 +116,7 @@ class CsvCreator {
 
   createLines() {
     bluebird.map(this.campaignParticipationInfos, async (campaignParticipationInfo) => {
-      await this.createLine(campaignParticipationInfo);
+      await this._createLine(campaignParticipationInfo);
     }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
       this.stream.end();
     }).catch((error) => {
