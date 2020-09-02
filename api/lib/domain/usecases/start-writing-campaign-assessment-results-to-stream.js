@@ -34,7 +34,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   //Create HEADER of CSV
   const csvCreator = new CsvCreator(writableStream, campaignId);
   await csvCreator.fetchData();
-  csvCreator.createHeaderOfCSV(targetProfile.skills, allCompetences, campaign.idPixLabel, organization.type, organization.isManagingStudents);
+  csvCreator.createHeaderOfCSV(targetProfile.skills, campaign.idPixLabel, organization.type, organization.isManagingStudents);
 
   // No return/await here, we need the writing to continue in the background
   // after this function's returned promise resolves. If we await the map

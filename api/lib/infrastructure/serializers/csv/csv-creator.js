@@ -26,15 +26,13 @@ class CsvCreator {
     ]);
 
     this.targetProfile = targetProfile;
-    this.allCompetences = allCompetences;
+    this.competences = this._extractCompetences(allCompetences, this.targetProfile.skills);
     this.organization = organization;
+    this.areas = this.extractAreas(this.competences);
     this.campaignParticipationInfos = campaignParticipationInfos;
   }
 
-  createHeaderOfCSV(skills, allCompetences, idPixLabel, organizationType, organizationIsManagingStudents) {
-    const competences = this._extractCompetences(allCompetences, skills);
-    const areas = this.extractAreas(competences);
-
+  createHeaderOfCSV(skills, idPixLabel, organizationType, organizationIsManagingStudents) {
     const headers = [
       'Nom de l\'organisation',
       'ID Campagne',
@@ -52,13 +50,13 @@ class CsvCreator {
       'Date du partage',
       '% maitrise de l\'ensemble des acquis du profil',
 
-      ...(_.flatMap(competences, (competence) => [
+      ...(_.flatMap(this.competences, (competence) => [
         `% de maitrise des acquis de la compétence ${competence.name}`,
         `Nombre d'acquis du profil cible dans la compétence ${competence.name}`,
         `Acquis maitrisés dans la compétence ${competence.name}`,
       ])),
 
-      ...(_.flatMap(areas, (area) => [
+      ...(_.flatMap(this.areas, (area) => [
         `% de maitrise des acquis du domaine ${area.title}`,
         `Nombre d'acquis du profil cible du domaine ${area.title}`,
         `Acquis maitrisés du domaine ${area.title}`,
