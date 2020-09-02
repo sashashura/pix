@@ -51,7 +51,7 @@ class CsvCreator {
     return _.uniqBy(competences.map((competence) => competence.area), 'code');
   }
 
-  async createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences, targetProfile, writableStream, skills) {
+  async createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences, targetProfile, skills) {
     const competences = this._extractCompetences(allCompetences, skills);
     const participantKnowledgeElements = await knowledgeElementRepository.findUniqByUserId({
       userId: campaignParticipationInfo.userId,
@@ -67,7 +67,7 @@ class CsvCreator {
       participantKnowledgeElements,
     });
 
-    writableStream.write(csvLine);
+    this.stream.write(csvLine);
   }
 
   _extractCompetences(allCompetences, skills) {
