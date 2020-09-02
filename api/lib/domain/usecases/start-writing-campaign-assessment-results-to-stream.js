@@ -32,7 +32,8 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   ]);
 
   //Create HEADER of CSV
-  const csvCreator = new CsvCreator(writableStream);
+  const csvCreator = new CsvCreator(writableStream, campaignId);
+  await csvCreator.fetchData();
   csvCreator.createHeaderOfCSV(targetProfile.skills, allCompetences, campaign.idPixLabel, organization.type, organization.isManagingStudents);
 
   // No return/await here, we need the writing to continue in the background

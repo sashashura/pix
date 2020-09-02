@@ -1,10 +1,34 @@
+const targetProfileRepository = require('../../repositories/target-profile-repository');
+const competenceRepository = require('../../repositories/competence-repository');
+const organizationRepository = require('../../repositories/organization-repository');
+const campaignParticipationInfoRepository = require('../../repositories/campaign-participation-info-repository');
+const campaignRepository = require('../../repositories/campaign-repository');
+
 const _ = require('lodash');
 const csvSerializer = require('./csv-serializer');
 const knowledgeElementRepository = require('../../repositories/knowledge-element-repository');
 
 class CsvCreator {
-  constructor(stream) {
+  constructor(stream, campaignId) {
     this.stream = stream;
+    this.campaignId = campaignId;
+
+  }
+
+  async fetchData() {
+    const campaign = await campaignRepository.get(this.campaignId);
+
+    const [targetProfile, allCompetences, organization, campaignParticipationInfos] = await Promise.all([
+      targetProfileRepository.get(campaign.targetProfileId),
+      competenceRepository.list(),
+      organizationRepository.get(campaign.organizationId),
+      campaignParticipationInfoRepository.findByCampaignId(campaign.id),
+    ]);
+
+    this.targetProfile = targetProfile;
+    this.allCompetences = allCompetences;
+    this.organization = organization;
+    this.campaignParticipationInfos = campaignParticipationInfos;
   }
 
   createHeaderOfCSV(skills, allCompetences, idPixLabel, organizationType, organizationIsManagingStudents) {
