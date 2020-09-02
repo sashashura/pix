@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const csvSerializer = require('./csv-serializer');
+const knowledgeElementRepository = require('../../repositories/knowledge-element-repository');
 
 class CsvCreator {
   constructor(stream) {
@@ -49,7 +50,7 @@ class CsvCreator {
     return _.uniqBy(competences.map((competence) => competence.area), 'code');
   }
 
-  async createLine(knowledgeElementRepository, campaignParticipationInfo, campaignCsvExportService, organization, campaign, competences, targetProfile, writableStream) {
+  async createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, competences, targetProfile, writableStream) {
     const participantKnowledgeElements = await knowledgeElementRepository.findUniqByUserId({
       userId: campaignParticipationInfo.userId,
       limitDate: campaignParticipationInfo.sharedAt,
