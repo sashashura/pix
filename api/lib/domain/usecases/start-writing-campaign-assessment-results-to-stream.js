@@ -4,7 +4,7 @@ const bluebird = require('bluebird');
 
 const constants = require('../../infrastructure/constants');
 const { UserNotAuthorizedToGetCampaignResultsError, CampaignWithoutOrganizationError } = require('../errors');
-const csvSerializer = require('../../infrastructure/serializers/csv/csv-serializer');
+const CsvCreator = require('../../infrastructure/serializers/csv/csv-creator');
 
 module.exports = async function startWritingCampaignAssessmentResultsToStream(
   {
@@ -35,14 +35,8 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   const competences = _extractCompetences(allCompetences, targetProfile.skills);
 
   //Create HEADER of CSV
-  const headers = _createHeaderOfCSV(targetProfile.skills, competences, campaign.idPixLabel, organization.type, organization.isManagingStudents);
-
-  // WHY: add \uFEFF the UTF-8 BOM at the start of the text, see:
-  // - https://en.wikipedia.org/wiki/Byte_order_mark
-  // - https://stackoverflow.com/a/38192870
-  const headerLine = '\uFEFF' + csvSerializer.serializeLine(headers);
-
-  writableStream.write(headerLine);
+  const csvCreator = new CsvCreator(writableStream);
+  csvCreator.createHeaderOfCSV(targetProfile.skills, competences, campaign.idPixLabel, organization.type, organization.isManagingStudents);
 
   // No return/await here, we need the writing to continue in the background
   // after this function's returned promise resolves. If we await the map
@@ -89,42 +83,6 @@ async function _checkCreatorHasAccessToCampaignOrganization(userId, organization
   }
 }
 
-function _createHeaderOfCSV(skills, competences, idPixLabel, organizationType, organizationIsManagingStudents) {
-  const areas = _extractAreas(competences);
-
-  return [
-    'Nom de l\'organisation',
-    'ID Campagne',
-    'Nom de la campagne',
-    'Nom du Profil Cible',
-    'Nom du Participant',
-    'Prénom du Participant',
-    ...((organizationType === 'SUP' && organizationIsManagingStudents) ? ['Numéro Étudiant'] : []),
-
-    ...(idPixLabel ? [idPixLabel] : []),
-
-    '% de progression',
-    'Date de début',
-    'Partage (O/N)',
-    'Date du partage',
-    '% maitrise de l\'ensemble des acquis du profil',
-
-    ...(_.flatMap(competences, (competence) => [
-      `% de maitrise des acquis de la compétence ${competence.name}`,
-      `Nombre d'acquis du profil cible dans la compétence ${competence.name}`,
-      `Acquis maitrisés dans la compétence ${competence.name}`,
-    ])),
-
-    ...(_.flatMap(areas, (area) => [
-      `% de maitrise des acquis du domaine ${area.title}`,
-      `Nombre d'acquis du profil cible du domaine ${area.title}`,
-      `Acquis maitrisés du domaine ${area.title}`,
-    ])),
-
-    ...(_.map(skills, 'name')),
-  ];
-}
-
 function _extractCompetences(allCompetences, skills) {
   return _(skills)
     .map('competenceId')
@@ -137,9 +95,5 @@ function _extractCompetences(allCompetences, skills) {
       return competence;
     })
     .value();
-}
-
-function _extractAreas(competences) {
-  return _.uniqBy(competences.map((competence) => competence.area), 'code');
 }
 
