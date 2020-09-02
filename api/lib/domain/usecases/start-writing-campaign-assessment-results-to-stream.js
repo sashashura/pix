@@ -16,7 +16,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   await _checkCreatorHasAccessToCampaignOrganization(userId, campaign.organizationId, userRepository);
 
   //Create HEADER of CSV
-  const csvCreator = new CsvCreator(writableStream, campaignId);
+  const csvCreator = new CsvCreator(writableStream, campaign);
   await csvCreator.startExport();
   return csvCreator.generateFilename();
 };

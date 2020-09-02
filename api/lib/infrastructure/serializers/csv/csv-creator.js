@@ -5,7 +5,6 @@ const targetProfileRepository = require('../../repositories/target-profile-repos
 const competenceRepository = require('../../repositories/competence-repository');
 const organizationRepository = require('../../repositories/organization-repository');
 const campaignParticipationInfoRepository = require('../../repositories/campaign-participation-info-repository');
-const campaignRepository = require('../../repositories/campaign-repository');
 const campaignCsvExportService = require('../../../domain/services/campaign-csv-export-service');
 const constants = require('../../constants');
 
@@ -14,9 +13,9 @@ const csvSerializer = require('./csv-serializer');
 const knowledgeElementRepository = require('../../repositories/knowledge-element-repository');
 
 class CsvCreator {
-  constructor(stream, campaignId) {
+  constructor(stream, campaign) {
     this.stream = stream;
-    this.campaignId = campaignId;
+    this.campaign = campaign;
   }
 
   async startExport() {
@@ -26,12 +25,12 @@ class CsvCreator {
   }
 
   generateFilename() {
-    const fileName = `Resultats-${this.campaign.name}-${this.campaign.id}-${moment.utc().format('YYYY-MM-DD-hhmm')}.csv`;
+    const fileName = `Resultats-${this.campaign.name}-${this.campaign.id}-${moment.utc().
+      format('YYYY-MM-DD-hhmm')}.csv`;
     return { fileName };
   }
 
   async fetchData() {
-    this.campaign = await campaignRepository.get(this.campaignId);
 
     const [targetProfile, allCompetences, organization, campaignParticipationInfos] = await Promise.all([
       targetProfileRepository.get(this.campaign.targetProfileId),
@@ -107,17 +106,13 @@ class CsvCreator {
   }
 
   _extractCompetences(allCompetences, skills) {
-    return _(skills)
-      .map('competenceId')
-      .uniq()
-      .map((competenceId) => {
-        const competence = _.find(allCompetences, { id: competenceId });
-        if (!competence) {
-          throw new Error(`Unknown competence ${competenceId}`);
-        }
-        return competence;
-      })
-      .value();
+    return _(skills).map('competenceId').uniq().map((competenceId) => {
+      const competence = _.find(allCompetences, { id: competenceId });
+      if (!competence) {
+        throw new Error(`Unknown competence ${competenceId}`);
+      }
+      return competence;
+    }).value();
   }
 
   createLines() {
