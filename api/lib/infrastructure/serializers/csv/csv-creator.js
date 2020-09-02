@@ -3,6 +3,7 @@ const competenceRepository = require('../../repositories/competence-repository')
 const organizationRepository = require('../../repositories/organization-repository');
 const campaignParticipationInfoRepository = require('../../repositories/campaign-participation-info-repository');
 const campaignRepository = require('../../repositories/campaign-repository');
+const campaignCsvExportService = require('../../../domain/services/campaign-csv-export-service');
 
 const _ = require('lodash');
 const csvSerializer = require('./csv-serializer');
@@ -73,8 +74,7 @@ class CsvCreator {
     return _.uniqBy(competences.map((competence) => competence.area), 'code');
   }
 
-  async createLine(campaignParticipationInfo, campaignCsvExportService, campaign, allCompetences) {
-    const competences = this._extractCompetences(allCompetences, this.targetProfile.skills);
+  async createLine(campaignParticipationInfo) {
     const participantKnowledgeElements = await knowledgeElementRepository.findUniqByUserId({
       userId: campaignParticipationInfo.userId,
       limitDate: campaignParticipationInfo.sharedAt,
@@ -82,8 +82,8 @@ class CsvCreator {
 
     const csvLine = campaignCsvExportService.createOneCsvLine({
       organization: this.organization,
-      campaign,
-      competences,
+      campaign: this.campaign,
+      competences: this.competences,
       campaignParticipationInfo,
       targetProfile: this.targetProfile,
       participantKnowledgeElements,
