@@ -32,7 +32,7 @@ class CsvCreator {
     this.campaignParticipationInfos = campaignParticipationInfos;
   }
 
-  createHeaderOfCSV(skills, idPixLabel, organizationType, organizationIsManagingStudents) {
+  createHeaderOfCSV(idPixLabel, organizationType, organizationIsManagingStudents) {
     const headers = [
       'Nom de l\'organisation',
       'ID Campagne',
@@ -62,7 +62,7 @@ class CsvCreator {
         `Acquis maitrisés du domaine ${area.title}`,
       ])),
 
-      ...(_.map(skills, 'name')),
+      ...(_.map(this.targetProfile.skills, 'name')),
     ];
 
     const headerLine = '\uFEFF' + csvSerializer.serializeLine(headers);
@@ -73,8 +73,8 @@ class CsvCreator {
     return _.uniqBy(competences.map((competence) => competence.area), 'code');
   }
 
-  async createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences, targetProfile, skills) {
-    const competences = this._extractCompetences(allCompetences, skills);
+  async createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences) {
+    const competences = this._extractCompetences(allCompetences, this.targetProfile.skills);
     const participantKnowledgeElements = await knowledgeElementRepository.findUniqByUserId({
       userId: campaignParticipationInfo.userId,
       limitDate: campaignParticipationInfo.sharedAt,
@@ -85,7 +85,7 @@ class CsvCreator {
       campaign,
       competences,
       campaignParticipationInfo,
-      targetProfile,
+      targetProfile: this.targetProfile,
       participantKnowledgeElements,
     });
 

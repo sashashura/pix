@@ -13,7 +13,6 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
     writableStream,
     campaignRepository,
     userRepository,
-    targetProfileRepository,
     competenceRepository,
     campaignParticipationInfoRepository,
     organizationRepository,
@@ -24,8 +23,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
 
   await _checkCreatorHasAccessToCampaignOrganization(userId, campaign.organizationId, userRepository);
 
-  const [targetProfile, allCompetences, organization, campaignParticipationInfos] = await Promise.all([
-    targetProfileRepository.get(campaign.targetProfileId),
+  const [allCompetences, organization, campaignParticipationInfos] = await Promise.all([
     competenceRepository.list(),
     organizationRepository.get(campaign.organizationId),
     campaignParticipationInfoRepository.findByCampaignId(campaign.id),
@@ -34,14 +32,14 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   //Create HEADER of CSV
   const csvCreator = new CsvCreator(writableStream, campaignId);
   await csvCreator.fetchData();
-  csvCreator.createHeaderOfCSV(targetProfile.skills, campaign.idPixLabel, organization.type, organization.isManagingStudents);
+  csvCreator.createHeaderOfCSV(campaign.idPixLabel, organization.type, organization.isManagingStudents);
 
   // No return/await here, we need the writing to continue in the background
   // after this function's returned promise resolves. If we await the map
   // function, node will keep all the data in memory until the end of the
   // complete operation.
   bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
-    await csvCreator.createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences, targetProfile, targetProfile.skills);
+    await csvCreator.createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences);
   }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
     writableStream.end();
   }).catch((error) => {
