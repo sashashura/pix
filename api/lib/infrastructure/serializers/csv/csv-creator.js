@@ -19,9 +19,9 @@ class CsvCreator {
   }
 
   async startExport() {
-    await this.fetchData();
-    this.createHeaderOfCSV();
-    this.createLines();
+    await this._fetchData();
+    this._writeHeader();
+    this._createLines();
   }
 
   generateFilename() {
@@ -30,8 +30,7 @@ class CsvCreator {
     return { fileName };
   }
 
-  async fetchData() {
-
+  async _fetchData() {
     const [targetProfile, allCompetences, organization, campaignParticipationInfos] = await Promise.all([
       targetProfileRepository.get(this.campaign.targetProfileId),
       competenceRepository.list(),
@@ -42,11 +41,11 @@ class CsvCreator {
     this.targetProfile = targetProfile;
     this.competences = this._extractCompetences(allCompetences, this.targetProfile.skills);
     this.organization = organization;
-    this.areas = this.extractAreas(this.competences);
+    this.areas = this._extractAreas(this.competences);
     this.campaignParticipationInfos = campaignParticipationInfos;
   }
 
-  createHeaderOfCSV() {
+  _writeHeader() {
     const headers = [
       'Nom de l\'organisation',
       'ID Campagne',
@@ -83,7 +82,7 @@ class CsvCreator {
     this.stream.write(headerLine);
   }
 
-  extractAreas(competences) {
+  _extractAreas(competences) {
     return _.uniqBy(competences.map((competence) => competence.area), 'code');
   }
 
@@ -115,7 +114,7 @@ class CsvCreator {
     }).value();
   }
 
-  createLines() {
+  _createLines() {
     bluebird.map(this.campaignParticipationInfos, async (campaignParticipationInfo) => {
       await this._createLine(campaignParticipationInfo);
     }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
