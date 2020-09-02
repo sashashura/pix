@@ -48,6 +48,24 @@ class CsvCreator {
   extractAreas(competences) {
     return _.uniqBy(competences.map((competence) => competence.area), 'code');
   }
+
+  async createLine(knowledgeElementRepository, campaignParticipationInfo, campaignCsvExportService, organization, campaign, competences, targetProfile, writableStream) {
+    const participantKnowledgeElements = await knowledgeElementRepository.findUniqByUserId({
+      userId: campaignParticipationInfo.userId,
+      limitDate: campaignParticipationInfo.sharedAt,
+    });
+
+    const csvLine = campaignCsvExportService.createOneCsvLine({
+      organization,
+      campaign,
+      competences,
+      campaignParticipationInfo,
+      targetProfile,
+      participantKnowledgeElements,
+    });
+
+    writableStream.write(csvLine);
+  }
 }
 
 module.exports = CsvCreator;

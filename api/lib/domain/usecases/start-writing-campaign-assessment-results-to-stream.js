@@ -43,21 +43,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   // function, node will keep all the data in memory until the end of the
   // complete operation.
   bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
-    const participantKnowledgeElements = await knowledgeElementRepository.findUniqByUserId({
-      userId: campaignParticipationInfo.userId,
-      limitDate: campaignParticipationInfo.sharedAt,
-    });
-
-    const csvLine = campaignCsvExportService.createOneCsvLine({
-      organization,
-      campaign,
-      competences,
-      campaignParticipationInfo,
-      targetProfile,
-      participantKnowledgeElements,
-    });
-
-    writableStream.write(csvLine);
+    await csvCreator.createLine(knowledgeElementRepository, campaignParticipationInfo, campaignCsvExportService, organization, campaign, competences, targetProfile, writableStream);
   }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
     writableStream.end();
   }).catch((error) => {
