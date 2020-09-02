@@ -7,7 +7,8 @@ class CsvCreator {
     this.stream = stream;
   }
 
-  createHeaderOfCSV(skills, competences, idPixLabel, organizationType, organizationIsManagingStudents) {
+  createHeaderOfCSV(skills, allCompetences, idPixLabel, organizationType, organizationIsManagingStudents) {
+    const competences = this._extractCompetences(allCompetences, skills);
     const areas = this.extractAreas(competences);
 
     const headers = [
@@ -66,6 +67,20 @@ class CsvCreator {
     });
 
     writableStream.write(csvLine);
+  }
+
+  _extractCompetences(allCompetences, skills) {
+    return _(skills)
+      .map('competenceId')
+      .uniq()
+      .map((competenceId) => {
+        const competence = _.find(allCompetences, { id: competenceId });
+        if (!competence) {
+          throw new Error(`Unknown competence ${competenceId}`);
+        }
+        return competence;
+      })
+      .value();
   }
 }
 
