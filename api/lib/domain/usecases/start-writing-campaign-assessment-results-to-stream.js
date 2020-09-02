@@ -15,7 +15,6 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
     userRepository,
     competenceRepository,
     campaignParticipationInfoRepository,
-    organizationRepository,
     campaignCsvExportService,
   }) {
 
@@ -23,23 +22,22 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
 
   await _checkCreatorHasAccessToCampaignOrganization(userId, campaign.organizationId, userRepository);
 
-  const [allCompetences, organization, campaignParticipationInfos] = await Promise.all([
+  const [allCompetences, campaignParticipationInfos] = await Promise.all([
     competenceRepository.list(),
-    organizationRepository.get(campaign.organizationId),
     campaignParticipationInfoRepository.findByCampaignId(campaign.id),
   ]);
 
   //Create HEADER of CSV
   const csvCreator = new CsvCreator(writableStream, campaignId);
   await csvCreator.fetchData();
-  csvCreator.createHeaderOfCSV(organization.type, organization.isManagingStudents);
+  csvCreator.createHeaderOfCSV();
 
   // No return/await here, we need the writing to continue in the background
   // after this function's returned promise resolves. If we await the map
   // function, node will keep all the data in memory until the end of the
   // complete operation.
   bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
-    await csvCreator.createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences);
+    await csvCreator.createLine(campaignParticipationInfo, campaignCsvExportService, campaign, allCompetences);
   }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
     writableStream.end();
   }).catch((error) => {
