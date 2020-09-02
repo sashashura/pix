@@ -109,8 +109,8 @@ class CsvCreator {
       .value();
   }
 
-  createLines(campaignParticipationInfos) {
-    bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
+  createLines() {
+    bluebird.map(this.campaignParticipationInfos, async (campaignParticipationInfo) => {
       await this.createLine(campaignParticipationInfo);
     }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
       this.stream.end();

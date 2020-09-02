@@ -10,16 +10,11 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
     writableStream,
     campaignRepository,
     userRepository,
-    campaignParticipationInfoRepository,
   }) {
 
   const campaign = await campaignRepository.get(campaignId);
 
   await _checkCreatorHasAccessToCampaignOrganization(userId, campaign.organizationId, userRepository);
-
-  const [campaignParticipationInfos] = await Promise.all([
-    campaignParticipationInfoRepository.findByCampaignId(campaign.id),
-  ]);
 
   //Create HEADER of CSV
   const csvCreator = new CsvCreator(writableStream, campaignId);
@@ -30,7 +25,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   // after this function's returned promise resolves. If we await the map
   // function, node will keep all the data in memory until the end of the
   // complete operation.
-  csvCreator.createLines(campaignParticipationInfos);
+  csvCreator.createLines();
 
   const fileName = `Resultats-${campaign.name}-${campaign.id}-${moment.utc().format('YYYY-MM-DD-hhmm')}.csv`;
   return { fileName };
