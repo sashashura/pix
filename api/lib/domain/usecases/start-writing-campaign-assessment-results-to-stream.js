@@ -31,8 +31,6 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
     campaignParticipationInfoRepository.findByCampaignId(campaign.id),
   ]);
 
-  const competences = _extractCompetences(allCompetences, targetProfile.skills);
-
   //Create HEADER of CSV
   const csvCreator = new CsvCreator(writableStream);
   csvCreator.createHeaderOfCSV(targetProfile.skills, allCompetences, campaign.idPixLabel, organization.type, organization.isManagingStudents);
@@ -42,7 +40,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   // function, node will keep all the data in memory until the end of the
   // complete operation.
   bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
-    await csvCreator.createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, competences, targetProfile, writableStream);
+    await csvCreator.createLine(campaignParticipationInfo, campaignCsvExportService, organization, campaign, allCompetences, targetProfile, writableStream, targetProfile.skills);
   }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
     writableStream.end();
   }).catch((error) => {
@@ -68,16 +66,3 @@ async function _checkCreatorHasAccessToCampaignOrganization(userId, organization
   }
 }
 
-function _extractCompetences(allCompetences, skills) {
-  return _(skills)
-    .map('competenceId')
-    .uniq()
-    .map((competenceId) => {
-      const competence = _.find(allCompetences, { id: competenceId });
-      if (!competence) {
-        throw new Error(`Unknown competence ${competenceId}`);
-      }
-      return competence;
-    })
-    .value();
-}
