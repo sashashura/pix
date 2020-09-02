@@ -1,9 +1,12 @@
+const bluebird = require('bluebird');
+
 const targetProfileRepository = require('../../repositories/target-profile-repository');
 const competenceRepository = require('../../repositories/competence-repository');
 const organizationRepository = require('../../repositories/organization-repository');
 const campaignParticipationInfoRepository = require('../../repositories/campaign-participation-info-repository');
 const campaignRepository = require('../../repositories/campaign-repository');
 const campaignCsvExportService = require('../../../domain/services/campaign-csv-export-service');
+const constants = require('../../constants');
 
 const _ = require('lodash');
 const csvSerializer = require('./csv-serializer');
@@ -104,6 +107,17 @@ class CsvCreator {
         return competence;
       })
       .value();
+  }
+
+  extracted(campaignParticipationInfos) {
+    bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
+      await this.createLine(campaignParticipationInfo);
+    }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
+      this.stream.end();
+    }).catch((error) => {
+      this.stream.emit('error', error);
+      throw error;
+    });
   }
 }
 

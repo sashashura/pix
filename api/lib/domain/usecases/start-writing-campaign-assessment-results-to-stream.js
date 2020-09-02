@@ -1,8 +1,5 @@
 const _ = require('lodash');
 const moment = require('moment');
-const bluebird = require('bluebird');
-
-const constants = require('../../infrastructure/constants');
 const { UserNotAuthorizedToGetCampaignResultsError, CampaignWithoutOrganizationError } = require('../errors');
 const CsvCreator = require('../../infrastructure/serializers/csv/csv-creator');
 
@@ -33,14 +30,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   // after this function's returned promise resolves. If we await the map
   // function, node will keep all the data in memory until the end of the
   // complete operation.
-  bluebird.map(campaignParticipationInfos, async (campaignParticipationInfo) => {
-    await csvCreator.createLine(campaignParticipationInfo);
-  }, { concurrency: constants.CONCURRENCY_HEAVY_OPERATIONS }).then(() => {
-    writableStream.end();
-  }).catch((error) => {
-    writableStream.emit('error', error);
-    throw error;
-  });
+  csvCreator.extracted(campaignParticipationInfos);
 
   const fileName = `Resultats-${campaign.name}-${campaign.id}-${moment.utc().format('YYYY-MM-DD-hhmm')}.csv`;
   return { fileName };
