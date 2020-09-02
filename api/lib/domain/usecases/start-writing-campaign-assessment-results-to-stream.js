@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const moment = require('moment');
 const { UserNotAuthorizedToGetCampaignResultsError, CampaignWithoutOrganizationError } = require('../errors');
 const CsvCreator = require('../../infrastructure/serializers/csv/csv-creator');
 
@@ -19,9 +18,7 @@ module.exports = async function startWritingCampaignAssessmentResultsToStream(
   //Create HEADER of CSV
   const csvCreator = new CsvCreator(writableStream, campaignId);
   await csvCreator.startExport();
-
-  const fileName = `Resultats-${campaign.name}-${campaign.id}-${moment.utc().format('YYYY-MM-DD-hhmm')}.csv`;
-  return { fileName };
+  return csvCreator.generateFilename();
 };
 
 async function _checkCreatorHasAccessToCampaignOrganization(userId, organizationId, userRepository) {

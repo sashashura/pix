@@ -1,4 +1,5 @@
 const bluebird = require('bluebird');
+const moment = require('moment');
 
 const targetProfileRepository = require('../../repositories/target-profile-repository');
 const competenceRepository = require('../../repositories/competence-repository');
@@ -22,6 +23,11 @@ class CsvCreator {
     await this.fetchData();
     this.createHeaderOfCSV();
     this.createLines();
+  }
+
+  generateFilename() {
+    const fileName = `Resultats-${this.campaign.name}-${this.campaign.id}-${moment.utc().format('YYYY-MM-DD-hhmm')}.csv`;
+    return { fileName };
   }
 
   async fetchData() {
