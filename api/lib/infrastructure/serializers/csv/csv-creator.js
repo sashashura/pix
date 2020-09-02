@@ -16,13 +16,13 @@ class CsvCreator {
   }
 
   async fetchData() {
-    const campaign = await campaignRepository.get(this.campaignId);
+    this.campaign = await campaignRepository.get(this.campaignId);
 
     const [targetProfile, allCompetences, organization, campaignParticipationInfos] = await Promise.all([
-      targetProfileRepository.get(campaign.targetProfileId),
+      targetProfileRepository.get(this.campaign.targetProfileId),
       competenceRepository.list(),
-      organizationRepository.get(campaign.organizationId),
-      campaignParticipationInfoRepository.findByCampaignId(campaign.id),
+      organizationRepository.get(this.campaign.organizationId),
+      campaignParticipationInfoRepository.findByCampaignId(this.campaign.id),
     ]);
 
     this.targetProfile = targetProfile;
@@ -32,7 +32,7 @@ class CsvCreator {
     this.campaignParticipationInfos = campaignParticipationInfos;
   }
 
-  createHeaderOfCSV(idPixLabel, organizationType, organizationIsManagingStudents) {
+  createHeaderOfCSV(organizationType, organizationIsManagingStudents) {
     const headers = [
       'Nom de l\'organisation',
       'ID Campagne',
@@ -42,7 +42,7 @@ class CsvCreator {
       'Prénom du Participant',
       ...((organizationType === 'SUP' && organizationIsManagingStudents) ? ['Numéro Étudiant'] : []),
 
-      ...(idPixLabel ? [idPixLabel] : []),
+      ...(this.campaign.idPixLabel ? [this.campaign.idPixLabel] : []),
 
       '% de progression',
       'Date de début',
