@@ -2,7 +2,7 @@
 /* eslint ember/require-tagless-components: 0 */
 
 import { expect } from 'chai';
-import { describe, it, beforeEach } from 'mocha';
+import { describe, beforeEach } from 'mocha';
 import setupIntlRenderingTest from '../../../helpers/setup-intl-rendering';
 import EmberObject from '@ember/object';
 import { click, fillIn, render, find } from '@ember/test-helpers';
@@ -12,6 +12,7 @@ import { reject, resolve } from 'rsvp';
 import sinon from 'sinon';
 
 describe('Integration | Component | routes/login-form', function() {
+
   setupIntlRenderingTest();
 
   let sessionStub;
@@ -186,5 +187,53 @@ describe('Integration | Component | routes/login-form', function() {
       // then
       sinon.assert.calledWith(replaceWithStub, 'update-expired-password');
     });
+  });
+
+  context('when external user IdToken exist', function() {
+
+    const externalUserToken = 'ABCD';
+
+    beforeEach(function() {
+      sessionStub.prototype.authenticate = sinon.stub().resolves();
+      sessionStub.prototype.get = sinon.stub().returns(externalUserToken);
+      sessionStub.prototype.set = sinon.stub().resolves();
+    });
+
+    it('should prevent redirection and update user authentication method', async function() {
+      // given
+      const sessionServiceObserver = this.owner.lookup('service:session');
+      const addGarAuthenticationMethodToUserStub = sinon.stub();
+      this.set('addGarAuthenticationMethodToUser', addGarAuthenticationMethodToUserStub);
+
+      await render(hbs`<Routes::LoginForm @addGarAuthenticationMethodToUser={{this.addGarAuthenticationMethodToUser}} />`);
+
+      await fillIn('#login', 'pix@example.net');
+      await fillIn('#password', 'JeMeLoggue1024');
+
+      // when
+      await click('#submit-connexion');
+
+      // then
+      sinon.assert.calledWith(sessionServiceObserver.set, 'attemptedTransition');
+      sinon.assert.calledWith(addGarAuthenticationMethodToUserStub, externalUserToken);
+    });
+    it('when update fails, should display specific error message', async function() {
+      // given
+      const addGarAuthenticationMethodToUserStub = sinon.stub().rejects(new Error());
+      this.set('addGarAuthenticationMethodToUser', addGarAuthenticationMethodToUserStub);
+
+      await render(hbs`<Routes::LoginForm @addGarAuthenticationMethodToUser={{this.addGarAuthenticationMethodToUser}} />`);
+
+      await fillIn('#login', 'pix@example.net');
+      await fillIn('#password', 'JeMeLoggue1024');
+
+      // when
+      await click('#submit-connexion');
+
+      // then
+      expect(find('#update-form-error-message')).to.exist;
+      expect(find('#update-form-error-message').textContent).to.equal('La méthode de connexion n\'a pas pu être ajoutée.');
+    });
+
   });
 });
