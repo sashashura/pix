@@ -23,11 +23,15 @@ export default Component.extend({
   intl: service(),
   url: service(),
 
+  hasFailed: false,
+  errorMessage: null,
   _notificationMessage: null,
   validation: null,
   _tokenHasBeenUsed: null,
   isRecaptchaEnabled: ENV.APP.IS_RECAPTCHA_ENABLED,
   isLoading: false,
+
+
 
   init() {
     this._super(...arguments);
@@ -119,6 +123,24 @@ export default Component.extend({
     this.set('user.email', email.trim());
   },
 
+  _manageErrorsApi(firstError) {
+    const statusCode = get(firstError, 'status');
+    this.set('errorMessage',this._showErrorMessages(statusCode));
+  },
+
+  _showErrorMessages(statusCode) {
+    const httpStatusCodeMessages = {
+      '422': this._updateInputsStatus(),
+      '400': ENV.APP.API_ERROR_MESSAGES.BAD_REQUEST,
+      '401': ENV.APP.API_ERROR_MESSAGES.LOGIN_UNAUTHORIZED.MESSAGE,
+      '500': ENV.APP.API_ERROR_MESSAGES.INTERNAL_SERVER_ERROR.MESSAGE,
+      '502': ENV.APP.API_ERROR_MESSAGES.INTERNAL_SERVER_ERROR.MESSAGE,
+      '504': ENV.APP.API_ERROR_MESSAGES.GATEWAY_TIMEOUT.MESSAGE,
+      'default': ENV.APP.API_ERROR_MESSAGES.INTERNAL_SERVER_ERROR.MESSAGE,
+    };
+    return this.intl.t(httpStatusCodeMessages[statusCode] || httpStatusCodeMessages['default']);
+  },
+
   actions: {
 
     resetTokenHasBeenUsed() {
@@ -141,6 +163,8 @@ export default Component.extend({
       this.set('_notificationMessage', null);
       this.set('isLoading', true);
 
+      this.set('hasFailed', false);
+
       this._trimNamesAndEmailOfUser();
 
       const campaignCode = get(this.session, 'attemptedTransition.from.parent.params.code');
@@ -150,8 +174,9 @@ export default Component.extend({
         this.authenticateUser(credentials);
         this.set('_tokenHasBeenUsed', true);
         this.set('user.password', null);
-      }).catch(() => {
-        this._updateInputsStatus();
+      }).catch((error) => {
+        this.set('hasFailed', true);
+        this._manageErrorsApi(error);
         this.set('_tokenHasBeenUsed', true);
         this.set('isLoading', false);
       });
