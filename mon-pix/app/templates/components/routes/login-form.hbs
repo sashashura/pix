@@ -4,7 +4,7 @@
   {{/if}}
 
   {{#if hasUpdateUserError}}
-    <div id="update-form-error-message" class="login-form__error-message error-message">La méthode de connexion n'a pas pu être ajoutée.</div>
+    <div id="update-form-error-message" class="login-form__error-message error-message">{{this.updateErrorMessage}}</div>
   {{/if}}
 
   <form {{action 'authenticate' on='submit'}}>

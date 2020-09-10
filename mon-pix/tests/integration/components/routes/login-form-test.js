@@ -217,7 +217,7 @@ describe('Integration | Component | routes/login-form', function() {
       sinon.assert.calledWith(sessionServiceObserver.set, 'attemptedTransition');
       sinon.assert.calledWith(addGarAuthenticationMethodToUserStub, externalUserToken);
     });
-    it('when update fails, should display specific error message', async function() {
+    it.only('when update fails with 5**, should display specific error message', async function() {
       // given
       const addGarAuthenticationMethodToUserStub = sinon.stub().rejects(new Error());
       this.set('addGarAuthenticationMethodToUser', addGarAuthenticationMethodToUserStub);
@@ -232,7 +232,34 @@ describe('Integration | Component | routes/login-form', function() {
 
       // then
       expect(find('#update-form-error-message')).to.exist;
-      expect(find('#update-form-error-message').textContent).to.equal('La méthode de connexion n\'a pas pu être ajoutée.');
+      expect(find('#update-form-error-message').textContent).to.equal('Une erreur interne est survenue, nos équipes sont en train de résoudre le problème. Veuillez réessayer ultérieurement.');
+    });
+    it.only('when update fails with 4**, should display specific error message', async function() {
+      // given
+
+      const expectedErrorMessage = 'Les données que vous avez soumises ne sont pas au bon format.';
+      const apiReturn = {
+        errors: [{
+          status: 400,
+          detail: expectedErrorMessage
+        }]
+      };
+      this.set('authenticateUser', sinon.stub().rejects(apiReturn));
+
+      const addGarAuthenticationMethodToUserStub = sinon.stub().rejects(new Error());
+      this.set('addGarAuthenticationMethodToUser', addGarAuthenticationMethodToUserStub);
+
+      await render(hbs`<Routes::LoginForm @addGarAuthenticationMethodToUser={{this.addGarAuthenticationMethodToUser}} />`);
+
+      await fillIn('#login', 'pix@example.net');
+      await fillIn('#password', 'JeMeLoggue1024');
+
+      // when
+      await click('#submit-connexion');
+
+      // then
+      expect(find('#update-form-error-message')).to.exist;
+      expect(find('#update-form-error-message').textContent).to.equal(expectedErrorMessage);
     });
 
   });

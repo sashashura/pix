@@ -29,6 +29,7 @@ export default class LoginOrRegisterToAccessRoute extends Controller {
 
     this.session.set('data.externalUser', null);
 
+    // add try/catch
     this.transitionToRoute('campaigns.start-or-resume', this.model.code, {
       queryParams: { associationDone: true, participantExternalId: this.participantExternalId }
     });

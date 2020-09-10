@@ -5,6 +5,7 @@ import { action, computed } from '@ember/object';
 import { inject } from '@ember/service';
 import Component from '@ember/component';
 import classic from 'ember-classic-decorator';
+import get from "lodash/get";
 
 @classic
 export default class LoginForm extends Component {
@@ -23,6 +24,7 @@ export default class LoginForm extends Component {
   isPasswordVisible = false;
   isErrorMessagePresent = false;
   hasUpdateUserError = false;
+  updateErrorMessage = '';
 
   @computed('isPasswordVisible')
   get passwordInputType() {
@@ -53,7 +55,10 @@ export default class LoginForm extends Component {
     const scope = 'mon-pix';
 
     if (this.externalUserToken) {
-      this.session.set('attemptedTransition', { retry: () => {} });
+      this.session.set('attemptedTransition', {
+        retry: () => {
+        }
+      });
     }
 
     try {
@@ -72,8 +77,18 @@ export default class LoginForm extends Component {
     if (this.externalUserToken) {
       try {
         await this.addGarAuthenticationMethodToUser(this.externalUserToken);
-      } catch (err) {
+      } catch (errors) {
+        //debugger;
         this.set('hasUpdateUserError', true);
+        const defaultErrorMessage = 'Une erreur interne est survenue, nos équipes sont en train de résoudre le problème. Veuillez réessayer ultérieurement.';
+
+        const error = errors[0];
+        let errorMessage = defaultErrorMessage;
+        const statusCode = get(error, 'status');
+        if (statusCode.startsWith('4')) {
+          errorMessage = 'Les données que vous avez soumises ne sont pas au bon format.';
+        }
+        this.set('updateErrorMessage', errorMessage);
       }
     }
   }
