@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-identical-title */
 const { expect, catchErr } = require('../../../test-helper');
 const userValidator = require('../../../../lib/domain/validators/user-validator');
 const { EntityValidationError } = require('../../../../lib/domain/errors');
@@ -213,6 +214,81 @@ describe('Unit | Domain | Validators | user-validator', function() {
           } catch (errors) {
             // then
             expect(errors.invalidAttributes).to.have.lengthOf(5);
+          }
+        });
+
+        it('should reject with errors on firstName, lastName and password when firstName, lastName and password have a maximum length of 255', () => {
+          // given
+          user = {
+            firstName: 'JohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJo',
+            lastName: 'DoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoe',
+            email: 'john.doe@example.net',
+            password: 'Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234',
+            cgu: true
+          };
+          try {
+            userValidator.validate({ user });
+            expect.fail('should have thrown an error');
+          } catch (errors) {
+            // then
+            expect(errors.invalidAttributes).to.have.lengthOf(3);
+          }
+        });
+
+        it('should reject with error on field "firstName" when firstName have a maximum length of 255', () => {
+          // given
+          const expectedError = {
+            attribute: 'firstName',
+            message: 'Votre prénom ne doit pas dépasser les 255 caractères.'
+          };
+          user.firstName = 'JohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJohnJo';
+
+          // when
+          try {
+            userValidator.validate({ user });
+            expect.fail('should have thrown an error');
+          } catch (errors) {
+            // then
+            console.log(errors);
+            _assertErrorMatchesWithExpectedOne(errors, expectedError);
+          }
+        });
+
+        it('should reject with error on field "lastName" when lastName have a maximum length of 255', () => {
+          // given
+          const expectedError = {
+            attribute: 'lastName',
+            message: 'Votre nom ne doit pas dépasser les 255 caractères.'
+          };
+          user.lastName = 'DoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoe';
+
+          // when
+          try {
+            userValidator.validate({ user });
+            expect.fail('should have thrown an error');
+          } catch (errors) {
+            // then
+            console.log(errors);
+            _assertErrorMatchesWithExpectedOne(errors, expectedError);
+          }
+        });
+
+        it('should reject with error on field "password" when password have a maximum length of 255', () => {
+          // given
+          const expectedError = {
+            attribute: 'password',
+            message: 'Votre mot de passe ne doit pas dépasser les 255 caractères.'
+          };
+          user.password = 'Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password123Password1234Password1234Password1234Password1234Password1234Password1234Password1234Password1234';
+
+          // when
+          try {
+            userValidator.validate({ user });
+            expect.fail('should have thrown an error');
+          } catch (errors) {
+            // then
+            console.log(errors);
+            _assertErrorMatchesWithExpectedOne(errors, expectedError);
           }
         });
       });
