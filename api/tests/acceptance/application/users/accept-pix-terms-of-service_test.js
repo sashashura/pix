@@ -54,7 +54,7 @@ describe('Acceptance | Controller | users-controller-accept-pix-terms-of-service
       const response = await server.inject(options);
 
       // then
-      expect(response.statusCode).to.equal(200);
+      expect(response.statusCode).to.equal(404);
       expect(response.result.data.attributes['must-validate-terms-of-service']).to.be.false;
       expect(response.result.data.attributes['last-terms-of-service-validated-at']).to.exist;
 
