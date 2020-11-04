@@ -5,17 +5,14 @@ export default class AuthenticatedSessionsDetailsAddStudentRoute extends Route {
     const session = await this.store.findRecord('session', params.session_id);
     const { id: certificationCenterId } = this.modelFor('authenticated');
     const students = await this.store.findAll('student',
-      { adapterOptions : { certificationCenterId } },
+      { adapterOptions : { certificationCenterId, sessionId: params.session_id } },
     );
-    const certificationCandidates = await this.store.query('certification-candidate', {
-      sessionId: params.session_id,
-    });
 
-    students.forEach((student) => {
-      const isEnrolled = certificationCandidates.toArray()
-        .some((candidate) => candidate.schoolingRegistrationId === student.id);
-      student.isEnrolled = isEnrolled;
-    });
+    // students.forEach((student) => {
+    //   const isEnrolled = certificationCandidates.toArray()
+    //     .some((candidate) => candidate.schoolingRegistrationId === student.id);
+    //   student.isEnrolled = isEnrolled;
+    // });
 
     return { session, students };
   }
