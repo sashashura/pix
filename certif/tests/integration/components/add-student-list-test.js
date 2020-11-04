@@ -2,6 +2,7 @@ import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { click, render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
+import sinon from 'sinon';
 import EmberObject from '@ember/object';
 
 module('Integration | Component | add-student-list', function(hooks) {
@@ -124,12 +125,14 @@ module('Integration | Component | add-student-list', function(hooks) {
           _buildSelectedStudent('Marie', 'Dupont', '3E', birthdate),
           _buildSelectedStudent('Tom', 'Dupont', '4G', birthdate),
         ];
+        const save = sinon.spy();
         this.set('students', studentList);
         this.set('session', EmberObject.create({
+          id: 123,
           address: '13 rue des petits champs',
           accessCode: 'ABCDE',
           status: 'started',
-          save: () => { this.set('certificationCandidates', studentList); },
+          save,
         }));
         this.set('candidatesWasSaved', false);
         this.set('returnToSessionCandidates', () => { this.set('candidatesWasSaved', true); });
@@ -144,7 +147,10 @@ module('Integration | Component | add-student-list', function(hooks) {
 
         // then
         assert.equal(this.students, studentList);
-        assert.equal(this.certificationCandidates, studentList);
+        sinon.assert.calledWith(save, { adapterOptions: {
+          sessionId: 123,
+          studentListToAdd: studentList } });
+        //assert.equal(this.certificationCandidates, studentList);
         assert.equal(this.candidatesWasSaved, true);
       });
     });
@@ -160,14 +166,12 @@ module('Integration | Component | add-student-list', function(hooks) {
               _buildUnselectedStudent('Tom', 'Dupont', '4G', birthdate),
             ];
             this.set('studentList', studentList);
-            this.set('certificationCandidates', []);
             this.set('session', _buildSession());
             this.set('returnToSessionCandidates', () => {});
 
             // when
             await render(hbs`<AddStudentList
               @studentList={{this.studentList}}
-              @certificationCandidates={{this.certificationCandidates}}
               @session={{this.session}}
               @returnToSessionCandidates={{this.returnToSessionCandidates}}>
             </AddStudentList>`);
@@ -188,9 +192,7 @@ module('Integration | Component | add-student-list', function(hooks) {
               _buildSelectedStudent('Tom', 'Dupont', '4G', birthdate),
               _buildSelectedStudent('Paul', 'Dupont', '4G', birthdate),
             ];
-            const certificationCandidates = [];
             this.set('studentList', studentList);
-            this.set('certificationCandidates', certificationCandidates);
             this.set('session', _buildSession());
             this.set('returnToSessionCandidates', () => {});
 
@@ -198,8 +200,7 @@ module('Integration | Component | add-student-list', function(hooks) {
             await render(hbs`<AddStudentList
               @studentList={{this.studentList}}
               @session={{this.session}}
-              @returnToSessionCandidates={{this.returnToSessionCandidates}}
-              @certificationCandidates={{this.certificationCandidates}}>
+              @returnToSessionCandidates={{this.returnToSessionCandidates}}>
             </AddStudentList>`);
 
             // then
@@ -216,12 +217,10 @@ module('Integration | Component | add-student-list', function(hooks) {
             // given
             const birthdate = new Date('2018-01-12T09:29:16Z');
             const studentList = [
-              _buildUnselectedStudent('Marie', 'Dupont', '3E', birthdate),
-              _buildUnselectedStudent('Tom', 'Dupont', '4G', birthdate),
+              _buildUnselectedStudent('Marie', 'Dupont', '3E', birthdate, true),
+              _buildUnselectedStudent('Tom', 'Dupont', '4G', birthdate, true),
             ];
-            const certificationCandidates = [ _buildCertificationCandidate(), _buildCertificationCandidate() ];
             this.set('studentList', studentList);
-            this.set('certificationCandidates', certificationCandidates);
             this.set('session', _buildSession());
             this.set('returnToSessionCandidates', () => {});
 
@@ -229,8 +228,7 @@ module('Integration | Component | add-student-list', function(hooks) {
             await render(hbs`<AddStudentList
               @studentList={{this.studentList}}
               @session={{this.session}}
-              @returnToSessionCandidates={{this.returnToSessionCandidates}}
-              @certificationCandidates={{this.certificationCandidates}}>
+              @returnToSessionCandidates={{this.returnToSessionCandidates}}>
             </AddStudentList>`);
           });
 
@@ -255,12 +253,12 @@ module('Integration | Component | add-student-list', function(hooks) {
             // given
             const birthdate = new Date('2018-01-12T09:29:16Z');
             const studentList = [
-              _buildSelectedStudent('Marie', 'Dupont', '3E', birthdate),
-              _buildSelectedStudent('Tom', 'Dupont', '4G', birthdate),
+              _buildUnselectedStudent('Marie', 'Dupont', '3E', birthdate, true),
+              _buildUnselectedStudent('Tom', 'Dupont', '4G', birthdate, true),
+              _buildSelectedStudent('TomTom', 'Dupont', '4G', birthdate),
+              _buildSelectedStudent('Marie-Jo', 'Dudu', '4G', birthdate),
             ];
-            const certificationCandidates = [ _buildCertificationCandidate(), _buildCertificationCandidate() ];
             this.set('studentList', studentList);
-            this.set('certificationCandidates', certificationCandidates);
             this.set('session', _buildSession());
             this.set('returnToSessionCandidates', () => {});
 
@@ -268,8 +266,7 @@ module('Integration | Component | add-student-list', function(hooks) {
             await render(hbs`<AddStudentList
               @studentList={{this.studentList}}
               @session={{this.session}}
-              @returnToSessionCandidates={{this.returnToSessionCandidates}}
-              @certificationCandidates={{this.certificationCandidates}}>
+              @returnToSessionCandidates={{this.returnToSessionCandidates}}>
             </AddStudentList>`);
           });
 
@@ -291,31 +288,18 @@ module('Integration | Component | add-student-list', function(hooks) {
         });
       });
     });
+
   });
 
-  function _buildUnselectedStudent(firstName = 'firstName', lastName = 'lastName', division = 'division', birthdate = 'birthdate') {
+  function _buildUnselectedStudent(firstName = 'firstName', lastName = 'lastName', division = 'division', birthdate = 'birthdate', isEnrolled = false) {
     return EmberObject.create({
-      firstName, lastName, division, birthdate, isSelected: false,
+      firstName, lastName, division, birthdate, isSelected: false, isEnrolled,
     });
   }
 
   function _buildSelectedStudent(firstName = 'firstName', lastName = 'lastName', division = 'division', birthdate = 'birthdate') {
     return EmberObject.create({
-      firstName, lastName, division, birthdate, isSelected: true,
-    });
-  }
-
-  function _buildCertificationCandidate(
-    firstName = 'firstName',
-    lastName = 'lastName',
-    birthdate = 'birthdate',
-    birthCity = 'birthCity',
-    birthProvinceCode = 'birthProvinceCode',
-    birthCountry = 'birthCountry',
-    isLinked = false,
-  ) {
-    return EmberObject.create({
-      firstName, lastName, birthdate, birthCity, birthProvinceCode, birthCountry, isLinked,
+      firstName, lastName, division, birthdate, isSelected: true, isEnrolled: false,
     });
   }
 
