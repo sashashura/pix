@@ -68,6 +68,13 @@ describe('Integration | Repository | Campaign Participation', () => {
       expect(foundCampaignParticipation.assessmentId).to.be.equal(recentAssessmentId);
     });
 
+    it('should return the campaign participation with assessments', async () => {
+      // when
+      const foundCampaignParticipation = await campaignParticipationRepository.get(campaignParticipationId);
+
+      // then
+      expect(false).to.equal(true);
+    });
   });
 
   describe('#save', () => {

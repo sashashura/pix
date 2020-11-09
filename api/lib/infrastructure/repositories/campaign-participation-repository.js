@@ -18,6 +18,7 @@ function _toDomain(bookshelfCampaignParticipation) {
   return new CampaignParticipation({
     id: bookshelfCampaignParticipation.get('id'),
     assessmentId: _getLastAssessmentIdForCampaignParticipation(bookshelfCampaignParticipation),
+    assessments: bookshelfCampaignParticipation.related('assessments').map((a) => new Assessment(a.toJSON())),
     campaign: new Campaign(bookshelfCampaignParticipation.related('campaign').toJSON()),
     campaignId: bookshelfCampaignParticipation.get('campaignId'),
     isShared: Boolean(bookshelfCampaignParticipation.get('isShared')),
