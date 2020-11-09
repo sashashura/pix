@@ -1,5 +1,7 @@
 const CampaignParticipation = require('../../../../lib/domain/models/CampaignParticipation');
-const { expect, domainBuilder } = require('../../../test-helper');
+const Assessment = require('../../../../lib/domain/models/Assessment');
+const { NotFoundError, AssessmentNotCompletedError, AlreadySharedCampaignParticipationError } = require('../../../../lib/domain/errors');
+const { expect, domainBuilder, catchErr } = require('../../../test-helper');
 
 describe('Unit | Domain | Models | CampaignParticipation', () => {
 
@@ -38,7 +40,7 @@ describe('Unit | Domain | Models | CampaignParticipation', () => {
 
   });
 
-  describe('lastAssessment', () => {
+  describe('#lastAssessment', () => {
 
     it('should retrieve the last assessment by creation date', () => {
       const campaignParticipation = new CampaignParticipation({
@@ -54,4 +56,87 @@ describe('Unit | Domain | Models | CampaignParticipation', () => {
 
   });
 
+  describe('#createImprovementAssessment', () => {
+    context('when there is no assessments', () => {
+      it('throws an error', async () => {
+        const campaignParticipation = new CampaignParticipation({
+          assessments: [],
+        });
+        const error = await catchErr(campaignParticipation.createImprovementAssessment, campaignParticipation)();
+
+        expect(error).to.be.an.instanceOf(NotFoundError);
+        expect(error.message).to.contains('Le participant n\'a pas été évalué sur cette campagne');
+      });
+    });
+
+    context('when there are assessments', () => {
+      context('when the last assessment is completed', () => {
+        it('create an assessment with the state improvement', async () => {
+          const campaignParticipation = new CampaignParticipation({
+            id: 12,
+            userId: 24,
+            assessments: [
+              domainBuilder.buildAssessment({ createdAt: new Date('2010-10-06'), state: Assessment.states.COMPLETED }),
+              domainBuilder.buildAssessment({ createdAt: new Date('2010-10-02'), state: Assessment.states.STARTED }),
+            ],
+          });
+          const assessment = campaignParticipation.createImprovementAssessment();
+
+          expect(assessment).to.include({
+            userId: campaignParticipation.userId,
+            campaignParticipationId: campaignParticipation.id,
+            state: Assessment.states.STARTED,
+            type: Assessment.types.CAMPAIGN,
+            courseId: Assessment.courseIdMessage.CAMPAIGN,
+            isImproving: true,
+          });
+        });
+      });
+
+      context('when the last assessment is ongoing', () => {
+        it('throws an error', async () => {
+          const campaignParticipation = new CampaignParticipation({
+            assessments: [
+              domainBuilder.buildAssessment({ createdAt: new Date('2010-10-06'), state: Assessment.states.STARTED }),
+              domainBuilder.buildAssessment({ createdAt: new Date('2010-10-02'), state: Assessment.states.COMPLETED }),
+            ],
+          });
+          const error = await catchErr(campaignParticipation.createImprovementAssessment, campaignParticipation)();
+
+          expect(error).to.be.an.instanceOf(AssessmentNotCompletedError);
+          expect(error.message).to.contains('Le participant a une évaluation en cours pour cette campagne');
+        });
+      });
+
+      context('when the last assessment is started', () => {
+        it('throws an error', async () => {
+          const campaignParticipation = new CampaignParticipation({
+            assessments: [
+              domainBuilder.buildAssessment({ createdAt: new Date('2010-10-06'), state: Assessment.states.STARTED }),
+              domainBuilder.buildAssessment({ createdAt: new Date('2010-10-02'), state: Assessment.states.COMPLETED }),
+            ],
+          });
+          const error = await catchErr(campaignParticipation.createImprovementAssessment, campaignParticipation)();
+
+          expect(error).to.be.an.instanceOf(AssessmentNotCompletedError);
+          expect(error.message).to.contains('Le participant a une évaluation en cours pour cette campagne');
+        });
+      });
+
+      context('when the participant has shared his results', () => {
+        it('throws an error', async () => {
+          const campaignParticipation = new CampaignParticipation({
+            isShared: true,
+            assessments: [
+              domainBuilder.buildAssessment({ createdAt: new Date('2010-10-02'), state: Assessment.states.COMPLETED }),
+            ],
+          });
+          const error = await catchErr(campaignParticipation.createImprovementAssessment, campaignParticipation)();
+
+          expect(error).to.be.an.instanceOf(AlreadySharedCampaignParticipationError);
+          expect(error.message).to.contains('Le participant a déjà partagé ses résultats');
+        });
+      });
+    });
+  });
 });
