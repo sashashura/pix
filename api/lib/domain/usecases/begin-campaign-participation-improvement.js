@@ -8,27 +8,12 @@ module.exports = async function beginCampaignParticipationImprovement({
   campaignParticipationRepository,
 }) {
 
-  const campaignParticipation = await campaignParticipationRepository.get(campaignParticipationId, {});
+  const campaignParticipation = await campaignParticipationRepository.get(campaignParticipationId, { });
   if (campaignParticipation.userId !== userId) {
     throw new UserNotAuthorizedToAccessEntity();
   }
 
-  if (campaignParticipation.isShared) {
-    throw new AlreadySharedCampaignParticipationError();
-  }
-  await _createImprovingAssessment({ userId, campaignParticipationId, assessmentRepository });
-
-  return campaignParticipation;
-};
-
-function _createImprovingAssessment({ userId, campaignParticipationId, assessmentRepository }) {
-  const assessment = new Assessment({
-    userId,
-    campaignParticipationId,
-    state: Assessment.states.STARTED,
-    type: Assessment.types.CAMPAIGN,
-    courseId: Assessment.courseIdMessage.CAMPAIGN,
-    isImproving: true,
-  });
+  const assessment = campaignParticipation.createImprovementAssessment();
   return assessmentRepository.save({ assessment });
-}
+
+};

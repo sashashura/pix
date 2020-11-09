@@ -2,9 +2,9 @@ const { expect, sinon, domainBuilder } = require('../../../test-helper');
 
 const Assessment = require('../../../../lib/domain/models/Assessment');
 const usecases = require('../../../../lib/domain/usecases');
-const { AlreadySharedCampaignParticipationError, UserNotAuthorizedToAccessEntity } = require('../../../../lib/domain/errors');
+const { UserNotAuthorizedToAccessEntity } = require('../../../../lib/domain/errors');
 
-describe('Unit | Usecase | begin-campaign-participation-improvement', () => {
+describe.only('Unit | Usecase | begin-campaign-participation-improvement', () => {
 
   const userId = 1;
   const oldAssessmentId = 1;
@@ -15,6 +15,7 @@ describe('Unit | Usecase | begin-campaign-participation-improvement', () => {
   const assessmentRepository = { save: () => undefined };
 
   beforeEach(() => {
+    campaignParticipation.assessments = [{ createdAt: '2000-01-01', state: Assessment.states.COMPLETED }];
     sinon.stub(campaignParticipationRepository, 'get');
     sinon.stub(assessmentRepository, 'save');
 
@@ -28,18 +29,6 @@ describe('Unit | Usecase | begin-campaign-participation-improvement', () => {
 
     // then
     return expect(promise).to.be.rejectedWith(UserNotAuthorizedToAccessEntity);
-  });
-
-  it('should throw an error if the campaign participation is shared', () => {
-    // given
-    const campaignParticipationShared = domainBuilder.buildCampaignParticipation({ userId, isShared: true });
-    campaignParticipationRepository.get.resolves(campaignParticipationShared);
-
-    // when
-    const promise = usecases.beginCampaignParticipationImprovement({ campaignParticipationId, userId , campaignParticipationRepository, assessmentRepository });
-
-    // then
-    return expect(promise).to.be.rejectedWith(AlreadySharedCampaignParticipationError);
   });
 
   it('should create a campaign assessment with the campaignParticipationId and isImproving at true', () => {
