@@ -118,8 +118,18 @@ cd ../high-level-tests/load-testing
 
 Exécuter les tests
 ``` shell script
-npm run start:import-schooling-registration  
+npm run import-schooling-registration:init
 ```
+
+Dans une fenêtre, démarrer le premier scénario (visite du profil)
+````shell script
+npm run import-schooling-registration:launch-test:get-profile
+````
+
+Dans une autre fenêtre, démarrer le deuxième scénario
+````shell script
+npm run import-schooling-registration:launch-test:import-file (import du fichier)
+````
 
 Consulter le rapport JSON
 ``` shell script

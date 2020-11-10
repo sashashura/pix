@@ -3,10 +3,9 @@ config:
     #  duration unit is in seconds
     #  Arrival rate = Virtual user count per second
     #  Arrival rate = 10 => In 1 second, 10 VU are created and execute the scenario
-    # arrivalCount = 5 is ok with 4k users for 30 seconds
-    - duration: 30
-      arrivalCount: 5 #5 is ok with 4k users for 30 seconds
-      name: "Import a file each 10 seconds"
+    - duration: 60
+      arrivalRate: 50
+      name: "Sustained load"
   http:
     # Use Scalingo 30 second timeout
     # From https://doc.scalingo.com/platform/internals/routing#timeouts
@@ -14,7 +13,7 @@ config:
     # From https://artillery.io/docs/http-reference/#request-timeout
     timeout: 30
 scenarios:
-  - name: 'Import du fichier SIECLE'
+  - name: 'Visite du profil'
     flow:
 
       # Authenticate user
@@ -30,11 +29,9 @@ scenarios:
             - json: "$.user_id"
               as: "userId"
 
-      # Import XML file
-      - function: "setVarInContext"
-      - post:
-          url: "/api/organizations/3/schooling-registrations/import-siecle?format=xml"
+      # Get user profile to check token
+      - get:
+          url: "/api/users/me"
           headers:
             Authorization: "Bearer {{ accessToken }}"
-            Content-Type: "application/xml"
-          body:  "{{ schoolingRegistrationXMLFormat }}"
+

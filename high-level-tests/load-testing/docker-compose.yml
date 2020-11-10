@@ -11,7 +11,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 500m
           cpus: "4"
 
   cache:
