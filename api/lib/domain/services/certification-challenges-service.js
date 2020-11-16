@@ -17,12 +17,17 @@ module.exports = {
     const knowledgeElementsByCompetence = await knowledgeElementRepository
       .findUniqByUserIdGroupedByCompetenceId({ userId: placementProfile.userId, limitDate: placementProfile.profileDate });
     const knowledgeElements = KnowledgeElement.findDirectlyValidatedFromGroups(knowledgeElementsByCompetence);
-
     const answerIds = _.map(knowledgeElements, 'answerId');
     const alreadyAnsweredChallengeIds = await answerRepository.findChallengeIdsFromAnswerIds(answerIds);
 
     const allFrFrOperativeChallenges = await challengeRepository.findFrenchFranceOperative();
 
+    const allChallengesForMyComp = _.filter((allFrFrOperativeChallenges), (challenge) => challenge.competenceId === 'recsvLz0W2ShyfD63');
+    const moteur2Challenges = allChallengesForMyComp.filter((challenge) => challenge.skills[0].name === '@moteur2');
+    const url4Challenges = allChallengesForMyComp.filter((challenge) => challenge.skills[0].name === '@url4');
+    console.log({ allChallengesForMyComp });
+    console.log({ url4Challenges });
+    console.log({ moteur2Challenges });
     const certifiableUserCompetencesWithOrderedSkills =
       UserCompetence.orderSkillsOfCompetenceByDifficulty(placementProfile.userCompetences)
         .filter((uc) => uc.isCertifiable());

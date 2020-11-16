@@ -73,6 +73,18 @@ function usersBuilder({ databaseBuilder }) {
     email: 'pixmasteur@example.net',
     cgu: true,
   });
+
+  const bruceWayne = {
+    id:2802,
+    firstName: 'Bruce',
+    lastName: 'Wayne',
+    email: 'bwayne@example.net',
+    rawPassword: 'pix123',
+    cgu: true,
+    mustValidateTermsOfService: false,
+    lastTermsOfServiceValidatedAt: '2020-07-22',
+  };
+  databaseBuilder.factory.buildUser.withUnencryptedPassword(bruceWayne);
 }
 
 module.exports = {
