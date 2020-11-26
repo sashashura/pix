@@ -1,3 +1,5 @@
+const PLACEHOLDER_DELIMITATION = '#';
+
 export default class ResponseBlock {
 
   constructor({ input, text, placeholder }) {
@@ -8,8 +10,9 @@ export default class ResponseBlock {
   }
 
   attachInputAndPlaceholderIfExist() {
-    if (this._input && stringHasPlaceholder(this._input)) {
-      const inputParts = this._input.split('#');
+    const inputHasPlaceholder = 1 <= this._input.indexOf(PLACEHOLDER_DELIMITATION);
+    if (this._input && inputHasPlaceholder) {
+      const inputParts = this._input.split(PLACEHOLDER_DELIMITATION);
       this._input = inputParts[0];
       this._placeholder = inputParts[1];
     }
@@ -49,8 +52,4 @@ export default class ResponseBlock {
       ariaLabel: this._ariaLabel,
     };
   }
-}
-
-function stringHasPlaceholder(input) {
-  return 1 <= input.indexOf('#');
 }

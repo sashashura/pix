@@ -68,9 +68,10 @@ function _buildLineFrom(blocks, ariaLabelNeeded, challengeResponseTemplate) {
 
 function _parseInput(isInput, input) {
   let block;
+  const inputDelimitation = '${';
 
   switch (input) {
-    case '${':
+    case inputDelimitation:
       isInput = true;
       break;
     case undefined:
