@@ -67,11 +67,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Lint and test scripts
+          name: Install dependencies
           command: |
-            npm ci
+           npm ci
+      - run:
+          name: Lint scripts
+          command: |
             npm run lint:scripts
+      - run:
+          name: Test scripts
+          command: |
             npm run test:scripts
+      - run:
+          name: Remove git history
+          command: |
             rm -rf .git/
       - persist_to_workspace:
           root: ~/pix
