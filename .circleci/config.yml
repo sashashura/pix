@@ -71,9 +71,9 @@ jobs:
           command: |
            npm ci
       - run:
-          name: Lint scripts
+          name: Lint all repository
           command: |
-            npm run lint:scripts
+            npm run lint
       - run:
           name: Test scripts
           command: |
