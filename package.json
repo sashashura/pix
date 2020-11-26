@@ -68,7 +68,7 @@
     "lint": "run-p --print-label lint:api lint:mon-pix lint:orga lint:certif lint:admin",
     "lint:admin": "cd admin && npm run lint",
     "lint:api": "cd api && npm run lint",
-    "lint:certif": "cd certif && npm run lint",
+    "lint:certif": "cd certif && npm run lint:ci",
     "lint:mon-pix": "cd mon-pix && npm run lint",
     "lint:orga": "cd orga && npm run lint",
     "lint:scripts": "cd scripts && eslint .",
