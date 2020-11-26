@@ -10,18 +10,18 @@ export default function proposalsAsBlocks(proposals) {
 
   const challengeResponseTemplate = new ChallengeResponseTemplate();
   const lines = proposals.split(/[\r|\n]+/).filter((line) => !isEmpty(line));
-  const ariaLabelNeeded = isAriaLabelNeededForInputs(lines);
+  const ariaLabelNeeded = _isAriaLabelNeededForInputs(lines);
 
   lines.forEach((line, lineIdx) => {
     const blocks = line.split(/\s*(\${)|}\s*/);
-    buildLineFrom(blocks, ariaLabelNeeded, challengeResponseTemplate);
+    _buildLineFrom(blocks, ariaLabelNeeded, challengeResponseTemplate);
     challengeResponseTemplate.addLineBreakIfIsNotLastLine({ lineIdx, lines });
   });
   return challengeResponseTemplate.get();
 }
 
-function isAriaLabelNeededForInputs(lines) {
-  const lastLine = getLastLine(lines);
+function _isAriaLabelNeededForInputs(lines) {
+  const lastLine = _getLastLine(lines);
   const inputStartRegex = /\${/g;
   const lastLineInputs = lastLine.match(inputStartRegex, '');
   const hasMoreThanOneInputField = lastLineInputs && lastLineInputs.length > 1;
@@ -37,14 +37,14 @@ function isAriaLabelNeededForInputs(lines) {
   return lastLineWithoutInput.length === 0;
 }
 
-function getLastLine(lines) {
+function _getLastLine(lines) {
   return lines[lines.length - 1];
 }
 
-function buildLineFrom(blocks, ariaLabelNeeded, challengeResponseTemplate) {
+function _buildLineFrom(blocks, ariaLabelNeeded, challengeResponseTemplate) {
   let previousBlockText = '';
   for (let blockIdx = 0; blockIdx < blocks.length; blockIdx += 1) {
-    const { isInput, block } = parseInput((isInput || false), blocks[blockIdx]);
+    const { isInput, block } = _parseInput((isInput || false), blocks[blockIdx]);
     if (!block) {
       continue;
     }
@@ -66,7 +66,7 @@ function buildLineFrom(blocks, ariaLabelNeeded, challengeResponseTemplate) {
   }
 }
 
-function parseInput(isInput, input) {
+function _parseInput(isInput, input) {
   let block;
 
   switch (input) {
