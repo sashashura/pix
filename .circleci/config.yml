@@ -104,9 +104,11 @@ jobs:
           name: Lint and test
           command: |
             npm run lint
-            npm test
+            npm run test:api:path:report -- tests
           environment:
             TEST_DATABASE_URL: postgres://circleci@localhost:5432/circleci
+      - store_test_results:
+          path: test-reports
 
   mon_pix_build_and_test:
     docker:
