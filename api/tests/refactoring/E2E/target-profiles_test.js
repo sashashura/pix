@@ -14,29 +14,56 @@ describe('POST /{id}/attach-organizations', () => {
     await databaseBuilder._emptyDatabase();
   });
 
-  it('returns 204 when all everything is OK', async () => {
+  it('returns 204 when everything is OK', async function() {
 
     const nonEncryptedPassword = 'Azerty123';
     // eslint-disable-next-line no-sync
     const userData = { email: 'sco@example.net', password: encrypt.hashPasswordSync(nonEncryptedPassword), scope: 'pix-admin' };
 
     const user = databaseBuilder.factory.buildUser.withPixRolePixMaster(userData);
-
+    const targetProfile = databaseBuilder.factory.buildTargetProfile();
+    const organization = databaseBuilder.factory.buildOrganization();
     await databaseBuilder.commit();
 
     const config = {
       headers: { Authorization: generateAuthorizationHeader(user.id) },
     };
-
-    const targetProfile = databaseBuilder.factory.buildTargetProfile();
-    const organization = databaseBuilder.factory.buildOrganization();
     const body = { 'organization-ids': [organization.id] };
-    await databaseBuilder.commit();
 
     const requestUrl = `http://localhost:3000/api/admin/target-profiles/${targetProfile.id}/attach-organizations`;
-    const response = await axios.post(requestUrl, body, config);
 
+    // const response = await server.inject(options);
+    // expect(response.statusCode).to.equal(204);
+
+    this.timeout(5000);
+
+    const nock = require('nock');
+    const AirtableBuilder = require('../../tooling/airtable-builder/airtable-builder');
+    const airtableBuilder = new AirtableBuilder({ nock });
+    const cache = require('../../../lib/infrastructure/caches/learning-content-cache');
+
+    airtableBuilder
+      .mockList({ tableName: 'Acquis' })
+      .returns([])
+      .activate();
+
+    const createServer = require('../../../server');
+
+    const server = await createServer();
+    const options = {
+      method: 'POST',
+      url: requestUrl,
+      headers: config.headers,
+      payload: body,
+    };
+
+
+    const response = await axios.post(requestUrl, body, config);
     expect(response.status).to.equal(204);
+
+    airtableBuilder.cleanAll();
+    await cache.flushAll();
+
   });
 
   it('returns 403 when user is not Pix master', async () => {
