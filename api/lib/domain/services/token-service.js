@@ -9,6 +9,13 @@ function createAccessTokenFromUser(userId, source) {
   }, settings.authentication.secret, { expiresIn: settings.authentication.tokenLifespan });
 }
 
+function createAccessTokenFromApplication(clientId, source) {
+  return jsonwebtoken.sign({
+    client_id: clientId,
+    source,
+  }, settings.authentication.secret, { expiresIn: settings.authentication.tokenLifespan });
+}
+
 function createTokenForCampaignResults(userId) {
   return jsonwebtoken.sign({
     access_id: userId,
@@ -86,9 +93,11 @@ async function extractPayloadFromPoleEmploiIdToken(idToken) {
 
 module.exports = {
   createAccessTokenFromUser,
+  createAccessTokenFromApplication,
   createTokenForCampaignResults,
   createIdTokenForUserReconciliation,
   decodeIfValid,
+  getDecodedToken,
   extractExternalUserFromIdToken,
   extractPayloadFromPoleEmploiIdToken,
   extractSamlId,

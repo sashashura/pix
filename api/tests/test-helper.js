@@ -25,8 +25,13 @@ afterEach(function() {
   return databaseBuilder.clean();
 });
 
-function generateValidRequestAuthorizationHeader(userId = 1234) {
-  const accessToken = tokenService.createAccessTokenFromUser(userId, 'pix');
+function generateValidRequestAuthorizationHeader(userId = 1234, source = 'pix') {
+  const accessToken = tokenService.createAccessTokenFromUser(userId, source);
+  return `Bearer ${accessToken}`;
+}
+
+function generateValidRequestAuthorizationHeaderForApplication(clientId = 'client-id-name', source = 'lsu') {
+  const accessToken = tokenService.createAccessTokenFromApplication(clientId, source);
   return `Bearer ${accessToken}`;
 }
 
@@ -147,6 +152,7 @@ module.exports = {
   domainBuilder: require('./tooling/domain-builder/factory'),
   databaseBuilder,
   generateValidRequestAuthorizationHeader,
+  generateValidRequestAuthorizationHeaderForApplication,
   generateIdTokenForExternalUser,
   hFake,
   HttpTestServer: require('./tooling/server/http-test-server'),

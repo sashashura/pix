@@ -215,7 +215,32 @@ async function checkUserIsAdminInSUPOrganizationManagingStudents(request, h) {
   return _replyWithAuthorizationError(h);
 }
 
+function checkApplicationIsAuthenticated(request, h) {
+
+  console.log('checkApplicationIsAuthenticated');
+  if (request.auth.mode === 'optional' && !request.headers.authorization) {
+    return boom.unauthorized(null, 'jwt-access-token');
+  }
+
+  const authorizationHeader = request.headers.authorization;
+  const accessToken = tokenService.extractTokenFromAuthChain(authorizationHeader);
+
+  if (!accessToken) {
+    return _replyWithAuthenticationError(h);
+  }
+
+  return checkUserIsAuthenticatedUseCase.execute(accessToken)
+    .then((authenticatedUser) => {
+      if (authenticatedUser) {
+        return h.authenticated({ credentials: { accessToken, userId: authenticatedUser.user_id } });
+      }
+      return _replyWithAuthenticationError(h);
+    })
+    .catch(() => _replyWithAuthenticationError(h));
+}
+
 module.exports = {
+  checkApplicationIsAuthenticated,
   checkRequestedUserIsAuthenticatedUser,
   checkUserBelongsToOrganizationOrHasRolePixMaster,
   checkUserBelongsToOrganizationManagingStudents,
