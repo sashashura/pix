@@ -3,6 +3,7 @@ const { knex } = require('../bookshelf');
 
 const CertificationCourseBookshelf = require('../data/certification-course');
 const AssessmentBookshelf = require('../data/assessment');
+const CertificationIssueReportBookshelf = require('../data/certification-issue-report');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
 const DomainTransaction = require('../DomainTransaction');
 const CertificationCourse = require('../../domain/models/CertificationCourse');
@@ -39,7 +40,7 @@ module.exports = {
       const certificationCourseBookshelf = await CertificationCourseBookshelf
         .where({ id })
         .fetch({ require: true, withRelated: ['assessment', 'challenges', 'certificationIssueReports'] });
-      return bookshelfToDomainConverter.buildDomainObject(CertificationCourseBookshelf, certificationCourseBookshelf);
+      return _toDomain(certificationCourseBookshelf);
     } catch (bookshelfError) {
       if (bookshelfError instanceof CertificationCourseBookshelf.NotFoundError) {
         throw new NotFoundError(`Certification course of id ${id} does not exist.`);
@@ -105,9 +106,11 @@ function _toDomain(bookshelfCertificationCourse) {
   }
 
   const assessment = bookshelfToDomainConverter.buildDomainObject(AssessmentBookshelf, bookshelfCertificationCourse.related('assessment'));
+  const certificationIssueReports = bookshelfToDomainConverter.buildDomainObjects(CertificationIssueReportBookshelf, bookshelfCertificationCourse.related('certificationIssueReports'));
   const dbCertificationCourse = bookshelfCertificationCourse.toJSON();
   return new CertificationCourse({
     type: Assessment.types.CERTIFICATION,
+    certificationIssueReports: certificationIssueReports,
     assessment,
     challenges: bookshelfCertificationCourse.related('challenges').toJSON(),
     ..._.pick(dbCertificationCourse, [
@@ -124,6 +127,8 @@ function _toDomain(bookshelfCertificationCourse) {
       'isPublished',
       'isV2Certification',
       'hasSeenEndTestScreen',
+      'maxReachableLevelOnCertificationDate',
+      'verificationCode',
     ]),
   });
 }
