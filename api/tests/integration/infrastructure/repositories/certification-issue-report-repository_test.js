@@ -19,7 +19,6 @@ describe('Integration | Repository | Certification Issue Report', function() {
       const certificationIssueReport = new CertificationIssueReport({
         certificationCourseId,
         category: CertificationIssueReportCategories.IN_CHALLENGE,
-        description: 'Un gros problème',
         subcategory: CertificationIssueReportSubcategories.IMAGE_NOT_DISPLAYING,
         questionNumber: 5,
       });
@@ -32,9 +31,9 @@ describe('Integration | Repository | Certification Issue Report', function() {
       const expectedSavedCertificationIssueReport = {
         certificationCourseId,
         category: CertificationIssueReportCategories.IN_CHALLENGE,
-        description: 'Un gros problème',
         subcategory: CertificationIssueReportSubcategories.IMAGE_NOT_DISPLAYING,
         questionNumber: 5,
+        description: null,
       };
 
       expect(_.omit(savedCertificationIssueReport, 'id')).to.deep.equal(expectedSavedCertificationIssueReport);

@@ -3,14 +3,13 @@ const { knex } = require('../bookshelf');
 
 const CertificationCourseBookshelf = require('../data/certification-course');
 const AssessmentBookshelf = require('../data/assessment');
-const CertificationIssueReportBookshelf = require('../data/certification-issue-report');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
 const DomainTransaction = require('../DomainTransaction');
 const CertificationCourse = require('../../domain/models/CertificationCourse');
 const Assessment = require('../../domain/models/Assessment');
 const { NotFoundError } = require('../../domain/errors');
 const certificationChallengeRepository = require('./certification-challenge-repository');
-
+const { toDomain } = require('./certification-issue-report-repository');
 module.exports = {
 
   async save({ certificationCourse, domainTransaction = DomainTransaction.emptyTransaction() }) {
@@ -106,7 +105,7 @@ function _toDomain(bookshelfCertificationCourse) {
   }
 
   const assessment = bookshelfToDomainConverter.buildDomainObject(AssessmentBookshelf, bookshelfCertificationCourse.related('assessment'));
-  const certificationIssueReports = bookshelfToDomainConverter.buildDomainObjects(CertificationIssueReportBookshelf, bookshelfCertificationCourse.related('certificationIssueReports'));
+  const certificationIssueReports = bookshelfCertificationCourse.related('certificationIssueReports').map((certificationIssueReportDTO) => toDomain(certificationIssueReportDTO));
   const dbCertificationCourse = bookshelfCertificationCourse.toJSON();
   return new CertificationCourse({
     type: Assessment.types.CERTIFICATION,

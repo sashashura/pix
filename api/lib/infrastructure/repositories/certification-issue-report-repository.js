@@ -1,11 +1,19 @@
 const { NotFoundError } = require('../../domain/errors');
 const CertificationIssueReportBookshelf = require('../data/certification-issue-report');
-const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
+const CertificationIssueReportFactory = require('../../domain/models/CertificatitonIssueReportFactory');
+
+function toDomain(bookshelfCertificationIssueReport) {
+  if (!bookshelfCertificationIssueReport) {
+    return null;
+  }
+  return CertificationIssueReportFactory.build(bookshelfCertificationIssueReport.attributes);
+}
 
 module.exports = {
+  toDomain,
   async save(certificationIssueReport) {
     const newCertificationIssueReport = await new CertificationIssueReportBookshelf(certificationIssueReport).save();
-    return bookshelfToDomainConverter.buildDomainObject(CertificationIssueReportBookshelf, newCertificationIssueReport);
+    return toDomain(newCertificationIssueReport);
   },
 
   async get(id) {
@@ -13,7 +21,7 @@ module.exports = {
       const certificationIssueReport = await CertificationIssueReportBookshelf
         .where({ id })
         .fetch({ require: true });
-      return bookshelfToDomainConverter.buildDomainObject(CertificationIssueReportBookshelf, certificationIssueReport);
+      return toDomain(certificationIssueReport);
     } catch (err) {
       if (err instanceof CertificationIssueReportBookshelf.NotFoundError) {
         throw new NotFoundError('Le signalement n\'existe pas');
