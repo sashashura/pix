@@ -1,5 +1,5 @@
 const { NotFoundError } = require('../errors');
-const CertificationIssueReport = require('../models/CertificationIssueReport');
+const CertificationIssueReportFactory = require('../models/CertificatitonIssueReportFactory');
 
 module.exports = async function saveCertificationIssueReport({
   userId,
@@ -15,6 +15,6 @@ module.exports = async function saveCertificationIssueReport({
     throw new NotFoundError('Erreur lors de la sauvegarde du signalement. Veuillez vous connecter et réessayer.');
   }
 
-  const certificationIssueReport = CertificationIssueReport.new(certificationIssueReportDTO);
+  const certificationIssueReport = CertificationIssueReportFactory.build(certificationIssueReportDTO);
   return certificationIssueReportRepository.save(certificationIssueReport);
 };
