@@ -22,11 +22,6 @@ const categoryCandidateInformationChangesJoiSchema = Joi.object({
   subcategory: Joi.string().required().valid(CertificationIssueReportSubcategories.NAME_OR_BIRTHDATE, CertificationIssueReportSubcategories.EXTRA_TIME_PERCENTAGE),
 });
 
-const categoryConnectionOrEndScreenJoiSchema = Joi.object({
-  certificationCourseId: Joi.number().required().empty(null),
-  category: Joi.string().required().valid(CertificationIssueReportCategories.CONNECTION_OR_END_SCREEN),
-});
-
 const categoryInChallengeJoiSchema = Joi.object({
   certificationCourseId: Joi.number().required().empty(null),
   category: Joi.string().required().valid(CertificationIssueReportCategories.IN_CHALLENGE),
@@ -56,18 +51,11 @@ const categoryInChallengeJoiSchema = Joi.object({
     }),
 });
 
-const categoryFraudJoiSchema = Joi.object({
-  certificationCourseId: Joi.number().required().empty(null),
-  category: Joi.string().required().valid(CertificationIssueReportCategories.FRAUD),
-});
-
 const categorySchemas = {
   [CertificationIssueReportCategories.OTHER]: categoryOtherJoiSchema,
   [CertificationIssueReportCategories.LATE_OR_LEAVING]: categoryLateOrLeavingJoiSchema,
   [CertificationIssueReportCategories.CANDIDATE_INFORMATIONS_CHANGES]: categoryCandidateInformationChangesJoiSchema,
-  [CertificationIssueReportCategories.CONNECTION_OR_END_SCREEN]: categoryConnectionOrEndScreenJoiSchema,
   [CertificationIssueReportCategories.IN_CHALLENGE]: categoryInChallengeJoiSchema,
-  [CertificationIssueReportCategories.FRAUD]: categoryFraudJoiSchema,
 };
 
 class CertificationIssueReport {

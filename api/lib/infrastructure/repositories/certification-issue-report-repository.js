@@ -6,7 +6,7 @@ function toDomain(bookshelfCertificationIssueReport) {
   if (!bookshelfCertificationIssueReport) {
     return null;
   }
-  return CertificationIssueReportFactory.build(bookshelfCertificationIssueReport.attributes);
+  return CertificationIssueReportFactory.create(bookshelfCertificationIssueReport.attributes);
 }
 
 module.exports = {

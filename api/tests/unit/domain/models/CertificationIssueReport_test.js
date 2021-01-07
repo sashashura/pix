@@ -137,43 +137,6 @@ describe('Unit | Domain | Models | CertificationIssueReport', () => {
       });
     });
 
-    context('CATEGORY: CONNECTION_OR_END_SCREEN', () => {
-      const certificationIssueReportDTO = {
-        certificationCourseId: 123,
-        category: CertificationIssueReportCategories.CONNECTION_OR_END_SCREEN,
-      };
-
-      it('should create a CONNECTION_OR_END_SCREEN CertificationIssueReport', () => {
-        expect(CertificationIssueReport.new(certificationIssueReportDTO))
-          .to.be.an.instanceOf(CertificationIssueReport);
-      });
-
-      [
-        MISSING_VALUE,
-        EMPTY_VALUE,
-        UNDEFINED_VALUE,
-        WHITESPACES_VALUE,
-      ].forEach((emptyValue) => {
-        it(`should create a CONNECTION_OR_END_SCREEN CertificationIssueReport when description is empty with value ${emptyValue}`, () => {
-          // when
-          expect(CertificationIssueReport.new({ ...certificationIssueReportDTO, description: emptyValue }))
-            .to.be.an.instanceOf(CertificationIssueReport);
-        });
-      });
-
-      [
-        MISSING_VALUE,
-        EMPTY_VALUE,
-        UNDEFINED_VALUE,
-      ].forEach((emptyValue) => {
-        it(`should create CONNECTION_OR_END_SCREEN CertificationIssueReport when subcategory is empty with value ${emptyValue}`, () => {
-          // when
-          expect(CertificationIssueReport.new({ ...certificationIssueReportDTO, subcategory: emptyValue }))
-            .to.be.an.instanceOf(CertificationIssueReport);
-        });
-      });
-    });
-
     context('CATEGORY: IN_CHALLENGE', () => {
       const certificationIssueReportDTO = {
         certificationCourseId: 123,

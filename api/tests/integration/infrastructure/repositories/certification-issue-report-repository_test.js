@@ -2,6 +2,7 @@ const _ = require('lodash');
 const { expect, databaseBuilder, knex, catchErr } = require('../../../test-helper');
 const certificationIssueReportRepository = require('../../../../lib/infrastructure/repositories/certification-issue-report-repository');
 const CertificationIssueReport = require('../../../../lib/domain/models/CertificationIssueReport');
+const ConnectionOrEndScreenCertificationIssueReport = require('./../../../../lib/domain/models/ConnectionOrEndScreenCertificationIssueReport');
 const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 
@@ -38,6 +39,22 @@ describe('Integration | Repository | Certification Issue Report', function() {
 
       expect(_.omit(savedCertificationIssueReport, 'id')).to.deep.equal(expectedSavedCertificationIssueReport);
       expect(savedCertificationIssueReport).to.be.an.instanceOf(CertificationIssueReport);
+    });
+
+    it('should persist a "connection or end screen" certification issue report on db', async () => {
+      // given
+      const certificationCourseId = databaseBuilder.factory.buildCertificationCourse().id;
+      const certificationIssueReport = new ConnectionOrEndScreenCertificationIssueReport({
+        certificationCourseId: certificationCourseId,
+      });
+      await databaseBuilder.commit();
+
+      // when
+      const savedCertificationIssueReport = await certificationIssueReportRepository.save(certificationIssueReport);
+
+      // then
+      expect(savedCertificationIssueReport).to.be.an.instanceOf(ConnectionOrEndScreenCertificationIssueReport);
+      expect(savedCertificationIssueReport.id).to.satisfy(Number.isInteger);
     });
   });
 
