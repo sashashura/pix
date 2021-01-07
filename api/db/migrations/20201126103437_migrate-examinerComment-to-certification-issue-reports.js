@@ -1,4 +1,4 @@
-const { CertificationIssueReportCategories } = require('../../lib/domain/models/CertificationIssueReportCategory');
+const { CertificationIssueReportCategories } = require('../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 const CERTIFICATION_COURSES = 'certification-courses';
 const CERTIFICATION_ISSUE_REPORTS = 'certification-issue-reports';
 

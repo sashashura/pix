@@ -1,7 +1,7 @@
-const { expect } = require('../../../test-helper');
+const { expect } = require('../../../../test-helper');
 
-const OtherCertificationIssueReport = require('../../../../lib/domain/models/OtherCertificationIssueReport');
-const { CertificationIssueReportCategories } = require('./../../../../lib/domain/models/CertificationIssueReportCategory');
+const OtherCertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/OtherCertificationIssueReport');
+const { CertificationIssueReportCategories } = require('./../../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 
 describe('Unit | Domain | Models | OtherCertificationIssueReport', () => {
 

@@ -1,5 +1,5 @@
 const { NotFoundError } = require('../errors');
-const CertificationIssueReportFactory = require('../models/CertificatitonIssueReportFactory');
+const CertificationIssueReportFactory = require('../models/certification-issue-report/CertificatitonIssueReportFactory');
 
 module.exports = async function saveCertificationIssueReport({
   userId,

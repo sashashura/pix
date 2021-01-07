@@ -1,12 +1,12 @@
-const { expect } = require('../../../test-helper');
+const { expect } = require('../../../../test-helper');
 
-const CertificationIssueReportFactory = require('../../../../lib/domain/models/CertificatitonIssueReportFactory');
-const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
-const ConnectionOrEndScreenCertificationIssueReport = require('../../../../lib/domain/models/ConnectionOrEndScreenCertificationIssueReport');
-const FraudCertificationIssueReport = require('../../../../lib/domain/models/FraudCertificationIssueReport');
-const OtherCertificationIssueReport = require('../../../../lib/domain/models/OtherCertificationIssueReport');
-const LateOrLeavingCertificationIssueReport = require('../../../../lib/domain/models/LateOrLeavingCertificationIssueReport');
-const CandidateInformationChangesCertificationIssueReport = require('../../../../lib/domain/models/CandidateInformationChangesCertificationIssueReport');
+const CertificationIssueReportFactory = require('../../../../../lib/domain/models/certification-issue-report/CertificatitonIssueReportFactory');
+const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
+const ConnectionOrEndScreenCertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/ConnectionOrEndScreenCertificationIssueReport');
+const FraudCertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/FraudCertificationIssueReport');
+const OtherCertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/OtherCertificationIssueReport');
+const LateOrLeavingCertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/LateOrLeavingCertificationIssueReport');
+const CandidateInformationChangesCertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/CandidateInformationChangesCertificationIssueReport');
 
 describe('Unit | Domain | Models | CertificationIssueReportFactory', () => {
   it('should build a "connection or end screen" issue report', () => {

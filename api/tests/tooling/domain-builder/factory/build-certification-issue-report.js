@@ -1,5 +1,5 @@
-const CertificationIssueReport = require('../../../../lib/domain/models/CertificationIssueReport');
-const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
+const CertificationIssueReport = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReport');
+const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 
 module.exports = function buildCertificationIssueReport({
   id = 123,

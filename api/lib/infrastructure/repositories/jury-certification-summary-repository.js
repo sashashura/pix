@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { knex } = require('../bookshelf');
 const JuryCertificationSummary = require('../../domain/read-models/JuryCertificationSummary');
-const CertificationIssueReport = require('../../domain/models/CertificationIssueReport');
+const CertificationIssueReport = require('../../domain/models/certification-issue-report/CertificationIssueReport');
 
 module.exports = {
 

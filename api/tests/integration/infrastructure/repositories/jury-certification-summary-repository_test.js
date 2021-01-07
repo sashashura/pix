@@ -1,7 +1,7 @@
 const { databaseBuilder, expect } = require('../../../test-helper');
 const JuryCertificationSummary = require('../../../../lib/domain/read-models/JuryCertificationSummary');
-const CertificationIssueReport = require('../../../../lib/domain/models/CertificationIssueReport');
-const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
+const CertificationIssueReport = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReport');
+const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 const { status: assessmentResultStatuses } = require('../../../../lib/domain/models/AssessmentResult');
 const juryCertificationSummaryRepository = require('../../../../lib/infrastructure/repositories/jury-certification-summary-repository');
 

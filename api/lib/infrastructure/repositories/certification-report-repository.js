@@ -3,7 +3,7 @@ const bluebird = require('bluebird');
 
 const Bookshelf = require('../bookshelf');
 const CertificationReport = require('../../domain/models/CertificationReport');
-const { CertificationIssueReportCategories } = require('../../domain/models/CertificationIssueReportCategory');
+const { CertificationIssueReportCategories } = require('../../domain/models/certification-issue-report/CertificationIssueReportCategory');
 
 const CertificationCourseBookshelf = require('../data/certification-course');
 const CertificationIssueReportBookshelf = require('../data/certification-issue-report');

@@ -1,6 +1,6 @@
 const { NotFoundError } = require('../../domain/errors');
 const CertificationIssueReportBookshelf = require('../data/certification-issue-report');
-const CertificationIssueReportFactory = require('../../domain/models/CertificatitonIssueReportFactory');
+const CertificationIssueReportFactory = require('../../domain/models/certification-issue-report/CertificatitonIssueReportFactory');
 
 function toDomain(bookshelfCertificationIssueReport) {
   if (!bookshelfCertificationIssueReport) {

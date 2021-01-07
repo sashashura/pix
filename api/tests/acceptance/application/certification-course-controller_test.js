@@ -2,7 +2,7 @@ const { expect, databaseBuilder, knex, airtableBuilder, generateValidRequestAuth
 const cache = require('../../../lib/infrastructure/caches/learning-content-cache');
 const createServer = require('../../../server');
 
-const { CertificationIssueReportCategories } = require('../../../lib/domain/models/CertificationIssueReportCategory');
+const { CertificationIssueReportCategories } = require('../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 const Assessment = require('../../../lib/domain/models/Assessment');
 
 describe('Acceptance | API | Certification Course', () => {

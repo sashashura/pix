@@ -2,8 +2,8 @@ const faker = require('faker');
 const moment = require('moment');
 const CertificationCourse = require('../../../../lib/domain/models/CertificationCourse');
 const buildAssessment = require('./build-assessment');
-const CertificationIssueReport = require('../../../../lib/domain/models/CertificationIssueReport');
-const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
+const CertificationIssueReport = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReport');
+const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 module.exports = function buildCertificationCourse(
   {
     id = faker.random.number(),

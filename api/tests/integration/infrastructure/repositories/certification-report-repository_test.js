@@ -3,7 +3,7 @@ const { databaseBuilder, domainBuilder, expect, catchErr, knex } = require('../.
 const CertificationReport = require('../../../../lib/domain/models/CertificationReport');
 const certificationReportRepository = require('../../../../lib/infrastructure/repositories/certification-report-repository');
 const { CertificationCourseUpdateError } = require('../../../../lib/domain/errors');
-const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
+const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 
 describe('Integration | Repository | CertificationReport', function() {
 

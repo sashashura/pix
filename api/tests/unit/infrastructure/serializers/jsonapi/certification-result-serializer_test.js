@@ -1,8 +1,8 @@
 const { expect, domainBuilder } = require('../../../../test-helper');
 const serializer = require('../../../../../lib/infrastructure/serializers/jsonapi/certification-result-serializer');
 const CertificationResult = require('../../../../../lib/domain/models/CertificationResult');
-const { CertificationIssueReportCategories } = require('../../../../../lib/domain/models/CertificationIssueReportCategory');
-const CertificationIssueReport = require('../../../../../lib/domain/models/CertificationIssueReport');
+const { CertificationIssueReportCategories } = require('../../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
+const CertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/CertificationIssueReport');
 
 describe('Unit | Serializer | JSONAPI | certification-result-serializer', function() {
 

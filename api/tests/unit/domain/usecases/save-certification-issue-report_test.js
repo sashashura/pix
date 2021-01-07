@@ -2,8 +2,8 @@ const { expect, sinon, catchErr, domainBuilder } = require('../../../test-helper
 
 const saveCertificationIssueReport = require('../../../../lib/domain/usecases/save-certification-issue-report');
 const { NotFoundError } = require('../../../../lib/domain/errors');
-const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
-const CertificationIssueReport = require('../../../../lib/domain/models/CertificationIssueReport');
+const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
+const CertificationIssueReport = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReport');
 
 describe('Unit | UseCase | save-certification-issue-report', () => {
 

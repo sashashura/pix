@@ -1,9 +1,9 @@
 const _ = require('lodash');
 const { expect, databaseBuilder, knex, catchErr } = require('../../../test-helper');
 const certificationIssueReportRepository = require('../../../../lib/infrastructure/repositories/certification-issue-report-repository');
-const CertificationIssueReport = require('../../../../lib/domain/models/CertificationIssueReport');
-const ConnectionOrEndScreenCertificationIssueReport = require('./../../../../lib/domain/models/ConnectionOrEndScreenCertificationIssueReport');
-const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
+const CertificationIssueReport = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReport');
+const ConnectionOrEndScreenCertificationIssueReport = require('./../../../../lib/domain/models/certification-issue-report/ConnectionOrEndScreenCertificationIssueReport');
+const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 
 describe('Integration | Repository | Certification Issue Report', function() {

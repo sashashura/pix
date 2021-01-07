@@ -1,7 +1,7 @@
-const { expect } = require('../../../test-helper');
-const CertificationIssueReport = require('../../../../lib/domain/models/CertificationIssueReport');
-const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
-const { InvalidCertificationIssueReportForSaving } = require('../../../../lib/domain/errors');
+const { expect } = require('../../../../test-helper');
+const CertificationIssueReport = require('../../../../../lib/domain/models/certification-issue-report/CertificationIssueReport');
+const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../../lib/domain/models/certification-issue-report/CertificationIssueReportCategory');
+const { InvalidCertificationIssueReportForSaving } = require('../../../../../lib/domain/errors');
 
 const MISSING_VALUE = null;
 const EMPTY_VALUE = '';

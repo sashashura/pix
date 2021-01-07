@@ -1,5 +1,5 @@
 const Joi = require('@hapi/joi');
-const { InvalidCertificationIssueReportForSaving } = require('../errors');
+const { InvalidCertificationIssueReportForSaving } = require('../../errors');
 const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('./CertificationIssueReportCategory');
 
 const categoryInChallengeJoiSchema = Joi.object({
