@@ -2,13 +2,6 @@ const Joi = require('@hapi/joi');
 const { InvalidCertificationIssueReportForSaving } = require('../errors');
 const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('./CertificationIssueReportCategory');
 
-const categoryLateOrLeavingJoiSchema = Joi.object({
-  certificationCourseId: Joi.number().required().empty(null),
-  category: Joi.string().required().valid(CertificationIssueReportCategories.LATE_OR_LEAVING),
-  description: Joi.string().trim().required(),
-  subcategory: Joi.string().required().valid(CertificationIssueReportSubcategories.LEFT_EXAM_ROOM, CertificationIssueReportSubcategories.SIGNATURE_ISSUE),
-});
-
 const categoryCandidateInformationChangesJoiSchema = Joi.object({
   certificationCourseId: Joi.number().required().empty(null),
   category: Joi.string().required().valid(CertificationIssueReportCategories.CANDIDATE_INFORMATIONS_CHANGES),
@@ -46,7 +39,6 @@ const categoryInChallengeJoiSchema = Joi.object({
 });
 
 const categorySchemas = {
-  [CertificationIssueReportCategories.LATE_OR_LEAVING]: categoryLateOrLeavingJoiSchema,
   [CertificationIssueReportCategories.CANDIDATE_INFORMATIONS_CHANGES]: categoryCandidateInformationChangesJoiSchema,
   [CertificationIssueReportCategories.IN_CHALLENGE]: categoryInChallengeJoiSchema,
 };

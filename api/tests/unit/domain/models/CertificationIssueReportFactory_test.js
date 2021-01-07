@@ -1,10 +1,11 @@
 const { expect } = require('../../../test-helper');
 
 const CertificationIssueReportFactory = require('../../../../lib/domain/models/CertificatitonIssueReportFactory');
-const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
+const { CertificationIssueReportCategories, CertificationIssueReportSubcategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
 const ConnectionOrEndScreenCertificationIssueReport = require('../../../../lib/domain/models/ConnectionOrEndScreenCertificationIssueReport');
 const FraudCertificationIssueReport = require('../../../../lib/domain/models/FraudCertificationIssueReport');
 const OtherCertificationIssueReport = require('../../../../lib/domain/models/OtherCertificationIssueReport');
+const LateOrLeavingCertificationIssueReport = require('../../../../lib/domain/models/LateOrLeavingCertificationIssueReport');
 
 describe('Unit | Domain | Models | CertificationIssueReportFactory', () => {
   it('should build a "connection or end screen" issue report', () => {
@@ -44,6 +45,21 @@ describe('Unit | Domain | Models | CertificationIssueReportFactory', () => {
     const certificationIssueReport = CertificationIssueReportFactory.create(certificationIssueReportDTO);
     // then
     expect(certificationIssueReport).to.be.an.instanceOf(OtherCertificationIssueReport);
+  });
+
+  it('should build an "late or leaving" issue report', () => {
+    // given
+    const certificationIssueReportDTO = {
+      category: CertificationIssueReportCategories.LATE_OR_LEAVING,
+      certificationCourseId: 42,
+      description: 'une description',
+      subcategory: CertificationIssueReportSubcategories.LEFT_EXAM_ROOM,
+    };
+
+    // when
+    const certificationIssueReport = CertificationIssueReportFactory.create(certificationIssueReportDTO);
+    // then
+    expect(certificationIssueReport).to.be.an.instanceOf(LateOrLeavingCertificationIssueReport);
   });
 
 });
