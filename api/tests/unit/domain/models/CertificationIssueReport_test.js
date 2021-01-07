@@ -12,43 +12,6 @@ describe('Unit | Domain | Models | CertificationIssueReport', () => {
 
   describe('#new', () => {
 
-    context('CATEGORY: OTHER', () => {
-      const certificationIssueReportDTO = {
-        certificationCourseId: 123,
-        category: CertificationIssueReportCategories.OTHER,
-        description: 'Une description obligatoire',
-      };
-
-      it('should create an OTHER CertificationIssueReport', () => {
-        expect(CertificationIssueReport.new(certificationIssueReportDTO)).to.be.an.instanceOf(CertificationIssueReport);
-      });
-
-      [
-        MISSING_VALUE,
-        EMPTY_VALUE,
-        UNDEFINED_VALUE,
-        WHITESPACES_VALUE,
-      ].forEach((emptyValue) => {
-        it(`should throw an InvalidCertificationIssueReportForSaving when description is of value ${emptyValue}`, () => {
-          // when
-          expect(() => CertificationIssueReport.new({ ...certificationIssueReportDTO, description: emptyValue }))
-            .to.throw(InvalidCertificationIssueReportForSaving);
-        });
-      });
-
-      [
-        MISSING_VALUE,
-        EMPTY_VALUE,
-        UNDEFINED_VALUE,
-      ].forEach((emptyValue) => {
-        it(`should create an OTHER CertificationIssueReport when subcategory is empty with value ${emptyValue}`, () => {
-          // when
-          expect(CertificationIssueReport.new({ ...certificationIssueReportDTO, subcategory: emptyValue }))
-            .to.be.an.instanceOf(CertificationIssueReport);
-        });
-      });
-    });
-
     context('CATEGORY: LATE_OR_LEAVING', () => {
       const certificationIssueReportDTO = {
         certificationCourseId: 123,
@@ -222,16 +185,6 @@ describe('Unit | Domain | Models | CertificationIssueReport', () => {
         // when
         expect(() => CertificationIssueReport.new({ ...certificationIssueReportDTO, questionNumber: 0 }))
           .to.throw(InvalidCertificationIssueReportForSaving);
-      });
-    });
-    context('CATEGORY: FRAUD', () => {
-      const certificationIssueReportDTO = {
-        certificationCourseId: 123,
-        category: CertificationIssueReportCategories.FRAUD,
-      };
-
-      it('it should be valid', () => {
-        expect(() => CertificationIssueReport.new(certificationIssueReportDTO)).not.to.throw();
       });
     });
   });

@@ -4,6 +4,7 @@ const CertificationIssueReportFactory = require('../../../../lib/domain/models/C
 const { CertificationIssueReportCategories } = require('../../../../lib/domain/models/CertificationIssueReportCategory');
 const ConnectionOrEndScreenCertificationIssueReport = require('../../../../lib/domain/models/ConnectionOrEndScreenCertificationIssueReport');
 const FraudCertificationIssueReport = require('../../../../lib/domain/models/FraudCertificationIssueReport');
+const OtherCertificationIssueReport = require('../../../../lib/domain/models/OtherCertificationIssueReport');
 
 describe('Unit | Domain | Models | CertificationIssueReportFactory', () => {
   it('should build a "connection or end screen" issue report', () => {
@@ -30,6 +31,19 @@ describe('Unit | Domain | Models | CertificationIssueReportFactory', () => {
     const certificationIssueReport = CertificationIssueReportFactory.create(certificationIssueReportDTO);
     // then
     expect(certificationIssueReport).to.be.an.instanceOf(FraudCertificationIssueReport);
+  });
+
+  it('should build an "other" issue report', () => {
+    // given
+    const certificationIssueReportDTO = {
+      category: CertificationIssueReportCategories.OTHER,
+      certificationCourseId: 42,
+    };
+
+    // when
+    const certificationIssueReport = CertificationIssueReportFactory.create(certificationIssueReportDTO);
+    // then
+    expect(certificationIssueReport).to.be.an.instanceOf(OtherCertificationIssueReport);
   });
 
 });
