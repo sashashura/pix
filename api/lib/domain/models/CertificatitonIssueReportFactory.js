@@ -4,6 +4,7 @@ const ConnectionOrEndScreenCertificationIssueReport = require('./ConnectionOrEnd
 const FraudCertificationIssueReport = require('./FraudCertificationIssueReport');
 const OtherCertificationIssueReport = require('./OtherCertificationIssueReport');
 const LateOrLeavingCertificationIssueReport = require('./LateOrLeavingCertificationIssueReport');
+const CandidateInformationChangesCertificationIssueReport = require('./CandidateInformationChangesCertificationIssueReport');
 const { CertificationIssueReportCategories } = require('./CertificationIssueReportCategory');
 
 module.exports = class CertificationIssueReportFactory {
@@ -19,6 +20,9 @@ module.exports = class CertificationIssueReportFactory {
     }
     if (certificationIssueReportDTO.category === CertificationIssueReportCategories.LATE_OR_LEAVING) {
       return new LateOrLeavingCertificationIssueReport(certificationIssueReportDTO);
+    }
+    if (certificationIssueReportDTO.category === CertificationIssueReportCategories.CANDIDATE_INFORMATIONS_CHANGES) {
+      return new CandidateInformationChangesCertificationIssueReport(certificationIssueReportDTO);
     }
     return CertificationIssueReport.new(certificationIssueReportDTO);
   }

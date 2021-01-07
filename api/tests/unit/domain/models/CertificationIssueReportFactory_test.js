@@ -6,6 +6,7 @@ const ConnectionOrEndScreenCertificationIssueReport = require('../../../../lib/d
 const FraudCertificationIssueReport = require('../../../../lib/domain/models/FraudCertificationIssueReport');
 const OtherCertificationIssueReport = require('../../../../lib/domain/models/OtherCertificationIssueReport');
 const LateOrLeavingCertificationIssueReport = require('../../../../lib/domain/models/LateOrLeavingCertificationIssueReport');
+const CandidateInformationChangesCertificationIssueReport = require('../../../../lib/domain/models/CandidateInformationChangesCertificationIssueReport');
 
 describe('Unit | Domain | Models | CertificationIssueReportFactory', () => {
   it('should build a "connection or end screen" issue report', () => {
@@ -60,6 +61,21 @@ describe('Unit | Domain | Models | CertificationIssueReportFactory', () => {
     const certificationIssueReport = CertificationIssueReportFactory.create(certificationIssueReportDTO);
     // then
     expect(certificationIssueReport).to.be.an.instanceOf(LateOrLeavingCertificationIssueReport);
+  });
+
+  it('should build an "candidate information changes" issue report', () => {
+    // given
+    const certificationIssueReportDTO = {
+      category: CertificationIssueReportCategories.CANDIDATE_INFORMATIONS_CHANGES,
+      certificationCourseId: 42,
+      description: 'une description',
+      subcategory: CertificationIssueReportSubcategories.EXTRA_TIME_PERCENTAGE,
+    };
+
+    // when
+    const certificationIssueReport = CertificationIssueReportFactory.create(certificationIssueReportDTO);
+    // then
+    expect(certificationIssueReport).to.be.an.instanceOf(CandidateInformationChangesCertificationIssueReport);
   });
 
 });
