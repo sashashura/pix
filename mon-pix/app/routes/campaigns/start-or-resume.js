@@ -94,7 +94,7 @@ export default class StartOrResumeRoute extends Route.extend(SecuredRouteMixin) 
     return this.transitionTo('login-pe');
   }
 
-  get _shouldJoinSimplifiedCampaign() {
+  get _shouldJoinSimplifiedCampaignAsAnonymous() {
     return this.state.hasUserSeenLandingPage
       && this.state.isCampaignSimplifiedAccess
       && !this.state.isUserLogged;
@@ -145,8 +145,10 @@ export default class StartOrResumeRoute extends Route.extend(SecuredRouteMixin) 
       return this.replaceWith('campaigns.campaign-landing-page', campaign, { queryParams: transition.to.queryParams });
     }
 
-    if (this._shouldJoinSimplifiedCampaign) {
-      await this.store.createRecord('user').save({ adapterOptions: { isAnonymous: true } });
+    if (this._shouldJoinSimplifiedCampaignAsAnonymous) {
+      this.session.set('attemptedTransition', { retry: () => {} });
+      await this.session.authenticate('authenticator:anonymous', {});
+      await this.currentUser.load();
     }
 
     super.beforeModel(...arguments);
