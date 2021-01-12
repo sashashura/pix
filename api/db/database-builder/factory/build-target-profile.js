@@ -11,6 +11,7 @@ module.exports = function buildTargetProfile({
   organizationId,
   createdAt = faker.date.recent(),
   outdated = false,
+  isSimplifiedAccess = false,
 } = {}) {
 
   organizationId = _.isUndefined(organizationId) ? buildOrganization().id : organizationId;
@@ -23,6 +24,7 @@ module.exports = function buildTargetProfile({
     organizationId,
     createdAt,
     outdated,
+    isSimplifiedAccess,
   };
   return databaseBuffer.pushInsertable({
     tableName: 'target-profiles',

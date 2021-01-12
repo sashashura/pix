@@ -10,6 +10,7 @@ class CampaignToJoin {
     externalIdHelpImageUrl,
     alternativeTextToExternalIdHelpImage,
     archivedAt,
+    isSimplifiedAccess,
     type,
     organizationId,
     organizationName,
@@ -30,6 +31,7 @@ class CampaignToJoin {
     this.alternativeTextToExternalIdHelpImage = alternativeTextToExternalIdHelpImage;
     this.archivedAt = archivedAt;
     this.isRestricted = organizationIsManagingStudents;
+    this.isSimplifiedAccess = isSimplifiedAccess;
     this.organizationId = organizationId;
     this.organizationName = organizationName;
     this.organizationType = organizationType;
