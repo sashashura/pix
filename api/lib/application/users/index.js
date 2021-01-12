@@ -20,15 +20,6 @@ exports.register = async function(server) {
       },
     },
     {
-      method: 'POST',
-      path: '/api/users/anonymous',
-      config: {
-        auth: false,
-        handler: userController.saveAnonymous,
-        tags: ['api'],
-      },
-    },
-    {
       method: 'GET',
       path: '/api/users',
       config: {

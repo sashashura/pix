@@ -27,6 +27,16 @@ module.exports = {
       .header('Pragma', 'no-cache');
   },
 
+  async authenticateAnonymousUser() {
+    const accessToken = await usecases.createAnonymousUser({ });
+
+    return {
+      token_type: 'bearer',
+      access_token: accessToken,
+      user_id: tokenService.extractUserId(accessToken),
+    };
+  },
+
   async authenticateExternalUser(request, h) {
     const {
       username,

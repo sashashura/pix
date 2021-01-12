@@ -25,6 +25,16 @@ exports.register = async (server) => {
       },
     },
 
+    {
+      method: 'POST',
+      path: '/api/token/anonymous',
+      config: {
+        auth: false,
+        handler: AuthenticationController.authenticateAnonymousUser,
+        tags: ['api'],
+      },
+    },
+
     /**
      * This endpoint does nothing and exists only because it is required by
      * Ember Simpl Auth addon, for OAuth 2 "Password Grant" strategy.
