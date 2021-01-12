@@ -33,6 +33,11 @@ export default class User extends ApplicationAdapter {
       return this.ajax(url, 'POST', payload);
     }
 
+    if (adapterOptions && adapterOptions.isAnonymous) {
+      const url = this.buildURL(type.modelName, null, snapshot, 'createRecord');
+      return this.ajax(url + '/anonymous', 'POST', {});
+    }
+
     return super.createRecord(...arguments);
   }
 

@@ -94,7 +94,31 @@ export default class StartOrResumeRoute extends Route.extend(SecuredRouteMixin) 
     return this.transitionTo('login-pe');
   }
 
-  beforeModel(transition) {
+  get _shouldJoinSimplifiedCampaign() {
+    return this.state.hasUserSeenLandingPage
+      && this.state.isCampaignSimplifiedAccess
+      && !this.state.isUserLogged;
+  }
+
+  _resetState() {
+    this.state = {
+      campaignCode: null,
+      isCampaignRestricted: false,
+      isCampaignForSCOOrganization: false,
+      hasUserCompletedRestrictedCampaignAssociation: false,
+      hasUserSeenJoinPage: false,
+      hasUserSeenLandingPage: false,
+      isUserLogged: false,
+      doesUserHaveOngoingParticipation: false,
+      doesCampaignAskForExternalId: false,
+      participantExternalId: null,
+      externalUser: null,
+      isCampaignPoleEmploi: false,
+      isUserLoggedInPoleEmploi: false,
+    };
+  }
+
+  async beforeModel(transition) {
     this.authenticationRoute = 'inscription';
     const campaign = this.modelFor('campaigns');
     if (this._shouldResetState(campaign.code)) {
@@ -121,25 +145,17 @@ export default class StartOrResumeRoute extends Route.extend(SecuredRouteMixin) 
       return this.replaceWith('campaigns.campaign-landing-page', campaign, { queryParams: transition.to.queryParams });
     }
 
+    if (this._shouldJoinSimplifiedCampaign) {
+      await this.store.createRecord('user').save({ adapterOptions: { isAnonymous: true } });
+    }
+
     super.beforeModel(...arguments);
   }
 
-  _resetState() {
-    this.state = {
-      campaignCode: null,
-      isCampaignRestricted: false,
-      isCampaignForSCOOrganization: false,
-      hasUserCompletedRestrictedCampaignAssociation: false,
-      hasUserSeenJoinPage: false,
-      hasUserSeenLandingPage: false,
-      isUserLogged: false,
-      doesUserHaveOngoingParticipation: false,
-      doesCampaignAskForExternalId: false,
-      participantExternalId: null,
-      externalUser: null,
-      isCampaignPoleEmploi: false,
-      isUserLoggedInPoleEmploi: false,
-    };
+  get _shouldVisitLandingPageAsVisitor() {
+    return !this.state.hasUserSeenLandingPage
+      && !this.state.isCampaignRestricted
+      && !this.state.isUserLogged;
   }
 
   _updateStateFrom({ campaign = {}, queryParams = {}, ongoingCampaignParticipation = null, session }) {
@@ -150,6 +166,7 @@ export default class StartOrResumeRoute extends Route.extend(SecuredRouteMixin) 
       campaignCode: get(campaign, 'code', this.state.campaignCode),
       isCampaignRestricted: get(campaign, 'isRestricted', this.state.isCampaignRestricted),
       isCampaignForSCOOrganization: get(campaign, 'organizationType') === 'SCO',
+      isCampaignSimplifiedAccess: get(campaign, 'isSimplifiedAccess', this.state.isCampaignSimplifiedAccess),
       hasUserCompletedRestrictedCampaignAssociation,
       hasUserSeenJoinPage,
       hasUserSeenLandingPage,
@@ -161,12 +178,6 @@ export default class StartOrResumeRoute extends Route.extend(SecuredRouteMixin) 
       isCampaignPoleEmploi: get(campaign, 'organizationIsPoleEmploi', this.state.isCampaignPoleEmploi),
       isUserLoggedInPoleEmploi: get(session, 'data.authenticated.source') === 'pole_emploi_connect' || this.state.isUserLoggedInPoleEmploi,
     };
-  }
-
-  get _shouldVisitLandingPageAsVisitor() {
-    return !this.state.hasUserSeenLandingPage
-      && !this.state.isCampaignRestricted
-      && !this.state.isUserLogged;
   }
 
   get _shouldVisitLandingPageAsLoggedUser() {
