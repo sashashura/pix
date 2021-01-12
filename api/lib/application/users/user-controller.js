@@ -35,6 +35,11 @@ module.exports = {
       });
   },
 
+  async saveAnonymous() {
+    await usecases.createAnonymousUser({ });
+    return null;
+  },
+
   getCurrentUser(request) {
     const authenticatedUserId = request.auth.credentials.userId;
 
