@@ -36,8 +36,7 @@ module.exports = {
   },
 
   async saveAnonymous() {
-    await usecases.createAnonymousUser({ });
-    return null;
+    return await usecases.createAnonymousUser({ });
   },
 
   getCurrentUser(request) {
