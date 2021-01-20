@@ -120,6 +120,7 @@
     "test:api:path": "NODE_ENV=test mocha --exit --recursive --reporter=dot",
     "test:api:unit": "TEST_DATABASE_URL=bad_url npm run test:api:path -- tests/unit",
     "test:api:integration": "npm run test:api:path -- tests/integration",
+    "test:api:refacto": "npm run test:api:path -- tests/refactoring",
     "test:api:acceptance": "npm run test:api:path -- tests/acceptance",
     "test:api:debug": "NODE_ENV=test mocha --inspect-brk=9229 --recursive --exit --reporter dot tests",
     "test:api:watch": "NODE_ENV=test mocha --recursive tests/refactoring --watch --reporter dot",

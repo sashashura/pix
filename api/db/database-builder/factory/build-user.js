@@ -293,9 +293,7 @@ buildUser.withPassword = function buildUserWithRawPassword({
     cgu,
     lang,
     lastTermsOfServiceValidatedAt, mustValidateTermsOfService, pixOrgaTermsOfServiceAccepted,
-    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions,
-    password: '',
-    shouldChangePassword: false,
+    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions
   };
 
   const user = databaseBuffer.pushInsertable({

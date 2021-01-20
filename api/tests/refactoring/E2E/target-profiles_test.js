@@ -15,7 +15,7 @@ function mockLearningContent(learningContent) {
 
 const databaseBuilder = new DatabaseBuilder({ knex });
 
-describe.only('POST /{id}/attach-organizations', () => {
+describe('POST /{id}/attach-organizations', () => {
   const learningContent = {
     areas: [{ id: 'recArea1', competenceIds: ['recArea1_Competence1'] }],
     competences: [{
@@ -72,14 +72,17 @@ describe.only('POST /{id}/attach-organizations', () => {
 
   it('returns 403 when user is not Pix master', async () => {
 
-    const userData = { email: 'sco@example.net', rawPassword: 'Azerty123', scope: 'pix' };
+    // user cannot get a pix-admin token if he has not pix master role
+    const userData = { email: 'sco@example.net', password: 'Azerty123', scope: 'mon-pix' };
 
     databaseBuilder.factory.buildUser.withPassword(userData);
     const targetProfile = databaseBuilder.factory.buildTargetProfile();
-    databaseBuilder.factory.buildOrganization();
+    const organization = databaseBuilder.factory.buildOrganization();
     await databaseBuilder.commit();
 
-    const accessToken = await createAccessToken({ email: userData.email, password: userData.rawPassword, scope: userData.scope });
+    const accessToken = await createAccessToken({ email: userData.email, password: userData.password, scope: userData.scope });
+
+    const body = { 'organization-ids': [organization.id] };
 
     const config = {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -90,7 +93,7 @@ describe.only('POST /{id}/attach-organizations', () => {
     let response;
 
     try {
-      response = await axios.post(requestUrl, {}, config);
+      response = await axios.post(requestUrl, body, config);
     } catch (error) {
       response = error.response;
     }
