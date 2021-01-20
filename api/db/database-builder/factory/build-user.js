@@ -269,4 +269,49 @@ buildUser.withCertificationCenterMembership = function buildUserWithCertificatio
   return user;
 };
 
+buildUser.withPassword = function buildUserWithRawPassword({
+  id,
+  firstName = faker.name.firstName(),
+  lastName = faker.name.lastName(),
+  email = faker.internet.exampleEmail().toLowerCase(),
+  username,
+  cgu = true,
+  lang = 'fr',
+  lastTermsOfServiceValidatedAt,
+  mustValidateTermsOfService = false,
+  pixOrgaTermsOfServiceAccepted = false,
+  pixCertifTermsOfServiceAccepted = false,
+  hasSeenAssessmentInstructions = false,
+  createdAt = new Date(),
+  updatedAt = new Date(),
+  password = 'Password123',
+  shouldChangePassword = false,
+} = {}) {
+
+  const values = {
+    id, firstName, lastName, email, username,
+    cgu,
+    lang,
+    lastTermsOfServiceValidatedAt, mustValidateTermsOfService, pixOrgaTermsOfServiceAccepted,
+    pixCertifTermsOfServiceAccepted, hasSeenAssessmentInstructions,
+    password: '',
+    shouldChangePassword: false,
+  };
+
+  const user = databaseBuffer.pushInsertable({
+    tableName: 'users',
+    values,
+  });
+
+  _buildPixAuthenticationMethod({
+    userId: user.id,
+    rawPassword: password,
+    shouldChangePassword,
+    createdAt,
+    updatedAt,
+  });
+
+  return user;
+};
+
 module.exports = buildUser;

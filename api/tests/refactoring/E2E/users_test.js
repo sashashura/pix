@@ -25,15 +25,14 @@ describe('GET /me', () => {
   });
 
   it('returns 200 when user is authenticated', async () => {
-
     const userData = {
       email: 'sco@example.net',
-      rawPassword: 'pix123',
+      password: 'pix123',
     };
 
-    databaseBuilder.factory.buildUser.withRawPassword(userData);
-    await databaseBuilder.commit();
+    databaseBuilder.factory.buildUser.withPassword(userData);
 
+    await databaseBuilder.commit();
     const accessToken = await createAccessToken(userData);
 
     const config = {
@@ -51,9 +50,9 @@ describe('GET /me', () => {
 
     const userData = {
       email: 'sco@example.net',
-      password:  'pix123',
+      password: 'pix123',
     };
-    const user = await databaseBuilder.factory.buildUser(userData);
+    const user = await databaseBuilder.factory.buildUser.withPassword(userData);
     await databaseBuilder.commit();
 
     const accessToken = await createAccessToken(userData);
