@@ -14,7 +14,7 @@ describe('GET /me', () => {
   });
 
   it('returns 401  when user is not authenticated', async () => {
-    const  requestUrl = 'http://localhost:3000/api/users/me';
+    const requestUrl = 'http://localhost:3000/api/users/me';
     let response = null;
     try {
       await axios.get(requestUrl);
@@ -28,10 +28,10 @@ describe('GET /me', () => {
 
     const userData = {
       email: 'sco@example.net',
-      password: 'pix123',
+      rawPassword: 'pix123',
     };
 
-    databaseBuilder.factory.buildUser(userData);
+    databaseBuilder.factory.buildUser.withRawPassword(userData);
     await databaseBuilder.commit();
 
     const accessToken = await createAccessToken(userData);
