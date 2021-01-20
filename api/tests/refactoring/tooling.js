@@ -13,11 +13,12 @@ const createAccessToken = async function(user) {
   return authenticateResponse.data.access_token;
 };
 
-const generateAuthorizationHeader = function(userId = 1234) {
-  const accessToken = tokenService.createAccessTokenFromUser({ id: userId }, 'pix');
+const generateAuthorizationHeader = function(userId = 1234, scope = 'pix') {
+  const accessToken = tokenService.createAccessTokenFromUser({ id: userId }, scope);
   return `Bearer ${accessToken}`;
 };
 
 module.exports = {
-  generateAuthorizationHeader, createAccessToken
+  generateAuthorizationHeader,
+  createAccessToken,
 };

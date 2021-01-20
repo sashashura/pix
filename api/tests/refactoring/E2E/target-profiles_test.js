@@ -1,96 +1,96 @@
 const chai = require('chai');
 const expect = chai.expect;
 const axios = require('axios');
+const nock = require('nock');
 const { knex } = require('../../../db/knex-database-connection');
 const DatabaseBuilder = require('../../../db/database-builder/database-builder');
-const encrypt = require('../../../lib/domain/services/encryption-service');
-const { createAccessToken, generateAuthorizationHeader } = require('../tooling');
+const { generateAuthorizationHeader, createAccessToken } = require('../tooling');
+
+function mockLearningContent(learningContent) {
+  nock('https://lcms-test.pix.fr/api')
+    .get('/current-content')
+    .matchHeader('Authorization', 'Bearer test-api-key')
+    .reply(200, learningContent);
+}
 
 const databaseBuilder = new DatabaseBuilder({ knex });
 
-describe('POST /{id}/attach-organizations', () => {
+describe.only('POST /{id}/attach-organizations', () => {
+  const learningContent = {
+    areas: [{ id: 'recArea1', competenceIds: ['recArea1_Competence1'] }],
+    competences: [{
+      id: 'recArea1_Competence1',
+      areaId: 'recArea1',
+      skillIds: ['skillId'],
+      origin: 'Pix',
+    }],
+    tubes: [{
+      id: 'recArea1_Competence1_Tube1',
+      competenceId: 'recArea1_Competence1',
+    }],
+    skills: [{
+      id: 'skillId',
+      name: '@recArea1_Competence1_Tube1_Skill1',
+      status: 'actif',
+      tubeId: 'recArea1_Competence1_Tube1',
+      competenceId: 'recArea1_Competence1',
+    }],
+  };
+
+  beforeEach(async function() {
+    this.timeout(3000);
+    mockLearningContent(learningContent);
+  });
 
   afterEach(async function() {
-    await databaseBuilder._emptyDatabase();
+    await knex('target-profile-shares').delete();
+    await databaseBuilder.clean();
   });
 
   it('returns 204 when everything is OK', async function() {
 
-    const nonEncryptedPassword = 'Azerty123';
     // eslint-disable-next-line no-sync
-    const userData = { email: 'sco@example.net', password: encrypt.hashPasswordSync(nonEncryptedPassword), scope: 'pix-admin' };
+    const userData = { email: 'sco@example.net', rawPassword: 'Azerty123', scope: 'pix-admin' };
 
     const user = databaseBuilder.factory.buildUser.withPixRolePixMaster(userData);
     const targetProfile = databaseBuilder.factory.buildTargetProfile();
     const organization = databaseBuilder.factory.buildOrganization();
     await databaseBuilder.commit();
 
+    const accessToken = await createAccessToken({ email: userData.email, password: userData.rawPassword, scope: userData.scope });
+
     const config = {
-      headers: { Authorization: generateAuthorizationHeader(user.id) },
+      headers: { Authorization: `Bearer ${accessToken}` },
     };
+
     const body = { 'organization-ids': [organization.id] };
 
     const requestUrl = `http://localhost:3000/api/admin/target-profiles/${targetProfile.id}/attach-organizations`;
-
-    // const response = await server.inject(options);
-    // expect(response.statusCode).to.equal(204);
-
-    this.timeout(5000);
-
-    const nock = require('nock');
-    const AirtableBuilder = require('../../tooling/airtable-builder/airtable-builder');
-    const airtableBuilder = new AirtableBuilder({ nock });
-    const cache = require('../../../lib/infrastructure/caches/learning-content-cache');
-
-    airtableBuilder
-      .mockList({ tableName: 'Acquis' })
-      .returns([])
-      .activate();
-
-    const createServer = require('../../../server');
-
-    const server = await createServer();
-    const options = {
-      method: 'POST',
-      url: requestUrl,
-      headers: config.headers,
-      payload: body,
-    };
-
-
     const response = await axios.post(requestUrl, body, config);
     expect(response.status).to.equal(204);
-
-    airtableBuilder.cleanAll();
-    await cache.flushAll();
-
   });
 
   it('returns 403 when user is not Pix master', async () => {
 
-    const nonEncryptedPassword = 'Azerty123';
-    // eslint-disable-next-line no-sync
-    const userData = { email: 'sco@example.net', password: encrypt.hashPasswordSync(nonEncryptedPassword), scope: 'pix-admin' };
+    const userData = { email: 'sco@example.net', rawPassword: 'Azerty123', scope: 'pix' };
 
-    const user = databaseBuilder.factory.buildUser(userData);
-
+    databaseBuilder.factory.buildUser.withPassword(userData);
+    const targetProfile = databaseBuilder.factory.buildTargetProfile();
+    databaseBuilder.factory.buildOrganization();
     await databaseBuilder.commit();
+
+    const accessToken = await createAccessToken({ email: userData.email, password: userData.rawPassword, scope: userData.scope });
 
     const config = {
-      headers: { Authorization: generateAuthorizationHeader(user.id) },
+      headers: { Authorization: `Bearer ${accessToken}` },
     };
-
-    const targetProfile = databaseBuilder.factory.buildTargetProfile();
-    const organization = databaseBuilder.factory.buildOrganization();
-    const body = { 'organization-ids': [organization.id] };
-    await databaseBuilder.commit();
 
     const requestUrl = `http://localhost:3000/api/admin/target-profiles/${targetProfile.id}/attach-organizations`;
 
     let response;
 
     try {
-      response = await axios.post(requestUrl, body, config);
+      response = await axios.post(requestUrl, {}, config);
     } catch (error) {
       response = error.response;
     }
