@@ -59,9 +59,16 @@ Pour les détails, voir [section dédiée](../INSTALLATION.md#L42-L42) du guide 
 
 ##### Configurer le cache applicatif pour les tests
 
-- Dans `~/api/.env`, renseignez/décommentez les variables `CYPRESS_AIRTABLE_BASE` et `CYPRESS_AIRTABLE_API_KEY`. Si vous ne possédez pas ces clefs, je vous invite à demander de l'aide à quelqu'un.
+- Dans `~/api/.env`, renseignez/décommentez les variables
+```shell
+CYPRESS_LCMS_BASE=e5d7b101-d0bd-4a3b-86c9-61edd5d39e8d
+CYPRESS_LCMS_API_KEY=https://lcms.minimal.pix.fr/api
+```
+  
+Si vous ne possédez pas ces clefs, je vous invite à demander de l'aide à quelqu'un.
 
-- Nettoyez le cache Redis grâce aux commandes suivantes pour que les données du Airtable minimal soient récupérées au lancement des tests :
+- Nettoyez le cache Redis grâce aux commandes suivantes pour que les données 
+  du Airtable minimal soient récupérées au lancement des tests :
 
 ```bash
 > redis-cli
