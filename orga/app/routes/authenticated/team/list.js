@@ -1,6 +1,5 @@
 import { inject as service } from '@ember/service';
 import Route from '@ember/routing/route';
-import RSVP from 'rsvp';
 
 export default class ListRoute extends Route {
   queryParams = {
@@ -22,10 +21,9 @@ export default class ListRoute extends Route {
       },
     });
 
-    return RSVP.hash({
+    return Promise.all([
       memberships,
-      organization,
-    });
+      organization]);
   }
 
   resetController(controller, isExiting) {
