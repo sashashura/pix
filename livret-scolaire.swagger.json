@@ -1,0 +1,257 @@
+{
+  "swagger": "2.0",
+  "host": "demo-pix-apim-gateway.cloud.gravitee.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "info": {
+    "title": "Welcome to the Pix LSU/LSL open api",
+    "version": "3.4.0"
+  },
+  "tags": [],
+  "paths": {
+    "/organizations/{uai}/certifications": {
+      "get": {
+        "operationId": "getApiOrganizationsUaiCertifications",
+        "description": "- **API for LSU/LSL qui nécessite une authentification de type client credentiel grant**\n- Récupération des résultats de certifications pour une organisation. Les résultats sont accompagnés du référentiel des compétences",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Bearer Access token to access to API ",
+            "name": "authorization",
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "description": "UAI/RNE (Unité Administrative Immatriculée anciennement Répertoire National des Établissements) ",
+            "name": "uai",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "tags": [
+          "api"
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/CertificationsResults"
+            },
+            "description": "Successful"
+          },
+          "204": {
+            "schema": {
+              "$ref": "#/definitions/CertificationsResults"
+            },
+            "description": "No Content"
+          },
+          "403": {
+            "schema": {
+              "$ref": "#/definitions/Response-Error-Object"
+            },
+            "description": "Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "competenceResult": {
+      "type": "object",
+      "description": "Tableau des niveaux validés par compétence",
+      "properties": {
+        "level": {
+          "type": "number",
+          "description": "Niveau obtenu pour la compétence",
+          "example": "4"
+        },
+        "competenceId": {
+          "type": "string",
+          "description": "ID unique de la compétence : il fait directement référence à l’attribut id du Resource Object Competence",
+          "example": "1.1"
+        }
+      },
+      "required": [
+        "level",
+        "competenceId"
+      ]
+    },
+    "certifications": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "ID de la certification pour l’élève"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "Prénom de l’élève",
+          "example": "Anne"
+        },
+        "middleName": {
+          "type": "string",
+          "description": "Deuxième nom de l’élève",
+          "example": "Sophie"
+        },
+        "thirdName": {
+          "type": "string",
+          "description": "Troisième nom de l’élève",
+          "example": "Bobby"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Nom de famille de l’élève",
+          "example": "Jerry"
+        },
+        "birthdate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date de naissance de l’élève",
+          "example": "2000-01-29"
+        },
+        "nationalStudentId": {
+          "type": "string",
+          "description": "INE de l’élève",
+          "example": "029991043XX"
+        },
+        "status": {
+          "type": "string",
+          "description": "validated: le candidat a obtenu sa certification. rejected: le candidat a eu sa certification rejetée. pending: le candidat a passé sa certification mais elle n'est pas encore publiée",
+          "example": "validated",
+          "enum": [
+            {
+              "value": {
+                "REJECTED": "rejected",
+                "VALIDATED": "validated",
+                "PENDING": "pending"
+              }
+            }
+          ]
+        },
+        "pixScore": {
+          "type": "string",
+          "description": "Nombre de Pix validés par la certification",
+          "example": "520"
+        },
+        "verificationCode": {
+          "type": "string",
+          "description": "Code d’attestation de la certification",
+          "example": "P-Y468ACDE"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date de passage de la certification",
+          "example": "2020-11-31T12:00:38.133Z"
+        },
+        "deliveredAt": {
+          "type": "string",
+          "format": "date",
+          "description": "Date de publication de la certification",
+          "example": "2020-12-31T11:00:38.133Z"
+        },
+        "certificationCenter": {
+          "type": "string",
+          "description": "Nom du centre de certification",
+          "example": "Collège Kort Colin"
+        },
+        "competenceResult": {
+          "$ref": "#/definitions/competenceResult"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "middleName",
+        "thirdName",
+        "lastName",
+        "birthdate",
+        "nationalStudentId",
+        "status",
+        "pixScore",
+        "date",
+        "certificationCenter"
+      ]
+    },
+    "area": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "ID unique de la compétence (ex : “1”, “4”)",
+          "example": "1"
+        },
+        "name": {
+          "type": "string",
+          "description": "Titre du domaine",
+          "example": "1. Information et données"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "competences": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "ID unique de la compétence (ex : “1.1”, “4.3”)",
+          "example": "1.1"
+        },
+        "name": {
+          "type": "string",
+          "description": "Nom de la compétence",
+          "example": "Mener une recherche et une veille d’information"
+        },
+        "area": {
+          "$ref": "#/definitions/area"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "CertificationsResults": {
+      "type": "object",
+      "properties": {
+        "certifications": {
+          "$ref": "#/definitions/certifications"
+        },
+        "competences": {
+          "$ref": "#/definitions/competences"
+        }
+      }
+    },
+    "Response-Error-Object": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "An application-specific error code."
+        },
+        "title": {
+          "type": "string",
+          "description": "A short, human-readable summary of the problem"
+        },
+        "status": {
+          "type": "string",
+          "description": "the HTTP status code applicable of the problem"
+        },
+        "detail": {
+          "type": "string",
+          "description": "a human-readable explanation specific of the problem"
+        }
+      },
+      "required": [
+        "code",
+        "title",
+        "status",
+        "detail"
+      ]
+    }
+  }
+}
