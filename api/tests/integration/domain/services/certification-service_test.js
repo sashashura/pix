@@ -1,5 +1,5 @@
 const { expect, databaseBuilder } = require('../../../test-helper');
-const { getCertificationResult } = require('../../../../lib/domain/services/certification-service');
+const { getCertificationResult, getCertificationResultByOrganizationAndDivision } = require('../../../../lib/domain/services/certification-service');
 const { statuses } = require('../../../../lib/infrastructure/repositories/clea-certification-status-repository');
 const CertificationResult = require('../../../../lib/domain/models/CertificationResult');
 const Assessment = require('../../../../lib/domain/models/Assessment');
@@ -54,6 +54,21 @@ describe('Integration | Service | certification-service', () => {
         expect(result.isPublished).to.equal(certificationCourse.isPublished);
         expect(result.cleaCertificationStatus).to.equal(statuses.ACQUIRED);
       });
+    });
+  });
+
+  describe('#getCertificationResultByOrganizationAndDivision', () => {
+    it('should return an empty list', async () => {
+      // given
+      const division = '3A';
+      const organizationId = databaseBuilder.factory.buildOrganization().id;
+      await databaseBuilder.commit();
+
+      // when
+      const result = await getCertificationResultByOrganizationAndDivision(organizationId, division);
+
+      // then
+      expect(result).to.deep.equal([]);
     });
   });
 });

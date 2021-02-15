@@ -42,8 +42,24 @@ async function getCertificationResultByCertifCourse({ certificationCourse }) {
   });
 }
 
+async function getCertificationResultByOrganizationAndDivision(organizationId, division) {
+  // trouver les élèves -> schoolingRegistration
+
+  // trouver leur certification course le plus récent -> userId
+
+  // Pour chaque certificationCourse {
+  //   Trouver leur session
+  //   Appeler ou faire équivalence de getCertificationResultByCertifCourse 
+  //   Ajouter les informations de session aux résultats trouvés
+  //   Présenter les infos en CSV }
+
+
+  return [];
+}
+
 module.exports = {
   calculateCertificationResultByCertificationCourseId,
   getCertificationResult,
   getCertificationResultByCertifCourse,
+  getCertificationResultByOrganizationAndDivision,
 };
