@@ -19,6 +19,8 @@ const fillCandidatesImportSheet = require('../../infrastructure/files/candidates
 const trim = require('lodash/trim');
 const UserLinkedToCertificationCandidate = require('../../domain/events/UserLinkedToCertificationCandidate');
 const { featureToggles } = require('../../config');
+const publishSession = require('../../../publication-session-certification/domain/usecases/publish-session');
+const PublishableSession = require('../../../publication-session-certification/domain/models/PublishableSession');
 
 module.exports = {
 
@@ -261,6 +263,12 @@ module.exports = {
     const certificationOfficerId = request.auth.credentials.userId;
     const jurySession = await usecases.assignCertificationOfficerToJurySession({ sessionId, certificationOfficerId });
     return jurySessionSerializer.serialize(jurySession);
+  },
+
+  async publishSession(request, h) {
+    const sessionId = request.params.id;
+    await publishSession(sessionId);
+    return h.response().code(204);
   },
 
 };
