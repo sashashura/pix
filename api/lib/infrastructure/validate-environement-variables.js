@@ -1,10 +1,11 @@
 const Joi = require('joi');
+const featureToggle = Joi.string().valid('true', 'false');
 
 const schema = Joi.object({
   REDIS_URL: Joi.string().uri().optional(),
   DATABASE_URL: Joi.string().uri().optional(),
   TEST_DATABASE_URL: Joi.string().optional(),
-  MAILING_ENABLED: Joi.string().optional().valid('true', 'false'),
+  MAILING_ENABLED: featureToggle.optional(),
   MAILING_PROVIDER: Joi.when('MAILING_ENABLED', { is: Joi.exist(), then: Joi.required().valid('sendinblue') }),
   MAILJET_API_KEY: Joi.string().optional(),
   MAILJET_API_SECRET: Joi.string().optional(),
@@ -23,7 +24,7 @@ const schema = Joi.object({
   DOMAIN_PIX_ORGA: Joi.string().optional(),
   LCMS_API_KEY: Joi.string().required(),
   LCMS_API_URL: Joi.string().uri().required(),
-  LOG_ENABLED: Joi.string().optional().valid('true', 'false'),
+  LOG_ENABLED: featureToggle.optional(),
   LOG_LEVEL: Joi.when('LOG_ENABLED', { is: Joi.exist(), then: Joi.required().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace') }),
   AUTH_SECRET: Joi.string().required(),
 }).options({ allowUnknown: true });
