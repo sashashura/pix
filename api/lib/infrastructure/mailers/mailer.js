@@ -37,6 +37,28 @@ class Mailer extends MailingProvider {
       });
   }
 
+  async sendEmailUnsafe(options) {
+    if (!mailing.enabled) {
+      return Promise.resolve();
+    }
+
+    try {
+      await mailCheck.checkMail(options.to);
+    }
+    catch (err) {
+      logger.warn({ err }, `Email is not valid '${options.to}'`);
+      throw err;
+    }
+
+    try {
+      await this._provider.sendEmail(options);
+    }
+    catch (err) {
+      logger.warn({ err }, `Could not send email to '${options.to}'`);
+      throw err;
+    }
+  }
+
   get accountCreationTemplateId() {
     return mailing[this._providerName].templates.accountCreationTemplateId;
   }
@@ -60,4 +82,3 @@ class Mailer extends MailingProvider {
 }
 
 module.exports = new Mailer();
-
