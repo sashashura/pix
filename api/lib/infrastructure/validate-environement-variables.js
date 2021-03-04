@@ -24,7 +24,7 @@ const schema = Joi.object({
   LCMS_API_KEY: Joi.string().required(),
   LCMS_API_URL: Joi.string().uri().required(),
   LOG_ENABLED: Joi.string().optional().valid('true', 'false'),
-  LOG_LEVEL: Joi.string().optional().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace'),
+  LOG_LEVEL: Joi.when('LOG_ENABLED', { is: Joi.exist(), then: Joi.required().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace') }),
   AUTH_SECRET: Joi.string().required(),
 }).options({ allowUnknown: true });
 
