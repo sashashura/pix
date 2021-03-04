@@ -1,7 +1,15 @@
 const Joi = require('joi');
 const featureToggle = Joi.string().valid('true', 'false');
 
-const schema = Joi.object({
+const schemaCI = Joi.object({
+  AUTH_SECRET: Joi.string().required(),
+  LCMS_API_KEY: Joi.string().required(),
+  LCMS_API_URL: Joi.string().uri().required(),
+  LOG_LEVEL: Joi.string().optional().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace'),
+  DATABASE_URL: Joi.string().uri().required(),
+}).options({ allowUnknown: true });
+
+const schemaRun = Joi.object({
   REDIS_URL: Joi.string().uri().optional(),
   DATABASE_URL: Joi.string().uri().optional(),
   TEST_DATABASE_URL: Joi.string().optional(),
@@ -30,6 +38,14 @@ const schema = Joi.object({
 }).options({ allowUnknown: true });
 
 const validateEnvironmentVariables = function() {
+  let schema;
+
+  if (process.env.NODE_ENV === 'test') {
+    schema = schemaCI;
+  } else {
+    schema = schemaRun;
+  }
+
   const { error } = schema.validate(process.env);
   if (error) {
     throw new Error('Configuration is invalid: ' + error.message + ', but was: ' + error.details[0].context.value);
