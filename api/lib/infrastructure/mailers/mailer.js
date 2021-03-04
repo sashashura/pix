@@ -21,25 +21,17 @@ class Mailer extends MailingProvider {
   }
 
   async sendEmail(options) {
-    if (!mailing.enabled) {
-      return Promise.resolve();
+    try {
+      await this.sendEmailUnsafe(options);
     }
-
-    return mailCheck.checkMail(options.to)
-      .then(() => {
-        return this._provider.sendEmail(options)
-          .catch((err) => {
-            logger.warn({ err }, `Could not send email to '${options.to}'`);
-          });
-      })
-      .catch((err) => {
-        logger.warn({ err }, `Email is not valid '${options.to}'`);
-      });
+    catch (err) {
+      // c'est fait exprès
+    }
   }
 
   async sendEmailUnsafe(options) {
     if (!mailing.enabled) {
-      return Promise.resolve();
+      return;
     }
 
     try {

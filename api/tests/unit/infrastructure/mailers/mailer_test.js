@@ -14,6 +14,29 @@ describe('Unit | Infrastructure | Mailers | mailer', () => {
 
     const recipient = 'test@example.net';
 
+    context('when mailing is disabled', () => {
+
+      it('should resolve immediately', async () => {
+        //given
+        sinon.stub(mailing, 'enabled').value(false);
+        const mailingProvider = _mockMailingProvider();
+
+        const options = {
+          from: 'bob.dylan@example.net',
+          to: 'test@example.net',
+          fromName: 'Ne Pas Repondre',
+          subject: 'Creation de compte',
+          template: '129291',
+        };
+
+        // when
+        await mailer.sendEmail(options);
+
+        // then
+        expect(mailingProvider.sendEmail).not.to.have.been.called;
+      });
+    });
+
     context('when mailing is enabled', () => {
 
       beforeEach(() => {
