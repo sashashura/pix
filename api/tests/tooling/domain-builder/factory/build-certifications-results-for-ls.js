@@ -25,9 +25,7 @@ function _createCertificationCenter() {
   return { certificationCenterId: id, certificationCenter: name };
 }
 
-function _buildCertificationData({ organizationId, isPublished, verificationCode }) {
-  const userId = _createUser().id;
-  const schoolingRegistration = _createSchoolingRegistration(userId, organizationId);
+function _buildCertificationData({ userId, isPublished, verificationCode }) {
   const {
     id: certificationCenterId,
     name: certificationCenter,
@@ -58,7 +56,6 @@ function _buildCertificationData({ organizationId, isPublished, verificationCode
   });
 
   return {
-    schoolingRegistration,
     session,
     certificationCourse,
     assessmentId: assessment.id,
@@ -88,19 +85,24 @@ function _createAssessmentResultWithCompetenceMarks({
   });
 }
 
+function buildStudent(organizationId) {
+  const user = _createUser();
+  const schoolingRegistration = _createSchoolingRegistration(user.id, organizationId);
+  return { userId: user.id, schoolingRegistration };
+}
+
 function buildOrganization(uai) {
   return databaseBuilder.factory.buildOrganization({ externalId: uai });
 }
 
-const buildValidatedPublishedCertificationData = function({ organizationId, verificationCode, pixScore, competenceMarks }) {
+const buildValidatedPublishedCertificationData = function({ userId, verificationCode, pixScore, competenceMarks }) {
   const certificationStatus = status.VALIDATED;
   const {
-    schoolingRegistration,
     session,
     certificationCourse,
     assessmentId,
   } = _buildCertificationData({
-    organizationId,
+    userId,
     verificationCode,
     type,
     pixScore,
@@ -130,16 +132,15 @@ const buildValidatedPublishedCertificationData = function({ organizationId, veri
   });
 
   return {
-    schoolingRegistration,
     session,
     certificationCourse,
   };
 };
 
-const buildRejectedPublishedCertificationData = function({ organizationId }) {
+const buildRejectedPublishedCertificationData = function({ userId }) {
   const certificationStatus = status.REJECTED;
   const { assessmentId } = _buildCertificationData({
-    organizationId,
+    userId,
     isPublished: true,
   });
 
@@ -151,10 +152,10 @@ const buildRejectedPublishedCertificationData = function({ organizationId }) {
 
 };
 
-const buildErrorUnpublishedCertificationData = function({ organizationId }) {
+const buildErrorUnpublishedCertificationData = function({ userId, organizationId }) {
   const certificationStatus = status.REJECTED;
   const { assessmentId } = _buildCertificationData({
-    organizationId,
+    userId,
     isPublished: false,
   });
 
@@ -166,10 +167,10 @@ const buildErrorUnpublishedCertificationData = function({ organizationId }) {
 
 };
 
-const buildCertificationDataWithNoCompetenceMarks = function({ organizationId }) {
+const buildCertificationDataWithNoCompetenceMarks = function({ userId }) {
   const certificationStatus = status.REJECTED;
   const { assessmentId } = _buildCertificationData({
-    organizationId,
+    userId,
     isPublished: false,
   });
 
@@ -253,4 +254,5 @@ module.exports = {
   buildCertificationDataWithNoCompetenceMarks,
   mockLearningContentCompetences,
   buildOrganization,
+  buildStudent,
 };
