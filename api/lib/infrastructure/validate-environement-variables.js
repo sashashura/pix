@@ -11,9 +11,9 @@ const schemaCI = Joi.object({
 
 const schemaRun = Joi.object({
   REDIS_URL: Joi.string().uri().optional(),
-  DATABASE_URL: Joi.string().uri().optional(),
-  TEST_DATABASE_URL: Joi.string().optional(),
-  MAILING_ENABLED: featureToggle.optional(),
+  DATABASE_URL: Joi.string().uri().required(),
+  TEST_DATABASE_URL: Joi.string().required(),
+  MAILING_ENABLED: featureToggle.required(),
   MAILING_PROVIDER: Joi.when('MAILING_ENABLED', { is: Joi.exist(), then: Joi.required().valid('sendinblue') }),
   MAILJET_API_KEY: Joi.string().optional(),
   MAILJET_API_SECRET: Joi.string().optional(),
