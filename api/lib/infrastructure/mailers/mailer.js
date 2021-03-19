@@ -36,8 +36,9 @@ class Mailer {
       await this._provider.sendEmail(options);
     }
     catch (err) {
-      logger.warn({ err }, `Could not send email to '${options.to}'`);
-      return EmailingAttempt.failure(options.to);
+      const message = `Could not send email to '${options.to}'`;
+      logger.warn({ err }, message);
+      throw new Error(message + err);
     }
 
     return EmailingAttempt.success(options.to);
