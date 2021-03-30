@@ -529,6 +529,12 @@ class NoCertificationResultForDivision extends DomainError {
   }
 }
 
+class NoDivisionListForOrganization extends DomainError {
+  constructor(message = 'Aucune classe pour cette organization.') {
+    super(message);
+  }
+}
+
 class ObjectValidationError extends DomainError {
   constructor(message = 'Erreur, objet non valide.') {
     super(message);
@@ -796,6 +802,7 @@ module.exports = {
   MissingOrInvalidCredentialsError,
   NoCampaignParticipationForUserAndCampaign,
   NoCertificationResultForDivision,
+  NoDivisionListForOrganization,
   NotEligibleCandidateError,
   NotFoundError,
   NotImplementedError,
