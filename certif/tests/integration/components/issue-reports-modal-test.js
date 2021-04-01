@@ -1,4 +1,4 @@
-import { module, test } from 'qunit';
+import { module, test, only } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { render, click } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
@@ -70,7 +70,7 @@ module('Integration | Component | issue-reports-modal', function(hooks) {
     assert.ok(onClickIssueReportStub.calledOnceWith(report));
   });
 
-  test('it should show Mes signalements (2)', async function(assert) {
+  only('it should show Mes signalements (2)', async function(assert) {
     // given
     const issue1 = EmberObject.create({
       category: certificationIssueReportCategories.CONNECTION_OR_END_SCREEN,
