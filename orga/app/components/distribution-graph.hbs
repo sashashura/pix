@@ -1,0 +1,23 @@
+<div class="distribution-graph__container">
+  <div class="distribution-graph__title">
+    <p>Répartion des agents par seuils de réussite du parcours de le Ville du Havre</p>
+  </div>
+
+  <div class="distribution-graph__parts">
+    <div class="distribution-graph-part__segment">
+      <div class="distribution-graph-part__stars">
+        <PixStars
+          @count= {{this.data.stage_1.starCount}}
+          @total={{this.data.stage_1.starCount}}
+          @alt={{'tests'}}
+          @color="blue"
+          class="stage-stars"
+        />
+      </div>
+      <div class="distribution-graph-part__rectangle" style={{this.distributionPercentage}} >
+        <p class="distribution-graph-part__participants-number">{{this.data.stage_1.participantsNumber}}</p>
+      </div>
+    </div>
+    <p class="distribution-graph-part__percentage"></p>
+  </div>
+</div>
