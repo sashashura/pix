@@ -3,7 +3,7 @@ const assessmentController = require('./assessment-controller');
 const assessmentAuthorization = require('../preHandlers/assessment-authorization');
 const identifiersType = require('../../domain/types/identifiers-type');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
 
     {

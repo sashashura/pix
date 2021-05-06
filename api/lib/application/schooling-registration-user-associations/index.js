@@ -5,7 +5,7 @@ const securityPreHandlers = require('../security-pre-handlers');
 const schoolingRegistrationUserAssociationController = require('./schooling-registration-user-association-controller');
 const identifiersType = require('../../domain/types/identifiers-type');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'POST',
@@ -142,7 +142,6 @@ exports.register = async function(server) {
         tags: ['api', 'schoolingRegistrationUserAssociation'],
       },
     },
-
     {
       method: 'PATCH',
       path: '/api/organizations/{id}/schooling-registration-user-associations/{schoolingRegistrationId}',
@@ -182,7 +181,6 @@ exports.register = async function(server) {
         tags: ['api', 'schoolingRegistrationUserAssociation'],
       },
     },
-
     {
       method: 'DELETE',
       path: '/api/schooling-registration-user-associations/{id}',

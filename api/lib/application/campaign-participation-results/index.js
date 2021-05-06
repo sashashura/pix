@@ -2,7 +2,7 @@ const Joi = require('joi');
 const campaignParticipationResultController = require('./campaign-participation-result-controller');
 const identifiersType = require('../../domain/types/identifiers-type');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'GET',

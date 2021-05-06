@@ -3,7 +3,7 @@ const campaignParticipationController = require('./campaign-participation-contro
 const { sendJsonApiError, NotFoundError } = require('../http-errors');
 const identifiersType = require('../../domain/types/identifiers-type');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'GET',

@@ -1,6 +1,6 @@
 const healthcheckController = require('./healthcheck-controller');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'GET',

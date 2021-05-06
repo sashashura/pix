@@ -4,8 +4,7 @@ const Joi = require('joi');
 const responseErrorObjectDoc = require('../../infrastructure/open-api-doc/livret-scolaire/response-object-error-doc');
 const certificationsResultsResponseDoc = require('../../infrastructure/open-api-doc/livret-scolaire/certifications-results-doc');
 
-exports.register = async function(server) {
-
+exports.register = async (server) => {
   server.route([
     {
       method: 'GET',

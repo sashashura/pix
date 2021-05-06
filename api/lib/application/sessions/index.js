@@ -450,7 +450,6 @@ exports.register = async (server) => {
           method: securityPreHandlers.checkUserHasRolePixMaster,
           assign: 'hasRolePixMaster',
         }],
-
         handler: sessionController.flagResultsAsSentToPrescriber,
         tags: ['api', 'sessions'],
         notes: [

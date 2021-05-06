@@ -1,6 +1,6 @@
 const poleEmploiController = require('./pole-emploi-controller');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'POST',

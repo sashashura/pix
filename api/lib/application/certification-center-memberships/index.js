@@ -1,9 +1,8 @@
 const certificationCenterMembershipController = require('./certification-center-membership-controller');
 const securityPreHandlers = require('../security-pre-handlers');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
-
     {
       method: 'POST',
       path: '/api/certification-center-memberships',

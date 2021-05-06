@@ -7,7 +7,7 @@ const { passwordValidationPattern } = require('../../config').account;
 
 const schoolingRegistrationDependentUserController = require('./schooling-registration-dependent-user-controller');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'POST',

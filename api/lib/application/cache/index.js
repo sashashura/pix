@@ -1,7 +1,7 @@
 const securityPreHandlers = require('../security-pre-handlers');
 const CacheController = require('./cache-controller');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'PATCH',
@@ -19,7 +19,8 @@ exports.register = async function(server) {
           'Attention : pour un état cohérent des objets stockés en cache, utiliser PATCH /api/cache',
         ],
       },
-    }, {
+    },
+    {
       method: 'PATCH',
       path: '/api/cache',
       config: {

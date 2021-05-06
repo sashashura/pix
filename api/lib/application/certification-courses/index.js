@@ -6,7 +6,7 @@ const certificationCourseController = require('./certification-course-controller
 const identifiersType = require('../../domain/types/identifiers-type');
 const config = require('../../config');
 
-exports.register = async function(server) {
+exports.register = async (server) => {
   server.route([
     {
       method: 'GET',
@@ -86,7 +86,8 @@ exports.register = async function(server) {
         handler: certificationCourseController.update,
         tags: ['api'],
       },
-    }, {
+    },
+    {
       method: 'POST',
       path: '/api/certification-courses',
       config: {
