@@ -4,6 +4,30 @@
   </div>
 
   <div class="distribution-graph__parts">
+    {{#each-in this.data as |stageTitle stage|}}
+      <div class="distribution-graph-part__segment" style={{ call (fn this.distributionPercentage stage.participantsNumber) }}>
+        <div class="distribution-graph-part__stars">
+          <PixStars
+            @count= {{stage.starCount}}
+            @alt={{'tests'}}
+            @color="blue"
+            class="stage-stars"
+          />
+        </div>
+        <div class="distribution-graph-part__rectangle">
+          <p class="distribution-graph-part__participants-number">{{stage.participantsNumber}}</p>
+        </div>
+      </div>
+    {{/each-in}}
+    <p class="distribution-graph-part__percentage"></p>
+  </div>
+</div>
+{{!-- <div class="distribution-graph__container">
+  <div class="distribution-graph__title">
+    <p>Répartion des agents par seuils de réussite du parcours de le Ville du Havre</p>
+  </div>
+
+  <div class="distribution-graph__parts">
     <div class="distribution-graph-part__segment">
       <div class="distribution-graph-part__stars">
         <PixStars
@@ -20,4 +44,4 @@
     </div>
     <p class="distribution-graph-part__percentage"></p>
   </div>
-</div>
+</div> --}}
