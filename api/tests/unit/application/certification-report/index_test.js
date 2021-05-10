@@ -1,20 +1,28 @@
-const { expect, HttpTestServer, sinon } = require('../../../test-helper');
-const certificationReportController = require('../../../../lib/application/certification-reports/certification-report-controller');
+const {
+  expect,
+  HttpTestServer,
+  sinon,
+} = require('../../../test-helper');
 
 const moduleUnderTest = require('../../../../lib/application/certification-reports');
 
-describe('Unit | Application | Certifications Report | Route', () => {
+const certificationReportController = require('../../../../lib/application/certification-reports/certification-report-controller');
 
-  it('POST /api/certification-reports/{id}/certification-issue-reports should exist', async () => {
-    // given
-    sinon.stub(certificationReportController, 'saveCertificationIssueReport').returns('ok');
-    const httpTestServer = new HttpTestServer();
-    await httpTestServer.register(moduleUnderTest);
+describe('Unit | Application | Router | certification-report-router', () => {
 
-    // when
-    const response = await httpTestServer.request('POST', '/api/certification-reports/1/certification-issue-reports');
+  describe('POST api/certification-reports/{id}/certification-issue-reports', () => {
 
-    // then
-    expect(response.statusCode).to.equal(200);
+    it('should return 200', async () => {
+      // given
+      sinon.stub(certificationReportController, 'saveCertificationIssueReport').callsFake((request, h) => h.response('ok').code(200));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request('POST', '/api/certification-reports/1/certification-issue-reports');
+
+      // then
+      expect(response.statusCode).to.equal(200);
+    });
   });
 });

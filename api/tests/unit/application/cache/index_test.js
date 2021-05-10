@@ -10,24 +10,20 @@ const moduleUnderTest = require('../../../../lib/application/cache');
 
 const cacheController = require('../../../../lib/application/cache/cache-controller');
 
-describe('Unit | Router | cache-router', () => {
-
-  let httpTestServer;
-
-  beforeEach(async() => {
-    sinon.stub(cacheController, 'refreshCacheEntries').callsFake((request, h) => h.response().code(204));
-    sinon.stub(cacheController, 'refreshCacheEntry').callsFake((request, h) => h.response().code(204));
-    sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
-
-    httpTestServer = new HttpTestServer();
-    await httpTestServer.register(moduleUnderTest);
-  });
+describe('Unit | Application | Router | cache-router', () => {
 
   describe('PATCH /api/cache/{model}/{id}', () => {
 
-    it('should exist', async () => {
-      // when
+    it('should return 204', async () => {
+      //given
+      sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
+      sinon.stub(cacheController, 'refreshCacheEntry').callsFake((request, h) => h.response('ok').code(204));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
       const updatedRecord = { id: 'recId', param: 'updatedValue' };
+
+      // when
       const response = await httpTestServer.request('PATCH', '/api/cache/table/recXYZ1234', updatedRecord);
 
       // then
@@ -37,7 +33,13 @@ describe('Unit | Router | cache-router', () => {
 
   describe('PATCH /api/cache', () => {
 
-    it('should exist', async () => {
+    it('should return 204', async () => {
+      //given
+      sinon.stub(securityPreHandlers, 'checkUserHasRolePixMaster').callsFake((request, h) => h.response(true));
+      sinon.stub(cacheController, 'refreshCacheEntries').callsFake((request, h) => h.response('ok').code(204));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
       // when
       const response = await httpTestServer.request('PATCH', '/api/cache');
 

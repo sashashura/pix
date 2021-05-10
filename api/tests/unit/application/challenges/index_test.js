@@ -1,30 +1,25 @@
-const { expect, sinon } = require('../../../test-helper');
-const Hapi = require('@hapi/hapi');
-const ChallengeController = require('../../../../lib/application/challenges/challenge-controller');
-const route = require('../../../../lib/application/challenges');
+const {
+  expect,
+  HttpTestServer,
+  sinon,
+} = require('../../../test-helper');
 
-describe('Unit | Router | challenge-router', function() {
+const moduleUnderTest = require('../../../../lib/application/challenges');
 
-  let server;
+const challengeController = require('../../../../lib/application/challenges/challenge-controller');
 
-  beforeEach(function() {
-    server = Hapi.server();
-  });
+describe('Unit | Application | Router | challenge-router', () => {
 
-  describe('GET /api/challenges/{id}', function() {
+  describe('GET /api/challenges/{id}', () => {
 
-    beforeEach(function() {
-      sinon.stub(ChallengeController, 'get').returns('ok');
-
-      return server.register(route);
-    });
-
-    it('should exist', async () => {
+    it('should return 200', async () => {
       // given
-      const options = { method: 'GET', url: '/api/challenges/challenge_id' };
+      sinon.stub(challengeController, 'get').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
 
       // when
-      const response = await server.inject(options);
+      const response = await httpTestServer.request('GET', '/api/challenges/1');
 
       // then
       expect(response.statusCode).to.equal(200);

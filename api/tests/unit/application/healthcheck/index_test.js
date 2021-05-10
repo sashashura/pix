@@ -8,20 +8,16 @@ const moduleUnderTest = require('../../../../lib/application/healthcheck');
 
 const healthcheckController = require('../../../../lib/application/healthcheck/healthcheck-controller');
 
-describe('Unit | Router | HealthcheckRouter', function() {
+describe('Unit | Application | Router | healthcheck-router', () => {
 
-  let httpTestServer;
+  describe('GET /api', () => {
 
-  beforeEach(async() => {
-    sinon.stub(healthcheckController, 'get').returns('ok');
+    it('should return 200', async () => {
+      // given
+      sinon.stub(healthcheckController, 'get').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
 
-    httpTestServer = new HttpTestServer();
-    await httpTestServer.register(moduleUnderTest);
-  });
-
-  describe('GET /api', function() {
-
-    it('should exist', async function() {
       // when
       const response = await httpTestServer.request('GET', '/api');
 

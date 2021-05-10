@@ -8,22 +8,16 @@ const moduleUnderTest = require('../../../../lib/application/organization-invita
 
 const organizationInvitationController = require('../../../../lib/application/organization-invitations/organization-invitation-controller');
 
-describe('Unit | Router | organization-invitation-router', () => {
-
-  let httpTestServer;
-
-  beforeEach(async() => {
-    sinon.stub(organizationInvitationController, 'acceptOrganizationInvitation').callsFake((request, h) => h.response().code(204));
-    sinon.stub(organizationInvitationController, 'getOrganizationInvitation').callsFake((request, h) => h.response().code(200));
-
-    httpTestServer = new HttpTestServer();
-    await httpTestServer.register(moduleUnderTest);
-  });
+describe('Unit | Application | Router | organization-invitation-router', () => {
 
   describe('POST /api/organization-invitations/{id}/response', () => {
 
-    it('should exists', async () => {
+    it('should return 204', async () => {
       // given
+      sinon.stub(organizationInvitationController, 'acceptOrganizationInvitation').callsFake((request, h) => h.response().code(204));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
       const method = 'POST';
       const url = '/api/organization-invitations/1/response';
       const payload = {
@@ -49,8 +43,12 @@ describe('Unit | Router | organization-invitation-router', () => {
 
     const method = 'GET';
 
-    it('should exists', async () => {
+    it('should return 200', async () => {
       // given
+      sinon.stub(organizationInvitationController, 'getOrganizationInvitation').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
       const url = '/api/organization-invitations/1?code=DZWMP7L5UM';
 
       // when
@@ -62,6 +60,9 @@ describe('Unit | Router | organization-invitation-router', () => {
 
     it('should return Bad Request Error when invitation identifier is not a number', async () => {
       // given
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
       const url = '/api/organization-invitations/XXXXXXXXXXXXXXXX15812?code=DZWMP7L5UM';
 
       // when
