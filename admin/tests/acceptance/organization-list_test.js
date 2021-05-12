@@ -44,7 +44,7 @@ module('Acceptance | Organization List', function(hooks) {
       await visit('/organizations/list');
 
       // then
-      assert.dom('.organization-list .table-admin tbody tr').exists({ count: 12 });
+      assert.dom('.table-admin tbody tr').exists({ count: 12 });
     });
 
     module('when filters are used', function(hooks) {
@@ -84,7 +84,7 @@ module('Acceptance | Organization List', function(hooks) {
       await visit('/organizations/list');
 
       // when
-      await click('.organization-list .table-admin tbody tr:first-child');
+      await click('.table-admin tbody tr:first-child');
 
       // then
       assert.equal(currentURL(), '/organizations/1/members');
