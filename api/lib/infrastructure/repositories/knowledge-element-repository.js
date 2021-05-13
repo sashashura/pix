@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const bluebird = require('bluebird');
 const constants = require('../constants');
-const { knex } = require('../bookshelf');
+const { knex } = require('../../../db/knex-database-connection');
 const KnowledgeElement = require('../../domain/models/KnowledgeElement');
 const BookshelfKnowledgeElement = require('../data/knowledge-element');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
