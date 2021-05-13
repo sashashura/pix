@@ -74,7 +74,7 @@ exports.seed = async (knex) => {
   buildPixAileProfile({ databaseBuilder });
 
   await databaseBuilder.commit();
-  await alterSequenceIfPG(knex);
+  await alterPostgresqlSequence(knex);
   const campaignParticipationData = await getEligibleCampaignParticipations(50000);
   await generateKnowledgeElementSnapshots(campaignParticipationData, 1);
 };
@@ -85,7 +85,7 @@ exports.seed = async (knex) => {
  * Making the sequences start at an arbitrary high number prevents the problem from happening for a time.
  * (time being enough for dev ou review apps - seed are not run on staging or prod)
  */
-async function alterSequenceIfPG(knex) {
+async function alterPostgresqlSequence(knex) {
   const sequenceNameQueryResult = await knex.raw('SELECT sequence_name FROM information_schema.sequences;');
   const sequenceNames = sequenceNameQueryResult.rows.map((row) => row.sequence_name);
   return bluebird.mapSeries(sequenceNames, async (sequenceName) => {
