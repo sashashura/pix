@@ -2,6 +2,9 @@ const validator = require('validator');
 const _ = require('lodash');
 
 const { knex } = require('../../db/knex-database-connection');
+const { flakify } = require('./flakify');
+flakify(knex);
+
 const bookshelf = require('bookshelf')(knex);
 
 validator.isRequired = function(value) {

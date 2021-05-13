@@ -1050,6 +1050,7 @@ describe('Integration | Infrastructure | Repository | UserRepository', () => {
         const { models: matchingUsers, pagination } = await userRepository.findPaginatedFiltered({ filter, page });
 
         // then
+        //expect(map(matchingUsers, 'firstName')).to.deep.equal(['Son Gohan', 'Son Goku', 'Son Goten']);
         expect(map(matchingUsers, 'firstName')).to.have.members(['Son Gohan', 'Son Goku', 'Son Goten']);
         expect(pagination).to.deep.equal(expectedPagination);
       });

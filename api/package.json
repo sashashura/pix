@@ -55,6 +55,7 @@
     "moment-timezone": "^0.5.33",
     "node-cache": "^5.1.2",
     "node-cron": "^2.0.3",
+    "node-sql-parser": "^3.3.0",
     "node-stream-zip": "^1.13.2",
     "papaparse": "^5.3.0",
     "pdf-lib": "^1.16.0",
