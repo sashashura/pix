@@ -3,7 +3,19 @@ const parser = new Parser();
 const sqlifyTargetDatabase = {
   database: 'postgresql',
 };
-const tables = ['users', 'foobar'];
+const tables = [
+  'users',
+  'answers',
+  'assessment-results',
+  'assessments',
+  'authentication-methods',
+  'badge-acquisitions',
+  'badge-criteria',
+  'badge-partner-competences',
+  'badges',
+  'campaign-participations',
+  'campaigns'];
+
 const shuffledViewPrefix = '_shuffled';
 
 const flakify = (knex) => {
