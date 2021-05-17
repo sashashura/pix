@@ -1,0 +1,11 @@
+@startuml
+participant stdout
+participant filesystem
+participant log_storage
+participant log_explorer
+
+stdout -> filesystem: PAAS-specific
+filesystem -> log_storage: PAAS/SAAS-specific
+log_storage -> log_explorer: SAAS-specific
+
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+actor end_user #blue
+participant front
+participant hapi_router
+participant hapi_good
+participant hapi_squeeze
+participant hapi_console
+participant stdout
+
+== http query successful==
+front -> hapi_router: GET /api
+hapi_router -[dotted]-> hapi_good: //request// event
+hapi_good -> hapi_squeeze : request
+hapi_squeeze -> hapi_good : filtered request
+hapi_good -> hapi_console:  request
+hapi_console -> stdout: pretty-print / JSON
+
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+actor end_user #blue
+participant hapi_oopsy
+participant hapi_good
+participant hapi_squeeze
+participant hapi_console
+participant stdout
+
+
+hapi_oopsy -[dotted]-> hapi_good: //ops// event
+hapi_good -> hapi_squeeze : ops object
+hapi_squeeze -> hapi_good : filtered ops object
+hapi_good -> hapi_console:  ops object
+hapi_console -> stdout: pretty-print / JSON
+
+@enduml

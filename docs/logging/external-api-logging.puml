@@ -1,0 +1,19 @@
+@startuml
+actor end_user #blue
+participant front
+participant hapi_router
+participant hapi_route
+participant http_client
+participant database
+participant logger
+participant stdout
+
+front -> hapi_router: GET /api/pole-emploi-token
+hapi_router -> hapi_route: GET <PIX_URL>/api/pole-emploi-token
+hapi_route -> http_client: GET <POLE_EMPLOI>/authenticate
+http_client -> hapi_route: response
+hapi_route -> database: INSERT INTO pole_emploi_request
+hapi_route -> logger: error message
+logger -> stdout: pretty-print / JSON
+
+@enduml

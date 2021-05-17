@@ -1,0 +1,17 @@
+@startuml
+actor end_user #blue
+participant front
+participant hapi_router
+participant hapi_route
+participant pre_response_utils
+participant logger
+participant stdout
+
+front -> hapi_router: GET /api/healthcheck/crash
+hapi_router -> hapi_route: execute
+hapi_route -> hapi_router: throw new
+hapi_router -> pre_response_utils: response (error)
+pre_response_utils -> logger : log(message)
+logger -> stdout : message
+
+@enduml
