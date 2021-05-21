@@ -56,7 +56,16 @@ const find = async () => {
       }, 200);
     });
 
-    const response = await axios.get(`https://registry.npmjs.org/${dependency.name}`);
+    let response;
+
+    try {
+      response = await axios.get(`https://registry.npmjs.org/${dependency.name}`);
+    } catch (error) {
+      console.error(`Error while fetching from npmjs API: ${error}`);
+      console.log('Exiting..');
+      process.exit(1);
+    }
+
     const versions = response.data.versions;
     const size = versions[Object.keys(versions)[Object.keys(versions).length - 1]].dist.unpackedSize;
     if (size) {
