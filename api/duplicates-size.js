@@ -79,10 +79,11 @@ const find = async () => {
   console.log('Duplicated dependencies ( a version in main package, and at least another version in transitive dependencies');
   console.log(`${dependenciesNameCountSizeRoot.length} are duplicated, total ${prettyBytes(totalSize)}`);
 
-  await Promise.all(dependenciesNameCountSizeRoot.map(async (dependency) => {
+  for (const dependency of dependenciesNameCountSizeRoot) {
     console.log(`${dependency.name} is duplicated ${dependency.count} times, ${prettyBytes(dependency.size)} each`);
     await packageSize(dependency.name);
-  }));
+  }
+
 };
 
 (async () => {
