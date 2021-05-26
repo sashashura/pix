@@ -55,16 +55,16 @@
   <div class="campaign-details-row">
     {{#unless @campaign.isArchived}}
       <div class="campaign-details-row">
-        <div class="campaign-details-content campaign-details-content--button campaign-details--button">
+        <div class="campaign-details-content campaign-details-content--button">
           <LinkTo
             @route="authenticated.campaigns.update"
             @model={{@campaign.id}}
-            class="button button--grey button--regular button--link campaign-details-content__update-button"
+            class="button button--grey button--regular button--link"
           >
             {{t 'pages.campaign-details.actions.edit'}}
           </LinkTo>
         </div>
-        <div class="campaign-details-content campaign-details-content--button campaign-details--button campaign-details-content--left">
+        <div class="campaign-details-content campaign-details-content--button campaign-details-content--left">
           <button
             type="button"
             {{on 'click' (fn this.archiveCampaign @campaign.id)}}
