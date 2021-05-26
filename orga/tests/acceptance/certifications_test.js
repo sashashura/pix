@@ -45,7 +45,6 @@ module('Acceptance | Certifications page', function(hooks) {
         await visit('/certifications');
 
         // then
-        assert.dom('.information-banner').doesNotExist();
         assert.dom('.pix-banner').doesNotExist();
       });
 

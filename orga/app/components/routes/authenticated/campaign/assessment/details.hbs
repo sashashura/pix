@@ -20,19 +20,19 @@
         {{#if @campaignAssessmentParticipation.participantExternalId}}
           <li class="panel-header-data__content">
             <div class="label-text panel-header-data-content__label">{{@campaign.idPixLabel}}</div>
-            <div class="value-text panel-header-data-content__value">{{@campaignAssessmentParticipation.participantExternalId}}</div>
+            <div class="value-text">{{@campaignAssessmentParticipation.participantExternalId}}</div>
           </li>
         {{/if}}
         <li class="panel-header-data__content">
           <div class="label-text panel-header-data-content__label">{{t 'pages.campaign-individual-results.start-date'}}</div>
-          <div class="value-text panel-header-data-content__value">
+          <div class="value-text">
             {{moment-format @campaignAssessmentParticipation.createdAt 'DD MMM YYYY'}}
           </div>
         </li>
         {{#unless @campaignAssessmentParticipation.isShared }}
           <li class="panel-header-data__content">
             <div class="label-text panel-header-data-content__label">{{t 'pages.assessment-individual-results.progression'}}</div>
-            <div class="value-text panel-header-data-content__value">
+            <div class="value-text">
               {{@campaignAssessmentParticipation.progression}}%
             </div>
           </li>
@@ -40,7 +40,7 @@
         {{#if @campaignAssessmentParticipation.isShared }}
           <li class="panel-header-data__content">
             <div class="label-text panel-header-data-content__label">{{t 'pages.campaign-individual-results.shared-date'}}</div>
-              <div class="value-text panel-header-data-content__value">
+              <div class="value-text">
                 {{moment-format @campaignAssessmentParticipation.sharedAt 'DD MMM YYYY'}}
               </div>
           </li>
