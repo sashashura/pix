@@ -24,6 +24,7 @@ exports.register = async (server) => {
         },
         handler: AuthenticationController.authenticateUser,
         tags: ['api'],
+        description: 'perimetre-acces',
       },
     },
     {
