@@ -19,7 +19,9 @@ export default class ResumeRoute extends Route {
     if (assessment.isCompleted) {
       return this._routeToResults(assessment);
     }
+    console.log('Hey je fais le resume et du coup je fais déjà un appel');
     const nextChallenge = await this.store.queryRecord('challenge', { assessmentId: assessment.id });
+    console.log('resume challenge', nextChallenge.id);
 
     if (assessment.hasCheckpoints) {
       return this._resumeAssessmentWithCheckpoint(assessment, nextChallenge);
@@ -67,9 +69,9 @@ export default class ResumeRoute extends Route {
       return this._routeToCheckpoint(assessment);
     }
     if (userHasReachedCheckpoint && userHasSeenCheckpoint) {
-      return this._routeToNextChallenge(assessment);
+      return this._routeToNextChallenge(assessment, nextChallenge);
     }
-    return this._routeToNextChallenge(assessment);
+    return this._routeToNextChallenge(assessment, nextChallenge);
   }
 
   _parseState(assessment, nextChallenge) {
@@ -90,8 +92,8 @@ export default class ResumeRoute extends Route {
     };
   }
 
-  _routeToNextChallenge(assessment) {
-    return this.replaceWith('assessments.challenge', assessment.id, assessment.currentChallengeNumber, { queryParams: { newLevel: this.newLevel, competenceLeveled: this.competenceLeveled } });
+  _routeToNextChallenge(assessment, nextChallenge) {
+    return this.replaceWith('assessments.challenge', assessment.id, assessment.currentChallengeNumber, { queryParams: { newLevel: this.newLevel, competenceLeveled: this.competenceLeveled, nextChallengeId: nextChallenge.id } });
   }
 
   async _rateAssessment(assessment) {

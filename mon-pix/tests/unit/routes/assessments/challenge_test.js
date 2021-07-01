@@ -51,7 +51,7 @@ describe('Unit | Route | Assessments | Challenge', function() {
     route.modelFor = sinon.stub().returns(assessment);
   });
 
-  describe('#model', function() {
+  describe.only('#model', function() {
     it('should correctly call the store to find assessment and challenge', async function() {
       // when
       await route.model(params);
@@ -60,6 +60,28 @@ describe('Unit | Route | Assessments | Challenge', function() {
       sinon.assert.calledWith(route.modelFor, 'assessments');
       sinon.assert.calledWith(queryRecordStub, 'challenge', { assessmentId: assessment.id });
     });
+
+    context('after another challenge', function() {
+      it('should call find challenge', async function() {
+        // given
+        const transition = {
+          to: {
+            queryParams: {
+              nextChallengeId: 'rec12345',
+            },
+          },
+        };
+        findRecordStub.resolves(model.challenge);
+
+        // when
+        await route.model(params, transition);
+
+        // then
+        sinon.assert.calledWith(route.modelFor, 'assessments');
+        sinon.assert.calledWith(findRecordStub, 'challenge', transition.to.queryParams.nextChallengeId);
+      });
+    });
+
     it('should call queryRecord to find answer', async function() {
       // given
       model.assessment.get.withArgs('isCertification').returns(false);
@@ -74,6 +96,7 @@ describe('Unit | Route | Assessments | Challenge', function() {
         challengeId: model.challenge.id,
       });
     });
+
     context('when the assessment is a Preview', async function() {
       beforeEach(function() {
         const assessmentForPreview = {

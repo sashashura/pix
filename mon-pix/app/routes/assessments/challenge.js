@@ -6,7 +6,7 @@ import { inject as service } from '@ember/service';
 export default class ChallengeRoute extends Route {
   @service currentUser;
 
-  async model(params) {
+  async model(params, transition) {
     const assessment = await this.modelFor('assessments');
     await assessment.certificationCourse;
     await assessment.answers;
@@ -22,7 +22,12 @@ export default class ChallengeRoute extends Route {
       if (assessment.isPreview) {
         challenge = await this.store.findRecord('challenge', params.challengeId);
       } else {
-        challenge = await this.store.queryRecord('challenge', { assessmentId: assessment.id });
+        const nextChallengeId = transition ? transition.to.queryParams.nextChallengeId : null;
+        if (nextChallengeId) {
+          challenge = await this.store.findRecord('challenge', nextChallengeId);
+        } else {
+          challenge = await this.store.queryRecord('challenge', { assessmentId: assessment.id });
+        }
       }
     }
 
