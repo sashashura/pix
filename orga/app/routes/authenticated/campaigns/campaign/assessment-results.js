@@ -1,6 +1,5 @@
 import Route from '@ember/routing/route';
 import RSVP from 'rsvp';
-import { action } from '@ember/object';
 
 export default class AssessmentResultsRoute extends Route {
   queryParams = {
@@ -28,14 +27,6 @@ export default class AssessmentResultsRoute extends Route {
       campaign,
       participations: this.fetchSummaries({ campaignId: campaign.id, ...params }),
     });
-  }
-
-  // ???????????????
-  @action
-  loading(transition) {
-    if (transition.from && transition.from.name === 'authenticated.campaigns.campaign.assessments') {
-      return false;
-    }
   }
 
   fetchSummaries(params) {
