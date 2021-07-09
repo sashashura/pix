@@ -25,12 +25,12 @@ export default class AssessmentResultsRoute extends Route {
     await campaign.belongsTo('campaignCollectiveResult').reload();
     return RSVP.hash({
       campaign,
-      participations: this.fetchSummaries({ campaignId: campaign.id, ...params }),
+      participations: this.fetchResultMinimalList({ campaignId: campaign.id, ...params }),
     });
   }
 
-  fetchSummaries(params) {
-    return this.store.query('campaignAssessmentParticipationSummary', {
+  fetchResultMinimalList(params) {
+    return this.store.query('campaignAssessmentResultMinimal', {
       page: {
         number: params.pageNumber,
         size: params.pageSize,
@@ -44,6 +44,17 @@ export default class AssessmentResultsRoute extends Route {
     });
   }
 
+<<<<<<< HEAD
+=======
+  @action
+  loading(transition) {
+    if (transition.from && transition.from.name === 'authenticated.campaigns.campaign.assessment-results') {
+      return false;
+    }
+    return true;
+  }
+
+>>>>>>> cd567f8ae (route orga)
   resetController(controller, isExiting) {
     if (isExiting) {
       controller.pageNumber = 1;
