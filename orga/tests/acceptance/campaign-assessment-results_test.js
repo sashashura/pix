@@ -46,7 +46,7 @@ module('Acceptance | Campaign Assessment Results', function(hooks) {
     test('it should display participant list with default settings for pagination', async function(assert) {
       // when
       await visit('/campagnes/1/resultats-evaluation');
-      debugger
+
       // then
       assert.dom('table tbody tr').exists({ count: pageSize });
       assert.contains('Page 1 / 4');
