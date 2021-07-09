@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import RSVP from 'rsvp';
+import { action } from '@ember/object';
 
 export default class AssessmentResultsRoute extends Route {
   queryParams = {
@@ -44,8 +45,6 @@ export default class AssessmentResultsRoute extends Route {
     });
   }
 
-<<<<<<< HEAD
-=======
   @action
   loading(transition) {
     if (transition.from && transition.from.name === 'authenticated.campaigns.campaign.assessment-results') {
@@ -54,7 +53,6 @@ export default class AssessmentResultsRoute extends Route {
     return true;
   }
 
->>>>>>> cd567f8ae (route orga)
   resetController(controller, isExiting) {
     if (isExiting) {
       controller.pageNumber = 1;
