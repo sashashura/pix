@@ -13,6 +13,9 @@ export default class ActivityRoute extends Route {
     divisions: {
       refreshModel: true,
     },
+    status: {
+      refreshModel: true,
+    },
   }
 
   model(params) {
@@ -32,6 +35,7 @@ export default class ActivityRoute extends Route {
       },
       filter: {
         divisions: params.divisions,
+        status: params.status,
       },
     });
   }
