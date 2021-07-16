@@ -6,43 +6,39 @@ export default class ParticipationFilters extends Component {
   @service currentUser;
 
   get displayFilters() {
-    return this.displayStagesFilter || this.displayBadgesFilter || this.displayDivisionFilter;
+    return this.displayStagesFilter || this.displayBadgesFilter || this.displayDivisionFilter || this.displayStatusFilter;
   }
 
   get displayStagesFilter() {
     const { isTypeAssessment, hasStages } = this.args.campaign;
-    return isTypeAssessment && hasStages;
+
+    return isTypeAssessment && hasStages && !this.args.isStagesHidden;
+  }
+
+  get displayStatusFilter() {
+    return !!this.args.statusOptions;
+  }
+
+  get displayBadgesFilter() {
+    const { isTypeAssessment, hasBadges } = this.args.campaign;
+
+    return isTypeAssessment && hasBadges && !this.args.isBadgesHidden;
+  }
+
+  get displayDivisionFilter() {
+    return this.isDivisionsLoaded && this.currentUser.isSCOManagingStudents;
   }
 
   get stageOptions() {
     return this.args.campaign.stages.map(({ id, threshold }) => ({ value: id, threshold }));
   }
 
-  @action
-  onSelectStage(stages) {
-    this.args.onTriggerFiltering({ stages });
-  }
-
-  get displayBadgesFilter() {
-    const { isTypeAssessment, hasBadges } = this.args.campaign;
-    return isTypeAssessment && hasBadges;
-  }
-
   get badgeOptions() {
     return this.args.campaign.badges.map(({ id, title }) => ({ value: id, label: title }));
   }
 
-  @action
-  onSelectBadge(badges) {
-    this.args.onTriggerFiltering({ badges });
-  }
-
   get isDivisionsLoaded() {
     return this.args.campaign.divisions.content.length > 0;
-  }
-
-  get displayDivisionFilter() {
-    return this.isDivisionsLoaded && this.currentUser.isSCOManagingStudents;
   }
 
   get divisionOptions() {
@@ -50,7 +46,22 @@ export default class ParticipationFilters extends Component {
   }
 
   @action
+  onSelectStage(stages) {
+    this.args.onTriggerFiltering({ stages });
+  }
+
+  @action
+  onSelectBadge(badges) {
+    this.args.onTriggerFiltering({ badges });
+  }
+
+  @action
   onSelectDivision(divisions) {
     this.args.onTriggerFiltering({ divisions });
+  }
+
+  @action
+  onSelectStatus(status) {
+    this.args.onTriggerFiltering({ status });
   }
 }

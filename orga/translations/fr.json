@@ -222,6 +222,13 @@
         "shared-assessment": "Résultats reçus",
         "completed-profile": "En attente d'envoi",
         "shared-profile": "Profil reçu"
+      },
+      "status-filter": {
+        "started-assessment": "En cours",
+        "completed-assessment": "En attente d'envoi",
+        "shared-assessment": "Résultats reçus",
+        "completed-profile": "En attente d'envoi",
+        "shared-profile": "Profil reçu"
       }
     },
     "campaign-creation": {
@@ -290,19 +297,20 @@
     "campaign-results": {
       "average": "Moyenne des résultats",
       "filters": {
-        "title": "Filtres",
         "actions": {
           "clear": "Effacer les filtres"
         },
         "aria-label": "Filtres sur les participations",
         "participations-count": "{count, plural, =0 {0 participant} =1 {1 participant} other {{count} participants}}",
+        "title": "Filtres",
         "type": {
           "badges": "Thématiques",
           "divisions": {
             "title": "Classes",
             "empty": "Pas de classe"
           },
-          "stages": "Paliers"
+          "stages": "Paliers",
+          "status": "Statut"
         }
       },
       "table": {

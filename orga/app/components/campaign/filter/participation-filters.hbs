@@ -7,6 +7,19 @@
     @clearFiltersLabel={{t 'pages.campaign-results.filters.actions.clear'}}
     @onClearFilters={{@onResetFiltering}}
     >
+    {{#if this.displayStatusFilter }}
+      <PixMultiSelect
+        @id="status"
+        @title={{t 'pages.campaign-results.filters.type.status'}}
+        @placeholder={{t 'pages.campaign-results.filters.type.status'}}
+        @onSelect={{this.onSelectStatus}}
+        @selected={{@selectedStatus}}
+        @options={{@statusOptions}} as |status|
+      >
+        {{status.label}}
+      </PixMultiSelect>
+    {{/if}}
+
     {{#if this.displayDivisionFilter }}
       <PixMultiSelect
         @id="division"
@@ -17,11 +30,12 @@
         @emptyMessage={{t 'pages.campaign-results.filters.type.divisions.empty'}}
         @onSelect={{this.onSelectDivision}}
         @selected={{@selectedDivisions}}
-        @options={{this.divisionOptions}} as |option|
+        @options={{this.divisionOptions}} as |division|
       >
-        {{option.label}}
+        {{division.label}}
       </PixMultiSelect>
     {{/if}}
+    
     {{#if this.displayStagesFilter }}
       <PixMultiSelect
         @id="stage"
@@ -33,6 +47,7 @@
         <StageStars @result={{stage.threshold}} @stages={{@campaign.stages}} />
       </PixMultiSelect>
     {{/if}}
+
     {{#if this.displayBadgesFilter }}
       <PixMultiSelect
         @id="badge"

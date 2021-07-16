@@ -7,8 +7,14 @@
 
 <Campaign::Filter::ParticipationFilters
   @campaign={{@model.campaign}}
+  @statusOptions={{this.statusOptions}}
   @selectedDivisions={{this.divisions}}
+  @selectedStatus={{this.status}}
   @rowCount={{@model.participations.meta.rowCount}}
+
+  @isBadgesHidden={{true}}
+  @isStagesHidden={{true}}
+
   @onTriggerFiltering={{this.triggerFiltering}}
   @onResetFiltering={{this.resetFiltering}}
 />
