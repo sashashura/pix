@@ -1,4 +1,4 @@
-{{!-- template-lint-disable no-action --}}
+{{! template-lint-disable no-action }}
 <div class="certification-informations">
   <div class="buttons-row">
     <PixButton
@@ -6,45 +6,100 @@
       @backgroundColor="red"
       @isDisabled={{this.isCertificationCancelled}}
       @border="squircle-small"
-      @triggerAction={{this.onCancelCourseButtonClick}}>
+      @triggerAction={{this.onCancelCourseButtonClick}}
+    >
       Annuler la certification
-      </PixButton>
+    </PixButton>
   </div>
   <div class="row">
     <div class="col">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">
-            <Certification::CertificationInfoPublished @record={{this.certification}} @float={{true}} />État
+            <Certification::CertificationInfoPublished
+              @record={{this.certification}}
+              @float={{true}}
+            />État
           </h5>
           <div class="card-text">
-            <Certification::CertificationInfoField @value={{this.certification.sessionId}} @edition={{false}} @label="Session :" @linkRoute="authenticated.sessions.session" />
-            <Certification::CertificationStatusSelect @certification={{this.certification}} @edition={{this.edition}} />
-            <Certification::CertificationInfoField @value={{this.certification.creationDate}} @edition={{false}} @label="Créée le :" />
-            <Certification::CertificationInfoField @value={{this.certification.completionDate}} @edition={{false}} @label="Terminée le :" />
-            <Certification::CertificationInfoField @value={{this.certification.publishedText}} @edition={{false}} @label="Publiée :" />
-            <Certification::CertificationInfoField @value={{this.certification.cleaCertificationStatusLabel}} @edition={{false}} @label="Certification CléA numérique :" @class="certification-informations__complementary-certification--{{this.certification.cleaCertificationStatus}}" />
-            <Certification::CertificationInfoField @value={{this.certification.pixPlusDroitMaitreCertificationStatusLabel}} @edition={{false}} @label="Certification Pix+ Droit Maître :" @class="certification-informations__complementary-certification--{{this.certification.pixPlusDroitMaitreCertificationStatus}}" />
-            <Certification::CertificationInfoField @value={{this.certification.pixPlusDroitExpertCertificationStatusLabel}} @edition={{false}} @label="Certification Pix+ Droit Expert :" @class="certification-informations__complementary-certification--{{this.certification.pixPlusDroitExpertCertificationStatus}}" />
+            <Certification::CertificationInfoField
+              @value={{this.certification.sessionId}}
+              @edition={{false}}
+              @label="Session :"
+              @linkRoute="authenticated.sessions.session"
+            />
+            <Certification::CertificationStatusSelect
+              @certification={{this.certification}}
+              @edition={{this.edition}}
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.creationDate}}
+              @edition={{false}}
+              @label="Créée le :"
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.completionDate}}
+              @edition={{false}}
+              @label="Terminée le :"
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.publishedText}}
+              @edition={{false}}
+              @label="Publiée :"
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.cleaCertificationStatusLabel}}
+              @edition={{false}}
+              @label="Certification CléA numérique :"
+              @class="certification-informations__complementary-certification--{{this.certification.cleaCertificationStatus}}"
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.pixPlusDroitMaitreCertificationStatusLabel}}
+              @edition={{false}}
+              @label="Certification Pix+ Droit Maître :"
+              @class="certification-informations__complementary-certification--{{this.certification.pixPlusDroitMaitreCertificationStatus}}"
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.pixPlusDroitExpertCertificationStatusLabel}}
+              @edition={{false}}
+              @label="Certification Pix+ Droit Expert :"
+              @class="certification-informations__complementary-certification--{{this.certification.pixPlusDroitExpertCertificationStatus}}"
+            />
           </div>
         </div>
       </div>
     </div>
     <div class="col">
-      <div class="card {{if this.edition 'border-primary'}}">
+      <div class="card {{if this.edition "border-primary"}}">
         <div class="card-body">
           <h5 class="card-title">Candidat</h5>
           <div class="card-text">
-            <Certification::CertificationInfoField @value={{this.certification.firstName}} @edition={{this.edition}} @label="Prénom :" @fieldId="certification-firstName" />
-            <Certification::CertificationInfoField @value={{this.certification.lastName}} @edition={{this.edition}} @label="Nom :" @fieldId="certification-lastName" />
             <Certification::CertificationInfoField
-                    @isDate={{true}}
-                    @edition={{this.edition}}
-                    @label="Date de naissance :"
-                    @fieldId="certification-birthdate"
-                    @value={{this.certification.birthdate}}
-                    @onUpdateCertificationBirthdate={{this.onUpdateCertificationBirthdate}} />
-            <Certification::CertificationInfoField @value={{this.certification.birthplace}} @edition={{this.edition}} @label="Lieu de naissance :" @fieldId="certification-birthPlace" />
+              @value={{this.certification.firstName}}
+              @edition={{this.edition}}
+              @label="Prénom :"
+              @fieldId="certification-firstName"
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.lastName}}
+              @edition={{this.edition}}
+              @label="Nom :"
+              @fieldId="certification-lastName"
+            />
+            <Certification::CertificationInfoField
+              @isDate={{true}}
+              @edition={{this.edition}}
+              @label="Date de naissance :"
+              @fieldId="certification-birthdate"
+              @value={{this.certification.birthdate}}
+              @onUpdateCertificationBirthdate={{this.onUpdateCertificationBirthdate}}
+            />
+            <Certification::CertificationInfoField
+              @value={{this.certification.birthplace}}
+              @edition={{this.edition}}
+              @label="Lieu de naissance :"
+              @fieldId="certification-birthPlace"
+            />
           </div>
         </div>
       </div>
@@ -54,20 +109,36 @@
   {{#if this.hasIssueReports}}
     <div class="row">
       <div class="col">
-        <div class="card {{if this.edition 'border-primary'}}">
+        <div class="card {{if this.edition "border-primary"}}">
           <div class="card-body">
             <h5 class="card-title">Signalements</h5>
 
             {{#if this.hasImpactfulIssueReports}}
               <div class="card-text">
-                <h6 class="certification-informations__certification-issue-report-title--with-required-action">Signalement(s) impactant(s)</h6>
-                <ul class="certification-informations__certification-issue-reports-list">
-                  {{#each this.impactfulCertificationIssueReports as |issueReport| }}
-                    <li class={{if issueReport.resolvedAt "certification-informations__certification-issue-report--resolved" "certification-informations__certification-issue-report--unresolved"}}>
+                <h6
+                  class="certification-informations__certification-issue-report-title--with-required-action"
+                >Signalement(s) impactant(s)</h6>
+                <ul
+                  class="certification-informations__certification-issue-reports-list"
+                >
+                  {{#each
+                    this.impactfulCertificationIssueReports
+                    as |issueReport|
+                  }}
+                    <li
+                      class={{if
+                        issueReport.resolvedAt
+                        "certification-informations__certification-issue-report--resolved"
+                        "certification-informations__certification-issue-report--unresolved"
+                      }}
+                    >
                       {{issueReport.categoryLabel}}
-                      {{#if issueReport.subcategoryLabel}}: {{issueReport.subcategoryLabel}}{{/if}}
-                      {{#if issueReport.description}}- {{issueReport.description}}{{/if}}
-                      {{#if issueReport.questionNumber}}- Question {{issueReport.questionNumber}}{{/if}}
+                      {{#if issueReport.subcategoryLabel}}:
+                        {{issueReport.subcategoryLabel}}{{/if}}
+                      {{#if issueReport.description}}-
+                        {{issueReport.description}}{{/if}}
+                      {{#if issueReport.questionNumber}}- Question
+                        {{issueReport.questionNumber}}{{/if}}
                     </li>
                   {{/each}}
                 </ul>
@@ -78,11 +149,16 @@
               <div class="card-text">
                 <h6>Signalement(s) non impactant(s)</h6>
                 <ul>
-                  {{#each this.unimpactfulCertificationIssueReports as |issueReport| }}
+                  {{#each
+                    this.unimpactfulCertificationIssueReports
+                    as |issueReport|
+                  }}
                     <li>
                       {{issueReport.categoryLabel}}
-                      {{#if issueReport.subcategoryLabel}}: {{issueReport.subcategoryLabel}}{{/if}}
-                      {{#if issueReport.description}}- {{issueReport.description}}{{/if}}
+                      {{#if issueReport.subcategoryLabel}}:
+                        {{issueReport.subcategoryLabel}}{{/if}}
+                      {{#if issueReport.description}}-
+                        {{issueReport.description}}{{/if}}
                     </li>
                   {{/each}}
                 </ul>
@@ -97,7 +173,7 @@
 
   <div class="row">
     <div class="col">
-      <div class="card {{if this.edition 'border-primary'}}">
+      <div class="card {{if this.edition "border-primary"}}">
         <div class="card-body">
           <h5 class="card-title">Commentaires jury</h5>
           <div class="card-text">
@@ -106,24 +182,28 @@
               @edition={{this.edition}}
               @label="Pour le candidat :"
               @fieldId="certification-commentForCandidate"
-              @isTextarea={{true}} />
+              @isTextarea={{true}}
+            />
             <Certification::CertificationInfoField
               @value={{this.certification.commentForOrganization}}
               @edition={{this.edition}}
               @label="Pour l'organisation :"
               @fieldId="certification-commentForOrganization"
-              @isTextarea={{true}} />
+              @isTextarea={{true}}
+            />
             <Certification::CertificationInfoField
               @value={{this.certification.commentForJury}}
               @edition={{this.edition}}
               @label="Pour le jury :"
               @fieldId="certification-commentForJury"
-              @isTextarea={{true}} />
+              @isTextarea={{true}}
+            />
             <Certification::CertificationInfoField
               @value={{this.certification.juryId}}
               @edition={{false}}
               @label="Identifiant jury :"
-              @isTextarea={{true}} />
+              @isTextarea={{true}}
+            />
           </div>
         </div>
       </div>
@@ -131,7 +211,7 @@
   </div>
   <div class="row">
     <div class="col">
-      <div class="card {{if this.edition 'border-primary'}}">
+      <div class="card {{if this.edition "border-primary"}}">
         <div class="card-body">
           <h5 class="card-title">Résultats</h5>
           <div class="card-text">
@@ -140,13 +220,15 @@
               @edition={{this.edition}}
               @label="Score :"
               @fieldId="certification-pixScore"
-              @suffix=" Pix" />
+              @suffix=" Pix"
+            />
             <p></p>
             <Certification::CertificationCompetenceList
-                    @competences={{this.certification.competences}}
-                    @edition={{this.edition}}
-                    @onUpdateScore={{this.onUpdateScore}}
-                    @onUpdateLevel={{this.onUpdateLevel}} />
+              @competences={{this.certification.competences}}
+              @edition={{this.edition}}
+              @onUpdateScore={{this.onUpdateScore}}
+              @onUpdateLevel={{this.onUpdateLevel}}
+            />
           </div>
         </div>
       </div>
@@ -156,14 +238,26 @@
     <div class="row">
       <div class="col certification-informations__actions">
         {{#if this.edition}}
-          <button class="btn btn-secondary btn-sm" type="submit" {{on 'click' this.onCancel}}>
+          <button
+            class="btn btn-secondary btn-sm"
+            type="submit"
+            {{on "click" this.onCancel}}
+          >
             Annuler
           </button>
-          <button class="btn btn-primary btn-sm" type="submit" {{on 'click' this.onSaveConfirm}}>
+          <button
+            class="btn btn-primary btn-sm"
+            type="submit"
+            {{on "click" this.onSaveConfirm}}
+          >
             Enregistrer
           </button>
         {{else}}
-          <button class="btn btn-primary btn-sm" type="submit" {{on 'click' this.onEdit}}>
+          <button
+            class="btn btn-primary btn-sm"
+            type="submit"
+            {{on "click" this.onEdit}}
+          >
             Modifier
           </button>
         {{/if}}
@@ -171,9 +265,10 @@
     </div>
   {{/if}}
   <ConfirmPopup
-          @message={{this.confirmMessage}}
-          @error={{this.confirmErrorMessage}}
-          @confirm={{action this.confirmAction}}
-          @cancel={{action this.onCancelConfirm}}
-          @show={{this.displayConfirm}} />
+    @message={{this.confirmMessage}}
+    @error={{this.confirmErrorMessage}}
+    @confirm={{action this.confirmAction}}
+    @cancel={{action this.onCancelConfirm}}
+    @show={{this.displayConfirm}}
+  />
 </div>
