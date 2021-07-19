@@ -1,5 +1,7 @@
 'use strict';
 
-module.exports = {
-  extends: 'octane',
-};
+    module.exports = {
+  plugins: [ 'ember-template-lint-plugin-prettier' ],
+  extends: [ 'octane', 'ember-template-lint-plugin-prettier:recommended' ]
+  rules: { 'eol-last': 'always' },
+  };
