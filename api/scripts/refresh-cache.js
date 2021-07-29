@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 'use strict';
-require('dotenv').config();
+// require('dotenv').config();
 const learningContentDatasource = require('../lib/infrastructure/datasources/learning-content/datasource');
 
 if (require.main === module) {

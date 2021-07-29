@@ -3,7 +3,7 @@
 // To use on file with columns |organizationId, tagName|
 
 'use strict';
-require('dotenv').config();
+// require('dotenv').config();
 const organizationTagRepository = require('../lib/infrastructure/repositories/organization-tag-repository');
 const tagRepository = require('../lib/infrastructure/repositories/tag-repository');
 const OrganizationTag = require('../lib/domain/models/OrganizationTag');

@@ -3,7 +3,7 @@
 // To use on file with columns |externalId, name, email| (email is optional)
 
 'use strict';
-require('dotenv').config();
+// require('dotenv').config();
 
 const logoUrl = require('./logo/default-sco-agri-organization-logo-base64');
 const { findOrganizationsByExternalIds, organizeOrganizationsByExternalId } = require('./helpers/organizations-by-external-id-helper');

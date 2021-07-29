@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 const PgClient = require('../PgClient');
 const { PGSQL_NON_EXISTENT_DATABASE_ERROR } = require('../../db/pgsql-errors');
 

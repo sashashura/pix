@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 const validateEnvironmentVariables = require('./lib/infrastructure/validate-environement-variables');
 const Hapi = require('@hapi/hapi');
 

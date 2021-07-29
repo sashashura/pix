@@ -3,7 +3,7 @@
 // To use on file with columns |externalId, targetProfileId-targetProfileId-targetProfileId|
 
 'use strict';
-require('dotenv').config();
+// require('dotenv').config();
 const targetProfileShareRepository = require('../../lib/infrastructure/repositories/target-profile-share-repository');
 const { findOrganizationsByExternalIds, organizeOrganizationsByExternalId } = require('../helpers/organizations-by-external-id-helper');
 const { parseCsv } = require('../helpers/csvHelpers');

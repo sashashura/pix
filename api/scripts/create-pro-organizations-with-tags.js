@@ -3,7 +3,7 @@
 // To use on file with columns |externalId, name, provinceCode, canCollectProfiles, credit, email, locale, tags|
 
 'use strict';
-require('dotenv').config();
+// require('dotenv').config();
 
 const { parseCsvWithHeader } = require('./helpers/csvHelpers');
 

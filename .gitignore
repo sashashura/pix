@@ -19,6 +19,7 @@
 **/testem.log
 **/out.log
 **/api/.env
+**/api/.envrc
 **/*.log
 **/*.log.*
 

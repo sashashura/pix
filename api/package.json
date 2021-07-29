@@ -31,7 +31,6 @@
     "bookshelf-validate": "^2.0.3",
     "boom": "^7.3.0",
     "bunyan": "^1.8.15",
-    "dotenv": "^10.0.0",
     "fast-levenshtein": "^3.0.0",
     "file-type": "^16.5.0",
     "good": "^8.1.2",
@@ -133,7 +132,9 @@
     "test:api:debug": "NODE_ENV=test mocha --inspect-brk=9229 --recursive --exit --reporter dot tests",
     "test:api:watch": "NODE_ENV=test mocha --recursive tests --watch --reporter dot",
     "test:api:bail": "npm run test:api:unit -- --bail && npm run test:api:integration -- --bail && npm run test:api:acceptance -- --bail",
-    "test:lint": "npm test && npm run lint"
+    "test:lint": "npm test && npm run lint",
+    "environment:load-manual": "echo 'type \"source ./.envrc\" to load all environment variables'",
+    "environment:load-auto": "echo Visit https://direnv.net"
   },
   "nodemonConfig": {
     "signal": "SIGTERM"

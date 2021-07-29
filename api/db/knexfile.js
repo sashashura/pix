@@ -1,4 +1,4 @@
-require('dotenv').config({ path: `${__dirname}/../.env` });
+// require('dotenv').config({ path: `${__dirname}/../.env` });
 
 function localPostgresEnv(databaseUrl, knexAsyncStacktraceEnabled) {
   return {
