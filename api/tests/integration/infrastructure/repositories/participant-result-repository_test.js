@@ -72,6 +72,7 @@ describe('Integration | Repository | ParticipantResultRepository', function() {
           userId,
           campaignId,
           sharedAt: new Date('2020-01-02'),
+          masteryPercentage: '0.4',
         });
         databaseBuilder.factory.buildAssessment({ campaignParticipationId, userId });
         await databaseBuilder.commit();
@@ -89,6 +90,7 @@ describe('Integration | Repository | ParticipantResultRepository', function() {
         const { id: campaignParticipationId } = databaseBuilder.factory.buildCampaignParticipation({
           userId,
           campaignId,
+          masteryPercentage: '0.4',
           sharedAt: new Date('2020-01-02'),
         });
         databaseBuilder.factory.buildAssessment({ campaignParticipationId, userId });
@@ -130,7 +132,7 @@ describe('Integration | Repository | ParticipantResultRepository', function() {
         const campaignId = databaseBuilder.factory.buildCampaign({ organizationId, targetProfileId, multipleSendings: true }).id;
         const userId = databaseBuilder.factory.buildUser().id;
         databaseBuilder.factory.buildSchoolingRegistration({ userId, organizationId, isDisabled: true });
-        const campaignParticipationId = databaseBuilder.factory.buildCampaignParticipation({ userId, campaignId }).id;
+        const campaignParticipationId = databaseBuilder.factory.buildCampaignParticipation({ userId, campaignId, masteryPercentage: '0.1' }).id;
         databaseBuilder.factory.buildAssessment({ campaignParticipationId, userId });
 
         const otherUserId = databaseBuilder.factory.buildUser().id;
@@ -149,7 +151,7 @@ describe('Integration | Repository | ParticipantResultRepository', function() {
         const organizationId = databaseBuilder.factory.buildOrganization().id;
         databaseBuilder.factory.buildSchoolingRegistration({ userId, organizationId, isDisabled: true });
         const campaignId = databaseBuilder.factory.buildCampaign({ organizationId, targetProfileId, multipleSendings: true }).id;
-        const campaignParticipationId = databaseBuilder.factory.buildCampaignParticipation({ userId, campaignId }).id;
+        const campaignParticipationId = databaseBuilder.factory.buildCampaignParticipation({ userId, campaignId, masteryPercentage: '0.1' }).id;
         databaseBuilder.factory.buildAssessment({ campaignParticipationId, userId });
 
         const otherOrganizationId = databaseBuilder.factory.buildOrganization().id;
@@ -386,6 +388,7 @@ describe('Integration | Repository | ParticipantResultRepository', function() {
           testedSkillsCount: 2,
           totalSkillsCount: 4,
           validatedSkillsCount: 1,
+          masteryRate: 0.5,
         });
       });
     });
@@ -399,6 +402,7 @@ describe('Integration | Repository | ParticipantResultRepository', function() {
           userId,
           campaignId,
           isShared: true,
+          masteryPercentage: '0.65',
           sharedAt: new Date('2020-01-02'),
         });
 

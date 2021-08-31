@@ -22,7 +22,7 @@ const ParticipantResultRepository = {
 
 async function _getParticipationResults(userId, campaignId) {
 
-  const { isCompleted, campaignParticipationId, sharedAt, assessmentCreatedAt, participantExternalId } = await _getParticipationAttributes(userId, campaignId);
+  const { isCompleted, campaignParticipationId, sharedAt, assessmentCreatedAt, participantExternalId, masteryRate } = await _getParticipationAttributes(userId, campaignId);
 
   const knowledgeElements = await _findTargetedKnowledgeElements(campaignId, userId, sharedAt);
 
@@ -35,13 +35,14 @@ async function _getParticipationResults(userId, campaignId) {
     assessmentCreatedAt,
     participantExternalId,
     knowledgeElements,
+    masteryRate,
     acquiredBadgeIds: acquiredBadgeIds.map(({ badgeId }) => badgeId),
   };
 }
 
 async function _getParticipationAttributes(userId, campaignId) {
   const participationAttributes = await knex('campaign-participations')
-    .select(['state', 'campaignParticipationId', 'sharedAt', 'assessments.createdAt AS assessmentCreatedAt', 'participantExternalId'])
+    .select(['state', 'campaignParticipationId', 'sharedAt', 'assessments.createdAt AS assessmentCreatedAt', 'participantExternalId', 'masteryPercentage AS masteryRate'])
     .join('assessments', 'campaign-participations.id', 'assessments.campaignParticipationId')
     .where({ 'campaign-participations.campaignId': campaignId })
     .andWhere({ 'campaign-participations.userId': userId })
@@ -52,8 +53,8 @@ async function _getParticipationAttributes(userId, campaignId) {
     throw new NotFoundError(`Participation not found for user ${userId} and campaign ${campaignId}`);
   }
 
-  const { state, campaignParticipationId, sharedAt, assessmentCreatedAt, participantExternalId } = participationAttributes;
-  return { isCompleted: state === Assessment.states.COMPLETED, campaignParticipationId, sharedAt, assessmentCreatedAt, participantExternalId };
+  const { state, campaignParticipationId, sharedAt, assessmentCreatedAt, participantExternalId, masteryRate } = participationAttributes;
+  return { isCompleted: state === Assessment.states.COMPLETED, campaignParticipationId, sharedAt, assessmentCreatedAt, participantExternalId, masteryRate };
 }
 
 async function _findTargetedKnowledgeElements(campaignId, userId, sharedAt) {
