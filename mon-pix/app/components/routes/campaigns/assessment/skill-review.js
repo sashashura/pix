@@ -71,8 +71,11 @@ export default class SkillReview extends Component {
     return Boolean(this.customButtonText && this.customButtonUrl);
   }
 
-  get masteryPercentage() {
-    return this.args.model.campaignParticipationResult.masteryPercentage;
+  get masteryRate() {
+    if (this.args.model.campaignParticipationResult.masteryRate) {
+      return parseFloat(this.args.model.campaignParticipationResult.masteryRate);
+    }
+    return null;
   }
 
   get participantExternalId() {
@@ -84,8 +87,8 @@ export default class SkillReview extends Component {
     if (buttonUrl) {
       const params = {};
 
-      if (!isNil(this.masteryPercentage)) {
-        params.masteryPercentage = this.masteryPercentage;
+      if (!isNil(this.masteryRate)) {
+        params.masteryPercentage = parseInt(this.masteryRate * 100);
       }
 
       if (!isNil(this.participantExternalId)) {
