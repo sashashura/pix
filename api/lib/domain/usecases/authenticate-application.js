@@ -4,6 +4,7 @@ const {
   ApplicationWithInvalidClientSecretError,
 } = require('../../domain/errors');
 
+const logger = require('../../infrastructure/logger');
 const { find } = require('lodash');
 const { graviteeRegisterApplicationsCredentials, jwtConfig } = require('../../config');
 
@@ -32,6 +33,9 @@ module.exports = async function authenticateApplication({
   tokenService,
 }) {
   const application = find(graviteeRegisterApplicationsCredentials, { clientId });
+  logger.error({ clientId });
+  logger.error({ graviteeRegisterApplicationsCredentials });
+  logger.error({ jwtConfig });
   _checkClientId(application, clientId);
   _checkClientSecret(application, clientSecret);
   _checkAppScope(application, scope);
