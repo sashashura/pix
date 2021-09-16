@@ -1,33 +1,106 @@
 name: Merge on Dev
+# on:
+#   push:
+#     branches:
+#       - dev
 on:
-  push:
-    branches:
-      - dev
+  push
 jobs:
-  transition-issue:
+  # transition-issue:
+  #   name: Transition Issue
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@master
+
+  #   - name: Login
+  #     uses: atlassian/gajira-login@master
+  #     env:
+  #       JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+  #       JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+  #       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+  #   - name: Find Issue Key
+  #     id: find
+  #     uses: atlassian/gajira-find-issue-key@master
+  #     continue-on-error: true
+  #     with:
+  #       from: commits
+
+  #   - name: Transition issue
+  #     uses: atlassian/gajira-transition@master
+  #     if: ${{ steps.find.outputs.issue }}
+  #     with:
+  #       issue: ${{ steps.find.outputs.issue }}
+  #       transition: "Move to 'Deployed in Integration'"
+
+  # notify-if-config-file-change:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 2
+  #     - name: Check config file change
+  #       run: |
+  #         echo "DIFF_RESULT=$(git diff HEAD~  HEAD --shortstat api/lib/config.js)" >> $GITHUB_ENV
+
+  #     - name: Send notification
+  #       uses: slackapi/slack-github-action@v1.14.0
+  #       with:
+  #         payload: "{\"environment\":\"INTÉGRATION\",\"scalingo_url\":\"https://dashboard.scalingo.com/apps/osc-fr1/pix-api-integration/environment\"}"
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  #       if: env.DIFF_RESULT
+  
+  test-github-script:
     name: Transition Issue
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
-
-    - name: Login
-      uses: atlassian/gajira-login@master
-      env:
-        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-
-    - name: Find Issue Key
-      id: find
-      uses: atlassian/gajira-find-issue-key@master
-      continue-on-error: true
-      with:
-        from: commits
-
-    - name: Transition issue
-      uses: atlassian/gajira-transition@master
-      if: ${{ steps.find.outputs.issue }}
-      with:
-        issue: ${{ steps.find.outputs.issue }}
-        transition: "Move to 'Deployed in Integration'"
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: check if config change
+        uses: actions/github-script@v4
+        id: get-team-channel
+        with:
+          script: |
+            const teams = {
+              'team-acces': 'C02ETURD4N6',
+              'team-contenu': 'C02F6HR6ZT3',
+              'team-evaluation': '#team-évaluation',
+              'team-prescription': '#team-prescription',
+              'team-certif': '#team-certif',
+              'team-captains': '#team-captains',
+            } 
+            const branch = await github.repos.getBranch({ owner: context.repo.owner,
+            repo: context.repo.repo, branch: 'dev' })
+            const lastCommitDate = branch.data.commit.commit.committer.date
+            const lastCommitParentSha = branch.data.commit.parents[0].sha
+            const lastCommitParent = await github.git.getCommit({ owner: context.repo.owner,
+            repo: context.repo.repo, commit_sha: lastCommitParentSha })
+            const lastCommitParentDate = lastCommitParent.data.committer.date
+            console.log('lastCommitParentDate', lastCommitParentDate)
+            console.log('lastCommitDate', lastCommitDate)
+            const listCommits = await github.repos.listCommits({ owner: context.repo.owner,
+            repo: context.repo.repo, path: 'api/lib/config.js', since: lastCommitParentSha})
+            if(listCommits.data.length > 0) {
+              pullRequest = await github.repos.listPullRequestsAssociatedWithCommit({ owner: context.repo.owner,
+              repo: context.repo.repo, commit_sha:listCommits.data[0].sha })
+              console.log(pullRequest.data[0].labels)
+              const labels = pullRequest.data[0].labels
+              teamLabel = labels.filter((label) => label.name.match(/team-/g))[0].name
+              console.log('team_channel', teams[`${teamLabel}`])
+              console.log('::save-state name=teamChannel::teams[`${teamLabel}`]')
+              core.exportVariable('TEAM_CHANNEL', teams.teamLabel)
+              return teams[`${teamLabel}`]
+            }
+          result-encoding: string
+      - name: check if env is set up
+        run: echo "${{steps.get-team-channel.outputs.result}}"
+      - name: Send notification
+        uses: slackapi/slack-github-action@v1.14.0
+        with:
+          channel-id: "${{steps.get-team-channel.outputs.result}}"
+          slack-message: 'posting from a github action!'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.PIX_BOT_RUN_SLACK_TOKEN }}

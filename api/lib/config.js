@@ -1,7 +1,9 @@
 const path = require('path');
 const moment = require('moment');
+const test = 'ress';
 
 function parseJSONEnv(varName) {
+  console.log(test);
   if (process.env[varName]) {
     return JSON.parse(process.env[varName]);
   }
