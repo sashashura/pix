@@ -1,0 +1,8 @@
+{
+  "realm": "realmPix",
+  "auth-server-url": "http://keycloak:8080/auth/",
+  "ssl-required": "external",
+  "resource": "clientPix",
+  "public-client": true,
+  "confidential-port": 0
+}
