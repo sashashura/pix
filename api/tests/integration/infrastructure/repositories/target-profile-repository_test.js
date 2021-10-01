@@ -550,66 +550,6 @@ describe('Integration | Repository | Target-profile', function() {
     });
   });
 
-  describe('#attachOrganizationIds', function() {
-
-    afterEach(function() {
-      return knex('target-profile-shares').delete();
-    });
-
-    it('add organizations to the target profile', async function() {
-      const targetProfileId = databaseBuilder.factory.buildTargetProfile().id;
-      const organizationId1 = databaseBuilder.factory.buildOrganization().id;
-      const organizationId2 = databaseBuilder.factory.buildOrganization().id;
-      await databaseBuilder.commit();
-
-      const organizationIds = [organizationId1, organizationId2];
-
-      await targetProfileRepository.attachOrganizationIds({ targetProfileId, organizationIds });
-
-      const rows = await knex('target-profile-shares')
-        .select('organizationId')
-        .where({ targetProfileId });
-      const result = rows.map(({ organizationId }) => organizationId);
-
-      expect(result).to.exactlyContain(organizationIds);
-    });
-
-    context('when the organization does not exist', function() {
-      it('throws an error', async function() {
-        const targetProfileId = databaseBuilder.factory.buildTargetProfile().id;
-        await databaseBuilder.commit();
-
-        const organizationIds = [10];
-
-        const error = await catchErr(targetProfileRepository.attachOrganizationIds)({ targetProfileId, organizationIds });
-
-        expect(error).to.be.an.instanceOf(NotFoundError);
-        expect(error.message).to.have.string('L\'organization  avec l\'id 10 n\'existe pas');
-      });
-    });
-
-    context('when the organization is already attached', function() {
-      it('should return inserted organization', async function() {
-        const targetProfileId = databaseBuilder.factory.buildTargetProfile().id;
-        const firstOrganization = databaseBuilder.factory.buildOrganization();
-        const secondOrganization = databaseBuilder.factory.buildOrganization();
-
-        databaseBuilder.factory.buildTargetProfileShare({ targetProfileId, organizationId: firstOrganization.id });
-
-        await databaseBuilder.commit();
-
-        await targetProfileRepository.attachOrganizationIds({ targetProfileId, organizationIds: [firstOrganization.id, secondOrganization.id] });
-
-        const rows = await knex('target-profile-shares')
-          .select('organizationId')
-          .where({ targetProfileId });
-        const result = rows.map(({ organizationId }) => organizationId);
-
-        expect(result).to.deep.equal([firstOrganization.id, secondOrganization.id]);
-      });
-    });
-  });
-
   describe('#isAttachedToOrganizations', function() {
 
     context('when none of given organizations is attached to the targetProfile', function() {

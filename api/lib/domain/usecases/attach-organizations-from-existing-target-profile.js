@@ -11,5 +11,8 @@ module.exports = async function attachOrganizationsFromExistingTargetProfile({
     throw new NoOrganizationToAttach(`Le profil cible ${existingTargetProfileId} n'a aucune organisation rattachée.`);
   }
 
-  await targetProfileRepository.attachOrganizationIds({ targetProfileId, organizationIds });
+  const targetProfile = await targetProfileRepository.get(targetProfileId);
+  targetProfile.addOrganizations(organizationIds);
+
+  await targetProfileRepository.attachOrganizations(targetProfile);
 };

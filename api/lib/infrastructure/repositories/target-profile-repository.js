@@ -130,11 +130,23 @@ module.exports = {
         targetProfileId: targetProfile.id,
       };
     });
-    const attachedOrganizationIds = await _createTargetProfileShares(rows, targetProfile.id);
 
-    const duplicatedOrganizationIds = targetProfile.organizations.filter((organizationId) => !attachedOrganizationIds.includes(organizationId));
+    try {
+      const attachedOrganizationIds = await knex('target-profile-shares')
+        .insert(rows)
+        .onConflict(['targetProfileId', 'organizationId'])
+        .ignore()
+        .returning('organizationId');
 
-    return { duplicatedIds: duplicatedOrganizationIds, attachedIds: attachedOrganizationIds };
+      const duplicatedOrganizationIds = targetProfile.organizations.filter((organizationId) => !attachedOrganizationIds.includes(organizationId));
+
+      return { duplicatedIds: duplicatedOrganizationIds, attachedIds: attachedOrganizationIds };
+    } catch (error) {
+      if (foreignKeyConstraintViolated(error)) {
+        const organizationId = error.detail.match(/=\((\d+)\)/)[1];
+        throw new NotFoundError(`L'organization  avec l'id ${organizationId} n'existe pas`);
+      }
+    }
   },
 
   async isAttachedToOrganizations(targetProfile) {
@@ -179,14 +191,6 @@ module.exports = {
       .where({ 'target-profile-shares.targetProfileId': targetProfileId });
     return targetProfileShares.map((targetProfileShare) => targetProfileShare.organizationId);
   },
-
-  attachOrganizationIds({ targetProfileId, organizationIds }) {
-    const rows = organizationIds.map((organizationId) => {
-      return { organizationId, targetProfileId };
-    });
-
-    return _createTargetProfileShares(rows, targetProfileId);
-  },
 };
 
 async function _getWithLearningContentSkills(targetProfile) {
@@ -209,20 +213,5 @@ function _setSearchFiltersForQueryBuilder(filter, qb) {
   }
   if (id) {
     qb.where({ id });
-  }
-}
-
-async function _createTargetProfileShares(targetProfileShares) {
-  try {
-    return await knex('target-profile-shares')
-      .insert(targetProfileShares)
-      .onConflict(['targetProfileId', 'organizationId'])
-      .ignore()
-      .returning('organizationId');
-  } catch (error) {
-    if (foreignKeyConstraintViolated(error)) {
-      const organizationId = error.detail.match(/=\((\d+)\)/)[1];
-      throw new NotFoundError(`L'organization  avec l'id ${organizationId} n'existe pas`);
-    }
   }
 }
