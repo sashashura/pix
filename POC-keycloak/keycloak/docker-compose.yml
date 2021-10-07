@@ -8,6 +8,9 @@ services:
     environment:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/pix.json 
+    volumes:
+      - ./pix.json:/tmp/pix.json
 
   cnav-idp:
     image: quay.io/keycloak/keycloak:15.0.2
