@@ -19,3 +19,6 @@ services:
     environment:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/cnav.json 
+    volumes:
+      - ./cnav.json:/tmp/cnav.json
