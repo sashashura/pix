@@ -1,5 +1,5 @@
 const { PDFDocument, rgb } = require('pdf-lib');
-const { readFile } = require('fs/promises');
+const { readFile, writeFile } = require('fs/promises');
 const pdfLibFontkit = require('@pdf-lib/fontkit');
 const moment = require('moment');
 const sharp = require('sharp');
@@ -30,7 +30,7 @@ async function getCertificationAttestationsPdfBuffer({
   generatedPdfDoc.setCreationDate(creationDate);
   generatedPdfDoc.setModificationDate(creationDate);
   const embeddedFonts = await _embedFonts(generatedPdfDoc, dirname);
-  const embeddedImages = await _embedImages(generatedPdfDoc, viewModels);
+  const embeddedImages = await _embedImages(generatedPdfDoc, viewModels, dirname);
 
   const templatePdfPages = await _embedTemplatePagesIntoDocument(viewModels, dirname, generatedPdfDoc);
 
@@ -39,7 +39,7 @@ async function getCertificationAttestationsPdfBuffer({
   const buffer = await _finalizeDocument(generatedPdfDoc);
 
   const fileName = `attestation-pix-${moment(certificates[0].deliveredAt).format('YYYYMMDD')}.pdf`;
-
+ // await writeFile(fileName,buffer);
   return {
     buffer,
     fileName,
@@ -66,7 +66,7 @@ async function _embedFontInPDFDocument(pdfDoc, fontFileName, dirname) {
   return pdfDoc.embedFont(fontFile, { subset: true, customName: fontFileName });
 }
 
-async function _embedImages(pdfDocument, viewModels) {
+async function _embedImages(pdfDocument, viewModels, dirname) {
   const embeddedImages = {};
   const viewModelsWithCleaCertification = _.filter(viewModels, (viewModel) =>
     viewModel.shouldDisplayCleaCertification()
@@ -74,7 +74,7 @@ async function _embedImages(pdfDocument, viewModels) {
 
   if (viewModelsWithCleaCertification.length > 0) {
     const cleaCertificationImagePath = viewModelsWithCleaCertification[0].cleaCertificationImagePath;
-    const image = await _embedCleaCertificationImage(pdfDocument, cleaCertificationImagePath);
+    const image = await _embedCleaCertificationImage(pdfDocument, `${dirname}${cleaCertificationImagePath}`);
     embeddedImages[cleaCertificationImagePath] = image;
   }
 
@@ -88,7 +88,7 @@ async function _embedImages(pdfDocument, viewModels) {
       .uniq()
       .value();
     for (const path of singleImagePaths) {
-      const image = await _embedPixPlusDroitCertificationImage(pdfDocument, path);
+      const image = await _embedPixPlusDroitCertificationImage(pdfDocument, `${dirname}${path}`);
       embeddedImages[path] = image;
     }
   }

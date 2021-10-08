@@ -15,7 +15,7 @@ describe('Integration | Infrastructure | Utils | Pdf | Certification Attestation
     _restorePdfLib();
   });
 
-  it('should generate full attestation (non-regression test)', async function () {
+  it.only('should generate full attestation (non-regression test)', async function () {
     // given
     const resultCompetenceTree = domainBuilder.buildResultCompetenceTree();
     const certificate = domainBuilder.buildCertificationAttestation({
@@ -23,8 +23,8 @@ describe('Integration | Infrastructure | Utils | Pdf | Certification Attestation
       firstName: 'Jean',
       lastName: 'Bon',
       resultCompetenceTree,
-      cleaCertificationImagePath: 'lib/infrastructure/utils/pdf/files/macaron_clea.png',
-      pixPlusDroitCertificationImagePath: 'lib/infrastructure/utils/pdf/files/macaron_maitre.png',
+      cleaCertificationImagePath: '/files/macaron_clea.png',
+      pixPlusDroitCertificationImagePath: '/files/macaron_maitre.png',
     });
     const referencePdfPath = __dirname + '/certification-attestation-pdf_test_full.pdf';
 
