@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  node:
+    image: node:14.17.0
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - .:/pix
+    depends_on:
+      - redis
+      - postgres
+
   postgres:
     image: postgres:13.3-alpine
     container_name: pix-api-postgres

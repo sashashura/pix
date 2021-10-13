@@ -1,0 +1,13 @@
+{
+  "name": "Pix",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "node",
+  "workspaceFolder": "/pix",
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg"
+  ],
+  "postCreateCommand": "npm ci && (cd api && npm run db:reset)",
+  "remoteUser": "node"
+}
