@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/hapi": "^20.2.1",
-    "hapi-auth-keycloak": "^5.1.2"
+    "keycloak-hapi": "^2.2.0",
+    "wreck": "^14.2.0",
+    "yar": "^9.1.0"
   }
 }

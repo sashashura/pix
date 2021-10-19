@@ -1,7 +1,6 @@
 'use strict';
 
 const Hapi = require('@hapi/hapi');
-const authKeycloak = require('hapi-auth-keycloak');
 
 const init = async () => {
 
@@ -10,27 +9,44 @@ const init = async () => {
     host: 'localhost',
   });
 
-  await server.register({ plugin: authKeycloak });
-
-  server.auth.strategy('keycloak-jwt', 'keycloak-jwt', {
-    realmUrl: 'http://localhost:8080/auth/realms/pix',
-    clientId: 'hapiPix',
-    minTimeBetweenJwksRequests: 15,
-    cache: true,
-    userInfo: ['name', 'email'],
+  await server.register({
+    plugin: require('yar'),
+    options: {
+      storeBlank: false,
+      name: 'kc_session',
+      maxCookieSize: 0,
+      cookieOptions: {
+        password: 'the-password-must-be-at-least-32-characters-long',
+        isSecure: false // use true for production (https).
+      }
+    }
   });
+
+  await server.register({
+    plugin: require('keycloak-hapi'),
+    options: {
+      serverUrl: 'http://localhost:8080/auth',
+      realm: 'pix',
+      clientId: 'hapiPix',
+      clientSecret: 'f9033011-6a16-439f-af97-c0c924bb9910',
+      bearerOnly: false // set it to true if you're writing a resource server (REST API).
+    }
+  });
+
+  server.auth.strategy('keycloak', 'keycloak');
+  server.auth.default('keycloak');
 
   server.route([
     {
       method: 'GET',
-      path: '/check-sso',
+      path: '/',
       config: {
         description: 'protected endpoint',
         auth: {
-          strategies: ['keycloak-jwt'],
+          strategies: ['keycloak'],
         },
         handler() {
-          return 'hello world';
+          return 'vous êtes à la racine.';
         },
       },
     },
@@ -41,6 +57,7 @@ const init = async () => {
 };
 
 process.on('unhandledRejection', (err) => {
+
   console.log(err);
   process.exit(1);
 });
