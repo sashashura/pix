@@ -17,6 +17,15 @@ module.exports = function (environment) {
       },
     },
 
+    'ember-simple-auth-oidc': {
+      host: 'http://localhost:8080/auth/realms/pix/protocol/openid-connect',
+      clientId: 'ember-quickstart',
+      authEndpoint: '/auth',
+      tokenEndpoint: '/token',
+      userinfoEndpoint: '/userinfo',
+      endSessionEndpoint: '/logout',
+    },
+
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
