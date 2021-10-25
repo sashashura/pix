@@ -8,6 +8,7 @@ const { expect, HttpTestServer, sinon } = require('../../../test-helper');
 
 const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
 const sessionController = require('../../../../lib/application/sessions/session-controller');
+const sessionForMonitoringController = require('../../../../lib/application/sessions/session-for-supervising-controller');
 const finalizedSessionController = require('../../../../lib/application/sessions/finalized-session-controller');
 const authorization = require('../../../../lib/application/preHandlers/authorization');
 const moduleUnderTest = require('../../../../lib/application/sessions');
@@ -23,6 +24,21 @@ describe('Unit | Application | Sessions | Routes', function () {
 
       // when
       const response = await httpTestServer.request('GET', '/api/sessions/3');
+
+      // then
+      expect(response.statusCode).to.equal(200);
+    });
+  });
+
+  describe('GET /api/sessions/{id}/monitoring', function () {
+    it('should exist', async function () {
+      // given
+      sinon.stub(sessionForMonitoringController, 'get').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request('GET', '/api/sessions/3/monitoring');
 
       // then
       expect(response.statusCode).to.equal(200);
