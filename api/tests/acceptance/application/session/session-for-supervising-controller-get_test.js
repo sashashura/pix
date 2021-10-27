@@ -4,16 +4,22 @@ const {
   generateValidRequestAuthorizationHeader,
   insertUserWithRolePixMaster,
   sinon,
+  knex,
 } = require('../../../test-helper');
 const createServer = require('../../../../server');
 const { featureToggles } = require('../../../../lib/config');
 
 describe('Acceptance | Controller | session-for-supervising-controller-get', function () {
   let server, options;
+  let user;
 
   beforeEach(async function () {
     server = await createServer();
-    await insertUserWithRolePixMaster();
+    user = await insertUserWithRolePixMaster();
+  });
+
+  afterEach(function () {
+    return knex('supervisor-access').delete();
   });
 
   describe('GET /api/sessions/{id}/supervising', function () {
@@ -34,7 +40,10 @@ describe('Acceptance | Controller | session-for-supervising-controller-get', fun
         options.headers = { authorization: generateValidRequestAuthorizationHeader() };
       });
 
-      it('should return a 200 status code response with JSON API serialized', async function () {
+      it('should return OK if  supervisor role has been granted', async function () {
+        // given
+        await _grantSupervisorRole({ userId: user.id, sessionId: 121 });
+
         // when
         sinon.stub(featureToggles, 'isEndTestScreenRemovalEnabled').value(true);
         const response = await server.inject(options);
@@ -42,6 +51,15 @@ describe('Acceptance | Controller | session-for-supervising-controller-get', fun
         // then
         expect(response.statusCode).to.equal(200);
         expect(response.result.data.type).to.equal('sessionForSupervisings');
+      });
+
+      it('should return UNAUTHORIZED if supervisor role has not been granted', async function () {
+        // when
+        sinon.stub(featureToggles, 'isEndTestScreenRemovalEnabled').value(true);
+        const response = await server.inject(options);
+
+        // then
+        expect(response.statusCode).to.equal(401);
       });
     });
 
@@ -59,3 +77,7 @@ describe('Acceptance | Controller | session-for-supervising-controller-get', fun
     });
   });
 });
+
+const _grantSupervisorRole = async ({ userId, sessionId }) => {
+  await knex('supervisor-access').insert({ userId, sessionId });
+};

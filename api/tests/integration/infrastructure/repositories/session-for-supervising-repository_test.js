@@ -1,4 +1,4 @@
-const { databaseBuilder, expect, catchErr } = require('../../../test-helper');
+const { databaseBuilder, expect, catchErr, knex } = require('../../../test-helper');
 const _ = require('lodash');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 const SessionForSupervising = require('../../../../lib/domain/models/SessionForSupervising');
@@ -88,5 +88,57 @@ describe('Integration | Repository | SessionForSupervising', function () {
       // then
       expect(error).to.be.instanceOf(NotFoundError);
     });
+  });
+  describe('#userHasSupervisorRole', function () {
+    afterEach(function () {
+      return knex('supervisor-access').delete();
+    });
+
+    it('should return true when user has been granted the role', async function () {
+      // given
+      databaseBuilder.factory.buildCertificationCenter({ name: 'Toto', id: 1234 });
+      const sessionId = databaseBuilder.factory.buildSession({
+        certificationCenter: 'Tour Gamma',
+        room: 'Salle A',
+        examiner: 'Monsieur Examinateur',
+        date: '2018-02-23',
+        time: '12:00:00',
+        certificationCenterId: 1234,
+      }).id;
+      const userId = databaseBuilder.factory.buildUser().id;
+      await databaseBuilder.commit();
+      await _grantSupervisorRole({ userId, sessionId });
+
+      // when
+      const result = await sessionForSupervisingRepository.userHasSupervisorRole({ userId, sessionId });
+
+      // then
+      expect(result).to.be.true;
+    });
+
+    it('should return false when user has not been granted the role', async function () {
+      // given
+      databaseBuilder.factory.buildCertificationCenter({ name: 'Toto', id: 1234 });
+      const sessionId = databaseBuilder.factory.buildSession({
+        certificationCenter: 'Tour Gamma',
+        room: 'Salle A',
+        examiner: 'Monsieur Examinateur',
+        date: '2018-02-23',
+        time: '12:00:00',
+        certificationCenterId: 1234,
+      }).id;
+      const userId = databaseBuilder.factory.buildUser().id;
+      await databaseBuilder.commit();
+
+      // when
+      const result = await sessionForSupervisingRepository.userHasSupervisorRole({ userId, sessionId });
+
+      // then
+      expect(result).to.be.false;
+    });
+
+    const _grantSupervisorRole = async ({ userId, sessionId }) => {
+      await knex('supervisor-access').insert({ userId, sessionId });
+    };
   });
 });

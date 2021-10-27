@@ -5,6 +5,7 @@ const checkUserBelongsToOrganizationManagingStudentsUseCase = require('./usecase
 const checkUserBelongsToScoOrganizationAndManagesStudentsUseCase = require('./usecases/checkUserBelongsToScoOrganizationAndManagesStudents');
 const checkUserBelongsToOrganizationUseCase = require('./usecases/checkUserBelongsToOrganization');
 const checkUserIsAdminAndManagingStudentsForOrganization = require('./usecases/checkUserIsAdminAndManagingStudentsForOrganization');
+const checkUserHasSupervisorRoleUseCase = require('./usecases/checkUserHasSupervisorRole');
 const Organization = require('../../lib/domain/models/Organization');
 
 const JSONAPIError = require('jsonapi-serializer').Error;
@@ -30,6 +31,24 @@ function checkUserHasRolePixMaster(request, h) {
   const userId = request.auth.credentials.userId;
 
   return checkUserHasRolePixMasterUseCase
+    .execute(userId)
+    .then((hasRolePixMaster) => {
+      if (hasRolePixMaster) {
+        return h.response(true);
+      }
+      return _replyForbiddenError(h);
+    })
+    .catch(() => _replyForbiddenError(h));
+}
+
+function checkUserHasSupervisorRole(request, h) {
+  if (!request.auth.credentials || !request.auth.credentials.userId) {
+    return _replyForbiddenError(h);
+  }
+
+  const userId = request.auth.credentials.userId;
+
+  return checkUserHasSupervisorRoleUseCase
     .execute(userId)
     .then((hasRolePixMaster) => {
       if (hasRolePixMaster) {
@@ -213,4 +232,5 @@ module.exports = {
   checkUserIsAdminInSCOOrganizationManagingStudents,
   checkUserIsAdminInSUPOrganizationManagingStudents,
   checkUserBelongsToOrganization,
+  checkUserHasSupervisorRole,
 };

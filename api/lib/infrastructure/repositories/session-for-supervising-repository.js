@@ -3,6 +3,11 @@ const { NotFoundError } = require('../../domain/errors');
 const CertificationCandidateForSupervising = require('../../domain/models/CertificationCandidateForSupervising');
 const SessionForSupervising = require('../../domain/models/SessionForSupervising');
 
+const userHasSupervisorRole = async ({ sessionId, userId }) => {
+  const data = await knex.count('sessionId').from('supervisor-access').where({ sessionId, userId }).first();
+  return data.count === 1;
+};
+
 module.exports = {
   async get(idSession) {
     const results = await knex
@@ -28,6 +33,7 @@ module.exports = {
     }
     return _toDomain(results);
   },
+  userHasSupervisorRole,
 };
 
 function _toDomain(results) {

@@ -353,6 +353,12 @@ exports.register = async (server) => {
             id: identifiersType.sessionId,
           }),
         },
+        pre: [
+          {
+            method: securityPreHandlers.checkUserHasSupervisorRole,
+            assign: 'hasSupervisorRole',
+          },
+        ],
         handler: sessionForMonitoringController.get,
         tags: ['api', 'sessions', 'monitoring'],
         notes: [

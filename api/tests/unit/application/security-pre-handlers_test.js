@@ -3,6 +3,7 @@ const { expect, sinon, hFake } = require('../../test-helper');
 const securityPreHandlers = require('../../../lib/application/security-pre-handlers');
 const tokenService = require('../../../lib/domain/services/token-service');
 const checkUserHasRolePixMasterUseCase = require('../../../lib/application/usecases/checkUserHasRolePixMaster');
+const checkUserHasSupervisorRoleUseCase = require('../../../lib/application/usecases/checkUserHasSupervisorRole');
 const checkUserIsAdminInOrganizationUseCase = require('../../../lib/application/usecases/checkUserIsAdminInOrganization');
 const checkUserBelongsToOrganizationManagingStudentsUseCase = require('../../../lib/application/usecases/checkUserBelongsToOrganizationManagingStudents');
 const checkUserBelongsToScoOrganizationAndManagesStudentsUseCase = require('../../../lib/application/usecases/checkUserBelongsToScoOrganizationAndManagesStudents');
@@ -68,6 +69,69 @@ describe('Unit | Application | SecurityPreHandlers', function () {
 
         // when
         const response = await securityPreHandlers.checkUserHasRolePixMaster(request, hFake);
+
+        // then
+        expect(response.statusCode).to.equal(403);
+        expect(response.isTakeOver).to.be.true;
+      });
+    });
+  });
+
+  describe('#checkUserHasSupervisorRole', function () {
+    let checkUserHasSupervisorRoleUseCaseStub;
+
+    beforeEach(function () {
+      sinon.stub(tokenService, 'extractTokenFromAuthChain');
+      checkUserHasSupervisorRoleUseCaseStub = sinon.stub(checkUserHasSupervisorRoleUseCase, 'execute');
+    });
+
+    context('Successful case', function () {
+      const request = { auth: { credentials: { accessToken: 'valid.access.token', userId: 1234 } } };
+
+      it('should authorize access to resource when the user is authenticated and has supervisor role', async function () {
+        // given
+        checkUserHasSupervisorRoleUseCaseStub.resolves({ user_id: 1234 });
+        // when
+        const response = await securityPreHandlers.checkUserHasSupervisorRole(request, hFake);
+
+        // then
+        expect(response.source).to.equal(true);
+      });
+    });
+
+    context('Error cases', function () {
+      const request = { auth: { credentials: { accessToken: 'valid.access.token' } } };
+
+      it('should forbid resource access when user was not previously authenticated', async function () {
+        // given
+        delete request.auth.credentials;
+
+        // when
+        const response = await securityPreHandlers.checkUserHasSupervisorRole(request, hFake);
+
+        // then
+        expect(response.statusCode).to.equal(403);
+        expect(response.isTakeOver).to.be.true;
+      });
+
+      it('should forbid resource access when user has not supervisor role', async function () {
+        // given
+        checkUserHasSupervisorRoleUseCaseStub.execute.resolves(false);
+
+        // when
+        const response = await securityPreHandlers.checkUserHasSupervisorRole(request, hFake);
+
+        // then
+        expect(response.statusCode).to.equal(403);
+        expect(response.isTakeOver).to.be.true;
+      });
+
+      it('should forbid resource access when an error is thrown by use case', async function () {
+        // given
+        checkUserHasSupervisorRoleUseCaseStub.execute.rejects(new Error('Some error'));
+
+        // when
+        const response = await securityPreHandlers.checkUserHasSupervisorRole(request, hFake);
 
         // then
         expect(response.statusCode).to.equal(403);
