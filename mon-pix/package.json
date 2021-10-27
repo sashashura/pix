@@ -34,6 +34,7 @@
     "preinstall": "npx check-engine",
     "start": "ember serve --proxy http://localhost:3000",
     "test": "ember test --reporter dot",
+    "test:qunit": "ember test --reporter dot --config-file=testem-qunit.js",
     "test:lint": "npm test && npm run lint",
     "test:watch": "ember exam --serve --reporter dot"
   },
