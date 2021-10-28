@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 
-module('Unit | Controller | authenticated/users/list', function (hooks) {
+module.only('Unit | Controller | authenticated/users/list', function (hooks) {
   setupTest(hooks);
   let controller;
 
@@ -9,15 +9,19 @@ module('Unit | Controller | authenticated/users/list', function (hooks) {
     controller = this.owner.lookup('controller:authenticated.users.list');
   });
 
-  module('#triggerFiltering task', function () {
+  module('#updateFilters', function () {
     module('updating firstName', function () {
       test('it should update controller firstName field', async function (assert) {
         // given
         controller.firstName = 'someFirstName';
+        controller.firstNameForm = 'someOtherFirstName';
         const expectedValue = 'someOtherFirstName';
-
+        const event = {
+          preventDefault: () => {},
+          target: { value: expectedValue },
+        };
         // when
-        await controller.triggerFiltering.perform('firstName', { target: { value: expectedValue } });
+        await controller.refreshModel(event);
 
         // then
         assert.equal(controller.firstName, expectedValue);
@@ -30,8 +34,12 @@ module('Unit | Controller | authenticated/users/list', function (hooks) {
         controller.lastName = 'someLastName';
         const expectedValue = 'someOtherLastName';
 
+        const event = {
+          preventDefault: () => {},
+          target: { value: expectedValue },
+        };
         // when
-        await controller.triggerFiltering.perform('lastName', { target: { value: expectedValue } });
+        await controller.refreshModel(event);
 
         // then
         assert.equal(controller.lastName, expectedValue);
@@ -44,8 +52,12 @@ module('Unit | Controller | authenticated/users/list', function (hooks) {
         controller.email = 'someEmail';
         const expectedValue = 'someOtherEmail';
 
+        const event = {
+          preventDefault: () => {},
+          target: { value: expectedValue },
+        };
         // when
-        await controller.triggerFiltering.perform('email', { target: { value: expectedValue } });
+        await controller.refreshModel(event);
 
         // then
         assert.equal(controller.email, expectedValue);

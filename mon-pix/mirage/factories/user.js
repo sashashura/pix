@@ -21,7 +21,8 @@ function _addDefaultIsCertifiable(user, server) {
 }
 
 function _addDefaultScorecards(user, server) {
-  if (!user.scorecards || user.scorecards.length === 0) {
+  if (!user.scorecards || user.scorecards
+    .length === 0) {
     const areas = _createAreas(server);
     const tutorial = _createTutorial(server);
     const scorecards = [];
