@@ -1250,11 +1250,12 @@
       "clientId" : "pix-broker",
       "tokenUrl" : "http://cnav-idp:8080/auth/realms/cnav/protocol/openid-connect/token",
       "jwksUrl" : "http://cnav-idp:8080/auth/realms/cnav/protocol/openid-connect/certs",
+      "backchannelSupported" : "true",
       "issuer" : "http://localhost:8081/auth/realms/cnav",
       "useJwksUrl" : "true",
       "authorizationUrl" : "http://localhost:8081/auth/realms/cnav/protocol/openid-connect/auth",
       "clientAuthMethod" : "client_secret_post",
-      "logoutUrl" : "http://localhost:8081/auth/realms/cnav/protocol/openid-connect/logout",
+      "logoutUrl" : "http://cnav-idp:8080/auth/realms/cnav/protocol/openid-connect/logout",
       "syncMode" : "IMPORT",
       "clientSecret" : "e2244bd0-c917-4d1d-98ec-c1b29b5a0737"
     }
