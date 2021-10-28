@@ -13,4 +13,9 @@ export default class ApplicationController extends Controller {
   deco() {
     this.session.invalidate();
   }
+
+  @action
+  globalDeco() {
+    this.session.singleLogout();
+  }
 }

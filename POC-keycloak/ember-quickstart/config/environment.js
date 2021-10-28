@@ -24,7 +24,7 @@ module.exports = function (environment) {
       tokenEndpoint: '/token',
       userinfoEndpoint: '/userinfo',
       endSessionEndpoint: '/logout',
-      afterLogoutUri: '/login',
+      afterLogoutUri: '/',
     },
 
     APP: {

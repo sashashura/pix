@@ -5,7 +5,8 @@
 <LinkTo @route="index">Aller à l'accueil</LinkTo>
 <LinkTo @route="profile">Aller à mon profil</LinkTo>
 {{#if this.isLogged}}
-  <button type="button" {{on "click" this.deco}}>Deconnexion</button>
+  <button type="button" {{on "click" this.deco}}>Déconnexion</button>
+  <button type="button" {{on "click" this.globalDeco}}>Globale déconnexion</button>
 {{/if}}
 
 {{outlet}}
