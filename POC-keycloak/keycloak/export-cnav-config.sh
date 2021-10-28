@@ -1,4 +1,5 @@
 docker-compose exec cnav-idp /opt/jboss/keycloak/bin/standalone.sh \
+  -c=standalone.xml \
   -Djboss.socket.binding.port-offset=100 -Dkeycloak.migration.action=export \
   -Dkeycloak.migration.provider=singleFile \
   -Dkeycloak.migration.realmName=cnav \
