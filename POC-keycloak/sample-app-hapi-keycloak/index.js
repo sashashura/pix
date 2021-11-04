@@ -10,27 +10,14 @@ const init = async () => {
   });
 
   await server.register({
-    plugin: require('yar'),
-    options: {
-      storeBlank: false,
-      name: 'kc_session',
-      maxCookieSize: 0,
-      cookieOptions: {
-        password: 'the-password-must-be-at-least-32-characters-long',
-        isSecure: false // use true for production (https).
-      }
-    }
-  });
-
-  await server.register({
     plugin: require('keycloak-hapi'),
     options: {
       serverUrl: 'http://localhost:8080/auth',
       realm: 'pix',
       clientId: 'hapiPix',
       clientSecret: 'f9033011-6a16-439f-af97-c0c924bb9910',
-      bearerOnly: true // set it to true if you're writing a resource server (REST API).
-    }
+      bearerOnly: true,
+    },
   });
 
   server.auth.strategy('keycloak', 'keycloak');
@@ -39,14 +26,15 @@ const init = async () => {
   server.route([
     {
       method: 'GET',
-      path: '/',
+      path: '/api',
       config: {
         description: 'protected endpoint',
         auth: {
           strategies: ['keycloak'],
         },
-        handler() {
-          return 'vous êtes à la racine.';
+        handler(request) {
+          console.debug(request.auth);
+          return { msg: `Vous êtes dans l'API, ${request.auth.credentials.name}` };
         },
       },
     },
