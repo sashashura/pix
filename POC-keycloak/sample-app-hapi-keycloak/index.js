@@ -29,7 +29,7 @@ const init = async () => {
       realm: 'pix',
       clientId: 'hapiPix',
       clientSecret: 'f9033011-6a16-439f-af97-c0c924bb9910',
-      bearerOnly: false // set it to true if you're writing a resource server (REST API).
+      bearerOnly: true // set it to true if you're writing a resource server (REST API).
     }
   });
 
