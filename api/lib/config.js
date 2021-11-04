@@ -70,6 +70,8 @@ module.exports = (function () {
       enabled: isFeatureEnabled(process.env.LOG_ENABLED),
       colorEnabled: false,
       logLevel: process.env.LOG_LEVEL || 'info',
+      logPayload: isFeatureEnabled(process.env.LOG_PAYLOAD),
+      logQueryParams: isFeatureEnabled(process.env.LOG_QUERY_PARAMS),
       enableLogKnexQueries: isFeatureEnabled(process.env.LOG_KNEX_QUERIES),
       enableLogStartingEventDispatch: isFeatureEnabled(process.env.LOG_STARTING_EVENT_DISPATCH),
       enableLogEndingEventDispatch: isFeatureEnabled(process.env.LOG_ENDING_EVENT_DISPATCH),

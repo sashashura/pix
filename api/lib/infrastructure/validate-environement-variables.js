@@ -23,6 +23,8 @@ const schema = Joi.object({
   LCMS_API_URL: Joi.string().uri().required(),
   LOG_ENABLED: Joi.string().optional().valid('true', 'false'),
   LOG_LEVEL: Joi.string().optional().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace'),
+  LOG_PAYLOAD: Joi.string().optional().valid('true', 'false'),
+  LOG_QUERY_PARAMS: Joi.string().optional().valid('true', 'false'),
   AUTH_SECRET: Joi.string().required(),
   SCO_ACCOUNT_RECOVERY_KEY_LIFETIME_MINUTES: Joi.number().integer().min(1).optional(),
   CACHE_RELOAD_TIME: Joi.string().optional(),

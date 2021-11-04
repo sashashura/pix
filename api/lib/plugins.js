@@ -42,7 +42,8 @@ const plugins = [
         req: logObjectSerializer,
       },
       instance: require('./infrastructure/logger'),
-      logQueryParams: true,
+      logQueryParams: settings.logging.logQueryParams,
+      logPayload: settings.logging.logPayload,
     },
   },
   ...(settings.sentry.enabled
