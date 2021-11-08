@@ -3,7 +3,7 @@
 <h1>Super appli Ember</h1>
 
 <LinkTo @route="index">Aller à l'accueil</LinkTo>
-<LinkTo @route="profile">Aller à mon profil</LinkTo>
+<a href="/profile">Aller à mon profil</a>
 {{#if this.isLogged}}
   <button type="button" {{on "click" this.deco}}>Déconnexion</button>
   <button type="button" {{on "click" this.globalDeco}}>Globale déconnexion</button>
