@@ -37,7 +37,9 @@ module.exports = {
   },
 
   getCurrentUser(request) {
-    const authenticatedUserId = request.auth.credentials.userId;
+    const authenticatedUserId = request.auth.credentials.name;
+
+    console.debug(request.auth);
 
     return usecases.getCurrentUser({ authenticatedUserId }).then(userSerializer.serialize);
   },

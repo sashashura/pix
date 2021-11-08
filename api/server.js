@@ -81,10 +81,25 @@ const setupErrorHandling = function (server) {
 
 const setupAuthentication = function (server) {
   server.auth.scheme(authentication.schemeName, authentication.scheme);
+
   authentication.strategies.map((strategy) => {
     server.auth.strategy(strategy.name, authentication.schemeName, strategy.configuration);
   });
-  server.auth.default(authentication.defaultStrategy);
+
+  server.register({
+    plugin: require('keycloak-hapi'),
+    options: {
+      serverUrl: 'http://localhost:8080/auth',
+      realm: 'pix',
+      clientId: 'hapiPix',
+      clientSecret: 'f9033011-6a16-439f-af97-c0c924bb9910',
+      bearerOnly: true,
+      principalNameAttribute: 'pixUserId',
+    },
+  });
+
+  server.auth.strategy('pix-keycloak', 'keycloak');
+  server.auth.default('pix-keycloak');
 };
 
 const setupRoutesAndPlugins = async function (server) {

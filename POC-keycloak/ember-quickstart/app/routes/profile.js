@@ -12,7 +12,7 @@ export default class ProfileRoute extends Route.extend(
   async model() {
     console.log(this.session.data);
     try {
-      const apiResponse = await this.ajax.request('/api', {
+      const apiResponse = await this.ajax.request('/api/users/me', {
         headers: {
           authorization: `Bearer ${this.session.data.authenticated.access_token}`,
         },
