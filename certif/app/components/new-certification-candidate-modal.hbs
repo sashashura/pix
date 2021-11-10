@@ -1,5 +1,5 @@
 <AppModal @containerClass="pix-modal-dialog--wide" @onClose={{@closeModal}}>
-  <div class="new-certification-candidate-details-modal">
+  <div class="new-certification-candidate-modal">
     <div class="pix-modal__close-button">
       <button aria-label="Fermer la fenêtre d'ajout d'un candidat" type="button" {{on "click" @closeModal}}>
         Fermer
@@ -8,23 +8,23 @@
     </div>
 
     <div class="pix-modal__container pix-modal__container--white">
-      <div class="new-certification-candidate-details-modal__title">
+      <div class="new-certification-candidate-modal__title">
         <h1>Ajouter un candidat</h1>
       </div>
 
-      <div class="new-certification-candidate-details-modal__content">
+      <div class="new-certification-candidate-modal__content">
 
         <form
           id="new-certification-candidate-form"
-          class="new-certification-candidate-details-modal__form"
+          class="new-certification-candidate-modal__form"
           {{on "submit" (fn this.onFormSubmit)}}
         >
 
-          <p class="new-certification-candidate-details-modal__form__required-fields-mention">
+          <p class="new-certification-candidate-modal__form__required-fields-mention">
             Les champs marqués de <span class="required-field-indicator">*</span> sont obligatoires.
           </p>
 
-          <div class="new-certification-candidate-details-modal__form__field new-certification-candidate-details-modal__form__field-double">
+          <div class="new-certification-candidate-modal__form__field new-certification-candidate-modal__form__field-double">
             <label for="last-name" class="label">
               <span class="required-field-indicator">*</span>
               Nom de famille
@@ -40,7 +40,7 @@
             />
           </div>
 
-          <div class="new-certification-candidate-details-modal__form__field new-certification-candidate-details-modal__form__field-double">
+          <div class="new-certification-candidate-modal__form__field new-certification-candidate-modal__form__field-double">
             <label for="first-name" class="label">
               <span class="required-field-indicator">*</span>
               Prénom
@@ -55,7 +55,7 @@
             />
           </div>
 
-          <div class="new-certification-candidate-details-modal__form__field">
+          <div class="new-certification-candidate-modal__form__field">
             <fieldset>
             <legend class="label">
               <span class="required-field-indicator">*</span> Sexe
@@ -82,7 +82,7 @@
             </fieldset>
           </div>
 
-          <div class="new-certification-candidate-details-modal__form__field">
+          <div class="new-certification-candidate-modal__form__field">
             <label for="birthdate" class="label">
               <span class="required-field-indicator">*</span>
               Date de naissance
@@ -98,7 +98,7 @@
             />
           </div>
 
-          <div class="new-certification-candidate-details-modal__form__field">
+          <div class="new-certification-candidate-modal__form__field">
             <label for="birth-country" class="label">
               <span class="required-field-indicator">*</span>
               Pays de naissance
@@ -114,7 +114,7 @@
           </div>
 
           {{#if this.isBirthGeoCodeRequired}}
-            <div class="new-certification-candidate-details-modal__form__field">
+            <div class="new-certification-candidate-modal__form__field">
               <fieldset>
               <legend class="label">
                 <span class="required-field-indicator">*</span> Code géographique de naissance
@@ -144,7 +144,7 @@
           {{/if}}
 
           {{#if this.isBirthInseeCodeRequired}}
-            <div class="new-certification-candidate-details-modal__form__field">
+            <div class="new-certification-candidate-modal__form__field">
               <label for="birth-insee-code" class="label">
                 <span class="required-field-indicator">*</span>
                 Code INSEE de naissance
@@ -162,7 +162,7 @@
           {{/if}}
 
           {{#if this.isBirthPostalCodeRequired}}
-            <div class="new-certification-candidate-details-modal__form__field new-certification-candidate-details-modal__form__field-double">
+            <div class="new-certification-candidate-modal__form__field new-certification-candidate-modal__form__field-double">
               <label for="birth-postal-code" class="label">
                 <span class="required-field-indicator">*</span>
                 Code postal de naissance
@@ -180,7 +180,7 @@
           {{/if}}
 
           {{#if this.isBirthCityRequired}}
-            <div class="new-certification-candidate-details-modal__form__field new-certification-candidate-details-modal__form__field-double">
+            <div class="new-certification-candidate-modal__form__field new-certification-candidate-modal__form__field-double">
               <label for="birth-city" class="label">
                 <span class="required-field-indicator">*</span>
                 Commune de naissance
@@ -196,7 +196,7 @@
             </div>
           {{/if}}
 
-          <div class="new-certification-candidate-details-modal__form__field">
+          <div class="new-certification-candidate-modal__form__field">
             <label for="external-id" class="label">Identifiant externe</label>
             <Input
               @id="external-id"
@@ -207,7 +207,7 @@
             />
           </div>
 
-          <div class="new-certification-candidate-details-modal__form__field">
+          <div class="new-certification-candidate-modal__form__field">
             <label for="extra-time-percentage" class="label">Temps majoré (%)</label>
             <Input
               @id="extra-time-percentage"
@@ -218,7 +218,7 @@
             />
           </div>
 
-          <div id="recipient-email-container" class="new-certification-candidate-details-modal__form__field new-certification-candidate-details-modal__form__field-double">
+          <div id="recipient-email-container" class="new-certification-candidate-modal__form__field new-certification-candidate-modal__form__field-double">
             <label for="result-recipient-email" class="label">E-mail du destinataire des résultats (formateur, enseignant...)</label>
             <Input
               @id="result-recipient-email"
@@ -229,7 +229,7 @@
             />
           </div>
 
-          <div id="email-container" class="new-certification-candidate-details-modal__form__field new-certification-candidate-details-modal__form__field-double">
+          <div id="email-container" class="new-certification-candidate-modal__form__field new-certification-candidate-modal__form__field-double">
             <label for="email" class="label">E-mail de convocation</label>
             <Input
               @id="email"
@@ -241,7 +241,7 @@
           </div>
 
           {{#if this.complementaryCertifications.length}}
-            <div class="new-certification-candidate-details-modal__form__field">
+            <div class="new-certification-candidate-modal__form__field">
               <span class="label">Certifications complémentaires</span>
               <div class="complementary-certifications-checkbox-list">
                 <ul>
@@ -262,7 +262,7 @@
             </div>
           {{/if}}
 
-          <div class="new-certification-candidate-details-modal__actions">
+          <div class="new-certification-candidate-modal__actions">
             <PixButton @triggerAction={{fn @closeModal}} @backgroundColor="transparent-light">
               Fermer
             </PixButton>

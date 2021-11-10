@@ -1,6 +1,23 @@
 /* stylelint-disable no-descending-specificity */
 
-.new-certification-candidate-details-modal {
+.pix-modal__overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  overflow-y: scroll;
+  right: 0;
+  top: 0;
+}
+
+.pix-modal {
+  position: static;
+  transform: initial;
+  top: initial;
+  left: initial;
+  margin: 64px auto;
+}
+
+.new-certification-candidate-modal {
   min-width: 576px;
   max-width: 576px;
 
