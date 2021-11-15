@@ -43,6 +43,16 @@ module.exports = function (environment) {
     },
 
     'ember-simple-auth-oidc': {
+      host: 'http://localhost:8080/auth/realms/pix/protocol/openid-connect',
+      clientId: 'ember-quickstart',
+      authEndpoint: '/auth',
+      tokenEndpoint: '/token',
+      userinfoEndpoint: '/userinfo',
+      endSessionEndpoint: '/logout',
+      afterLogoutUri: '/',
+    },
+
+    'ember-simple-auth-oidc-pole-emploi': {
       afterLogoutUri: process.env.POLE_EMPLOI_AFTER_LOGOUT_URI,
       authEndpoint: '/connexion/oauth2/authorize',
       clientId: process.env.POLE_EMPLOI_CLIENT_ID,
@@ -180,8 +190,8 @@ module.exports = function (environment) {
       ENV.matomo.debug = true;
     }
 
-    ENV['ember-simple-auth-oidc'].host = 'https://authentification-candidat-r.pe-qvr.fr';
-    ENV['ember-simple-auth-oidc'].afterLogoutUri = 'http://localhost:8080/';
+    ENV['ember-simple-auth-oidc-pole-emploi'].host = 'https://authentification-candidat-r.pe-qvr.fr';
+    ENV['ember-simple-auth-oidc-pole-emploi'].afterLogoutUri = 'http://localhost:8080/';
   }
 
   if (environment === 'test') {
