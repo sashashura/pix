@@ -4,7 +4,7 @@ const usecases = require('../../domain/usecases');
 
 module.exports = {
   get(request) {
-    const authenticatedUserId = request.auth.credentials.userId;
+    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
 
     return usecases
       .getPrescriber({ userId: authenticatedUserId })

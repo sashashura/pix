@@ -15,7 +15,7 @@ const { extractLocaleFromRequest } = require('../../infrastructure/utils/request
 
 module.exports = {
   async save(request, h) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const campaignParticipation = await campaignParticipationSerializer.deserialize(request.payload);
 
     const { event, campaignParticipation: campaignParticipationCreated } = await DomainTransaction.execute(
@@ -29,7 +29,7 @@ module.exports = {
   },
 
   async shareCampaignResult(request) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const campaignParticipationId = request.params.id;
 
     const event = await DomainTransaction.execute((domainTransaction) => {
@@ -45,7 +45,7 @@ module.exports = {
   },
 
   async beginImprovement(request) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const campaignParticipationId = request.params.id;
 
     return DomainTransaction.execute(async (domainTransaction) => {

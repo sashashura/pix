@@ -23,11 +23,11 @@ function _replyForbiddenError(h) {
 }
 
 function checkUserHasRolePixMaster(request, h) {
-  if (!request.auth.credentials || !request.auth.credentials.userId) {
+  if (!request.auth.credentials || !request.auth.credentials?.accessToken?.content?.pixUserId) {
     return _replyForbiddenError(h);
   }
 
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
 
   return checkUserHasRolePixMasterUseCase
     .execute(userId)
@@ -41,22 +41,21 @@ function checkUserHasRolePixMaster(request, h) {
 }
 
 function checkRequestedUserIsAuthenticatedUser(request, h) {
-  if (!request.auth.credentials || !request.auth.credentials.userId) {
+
+  const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+  if (!authenticatedUserId) {
     return _replyForbiddenError(h);
   }
-
-  const authenticatedUserId = request.auth.credentials.userId;
   const requestedUserId = parseInt(request.params.userId) || parseInt(request.params.id);
-
   return authenticatedUserId === requestedUserId ? h.response(true) : _replyForbiddenError(h);
 }
 
 function checkUserIsAdminInOrganization(request, h) {
-  if (!request.auth.credentials || !request.auth.credentials.userId) {
+  if (!request.auth.credentials || !request.auth.credentials?.accessToken?.content?.pixUserId) {
     return _replyForbiddenError(h);
   }
 
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
 
   //organizationId can be retrieved from path param in case organizations/id/invitations api or from memberships payload in case memberships/id
   const organizationId =
@@ -76,11 +75,11 @@ function checkUserIsAdminInOrganization(request, h) {
 }
 
 async function checkUserBelongsToOrganizationOrHasRolePixMaster(request, h) {
-  if (!request.auth.credentials || !request.auth.credentials.userId) {
+  if (!request.auth.credentials || !request.auth.credentials?.accessToken?.content?.pixUserId) {
     return _replyForbiddenError(h);
   }
 
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const organizationId = parseInt(request.params.id);
 
   const belongsToOrganization = await checkUserBelongsToOrganizationUseCase.execute(userId, organizationId);
@@ -97,11 +96,11 @@ async function checkUserBelongsToOrganizationOrHasRolePixMaster(request, h) {
 }
 
 async function checkUserIsAdminInOrganizationOrHasRolePixMaster(request, h) {
-  if (!request.auth.credentials || !request.auth.credentials.userId) {
+  if (!request.auth.credentials || !request.auth.credentials?.accessToken?.content?.pixUserId) {
     return _replyForbiddenError(h);
   }
 
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   //organizationId can be retrieved from path param in case organizations/id/invitations api or from memberships payload in case memberships/id
   const organizationId =
     request.path && request.path.includes('memberships')
@@ -126,7 +125,7 @@ async function checkUserBelongsToOrganizationManagingStudents(request, h) {
     return _replyForbiddenError(h);
   }
 
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const organizationId = parseInt(request.params.id);
 
   try {
@@ -140,11 +139,11 @@ async function checkUserBelongsToOrganizationManagingStudents(request, h) {
 }
 
 async function checkUserBelongsToScoOrganizationAndManagesStudents(request, h) {
-  if (!request.auth.credentials || !request.auth.credentials.userId) {
+  if (!request.auth.credentials || !request.auth.credentials?.accessToken?.content?.pixUserId) {
     return _replyForbiddenError(h);
   }
 
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const organizationId = parseInt(request.params.id) || parseInt(request.payload.data.attributes['organization-id']);
 
   let belongsToScoOrganizationAndManageStudents;
@@ -163,7 +162,7 @@ async function checkUserBelongsToScoOrganizationAndManagesStudents(request, h) {
 }
 
 async function checkUserIsAdminInSCOOrganizationManagingStudents(request, h) {
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const organizationId = parseInt(request.params.id);
 
   if (
@@ -175,7 +174,7 @@ async function checkUserIsAdminInSCOOrganizationManagingStudents(request, h) {
 }
 
 async function checkUserIsAdminInSUPOrganizationManagingStudents(request, h) {
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const organizationId = parseInt(request.params.id);
 
   if (
@@ -188,11 +187,11 @@ async function checkUserIsAdminInSUPOrganizationManagingStudents(request, h) {
 }
 
 async function checkUserBelongsToOrganization(request, h) {
-  if (!request.auth.credentials || !request.auth.credentials.userId) {
+  if (!request.auth.credentials || !request.auth.credentials?.accessToken?.content?.pixUserId) {
     return _replyForbiddenError(h);
   }
 
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const organizationId = parseInt(request.params.id);
 
   const belongsToOrganization = await checkUserBelongsToOrganizationUseCase.execute(userId, organizationId);

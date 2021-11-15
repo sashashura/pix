@@ -5,7 +5,7 @@ const DomainTransaction = require('../../infrastructure/DomainTransaction');
 
 module.exports = {
   async startOrResume(request, h) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const competenceId = request.payload.competenceId;
 
     const { competenceEvaluation, created } = await usecases.startOrResumeCompetenceEvaluation({
@@ -18,7 +18,7 @@ module.exports = {
   },
 
   async improve(request, h) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const competenceId = request.payload.competenceId;
 
     const competenceEvaluation = await DomainTransaction.execute(async (domainTransaction) => {

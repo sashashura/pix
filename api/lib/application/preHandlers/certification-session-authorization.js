@@ -4,7 +4,7 @@ const certificationCourseRepository = require('../../infrastructure/repositories
 
 module.exports = {
   async verify(request) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const certificationCourseId = request.params.id;
 
     const certificationCourse = await certificationCourseRepository.get(certificationCourseId);

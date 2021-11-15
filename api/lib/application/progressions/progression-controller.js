@@ -3,7 +3,7 @@ const usecases = require('../../domain/usecases');
 
 module.exports = {
   get(request) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
 
     const progressionId = request.params.id;
 

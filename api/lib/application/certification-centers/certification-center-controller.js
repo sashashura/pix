@@ -47,7 +47,7 @@ module.exports = {
 
   async findPaginatedSessionSummaries(request) {
     const certificationCenterId = request.params.id;
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const options = queryParamsUtils.extractParameters(request.query);
 
     const { models: sessionSummaries, meta } = await usecases.findPaginatedCertificationCenterSessionSummaries({

@@ -3,7 +3,7 @@ const schoolingRegistrationSerializer = require('../../infrastructure/serializer
 
 module.exports = {
   async reconcileSchoolingRegistrationAutomatically(request) {
-    const authenticatedUserId = request.auth.credentials.userId;
+    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const payload = request.payload.data.attributes;
     const campaignCode = payload['campaign-code'];
     const schoolingRegistration = await usecases.reconcileUserToOrganization({
@@ -14,7 +14,7 @@ module.exports = {
   },
 
   async reconcileSchoolingRegistrationManually(request, h) {
-    const authenticatedUserId = request.auth.credentials.userId;
+    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const payload = request.payload.data.attributes;
     const campaignCode = payload['campaign-code'];
     const withReconciliation = request.query.withReconciliation === 'true';
@@ -40,7 +40,7 @@ module.exports = {
   },
 
   async reconcileHigherSchoolingRegistration(request, h) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const payload = request.payload.data.attributes;
 
     const campaignCode = payload['campaign-code'];
@@ -59,7 +59,7 @@ module.exports = {
   },
 
   async findAssociation(request) {
-    const authenticatedUserId = request.auth.credentials.userId;
+    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
     // eslint-disable-next-line no-restricted-syntax
     const requestedUserId = parseInt(request.query.userId);
     const campaignCode = request.query.campaignCode;

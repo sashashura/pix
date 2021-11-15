@@ -25,7 +25,7 @@ module.exports = {
 
   async update(request) {
     const certificationCourseId = request.params.id;
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const command = await certificationSerializer.deserializeCertificationCandidateModificationCommand(
       request.payload,
       certificationCourseId,
@@ -40,7 +40,7 @@ module.exports = {
   },
 
   async save(request, h) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const accessCode = request.payload.data.attributes['access-code'];
     const sessionId = request.payload.data.attributes['session-id'];
     const locale = extractLocaleFromRequest(request);
@@ -62,7 +62,7 @@ module.exports = {
 
   async get(request) {
     const certificationCourseId = request.params.id;
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
 
     const certificationCourse = await usecases.getCertificationCourse({ userId, certificationCourseId });
 

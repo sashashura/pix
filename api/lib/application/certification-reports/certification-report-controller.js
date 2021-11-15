@@ -3,7 +3,7 @@ const certificationIssueReportSerializer = require('../../infrastructure/seriali
 
 module.exports = {
   async saveCertificationIssueReport(request, h) {
-    const userId = request.auth.credentials.userId;
+    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
     const certificationIssueReportDTO = certificationIssueReportSerializer.deserialize(request);
     const certificationIssueReportSaved = await usecases.saveCertificationIssueReport({
       userId,

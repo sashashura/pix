@@ -3,14 +3,14 @@ const certificationCourseRepository = require('../../infrastructure/repositories
 const sessionRepository = require('../../infrastructure/repositories/session-repository');
 
 module.exports.verifySessionAuthorization = async (request) => {
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const sessionId = request.params.id;
 
   return await _isAuthorizedToAccessSession({ userId, sessionId });
 };
 
 module.exports.verifyCertificationSessionAuthorization = async (request) => {
-  const userId = request.auth.credentials.userId;
+  const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
   const certificationCourseId = request.params.id;
 
   const certificationCourse = await certificationCourseRepository.get(certificationCourseId);
