@@ -17,7 +17,7 @@ export default class ProfileRoute extends Route.extend(
           authorization: `Bearer ${this.session.data.authenticated.access_token}`,
         },
       });
-      return apiResponse;
+      return JSON.stringify(apiResponse);
     } catch (e) {
       console.error('request error', e);
       return 'oops';
