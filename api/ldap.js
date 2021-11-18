@@ -1,29 +1,34 @@
 const ldap = require('ldapjs');
 
-
 ///--- Shared handlers
 
 function authorize(req, res, next) {
   /* Any user may search after bind, only cn=root has full power */
-  const isSearch = (req instanceof ldap.SearchRequest);
-  if (!req.connection.ldap.bindDN.equals('cn=root') && !isSearch)
-    return next(new ldap.InsufficientAccessRightsError());
+  const isSearch = req instanceof ldap.SearchRequest;
+  if (!req.connection.ldap.bindDN.equals('cn=root') && !isSearch) return next(new ldap.InsufficientAccessRightsError());
 
   return next();
 }
 
-
 ///--- Globals
 
-const SUFFIX = 'o=joyent';
-const db = {'o=joyent': {'cn': 'Orga PIX', 'objectclass': 'organisation'} };
+const SUFFIX = 'o=pix';
+const db = {
+  'o=pix': { cn: 'Orga PIX', objectclass: 'organisation' },
+  'cn=george, o=pix': {
+    cn: 'george',
+    objectclass: 'person',
+    uid: '1',
+    userpassword: ['pix123'],
+    mail: 'user@example.net',
+    givenName: 'George',
+    sn: 'De Cambridge',
+  },
+};
 const server = ldap.createServer();
 
-
-
 server.bind('cn=root', (req, res, next) => {
-  if (req.dn.toString() !== 'cn=root' || req.credentials !== 'secret')
-    return next(new ldap.InvalidCredentialsError());
+  if (req.dn.toString() !== 'cn=root' || req.credentials !== 'secret') return next(new ldap.InvalidCredentialsError());
 
   res.end();
   return next();
@@ -32,8 +37,7 @@ server.bind('cn=root', (req, res, next) => {
 server.add(SUFFIX, authorize, (req, res, next) => {
   const dn = req.dn.toString();
 
-  if (db[dn])
-    return next(new ldap.EntryAlreadyExistsError(dn));
+  if (db[dn]) return next(new ldap.EntryAlreadyExistsError(dn));
 
   db[dn] = req.toObject().attributes;
   res.end();
@@ -42,14 +46,11 @@ server.add(SUFFIX, authorize, (req, res, next) => {
 
 server.bind(SUFFIX, (req, res, next) => {
   const dn = req.dn.toString();
-  if (!db[dn])
-    return next(new ldap.NoSuchObjectError(dn));
+  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
 
-  if (!db[dn].userpassword)
-    return next(new ldap.NoSuchAttributeError('userPassword'));
+  if (!db[dn].userpassword) return next(new ldap.NoSuchAttributeError('userPassword'));
 
-  if (db[dn].userpassword.indexOf(req.credentials) === -1)
-    return next(new ldap.InvalidCredentialsError());
+  if (db[dn].userpassword.indexOf(req.credentials) === -1) return next(new ldap.InvalidCredentialsError());
 
   res.end();
   return next();
@@ -57,13 +58,11 @@ server.bind(SUFFIX, (req, res, next) => {
 
 server.compare(SUFFIX, authorize, (req, res, next) => {
   const dn = req.dn.toString();
-  if (!db[dn])
-    return next(new ldap.NoSuchObjectError(dn));
+  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
 
-  if (!db[dn][req.attribute])
-    return next(new ldap.NoSuchAttributeError(req.attribute));
+  if (!db[dn][req.attribute]) return next(new ldap.NoSuchAttributeError(req.attribute));
 
-  const matches = false;
+  let matches = false;
   const vals = db[dn][req.attribute];
   for (const value of vals) {
     if (value === req.value) {
@@ -78,8 +77,7 @@ server.compare(SUFFIX, authorize, (req, res, next) => {
 
 server.del(SUFFIX, authorize, (req, res, next) => {
   const dn = req.dn.toString();
-  if (!db[dn])
-    return next(new ldap.NoSuchObjectError(dn));
+  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
 
   delete db[dn];
 
@@ -89,19 +87,16 @@ server.del(SUFFIX, authorize, (req, res, next) => {
 
 server.modify(SUFFIX, authorize, (req, res, next) => {
   const dn = req.dn.toString();
-  if (!req.changes.length)
-    return next(new ldap.ProtocolError('changes required'));
-  if (!db[dn])
-    return next(new ldap.NoSuchObjectError(dn));
+  if (!req.changes.length) return next(new ldap.ProtocolError('changes required'));
+  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
 
   const entry = db[dn];
 
   for (const change of req.changes) {
-    mod = change.modification;
+    const mod = change.modification;
     switch (change.operation) {
       case 'replace':
-        if (!entry[mod.type])
-          return next(new ldap.NoSuchAttributeError(mod.type));
+        if (!entry[mod.type]) return next(new ldap.NoSuchAttributeError(mod.type));
 
         if (!mod.vals || !mod.vals.length) {
           delete entry[mod.type];
@@ -116,16 +111,14 @@ server.modify(SUFFIX, authorize, (req, res, next) => {
           entry[mod.type] = mod.vals;
         } else {
           for (const v of mod.vals) {
-            if (entry[mod.type].indexOf(v) === -1)
-              entry[mod.type].push(v);
+            if (entry[mod.type].indexOf(v) === -1) entry[mod.type].push(v);
           }
         }
 
         break;
 
       case 'delete':
-        if (!entry[mod.type])
-          return next(new ldap.NoSuchAttributeError(mod.type));
+        if (!entry[mod.type]) return next(new ldap.NoSuchAttributeError(mod.type));
 
         delete entry[mod.type];
 
@@ -140,8 +133,7 @@ server.modify(SUFFIX, authorize, (req, res, next) => {
 server.search(SUFFIX, authorize, (req, res, next) => {
   const dn = req.dn.toString();
   console.log('NOUS SOMMES DANS LE SEARCH, DN BIEN REÇU : ', dn);
-  if (!db[dn])
-    return next(new ldap.NoSuchObjectError(dn));
+  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
 
   let scopeCheck;
 
@@ -150,7 +142,7 @@ server.search(SUFFIX, authorize, (req, res, next) => {
       if (req.filter.matches(db[dn])) {
         res.send({
           dn: dn,
-          attributes: db[dn]
+          attributes: db[dn],
         });
       }
 
@@ -159,17 +151,16 @@ server.search(SUFFIX, authorize, (req, res, next) => {
 
     case 'one':
       scopeCheck = (k) => {
-        if (req.dn.equals(k))
-          return true;
+        if (req.dn.equals(k)) return true;
 
         const parent = ldap.parseDN(k).parent();
-        return (parent ? parent.equals(req.dn) : false);
+        return parent ? parent.equals(req.dn) : false;
       };
       break;
 
     case 'sub':
       scopeCheck = (k) => {
-        return (req.dn.equals(k) || req.dn.parentOf(k));
+        return req.dn.equals(k) || req.dn.parentOf(k);
       };
 
       break;
@@ -177,13 +168,12 @@ server.search(SUFFIX, authorize, (req, res, next) => {
 
   const keys = Object.keys(db);
   for (const key of keys) {
-    if (!scopeCheck(key))
-      continue;
+    if (!scopeCheck(key)) continue;
 
     if (req.filter.matches(db[key])) {
       res.send({
         dn: key,
-        attributes: db[key]
+        attributes: db[key],
       });
     }
   }
@@ -191,8 +181,6 @@ server.search(SUFFIX, authorize, (req, res, next) => {
   res.end();
   return next();
 });
-
-
 
 ///--- Fire it up
 
