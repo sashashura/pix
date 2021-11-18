@@ -34,16 +34,6 @@ server.bind('cn=root', (req, res, next) => {
   return next();
 });
 
-server.add(SUFFIX, authorize, (req, res, next) => {
-  const dn = req.dn.toString();
-
-  if (db[dn]) return next(new ldap.EntryAlreadyExistsError(dn));
-
-  db[dn] = req.toObject().attributes;
-  res.end();
-  return next();
-});
-
 server.bind(SUFFIX, (req, res, next) => {
   const dn = req.dn.toString();
   if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
@@ -56,83 +46,10 @@ server.bind(SUFFIX, (req, res, next) => {
   return next();
 });
 
-server.compare(SUFFIX, authorize, (req, res, next) => {
-  const dn = req.dn.toString();
-  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
-
-  if (!db[dn][req.attribute]) return next(new ldap.NoSuchAttributeError(req.attribute));
-
-  let matches = false;
-  const vals = db[dn][req.attribute];
-  for (const value of vals) {
-    if (value === req.value) {
-      matches = true;
-      break;
-    }
-  }
-
-  res.end(matches);
-  return next();
-});
-
-server.del(SUFFIX, authorize, (req, res, next) => {
-  const dn = req.dn.toString();
-  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
-
-  delete db[dn];
-
-  res.end();
-  return next();
-});
-
-server.modify(SUFFIX, authorize, (req, res, next) => {
-  const dn = req.dn.toString();
-  if (!req.changes.length) return next(new ldap.ProtocolError('changes required'));
-  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
-
-  const entry = db[dn];
-
-  for (const change of req.changes) {
-    const mod = change.modification;
-    switch (change.operation) {
-      case 'replace':
-        if (!entry[mod.type]) return next(new ldap.NoSuchAttributeError(mod.type));
-
-        if (!mod.vals || !mod.vals.length) {
-          delete entry[mod.type];
-        } else {
-          entry[mod.type] = mod.vals;
-        }
-
-        break;
-
-      case 'add':
-        if (!entry[mod.type]) {
-          entry[mod.type] = mod.vals;
-        } else {
-          for (const v of mod.vals) {
-            if (entry[mod.type].indexOf(v) === -1) entry[mod.type].push(v);
-          }
-        }
-
-        break;
-
-      case 'delete':
-        if (!entry[mod.type]) return next(new ldap.NoSuchAttributeError(mod.type));
-
-        delete entry[mod.type];
-
-        break;
-    }
-  }
-
-  res.end();
-  return next();
-});
-
 server.search(SUFFIX, authorize, (req, res, next) => {
   const dn = req.dn.toString();
   console.log('NOUS SOMMES DANS LE SEARCH, DN BIEN REÇU : ', dn);
+  console.log('request ', req);
   if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
 
   let scopeCheck;
