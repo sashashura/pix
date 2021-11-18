@@ -49,6 +49,7 @@
     "jszip": "^3.6.0",
     "keycloak-hapi": "^3.0.0",
     "knex": "^0.95.6",
+    "ldapjs": "^2.3.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.33",
