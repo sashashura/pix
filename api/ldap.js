@@ -1,4 +1,8 @@
+require('dotenv').config();
+const userRepository = require('./lib/infrastructure/repositories/user-repository');
 const ldap = require('ldapjs');
+const { knex } = require('./db/knex-database-connection');
+const encryptionService = require('./lib/domain/services/encryption-service');
 
 ///--- Shared handlers
 
@@ -36,67 +40,83 @@ server.bind('cn=root', (req, res, next) => {
 
 server.bind(SUFFIX, (req, res, next) => {
   const dn = req.dn.toString();
-  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
+  console.log('------------');
+  console.log(dn);
+  console.log(req.credentials);
+  // const password = req.credentials;
+  const [, userId] = dn.toString().match(/^uid=([0-9]+)/);
+  console.log({ userId });
 
-  if (!db[dn].userpassword) return next(new ldap.NoSuchAttributeError('userPassword'));
-
-  if (db[dn].userpassword.indexOf(req.credentials) === -1) return next(new ldap.InvalidCredentialsError());
-
-  res.end();
-  return next();
+  knex('authentication-methods')
+    .where({ userId, identityProvider: 'PIX' })
+    .pluck('authenticationComplement')
+    .then(([{ password }]) => {
+      console.log({ password });
+      return encryptionService.checkPassword({ password: req.credentials, passwordHash: password }).then(() => {
+        res.end();
+        return next();
+      });
+    })
+    .catch(() => {
+      return next(new ldap.InvalidCredentialsError());
+    });
 });
 
 server.search(SUFFIX, authorize, (req, res, next) => {
   const dn = req.dn.toString();
+
   console.log('NOUS SOMMES DANS LE SEARCH, DN BIEN REÇU : ', dn);
-  console.log('request ', req);
-  if (!db[dn]) return next(new ldap.NoSuchObjectError(dn));
+  console.log('filter ', req.filter);
+  const mailFilter = req.filter.filters.find((filter) => filter.attribute === 'mail');
+  const uidFilter = req.filter.filters.find((filter) => filter.attribute === 'uid');
 
-  let scopeCheck;
+  if (mailFilter) {
+    const email = mailFilter.raw.toString('ascii');
 
-  switch (req.scope) {
-    case 'base':
-      if (req.filter.matches(db[dn])) {
+    userRepository
+      .getByEmail(email)
+      .then((user) => {
         res.send({
-          dn: dn,
-          attributes: db[dn],
+          dn: `uid=${user.id},o=pix`,
+          attributes: {
+            uid: user.id,
+            mail: user.email,
+            cn: user.firstName,
+          },
         });
-      }
 
-      res.end();
-      return next();
-
-    case 'one':
-      scopeCheck = (k) => {
-        if (req.dn.equals(k)) return true;
-
-        const parent = ldap.parseDN(k).parent();
-        return parent ? parent.equals(req.dn) : false;
-      };
-      break;
-
-    case 'sub':
-      scopeCheck = (k) => {
-        return req.dn.equals(k) || req.dn.parentOf(k);
-      };
-
-      break;
-  }
-
-  const keys = Object.keys(db);
-  for (const key of keys) {
-    if (!scopeCheck(key)) continue;
-
-    if (req.filter.matches(db[key])) {
-      res.send({
-        dn: key,
-        attributes: db[key],
+        res.end();
+        return next();
+      })
+      .catch((error) => {
+        console.log(error);
+        res.end();
+        return next();
       });
-    }
-  }
+  } else if (uidFilter) {
+    const uid = uidFilter.raw.toString('ascii');
 
-  res.end();
-  return next();
+    userRepository
+      .get(uid)
+      .then((user) => {
+        res.send({
+          dn: `uid=${user.id},o=pix`,
+          attributes: {
+            uid: user.id,
+            mail: user.email,
+            cn: user.firstName,
+          },
+        });
+
+        res.end();
+        return next();
+      })
+      .catch((error) => {
+        console.log(error);
+        res.end();
+        return next();
+      });
+  }
 });
 
 ///--- Fire it up

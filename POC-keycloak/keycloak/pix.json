@@ -1427,19 +1427,31 @@
             "always.read.value.from.ldap" : [ "true" ],
             "user.model.attribute" : [ "modifyTimestamp" ]
           }
+        }, {
+          "id" : "2756fc2e-e94a-4197-98c9-43c4f475eee8",
+          "name" : "pix-user-id",
+          "providerId" : "user-attribute-ldap-mapper",
+          "subComponents" : { },
+          "config" : {
+            "ldap.attribute" : [ "uid" ],
+            "is.mandatory.in.ldap" : [ "false" ],
+            "is.binary.attribute" : [ "false" ],
+            "read.only" : [ "true" ],
+            "user.model.attribute" : [ "userId" ]
+          }
         } ]
       },
       "config" : {
-        "fullSyncPeriod" : [ "-1" ],
         "pagination" : [ "true" ],
-        "usersDn" : [ "o=pix" ],
+        "fullSyncPeriod" : [ "-1" ],
         "connectionPooling" : [ "true" ],
+        "usersDn" : [ "o=pix" ],
         "cachePolicy" : [ "DEFAULT" ],
         "useKerberosForPasswordAuthentication" : [ "false" ],
-        "importEnabled" : [ "true" ],
+        "importEnabled" : [ "false" ],
         "enabled" : [ "true" ],
-        "usernameLDAPAttribute" : [ "cn" ],
         "changedSyncPeriod" : [ "-1" ],
+        "usernameLDAPAttribute" : [ "mail" ],
         "lastSync" : [ "1637250837" ],
         "vendor" : [ "other" ],
         "uuidLDAPAttribute" : [ "uid" ],
