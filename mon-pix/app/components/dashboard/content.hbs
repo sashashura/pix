@@ -30,6 +30,7 @@
   {{/if}}
 
   <section class="dashboard-content__score">
+    <h2 class="sr-only">{{t "pages.dashboard.score.title"}}</h2>
     <div class="dashboard-content-score__wrapper">
       <HexagonScore @pixScore={{this.userScore}} />
       <LinkTo @route="profile" class="dashboard-content-score-wrapper__button">{{t
