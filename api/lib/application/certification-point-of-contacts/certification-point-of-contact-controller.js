@@ -3,7 +3,7 @@ const usecases = require('../../domain/usecases');
 
 module.exports = {
   async get(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const certificationPointOfContact = await usecases.getCertificationPointOfContact({ userId: authenticatedUserId });
     return certificationPointOfContactSerializer.serialize(certificationPointOfContact);
   },

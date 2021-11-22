@@ -117,7 +117,7 @@ module.exports = {
   },
 
   async findCompetenceEvaluations(request) {
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
     const assessmentId = request.params.id;
 
     const competenceEvaluations = await usecases.findCompetenceEvaluationsByAssessment({ userId, assessmentId });

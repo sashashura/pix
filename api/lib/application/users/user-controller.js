@@ -37,7 +37,10 @@ module.exports = {
   },
 
   getCurrentUser(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.name;
+
+    console.debug(request.auth);
+
     return usecases.getCurrentUser({ authenticatedUserId }).then(userSerializer.serialize);
   },
 
@@ -49,7 +52,7 @@ module.exports = {
 
   async updateEmail(request, h) {
     const userId = request.params.id;
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const { email, password } = request.payload.data.attributes;
     const locale = extractLocaleFromRequest(request);
 
@@ -90,7 +93,7 @@ module.exports = {
   },
 
   async acceptPixLastTermsOfService(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     const updatedUser = await usecases.acceptPixLastTermsOfService({
       userId: authenticatedUserId,
@@ -100,7 +103,7 @@ module.exports = {
   },
 
   async changeLang(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const lang = request.params.lang;
     const updatedUser = await usecases.changeUserLang({
       userId: authenticatedUserId,
@@ -111,7 +114,7 @@ module.exports = {
   },
 
   async acceptPixOrgaTermsOfService(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     const updatedUser = await usecases.acceptPixOrgaTermsOfService({
       userId: authenticatedUserId,
@@ -121,7 +124,7 @@ module.exports = {
   },
 
   async acceptPixCertifTermsOfService(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     const updatedUser = await usecases.acceptPixCertifTermsOfService({
       userId: authenticatedUserId,
@@ -131,21 +134,21 @@ module.exports = {
   },
 
   async rememberUserHasSeenAssessmentInstructions(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     const updatedUser = await usecases.rememberUserHasSeenAssessmentInstructions({ userId: authenticatedUserId });
     return userSerializer.serialize(updatedUser);
   },
 
   async rememberUserHasSeenNewDashboardInfo(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     const updatedUser = await usecases.rememberUserHasSeenNewDashboardInfo({ userId: authenticatedUserId });
     return userSerializer.serialize(updatedUser);
   },
 
   async rememberUserHasSeenChallengeTooltip(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const challengeType = request.params.challengeType;
 
     const updatedUser = await usecases.rememberUserHasSeenChallengeTooltip({
@@ -156,7 +159,7 @@ module.exports = {
   },
 
   getMemberships(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     return usecases
       .getUserWithMemberships({ userId: authenticatedUserId })
@@ -174,7 +177,7 @@ module.exports = {
   },
 
   getCampaignParticipations(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     return usecases
       .findLatestOngoingUserCampaignParticipations({ userId: authenticatedUserId })
@@ -182,7 +185,7 @@ module.exports = {
   },
 
   async getCampaignParticipationOverviews(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const query = queryParamsUtils.extractParameters(request.query);
 
     const userCampaignParticipationOverviews = await usecases.findUserCampaignParticipationOverviews({
@@ -195,28 +198,28 @@ module.exports = {
   },
 
   async isCertifiable(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
 
     const certificationEligibility = await usecases.getUserCertificationEligibility({ userId: authenticatedUserId });
     return certificationEligibilitySerializer.serialize(certificationEligibility);
   },
 
   getProfile(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const locale = extractLocaleFromRequest(request);
 
     return usecases.getUserProfile({ userId: authenticatedUserId, locale }).then(profileSerializer.serialize);
   },
 
   resetScorecard(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const competenceId = request.params.competenceId;
 
     return usecases.resetScorecard({ userId: authenticatedUserId, competenceId }).then(scorecardSerializer.serialize);
   },
 
   getUserCampaignParticipationToCampaign(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const campaignId = request.params.campaignId;
 
     return usecases
@@ -225,7 +228,7 @@ module.exports = {
   },
 
   async getUserProfileSharedForCampaign(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const campaignId = request.params.campaignId;
     const locale = extractLocaleFromRequest(request);
 
@@ -239,7 +242,7 @@ module.exports = {
   },
 
   async getUserCampaignAssessmentResult(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const campaignId = request.params.campaignId;
     const locale = extractLocaleFromRequest(request);
 

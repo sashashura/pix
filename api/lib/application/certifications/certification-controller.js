@@ -7,14 +7,14 @@ const moment = require('moment');
 
 module.exports = {
   async findUserCertifications(request) {
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
 
     const privateCertificates = await usecases.findUserPrivateCertificates({ userId });
     return privateCertificateSerializer.serialize(privateCertificates);
   },
 
   async getCertification(request) {
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
     const certificationId = request.params.id;
 
     const privateCertificate = await usecases.getPrivateCertificate({
@@ -32,7 +32,7 @@ module.exports = {
   },
 
   async getPDFAttestation(request, h) {
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
     const certificationId = request.params.id;
     const attestation = await usecases.getCertificationAttestation({
       userId,
@@ -53,7 +53,7 @@ module.exports = {
   async neutralizeChallenge(request, h) {
     const challengeRecId = request.payload.data.attributes.challengeRecId;
     const certificationCourseId = request.payload.data.attributes.certificationCourseId;
-    const juryId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const juryId = request.auth.credentials.userId;
     const event = await usecases.neutralizeChallenge({
       challengeRecId,
       certificationCourseId,
@@ -66,7 +66,7 @@ module.exports = {
   async deneutralizeChallenge(request, h) {
     const challengeRecId = request.payload.data.attributes.challengeRecId;
     const certificationCourseId = request.payload.data.attributes.certificationCourseId;
-    const juryId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const juryId = request.auth.credentials.userId;
     const event = await usecases.deneutralizeChallenge({
       challengeRecId,
       certificationCourseId,

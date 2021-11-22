@@ -48,7 +48,7 @@ module.exports = {
   },
 
   async save(request) {
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
     const session = sessionSerializer.deserialize(request.payload);
 
     const newSession = await usecases.createSession({ userId, session });
@@ -57,7 +57,7 @@ module.exports = {
   },
 
   async update(request) {
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
     const session = sessionSerializer.deserialize(request.payload);
     session.id = request.params.id;
 
@@ -211,7 +211,7 @@ module.exports = {
   },
 
   async createCandidateParticipation(request, h) {
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
     const sessionId = request.params.id;
     const firstName = trim(request.payload.data.attributes['first-name']);
     const lastName = trim(request.payload.data.attributes['last-name']);
@@ -283,14 +283,14 @@ module.exports = {
 
   async assignCertificationOfficer(request) {
     const sessionId = request.params.id;
-    const certificationOfficerId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const certificationOfficerId = request.auth.credentials.userId;
     const jurySession = await usecases.assignCertificationOfficerToJurySession({ sessionId, certificationOfficerId });
     return jurySessionSerializer.serialize(jurySession);
   },
 
   async commentAsJury(request, h) {
     const sessionId = request.params.id;
-    const juryCommentAuthorId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const juryCommentAuthorId = request.auth.credentials.userId;
     const juryComment = request.payload['jury-comment'];
     await usecases.commentSessionAsJury({ sessionId, juryCommentAuthorId, juryComment });
 

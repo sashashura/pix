@@ -4,7 +4,7 @@ const usecases = require('../../domain/usecases');
 
 module.exports = {
   async createOrUpdate(request) {
-    const authenticatedUserId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const authenticatedUserId = request.auth.credentials.userId;
     const userId = request.params.id;
     const organizationId = request.payload.data.relationships.organization.data.id;
 

@@ -177,7 +177,7 @@ describe('Unit | Controller | sessionController', function () {
       };
 
       updateSessionArgs = {
-        userId: request.auth.credentials?.accessToken?.content?.pixUserId,
+        userId: request.auth.credentials.userId,
         session: updatedSession,
       };
 

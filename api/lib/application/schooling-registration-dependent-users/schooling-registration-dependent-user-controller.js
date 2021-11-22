@@ -49,7 +49,7 @@ module.exports = {
 
   async updatePassword(request, h) {
     const payload = request.payload.data.attributes;
-    const userId = request.auth.credentials?.accessToken?.content?.pixUserId;
+    const userId = request.auth.credentials.userId;
     const organizationId = payload['organization-id'];
     const schoolingRegistrationId = payload['schooling-registration-id'];
 

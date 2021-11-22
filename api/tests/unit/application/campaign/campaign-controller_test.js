@@ -271,7 +271,7 @@ describe('Unit | Application | Controller | Campaign', function () {
       sinon.stub(tokenService, 'createTokenForCampaignResults');
 
       queryParamsUtils.extractParameters.withArgs({}).returns({});
-      tokenService.createTokenForCampaignResults.withArgs(request.auth.credentials?.accessToken?.content?.pixUserId).returns('token');
+      tokenService.createTokenForCampaignResults.withArgs(request.auth.credentials.userId).returns('token');
       usecases.getCampaign.resolves(campaign);
     });
 
@@ -316,7 +316,7 @@ describe('Unit | Application | Controller | Campaign', function () {
       };
 
       updateCampaignArgs = {
-        userId: request.auth.credentials?.accessToken?.content?.pixUserId,
+        userId: request.auth.credentials.userId,
         campaignId: updatedCampaign.id,
         name: updatedCampaign.name,
         title: updatedCampaign.title,
