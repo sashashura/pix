@@ -87,7 +87,7 @@ const setupAuthentication = function (server) {
   });
 
   server.register({
-    plugin: require('keycloak-hapi'),
+    plugin: require('./lib/infrastructure/hapi-keycloak'),
     options: {
       serverUrl: 'http://localhost:8080/auth',
       realm: 'pix',
