@@ -72,13 +72,11 @@
     "sib-api-v3-sdk": "^8.2.0",
     "uuid": "^8.3.2",
     "validator": "^13.6.0",
-    "wreck": "^14.2.0",
     "xlsx": "^0.16.1",
     "xml-buffer-tostring": "^0.2.0",
     "xml2js": "^0.4.23",
     "xmldom": "^0.6.0",
     "xregexp": "^5.0.2",
-    "yar": "^9.1.0",
     "yargs": "^17.0.1"
   },
   "devDependencies": {

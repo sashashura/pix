@@ -2,15 +2,9 @@ const KeycloakConfig = require('keycloak-connect/middleware/auth-utils/config');
 const GrantManager = require('keycloak-connect/middleware/auth-utils/grant-manager');
 const Token = require('keycloak-connect/middleware/auth-utils/token');
 const Grant = require('keycloak-connect/middleware/auth-utils/grant');
-const UUID = require('keycloak-connect/uuid');
 const Boom = require('@hapi/boom');
 const _ = require('lodash');
 const crypto = require('crypto');
-const urljoin = require('url-join');
-
-const getProtocol = (request) => request.headers['x-forwarded-proto'] || request.server.info.protocol;
-const getHost = (request) => request.headers['x-forwarded-host'] || request.info.host;
-const getLocale = (request) => request.query['kc_locale'] || request.query['ui_locales'];
 
 const throwError = (message) => {
   throw new Error(message);
@@ -57,34 +51,6 @@ class ActionTokenVerifier {
   }
 }
 
-class SessionGrantStore {
-  constructor(options = null) {
-    this.options = Object.assign(
-      {
-        key: 'kc_auth_grant',
-      },
-      options
-    );
-    this.name = 'session';
-  }
-
-  canRetrieveGrantFrom(request) {
-    return !!this.getGrant(request);
-  }
-
-  getGrant(request) {
-    return request.yar.get(this.options.key);
-  }
-
-  saveGrant(request, grant) {
-    request.yar.set(this.options.key, grant);
-  }
-
-  clearGrant(request) {
-    request.yar.reset();
-  }
-}
-
 class BearerGrantStore {
   constructor() {
     this.name = 'bearer';
@@ -109,62 +75,9 @@ class BearerGrantStore {
   }
 }
 
-class NoGrantStore {
-  canRetrieveGrantFrom() {
-    return true;
-  }
-
-  getGrant() {
-    return null;
-  }
-}
-
-class DelegatingGrantStore {
-  constructor(innerGrantStore, serializer) {
-    this.innerGrantStore = innerGrantStore;
-    this.serializer = serializer;
-  }
-
-  canRetrieveGrantFrom(request) {
-    return this.innerGrantStore.canRetrieveGrantFrom(request);
-  }
-
-  getGrant(request) {
-    const grant = this.innerGrantStore.getGrant(request);
-    return grant ? this.serializer.deserialize(grant) : null;
-  }
-
-  saveGrant(request, grant) {
-    if (!this.innerGrantStore.saveGrant) {
-      return;
-    }
-    const grantData = this.serializer.serialize(grant);
-    this.innerGrantStore.saveGrant(request, grantData);
-  }
-
-  clearGrant(request) {
-    if (this.innerGrantStore.clearGrant) {
-      this.innerGrantStore.clearGrant(request);
-    }
-  }
-}
-
 class GrantSerializer {
   constructor(clientId) {
     this.clientId = clientId;
-  }
-
-  serialize(grant) {
-    if (!grant) {
-      return null;
-    }
-    return {
-      access_token: grant.access_token ? grant.access_token.token : undefined,
-      refresh_token: grant.refresh_token ? grant.refresh_token.token : undefined,
-      id_token: grant.id_token ? grant.id_token.token : undefined,
-      expires_in: grant.expires_in,
-      token_type: grant.token_type,
-    };
   }
 
   deserialize(grantData) {
@@ -173,53 +86,17 @@ class GrantSerializer {
     }
     return new Grant({
       access_token: grantData.access_token ? new Token(grantData.access_token, this.clientId) : undefined,
-      refresh_token: grantData.refresh_token ? new Token(grantData.refresh_token, this.clientId) : undefined,
-      id_token: grantData.id_token ? new Token(grantData.id_token, this.clientId) : undefined,
-      expires_in: grantData.expires_in,
-      token_type: grantData.token_type,
       __raw: grantData,
     });
   }
 }
-
-const defaultPrincipalConversion = (principal) => principal;
-const defaultShouldRedirectUnauthenticated = (config) => (request) => {
-  return !(
-    config.bearerOnly ||
-    request.auth.mode !== 'required' ||
-    request.raw.req.url.startsWith('/api/') ||
-    request.headers['x-requested-with'] === 'XMLHttpRequest'
-  );
-};
-
-const hapi17ReplyStrategy = (reply) => {
-  return {
-    authenticated: (options) => reply.authenticated(options),
-    representation: (obj) => obj,
-  };
-};
-
-const hapi16ReplyStrategy = (reply) => {
-  return {
-    authenticated: (options) => reply.continue(options),
-    representation: (obj) => reply(obj),
-  };
-};
 
 class KeycloakAdapter {
   constructor(server, config) {
     this.server = server;
     this.config = Object.assign(
       {
-        loginUrl: '/sso/login',
-        logoutUrl: '/sso/logout',
-        registerUrl: '/sso/register',
-        apiLogoutUrl: '/api/logout',
-        principalUrl: '/api/principal',
-        corsOrigin: ['*'],
-        principalConversion: defaultPrincipalConversion,
         principalNameAttribute: 'name',
-        shouldRedirectUnauthenticated: defaultShouldRedirectUnauthenticated(config),
       },
       config
     );
@@ -230,94 +107,7 @@ class KeycloakAdapter {
     this.grantManager = new GrantManager(this.keycloakConfig);
     this.actionTokenVerifier = new ActionTokenVerifier(this.grantManager);
     this.grantSerializer = new GrantSerializer(this.config.clientId);
-    this.grantStores = this.createGrantStores(this.config.bearerOnly);
-    this.replyStrategy = server.version < '17' ? hapi16ReplyStrategy : hapi17ReplyStrategy;
-  }
-
-  createGrantStores(bearerOnly) {
-    const stores = [];
-    stores.push(new BearerGrantStore());
-    if (!bearerOnly) {
-      stores.push(new SessionGrantStore());
-    }
-    stores.push(new NoGrantStore());
-    return stores;
-  }
-
-  obtainGrantFromCode(code, redirectUri, sessionId, sessionHost) {
-    const req = {
-      session: { auth_redirect_uri: redirectUri },
-    };
-    return this.grantManager.obtainFromCode(req, code, sessionId, sessionHost);
-  }
-
-  getLoginUrl(redirectUrl, stateUuid = null) {
-    return (
-      this.keycloakConfig.realmUrl +
-      '/protocol/openid-connect/auth' +
-      '?client_id=' +
-      encodeURIComponent(this.keycloakConfig.clientId) +
-      '&state=' +
-      encodeURIComponent(stateUuid || UUID()) +
-      '&redirect_uri=' +
-      encodeURIComponent(redirectUrl) +
-      '&scope=openid' +
-      '&response_type=code'
-    );
-  }
-
-  getLogoutUrl({ redirectUrl, idTokenHint }) {
-    return urljoin(
-      this.keycloakConfig.realmUrl,
-      '/protocol/openid-connect/logout',
-      redirectUrl ? '?redirect_uri=' + encodeURIComponent(redirectUrl) : '',
-      idTokenHint ? '?id_token_hint=' + encodeURIComponent(idTokenHint) : ''
-    );
-  }
-
-  getRegistrationUrl(redirectUrl, locale) {
-    return (
-      this.keycloakConfig.realmUrl +
-      '/protocol/openid-connect/registrations' +
-      '?client_id=' +
-      encodeURIComponent(this.keycloakConfig.clientId) +
-      '&redirect_uri=' +
-      encodeURIComponent(redirectUrl) +
-      '&scope=openid' +
-      '&response_type=code' +
-      (locale ? '&kc_locale=' + locale : '')
-    );
-  }
-
-  getChangePasswordUrl() {
-    return urljoin(
-      this.keycloakConfig.realmUrl,
-      '/account/password',
-      `?referrer=${encodeURIComponent(this.keycloakConfig.clientId)}`
-    );
-  }
-
-  getAccountUrl() {
-    return urljoin(
-      this.keycloakConfig.realmUrl,
-      '/account',
-      `?referrer=${encodeURIComponent(this.keycloakConfig.clientId)}`
-    );
-  }
-
-  getBaseUrl(request) {
-    const base =
-      this.config.baseUrl || urljoin(`${getProtocol(request)}://${getHost(request)}`, this.config.basePath || '');
-    return urljoin(base, this.server.realm.modifiers.route.prefix || '');
-  }
-
-  getClientBasicAuth() {
-    const clientCredentials = `${this.config.clientId}:${this.config.clientSecret}`;
-    return Buffer.from(clientCredentials).toString('base64');
-  }
-
-  getLoginRedirectUrl(request) {
-    return urljoin(this.getBaseUrl(request), this.config.loginUrl, '?auth_callback=1');
+    this.grantStore = new BearerGrantStore();
   }
 
   getAssignedRoles(accessToken) {
@@ -326,46 +116,29 @@ class KeycloakAdapter {
     return _.union(appRoles, realmRoles);
   }
 
-  getGrantStoreFor(request) {
-    const grantStore = _.find(this.grantStores, (store) => store.canRetrieveGrantFrom(request));
-    return new DelegatingGrantStore(grantStore, this.grantSerializer);
-  }
-
-  getGrantStoreByName(name) {
-    const grantStore = _.find(this.grantStores, (store) => store.name === name);
-    return new DelegatingGrantStore(grantStore, this.grantSerializer);
-  }
-
   async authenticate(request, reply) {
     const log = this.server.log.bind(this.server);
-    const grantStore = this.getGrantStoreFor(request);
-    const existingGrant = grantStore.getGrant(request);
+    const grant = this.grantStore.getGrant(request);
+    const existingGrant = grant ? this.grantSerializer.deserialize(grant) : null;
+
     if (!existingGrant) {
       log(['debug', 'keycloak'], 'No authorization grant received.');
       return null;
     }
     try {
-      let grant = existingGrant;
-      if (this.grantManager.isGrantRefreshable(grant)) {
-        grant = await this.grantManager.ensureFreshness(grant);
-        if (grant !== existingGrant) {
-          log(['debug', 'keycloak'], `Access token has been refreshed: ${grant}`);
-          grant = await this.grantManager.validateGrant(grant);
-          grantStore.saveGrant(request, grant);
-        }
-      } else {
-        grant = await this.grantManager.validateGrant(grant);
-      }
+      const grant = await this.grantManager.validateGrant(existingGrant);
       return this.getPrincipal(grant);
     } catch (err) {
       log(['warn', 'keycloak'], `Authorization has failed - Received grant is invalid: ${err}.`);
-      grantStore.clearGrant(request);
       return null;
     }
   }
 
   answer(reply) {
-    return this.replyStrategy(reply);
+    return {
+      authenticated: (options) => reply.authenticated(options),
+      representation: (obj) => obj,
+    };
   }
 
   getAuthScheme() {
@@ -383,11 +156,9 @@ class KeycloakAdapter {
           if (credentials) {
             return keycloak.answer(reply).authenticated({ credentials });
           } else {
-            return keycloak.answer(reply).representation(
-              Boom.unauthorized('The resource owner is not authenticated.', 'bearer', {
-                realm: keycloak.config.realm,
-              })
-            );
+            return Boom.unauthorized('The resource owner is not authenticated.', 'bearer', {
+              realm: keycloak.config.realm,
+            });
           }
         },
       };
@@ -422,21 +193,15 @@ class KeycloakAdapter {
   }
 
   register() {
-    this.server.auth.scheme('keycloak', this.getAuthScheme.bind(this)());
+    this.server.auth.scheme('keycloak', this.getAuthScheme());
   }
 }
 
-/* This is a plugin registration backward-compatible with Hapijs v14+ */
-const register = (server, options, next) => {
-  const adapter = new KeycloakAdapter(server, options);
-  adapter.register();
-  if (next) {
-    next();
-  }
-};
 module.exports = {
-  register,
+  register(server, options) {
+    const adapter = new KeycloakAdapter(server, options);
+    adapter.register();
+  },
   name: 'hapi-keycloak',
   version: '1.0.0',
-  KeycloakAdapter,
 };
