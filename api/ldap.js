@@ -17,18 +17,6 @@ function authorize(req, res, next) {
 ///--- Globals
 
 const SUFFIX = 'o=pix';
-const db = {
-  'o=pix': { cn: 'Orga PIX', objectclass: 'organisation' },
-  'cn=george, o=pix': {
-    cn: 'george',
-    objectclass: 'person',
-    uid: '1',
-    userpassword: ['pix123'],
-    mail: 'user@example.net',
-    givenName: 'George',
-    sn: 'De Cambridge',
-  },
-};
 const server = ldap.createServer();
 
 server.bind('cn=root', (req, res, next) => {
