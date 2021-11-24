@@ -46,6 +46,8 @@
     "babel-eslint": "^10.1.0",
     "bootstrap": "^4.6.0",
     "broccoli-asset-rev": "^3.0.0",
+    "chai": "^4.3.4",
+    "chai-sorted": "^0.2.0",
     "ember-ajax": "^5.0.0",
     "ember-api-actions": "^0.2.9",
     "ember-auto-import": "^1.12.0",
