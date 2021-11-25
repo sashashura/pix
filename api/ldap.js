@@ -52,109 +52,124 @@ server.bind(SUFFIX, (req, res, next) => {
 });
 
 server.search(SUFFIX, authorize, (req, res, next) => {
-  const dn = req.dn.toString();
+  try {
+    const dn = req.dn.toString();
 
-  console.log('NOUS SOMMES DANS LE SEARCH, DN BIEN REÇU : ', dn);
-  console.log('filter ', req.filter);
+    console.log('NOUS SOMMES DANS LE SEARCH, DN BIEN REÇU : ', dn);
+    console.log('filter ', req.filter);
 
-  const where = {};
+    const where = {};
 
-  function applyFilter(filter) {
-    switch (filter.type) {
-      case 'equal':
-        switch (filter.attribute) {
-          case 'mail':
-            where.email = filter.value;
-            break;
-          case 'uid':
-            where.id = filter.value;
-            break;
-          case 'cn':
-            where.username = filter.value;
-            break;
-          case 'objectclass':
-            console.log('Ignoring filter on', filter.attribute);
-            break;
-          default:
-            throw new Error('Unsupported filter attribute:' + filter.attribute);
-        }
-        break;
+    function applyFilter(filter) {
+      switch (filter.type) {
+        case 'equal':
+          switch (filter.attribute) {
+            case 'mail':
+              where.email = filter.value;
+              break;
+            case 'uid':
+              where.id = filter.value;
+              break;
+            case 'cn':
+              where.username = filter.value;
+              break;
+            case 'sn':
+              where.lastName = filter.value;
+              break;
+            case 'objectclass':
+              console.log('Ignoring filter on', filter.attribute);
+              break;
+            default:
+              throw new Error('Unsupported filter attribute:' + filter.attribute);
+          }
+          break;
 
-      case 'and':
-        filter.filters.forEach(applyFilter);
-        break;
+        case 'and':
+          filter.filters.forEach(applyFilter);
+          break;
 
-      default:
-        throw new Error('Unsupported filter type:' + filter.type);
-    }
-  }
-
-  applyFilter(req.filter);
-
-  function sendUser(user) {
-    if (user) {
-      res.send({
-        dn: `uid=${user.id},o=pix`,
-        attributes: {
-          uid: user.id,
-          mail: user.email,
-          cn: user.firstName,
-          givenName: user.firstName,
-          sn: user.lastName,
-        },
-      });
+        default:
+          throw new Error('Unsupported filter type:' + filter.type);
+      }
     }
 
-    res.end();
-    return next();
-  }
+    applyFilter(req.filter);
 
-  function ignoreError(error) {
-    console.log(error);
-    res.end();
-    return next();
-  }
+    function sendUser(user) {
+      if (user) {
+        res.send({
+          dn: `uid=${user.id},o=pix`,
+          attributes: {
+            uid: user.id,
+            mail: user.email,
+            cn: user.username,
+            givenName: user.firstName,
+            sn: user.lastName,
+          },
+        });
+      }
 
-  if (mailFilter) {
-    const email = mailFilter.raw.toString('ascii');
+      res.end();
+      return next();
+    }
 
-    return userRepository.getByEmail(email).then(sendUser).catch(ignoreError);
-  } else if (uidFilter) {
-    const uid = uidFilter.raw.toString('ascii');
+    function ignoreError(error) {
+      console.log(error);
+      res.end();
+      return next();
+    }
 
-    return userRepository.get(uid).then(sendUser).catch(ignoreError);
-  } else {
-    throw new Error("can't handle this question");
+    return knex('users').where(where).first().then(sendUser).catch(ignoreError);
+  } catch (e) {
+    console.error(e);
+    return next(e);
   }
 });
 
-server.modify('o=pix', (req, res, next) => {
-  console.log('ON EST DANS LE MODIFY');
-  const {
-    rdns: [
-      {
-        attrs: {
-          uid: { value: uid },
-        },
-      },
-    ],
-  } = req.object;
-  console.debug('found uid', uid);
-  console.debug(`${req.changes.length} changes`);
+server.add('o=pix', (req, res, next) => {
+  console.log('ON EST DANS LE ADD');
+  console.debug(req.toObject());
+  const entry = req.toObject().attributes;
 
-  async function applyChanges() {
+  async function addUser() {
+    await knex('users').insert({
+      username: entry.cn[0],
+      firstName: 'TBD',
+      lastName: 'TBD',
+    });
+  }
+
+  return addUser().then(
+    () => {
+      res.end();
+      return next();
+    },
+    (err) => {
+      if (err.constraint === 'users_username_unique') {
+        return next(new ldap.EntryAlreadyExistsError(req.dn.toString()));
+      }
+      console.error(err);
+      // ladp.js pas content si l'objet Error a une propriété `code` qui n'est pas un nombre
+      // or knex renvoie des erreurs avec un `code` en chaîne
+      return next(new Error(err));
+    }
+  );
+});
+
+server.modify('o=pix', (req, res, next) => {
+  async function applyChanges(where) {
     const userUpdates = {};
     for (const change of req.changes) {
       const mod = change.modification;
       const [value] = mod.vals;
       console.debug(change.operation, mod.type, 'with', value);
       if (change.operation == 'replace') {
-        switch (mod.type) {
+        switch (mod.type.toLowerCase()) {
           case 'userpassword': {
             const [newPassword] = value;
             const hashedPassword = await encryptionService.hashPassword(newPassword);
             await authenticationMethodRepository.updateChangedPassword({
-              userId: uid,
+              userId: where.id,
               hashedPassword,
             });
             break;
@@ -164,7 +179,7 @@ server.modify('o=pix', (req, res, next) => {
             userUpdates['lastName'] = value;
             break;
 
-          case 'givenName':
+          case 'givenname':
             userUpdates['firstName'] = value;
             break;
 
@@ -177,14 +192,42 @@ server.modify('o=pix', (req, res, next) => {
       }
     }
     if (Object.keys(userUpdates).length > 0) {
-      await knex('users').where({ id: uid }).update(userUpdates);
+      await knex('users').where(where).update(userUpdates);
     }
   }
 
-  return applyChanges().then(() => {
-    res.end();
-    return next();
-  }, next);
+  function handleError(e) {
+    console.error(e);
+    return next(e);
+  }
+
+  try {
+    console.log('ON EST DANS LE MODIFY', req.object.toString());
+
+
+    // On récupère le bout du DN à mettre à jour (`uid=1` dans `uid=1,o=pix`)
+    const {
+      rdns: [rdn],
+    } = req.object;
+
+    // On regarde si le DN était de la forme `uid=1,o=pix` ou bien `cn=toto,o=pix`
+    // et on met à jour le filtre where en fonction
+    const where = {};
+    if (rdn.attrs.uid) {
+      where.id = rdn.attrs.uid.value;
+    } else if (rdn.attrs.cn) {
+      where.username = rdn.attrs.cn.value;
+    } else {
+      throw new Error('Missing attribute on DN');
+    }
+
+    return applyChanges(where).then(() => {
+      res.end();
+      return next();
+    }, handleError);
+  } catch (e) {
+    handleError(e);
+  }
 });
 
 ///--- Fire it up
