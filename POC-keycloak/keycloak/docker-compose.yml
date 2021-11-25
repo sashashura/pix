@@ -10,6 +10,7 @@ services:
       KEYCLOAK_PASSWORD: admin
       KEYCLOAK_IMPORT: /tmp/pix.json
       KEYCLOAK_FRONTEND_URL: http://localhost:8080/auth
+      KEYCLOAK_LOGLEVEL: TRACE
     volumes:
       - ./pix.json:/tmp/pix.json
     command: ['-c=standalone.xml']
