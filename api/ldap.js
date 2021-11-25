@@ -56,20 +56,54 @@ server.search(SUFFIX, authorize, (req, res, next) => {
 
   console.log('NOUS SOMMES DANS LE SEARCH, DN BIEN REÇU : ', dn);
   console.log('filter ', req.filter);
-  const mailFilter = req.filter.filters.find((filter) => filter.attribute === 'mail');
-  const uidFilter = req.filter.filters.find((filter) => filter.attribute === 'uid');
+
+  const where = {};
+
+  function applyFilter(filter) {
+    switch (filter.type) {
+      case 'equal':
+        switch (filter.attribute) {
+          case 'mail':
+            where.email = filter.value;
+            break;
+          case 'uid':
+            where.id = filter.value;
+            break;
+          case 'cn':
+            where.username = filter.value;
+            break;
+          case 'objectclass':
+            console.log('Ignoring filter on', filter.attribute);
+            break;
+          default:
+            throw new Error('Unsupported filter attribute:' + filter.attribute);
+        }
+        break;
+
+      case 'and':
+        filter.filters.forEach(applyFilter);
+        break;
+
+      default:
+        throw new Error('Unsupported filter type:' + filter.type);
+    }
+  }
+
+  applyFilter(req.filter);
 
   function sendUser(user) {
-    res.send({
-      dn: `uid=${user.id},o=pix`,
-      attributes: {
-        uid: user.id,
-        mail: user.email,
-        cn: user.firstName,
-        givenName: user.firstName,
-        sn: user.lastName,
-      },
-    });
+    if (user) {
+      res.send({
+        dn: `uid=${user.id},o=pix`,
+        attributes: {
+          uid: user.id,
+          mail: user.email,
+          cn: user.firstName,
+          givenName: user.firstName,
+          sn: user.lastName,
+        },
+      });
+    }
 
     res.end();
     return next();
