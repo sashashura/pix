@@ -59,52 +59,36 @@ server.search(SUFFIX, authorize, (req, res, next) => {
   const mailFilter = req.filter.filters.find((filter) => filter.attribute === 'mail');
   const uidFilter = req.filter.filters.find((filter) => filter.attribute === 'uid');
 
+  function sendUser(user) {
+    res.send({
+      dn: `uid=${user.id},o=pix`,
+      attributes: {
+        uid: user.id,
+        mail: user.email,
+        cn: user.firstName,
+        givenName: user.firstName,
+        sn: user.lastName,
+      },
+    });
+
+    res.end();
+    return next();
+  }
+
+  function ignoreError(error) {
+    console.log(error);
+    res.end();
+    return next();
+  }
+
   if (mailFilter) {
     const email = mailFilter.raw.toString('ascii');
 
-    userRepository
-      .getByEmail(email)
-      .then((user) => {
-        res.send({
-          dn: `uid=${user.id},o=pix`,
-          attributes: {
-            uid: user.id,
-            mail: user.email,
-            cn: user.firstName,
-          },
-        });
-
-        res.end();
-        return next();
-      })
-      .catch((error) => {
-        console.log(error);
-        res.end();
-        return next();
-      });
+    return userRepository.getByEmail(email).then(sendUser).catch(ignoreError);
   } else if (uidFilter) {
     const uid = uidFilter.raw.toString('ascii');
 
-    userRepository
-      .get(uid)
-      .then((user) => {
-        res.send({
-          dn: `uid=${user.id},o=pix`,
-          attributes: {
-            uid: user.id,
-            mail: user.email,
-            cn: user.firstName,
-          },
-        });
-
-        res.end();
-        return next();
-      })
-      .catch((error) => {
-        console.log(error);
-        res.end();
-        return next();
-      });
+    return userRepository.get(uid).then(sendUser).catch(ignoreError);
   } else {
     throw new Error("can't handle this question");
   }
@@ -123,29 +107,50 @@ server.modify('o=pix', (req, res, next) => {
   } = req.object;
   console.debug('found uid', uid);
   console.debug(`${req.changes.length} changes`);
-  for (const change of req.changes) {
-    const mod = change.modification;
-    console.debug(change.operation, mod.type, 'with', mod.vals);
-    if (mod.type == 'userpassword' && change.operation == 'replace') {
-      const [newPassword] = mod.vals;
-      return encryptionService
-        .hashPassword(newPassword)
-        .then((hashedPassword) => {
-          return authenticationMethodRepository.updateChangedPassword({
-            userId: uid,
-            hashedPassword,
-          });
-        })
-        .then(() => {
-          res.end();
-          return next();
-        }, next);
-    } else {
-      throw new Error("Can't apply this modification");
+
+  async function applyChanges() {
+    const userUpdates = {};
+    for (const change of req.changes) {
+      const mod = change.modification;
+      const [value] = mod.vals;
+      console.debug(change.operation, mod.type, 'with', value);
+      if (change.operation == 'replace') {
+        switch (mod.type) {
+          case 'userpassword': {
+            const [newPassword] = value;
+            const hashedPassword = await encryptionService.hashPassword(newPassword);
+            await authenticationMethodRepository.updateChangedPassword({
+              userId: uid,
+              hashedPassword,
+            });
+            break;
+          }
+
+          case 'sn':
+            userUpdates['lastName'] = value;
+            break;
+
+          case 'givenName':
+            userUpdates['firstName'] = value;
+            break;
+
+          default:
+            console.warn('Ignoring modification of', mod.type);
+            break;
+        }
+      } else {
+        throw new Error("Can't apply this modification");
+      }
+    }
+    if (Object.keys(userUpdates).length > 0) {
+      await knex('users').where({ id: uid }).update(userUpdates);
     }
   }
-  res.end();
-  return next();
+
+  return applyChanges().then(() => {
+    res.end();
+    return next();
+  }, next);
 });
 
 ///--- Fire it up
