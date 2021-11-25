@@ -115,6 +115,7 @@ const dependencies = {
   supervisorAccessRepository: require('../../infrastructure/repositories/supervisor-access-repository'),
   tagRepository: require('../../infrastructure/repositories/tag-repository'),
   targetProfileRepository: require('../../infrastructure/repositories/target-profile-repository'),
+  targetProfileForUpdateRepository: require('../../infrastructure/repositories/target-profile-for-update-repository'),
   targetProfileShareRepository: require('../../infrastructure/repositories/target-profile-share-repository'),
   targetProfileWithLearningContentRepository: require('../../infrastructure/repositories/target-profile-with-learning-content-repository'),
   tokenService: require('../../domain/services/token-service'),
