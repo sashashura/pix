@@ -1,5 +1,6 @@
 require('dotenv').config();
 const userRepository = require('./lib/infrastructure/repositories/user-repository');
+const authenticationMethodRepository = require('./lib/infrastructure/repositories/authentication-method-repository');
 const ldap = require('ldapjs');
 const { knex } = require('./db/knex-database-connection');
 const encryptionService = require('./lib/domain/services/encryption-service');
@@ -104,7 +105,47 @@ server.search(SUFFIX, authorize, (req, res, next) => {
         res.end();
         return next();
       });
+  } else {
+    throw new Error("can't handle this question");
   }
+});
+
+server.modify('o=pix', (req, res, next) => {
+  console.log('ON EST DANS LE MODIFY');
+  const {
+    rdns: [
+      {
+        attrs: {
+          uid: { value: uid },
+        },
+      },
+    ],
+  } = req.object;
+  console.debug('found uid', uid);
+  console.debug(`${req.changes.length} changes`);
+  for (const change of req.changes) {
+    const mod = change.modification;
+    console.debug(change.operation, mod.type, 'with', mod.vals);
+    if (mod.type == 'userpassword' && change.operation == 'replace') {
+      const [newPassword] = mod.vals;
+      return encryptionService
+        .hashPassword(newPassword)
+        .then((hashedPassword) => {
+          return authenticationMethodRepository.updateChangedPassword({
+            userId: uid,
+            hashedPassword,
+          });
+        })
+        .then(() => {
+          res.end();
+          return next();
+        }, next);
+    } else {
+      throw new Error("Can't apply this modification");
+    }
+  }
+  res.end();
+  return next();
 });
 
 ///--- Fire it up
