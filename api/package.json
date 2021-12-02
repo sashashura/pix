@@ -123,7 +123,7 @@
     "preinstall": "npx check-engine",
     "scalingo-background-job": "node scripts/reload-cache-everyday.js",
     "scalingo-postbuild": "echo 'nothing to do'",
-    "start": "node bin/www",
+    "start": "./start-server",
     "start:watch": "nodemon bin/www",
     "test": "NODE_ENV=test npm run db:prepare && npm run test:api",
     "test:api": "status=0; npm run test:api:unit || status=1 ; for dir in $(find tests/* -maxdepth 0 -type d -not -path tests/unit) ; do npm run test:api:path -- $dir || status=1 ; done ; exit $status",

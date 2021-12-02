@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 require('dotenv').config();
-const validateEnvironmentVariables = require('../lib/infrastructure/validate-environement-variables');
+const validateEnvironmentVariables = require('./lib/infrastructure/validate-environement-variables');
 validateEnvironmentVariables();
 
-const createServer = require('../server');
-const logger = require('../lib/infrastructure/logger');
-const { disconnect } = require('../db/knex-database-connection');
+const createServer = require('./server');
+const logger = require('./lib/infrastructure/logger');
+const { disconnect } = require('./db/knex-database-connection');
 
 const start = async () => {
   try {
