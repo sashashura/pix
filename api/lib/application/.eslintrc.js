@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+// lint is not included in coverage
 module.exports = {
   extends: '../.eslintrc.js',
   rules: {

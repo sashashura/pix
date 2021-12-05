@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+// There is no test for www/bin which is the only client
 const Joi = require('joi');
 
 const schema = Joi.object({
