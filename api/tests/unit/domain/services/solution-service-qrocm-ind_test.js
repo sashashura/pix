@@ -86,6 +86,29 @@ describe('Unit | Service | SolutionServiceQROCM-ind ', function () {
       expect(error).to.be.an.instanceOf(YamlParsingError);
       expect(error.message).to.equal("Une erreur s'est produite lors de l'interprétation des réponses.");
     });
+
+    it('test toto', function () {
+      const answers = {
+        question1: 'Taille de 28 pouces ?',
+        question2: 'Freins à patins ?',
+        question3: 'Prix inférieur à 400 euros ?',
+        question4: 'Sans accessoire ?',
+      };
+      const solutions = {
+        question1: ['Taille de 28 pouces ?'],
+        question2: ['Freins à patins ?'],
+        question3: ['Prix inférieur à 400 euros ?'],
+        question4: ['Sans accessoire ?', 'éclairage à piles', 'éclairage avec piles', 'éclairage = piles'],
+      };
+      const enabledTreatments = ['t1', 't2', 't3'];
+
+      // when the
+      const actual = service._compareAnswersAndSolutions(answers, solutions, enabledTreatments);
+
+      // then
+      const expected = { question1: true, question2: true, question3: true, question4: true };
+      expect(actual).to.deep.equal(expected);
+    });
   });
 
   describe('#_formatResult', function () {
