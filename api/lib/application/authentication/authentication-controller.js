@@ -11,12 +11,20 @@ module.exports = {
    */
   async authenticateUser(request, h) {
     let accessToken;
+    let refreshToken;
     if (request.payload.grant_type === 'refresh_token') {
-      accessToken = request.payload.refresh_token;
+      accessToken = tokenService.createAccessTokenFromRefreshToken(request.payload.refresh_token);
     } else {
       const { username, password, scope } = request.payload;
 
-      accessToken = await usecases.authenticateUser({ username, password, scope, source: 'pix' });
+      const result = await usecases.authenticateUser({
+        username,
+        password,
+        scope,
+        source: 'pix',
+      });
+      accessToken = result.accessToken;
+      refreshToken = result.refreshToken;
     }
     return h
       .response({
@@ -24,7 +32,7 @@ module.exports = {
         access_token: accessToken,
         user_id: tokenService.extractUserId(accessToken),
         expires_in: 10,
-        refresh_token: accessToken,
+        refresh_token: refreshToken,
       })
       .code(200)
       .header('Content-Type', 'application/json;charset=UTF-8')

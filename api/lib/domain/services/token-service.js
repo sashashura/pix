@@ -9,8 +9,19 @@ const settings = require('../../config');
 
 function createAccessTokenFromUser(userId, source) {
   return jsonwebtoken.sign({ user_id: userId, source }, settings.authentication.secret, {
+    expiresIn: settings.authentication.accessTokenLifespan,
+  });
+}
+
+function createRefreshTokenFromUser(userId, source) {
+  return jsonwebtoken.sign({ user_id: userId, source }, settings.authentication.secret, {
     expiresIn: settings.authentication.tokenLifespan,
   });
+}
+
+function createAccessTokenFromRefreshToken(refreshToken) {
+  const { user_id, source } = getDecodedToken(refreshToken);
+  return createAccessTokenFromUser(user_id, source);
 }
 
 function createAccessTokenFromExternalUser(userId) {
@@ -195,4 +206,6 @@ module.exports = {
   extractUserId,
   extractClientId,
   extractUserIdForCampaignResults,
+  createRefreshTokenFromUser,
+  createAccessTokenFromRefreshToken,
 };

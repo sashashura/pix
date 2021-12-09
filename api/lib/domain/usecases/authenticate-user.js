@@ -41,9 +41,10 @@ module.exports = async function authenticateUser({ password, scope, source, user
 
     if (!shouldChangePassword) {
       _checkUserAccessScope(scope, foundUser);
-      const token = tokenService.createAccessTokenFromUser(foundUser.id, source);
+      const accessToken = tokenService.createAccessTokenFromUser(foundUser.id, source);
+      const refreshToken = tokenService.createRefreshTokenFromUser(foundUser.id, source);
       await userRepository.updateLastLoggedAt({ userId: foundUser.id });
-      return token;
+      return { accessToken, refreshToken };
     } else {
       throw new UserShouldChangePasswordError();
     }
