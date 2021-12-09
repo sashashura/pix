@@ -13,7 +13,7 @@ module.exports = {
     let accessToken;
     let refreshToken;
     if (request.payload.grant_type === 'refresh_token') {
-      accessToken = tokenService.createAccessTokenFromRefreshToken(request.payload.refresh_token);
+      accessToken = await tokenService.createAccessTokenFromRefreshToken(request.payload.refresh_token);
     } else {
       const { username, password, scope } = request.payload;
 
@@ -41,7 +41,7 @@ module.exports = {
   },
 
   async revokeToken(request) {
-    tokenService.revokeRefreshToken(request.payload.token);
+    await tokenService.revokeRefreshToken(request.payload.token);
     return null;
   },
 

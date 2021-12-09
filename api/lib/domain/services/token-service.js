@@ -1,4 +1,5 @@
 const jsonwebtoken = require('jsonwebtoken');
+const ms = require('ms');
 const {
   InvalidTemporaryKeyError,
   InvalidExternalUserTokenError,
@@ -7,30 +8,31 @@ const {
 } = require('../../domain/errors');
 const settings = require('../../config');
 
+const temporaryStorage = require('../../infrastructure/temporary-storage');
+
 function createAccessTokenFromUser(userId, source) {
   return jsonwebtoken.sign({ user_id: userId, source }, settings.authentication.secret, {
     expiresIn: settings.authentication.accessTokenLifespan,
   });
 }
 
-const refreshTokens = new Set();
-function createRefreshTokenFromUser(userId, source) {
-  const refreshToken = jsonwebtoken.sign({ user_id: userId, source }, settings.authentication.secret, {
-    expiresIn: settings.authentication.tokenLifespan,
+async function createRefreshTokenFromUser(userId, source) {
+  const expirationDelaySeconds = ms(settings.authentication.tokenLifespan) / 1000;
+  return await temporaryStorage.save({
+    value: { type: 'refresh_token', userId, source },
+    expirationDelaySeconds,
   });
-  refreshTokens.add(refreshToken);
-  return refreshToken;
 }
 
-function revokeRefreshToken(refreshToken) {
-  refreshTokens.delete(refreshToken);
+async function revokeRefreshToken(refreshToken) {
+  await temporaryStorage.delete(refreshToken);
 }
 
-function createAccessTokenFromRefreshToken(refreshToken) {
-  if (!refreshTokens.has(refreshToken)) return null;
+async function createAccessTokenFromRefreshToken(refreshToken) {
+  const { userId, source } = (await temporaryStorage.get(refreshToken)) || {};
+  if (!userId) return null;
 
-  const { user_id, source } = getDecodedToken(refreshToken);
-  return createAccessTokenFromUser(user_id, source);
+  return createAccessTokenFromUser(userId, source);
 }
 
 function createAccessTokenFromExternalUser(userId) {
