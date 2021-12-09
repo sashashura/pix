@@ -10,15 +10,21 @@ module.exports = {
    * @see https://tools.ietf.org/html/rfc6749#section-4.3
    */
   async authenticateUser(request, h) {
-    const { username, password, scope } = request.payload;
+    let accessToken;
+    if (request.payload.grant_type === 'refresh_token') {
+      accessToken = request.payload.refresh_token;
+    } else {
+      const { username, password, scope } = request.payload;
 
-    const accessToken = await usecases.authenticateUser({ username, password, scope, source: 'pix' });
-
+      accessToken = await usecases.authenticateUser({ username, password, scope, source: 'pix' });
+    }
     return h
       .response({
         token_type: 'bearer',
         access_token: accessToken,
         user_id: tokenService.extractUserId(accessToken),
+        expires_in: 10,
+        refresh_token: accessToken,
       })
       .code(200)
       .header('Content-Type', 'application/json;charset=UTF-8')
