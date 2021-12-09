@@ -40,6 +40,11 @@ module.exports = {
       .header('Pragma', 'no-cache');
   },
 
+  async revokeToken(request) {
+    tokenService.revokeRefreshToken(request.payload.token);
+    return null;
+  },
+
   async authenticateExternalUser(request, h) {
     const {
       username,

@@ -13,13 +13,22 @@ function createAccessTokenFromUser(userId, source) {
   });
 }
 
+const refreshTokens = new Set();
 function createRefreshTokenFromUser(userId, source) {
-  return jsonwebtoken.sign({ user_id: userId, source }, settings.authentication.secret, {
+  const refreshToken = jsonwebtoken.sign({ user_id: userId, source }, settings.authentication.secret, {
     expiresIn: settings.authentication.tokenLifespan,
   });
+  refreshTokens.add(refreshToken);
+  return refreshToken;
+}
+
+function revokeRefreshToken(refreshToken) {
+  refreshTokens.delete(refreshToken);
 }
 
 function createAccessTokenFromRefreshToken(refreshToken) {
+  if (!refreshTokens.has(refreshToken)) return null;
+
   const { user_id, source } = getDecodedToken(refreshToken);
   return createAccessTokenFromUser(user_id, source);
 }
@@ -208,4 +217,5 @@ module.exports = {
   extractUserIdForCampaignResults,
   createRefreshTokenFromUser,
   createAccessTokenFromRefreshToken,
+  revokeRefreshToken,
 };

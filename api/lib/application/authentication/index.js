@@ -111,10 +111,12 @@ exports.register = async (server) => {
           allow: 'application/x-www-form-urlencoded',
         },
         validate: {
-          payload: Joi.object().required().keys({
-            token: Joi.string().required(),
-            token_type_hint: 'access_token',
-          }),
+          payload: Joi.object()
+            .required()
+            .keys({
+              token: Joi.string().required(),
+              token_type_hint: ['access_token', 'refresh_token'],
+            }),
           failAction: (request, h) => {
             return sendJsonApiError(
               new BadRequestError('The server could not understand the request due to invalid token.'),
@@ -122,7 +124,7 @@ exports.register = async (server) => {
             );
           },
         },
-        handler: (request, h) => null,
+        handler: AuthenticationController.revokeToken,
         tags: ['api'],
       },
     },
