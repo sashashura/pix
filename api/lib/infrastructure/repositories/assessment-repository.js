@@ -118,6 +118,13 @@ module.exports = {
     );
   },
 
+  endBySupervisorByAssessmentId(assessmentId, domainTransaction = DomainTransaction.emptyTransaction()) {
+    return this._updateStateById(
+      { id: assessmentId, state: Assessment.states.ENDED_BY_SUPERVISOR },
+      domainTransaction.knexTransaction
+    );
+  },
+
   async ownedByUser({ id, userId = null }) {
     const assessment = await knex('assessments').select('userId').where({ id }).first();
 

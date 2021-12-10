@@ -568,6 +568,51 @@ describe('Integration | Infrastructure | Repositories | assessment-repository', 
     });
   });
 
+  describe('#endBySupervisorByAssessmentId', function () {
+    let assessmentId;
+
+    beforeEach(function () {
+      const userId = databaseBuilder.factory.buildUser().id;
+
+      assessmentId = databaseBuilder.factory.buildAssessment({
+        userId,
+        type: Assessment.types.COMPETENCE_EVALUATION,
+        state: Assessment.states.STARTED,
+      }).id;
+
+      return databaseBuilder.commit();
+    });
+
+    afterEach(function () {
+      return knex('assessments').delete();
+    });
+
+    it('should end an assessment if not already existing and commited', async function () {
+      // when
+      await DomainTransaction.execute(async (domainTransaction) => {
+        await assessmentRepository.endBySupervisorByAssessmentId(assessmentId, domainTransaction);
+      });
+
+      // then
+      const assessmentsInDb = await knex('assessments').where('id', assessmentId).first('state');
+      expect(assessmentsInDb.state).to.equal(Assessment.states.ENDED_BY_SUPERVISOR);
+    });
+
+    it('should not end an assessment if not already existing but rolled back', async function () {
+      // when
+      await catchErr(async () => {
+        await DomainTransaction.execute(async (domainTransaction) => {
+          await assessmentRepository.endBySupervisorByAssessmentId(assessmentId, domainTransaction);
+          throw new Error('an error occurs within the domain transaction');
+        });
+      });
+
+      // then
+      const assessmentsInDb = await knex('assessments').where('id', assessmentId).first('state');
+      expect(assessmentsInDb.state).to.equal(Assessment.states.STARTED);
+    });
+  });
+
   describe('#ownedByUser', function () {
     let user;
     let userWithNoAssessment;
