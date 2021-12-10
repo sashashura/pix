@@ -21,7 +21,7 @@ module.exports = function buildAnsweredNotCompletedCertificationAssessment({
     type: Assessment.types.CERTIFICATION,
     createdAt: limitDate,
   });
-  competenceIdSkillIdPairs.forEach((element) => {
+  competenceIdSkillIdPairs?.forEach((element) => {
     const { challengeId, competenceId } = element;
     buildCertificationChallenge({ courseId: certificationCourseId, challengeId, competenceId });
     buildAnswer({ assessmentId: certificationAssessment.id, challengeId, result: 'ok' });
