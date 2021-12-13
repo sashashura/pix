@@ -27,4 +27,9 @@ export default class CertificationCandidateForSupervising extends Model {
     type: 'post',
     urlType: 'authorizeToResume',
   });
+
+  endTestBySupervisor = memberAction({
+    type: 'patch',
+    urlType: 'endTestBySupervisor',
+  });
 }
