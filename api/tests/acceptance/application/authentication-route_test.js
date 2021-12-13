@@ -30,24 +30,25 @@ describe('Acceptance | Controller | authentication-controller', function () {
 
   beforeEach(async function () {
     server = await createServer();
-
     userId = databaseBuilder.factory.buildUser.withRawPassword({
       email: userEmailAddress,
       rawPassword: userPassword,
       cgu: true,
     }).id;
-
     await databaseBuilder.commit();
   });
 
   describe('POST /api/token', function () {
-    let options;
-
     beforeEach(async function () {
       const organizationId = databaseBuilder.factory.buildOrganization().id;
       databaseBuilder.factory.buildMembership({ userId, organizationId, organizationRoleId: orgaRoleInDB.id });
 
-      options = {
+      await databaseBuilder.commit();
+    });
+
+    it('should return an 200 with accessToken when authentication is ok', async function () {
+      // given
+      const options = {
         method: 'POST',
         url: '/api/token',
         headers: {
@@ -61,10 +62,6 @@ describe('Acceptance | Controller | authentication-controller', function () {
         }),
       };
 
-      await databaseBuilder.commit();
-    });
-
-    it('should return an 200 with accessToken when authentication is ok', async function () {
       // when
       const response = await server.inject(options);
 
@@ -79,6 +76,19 @@ describe('Acceptance | Controller | authentication-controller', function () {
 
     it('should return http code 401 when user should change password', async function () {
       // given
+      const options = {
+        method: 'POST',
+        url: '/api/token',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+        },
+        payload: querystring.stringify({
+          grant_type: 'password',
+          username: userEmailAddress,
+          password: userPassword,
+          scope: 'pix-orga',
+        }),
+      };
       const username = 'username123';
       const shouldChangePassword = true;
 
