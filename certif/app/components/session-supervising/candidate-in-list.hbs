@@ -51,19 +51,31 @@
   {{#if this.isConfirmationModalDisplayed}}
     <SessionSupervising::ConfirmationModal
       @closeConfirmationModal={{this.closeConfirmationModal}}
-      @actionOnConfirmation={{this.actionMethod}}
+      @authorizeTestResume={{this.authorizeTestResume}}
       @candidate={{this.candidate}}
-      @modalCancelText={{this.modalCancelText}}
-      @modalConfirmationButtonText={{this.modalConfirmationText}}
     >
       <:instruction>
-        {{this.modalInstructionText}}
+        Autoriser {{@candidate.firstName}} {{@candidate.lastName}} à reprendre son test ?
       </:instruction>
       <:description>
-        {{this.modalDescriptionText}}
+        Si le candidat a fermé la fenêtre de son test de certification (par erreur, ou à cause d'un problème technique) et est toujours présent dans la salle de test, vous pouvez lui permettre de reprendre son test à l'endroit où il l'avait quitté.
       </:description>
     </SessionSupervising::ConfirmationModal>
+  {{/if}}
 
+  {{#if this.isEndTestConfirmationModalDisplayed}}
+    <SessionSupervising::EndTestConfirmationModal
+      @closeConfirmationModal={{this.closeConfirmationModal}}
+      @endTestForCandidate={{this.endTestForCandidate}}
+      @candidate={{this.candidate}}
+    >
+      <:instruction>
+        Terminer le test de {{@candidate.firstName}} {{@candidate.lastName}} ?
+      </:instruction>
+      <:description>
+        Attention : cette action entraine la fin de son test de certification et est irréversible.
+      </:description>
+    </SessionSupervising::EndTestConfirmationModal>
   {{/if}}
 
 </li>

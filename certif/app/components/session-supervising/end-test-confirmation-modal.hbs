@@ -27,10 +27,10 @@
     <div class="pix-modal-footer">
       <PixButton
         data-test-id="finalize-session-modal__confirm-button"
-        @triggerAction={{@authorizeTestResume}}
+        @triggerAction={{@endTestForCandidate}}
         @backgroundColor="yellow"
       >
-        Je confirme l'autorisation
+        Terminer le test
       </PixButton>
       <PixButton
         data-test-id="finalize-session-modal__cancel-button"
@@ -39,7 +39,7 @@
         @isBorderVisible={{true}}
         aria-label="Annuler et fermer la fenêtre de confirmation"
       >
-        Fermer
+        Annuler
       </PixButton>
     </div>
   </div>

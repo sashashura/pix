@@ -1,4 +1,3 @@
-import { set } from '@ember/object';
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
@@ -9,6 +8,7 @@ export default class CandidateInList extends Component {
 
   @tracked isMenuOpen = false;
   @tracked isConfirmationModalDisplayed = false;
+  @tracked isEndTestConfirmationModalDisplayed = false;
   @tracked modalDescriptionText;
   @tracked modalCancelText;
   @tracked modalConfirmationText;
@@ -32,27 +32,20 @@ export default class CandidateInList extends Component {
 
   @action
   askUserToConfirmTestResume() {
-    this.modalDescriptionText = 'Si le candidat a fermé la fenêtre de son test de certification (par erreur, ou à cause d\'un problème technique) et est toujours présent dans la salle de test, vous pouvez lui permettre de reprendre son test à l\'endroit où il l\'avait quitté.';
-    this.modalCancelText = 'Fermer';
-    this.modalConfirmationText = 'Je confirme l\'autorisation';
-    this.modalInstructionText = `Autoriser ${this.args.candidate.firstName} ${this.args.candidate.lastName} à reprendre son test ?`;
-    set(this, 'actionOnConfirmation', this.authorizeTestResume);
     this.isConfirmationModalDisplayed = true;
   }
 
   @action
   askUserToConfirmTestEnd() {
     this.modalDescriptionText = 'Attention : cette action entraine la fin de son test de certification et est irréversible.';
-    this.modalCancelText = 'Annuler';
-    this.modalConfirmationText = 'Terminer ce test';
     this.modalInstructionText = `Terminer le test de ${this.args.candidate.firstName} ${this.args.candidate.lastName} ?`;
-    set(this, 'actionOnConfirmation', this.endTestForCandidate);
-    this.isConfirmationModalDisplayed = true;
+    this.isEndTestConfirmationModalDisplayed = true;
   }
 
   @action
   closeConfirmationModal() {
     this.isConfirmationModalDisplayed = false;
+    this.isEndTestConfirmationModalDisplayed = false;
   }
 
   @action

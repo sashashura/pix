@@ -355,9 +355,10 @@ module('Integration | Component | SessionSupervising::CandidateInList', function
           // when
           await click(screen.getByRole('button', { name: 'Afficher les options du candidat' }));
           await click(screen.getByRole('button', { name: 'Terminer le test' }));
+          const actions = screen.getAllByRole('button', { name: 'Terminer le test' });
 
           // then
-          assert.dom(screen.getByRole('button', { name: 'Terminer ce test' })).exists();
+          assert.equal(actions.length, 2);
           assert.contains('Attention : cette action entraine la fin de son test de certification et est irréversible.');
           assert.contains('Terminer le test de Drax The Destroyer ?');
         });
@@ -388,7 +389,7 @@ module('Integration | Component | SessionSupervising::CandidateInList', function
             await click(screen.getByRole('button', { name: 'Annuler et fermer la fenêtre de confirmation' }));
 
             // then
-            assert.dom(screen.queryByRole('button', { name: 'Terminer ce test' })).doesNotExist();
+            assert.dom(screen.queryByRole('button', { name: 'Terminer le test' })).doesNotExist();
           });
         });
 
@@ -418,7 +419,7 @@ module('Integration | Component | SessionSupervising::CandidateInList', function
             await click(screen.getByRole('button', { name: 'Fermer la fenêtre de confirmation' }));
 
             // then
-            assert.dom(screen.queryByRole('button', { name: 'Terminer ce test' })).doesNotExist();
+            assert.dom(screen.queryByRole('button', { name: 'Terminer le test' })).doesNotExist();
           });
         });
 
@@ -446,11 +447,11 @@ module('Integration | Component | SessionSupervising::CandidateInList', function
               // when
               await click(screen.getByRole('button', { name: 'Afficher les options du candidat' }));
               await click(screen.getByRole('button', { name: 'Terminer le test' }));
-              await click(screen.getByRole('button', { name: 'Terminer ce test' }));
+              const [, endTestModal] = screen.getAllByRole('button', { name: 'Terminer le test' });
+              await click(endTestModal);
 
               // then
               sinon.assert.calledOnce(this.endTestForCandidate);
-              assert.dom(screen.queryByRole('button', { name: 'Terminer ce test' })).doesNotExist();
               assert.contains('Succès ! Le test de  Yondu Undonta est terminé.');
             });
           });
@@ -478,7 +479,8 @@ module('Integration | Component | SessionSupervising::CandidateInList', function
               // when
               await click(screen.getByRole('button', { name: 'Afficher les options du candidat' }));
               await click(screen.getByRole('button', { name: 'Terminer le test' }));
-              await click(screen.getByRole('button', { name: 'Terminer ce test' }));
+              const [, endTestModal] = screen.getAllByRole('button', { name: 'Terminer le test' });
+              await click(endTestModal);
 
               // then
               sinon.assert.calledOnce(this.endTestBySupervisor);
