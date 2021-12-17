@@ -1,2 +1,2 @@
 web: ruby -run -e httpd /dev/null -p $PORT
-background: npm run arti:local:profil
+background: npm run arti:dev:profil
