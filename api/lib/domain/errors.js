@@ -339,6 +339,12 @@ class CertificateVerificationCodeGenerationTooManyTrials extends DomainError {
   }
 }
 
+class CertificationEndedBySupervisor extends DomainError {
+  constructor(message = 'Le surveillant à mis fin à votre test de certification.') {
+    super(message);
+  }
+}
+
 class CertificationCandidateAlreadyLinkedToUserError extends DomainError {
   constructor(message = 'Ce candidat de certification a déjà été lié à un utilisateur.') {
     super(message);
@@ -991,6 +997,7 @@ module.exports = {
   CertificationComputeError,
   CertificationCourseNotPublishableError,
   CertificationCourseUpdateError,
+  CertificationEndedBySupervisor,
   ChallengeAlreadyAnsweredError,
   ChallengeNotAskedError,
   ChallengeToBeNeutralizedNotFoundError,
