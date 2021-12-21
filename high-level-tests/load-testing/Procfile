@@ -1,1 +1,2 @@
 web: ruby -run -e httpd /dev/null -p $PORT
+background: npm run arti:cmd:dev
