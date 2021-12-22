@@ -98,10 +98,6 @@ export default class UserOverview extends Component {
     return urlDashboardPrefix && urlDashboardPrefix + this.args.user.id;
   }
 
-  get canModifyEmail() {
-    return !!(this.args.user.email || this.args.user.username);
-  }
-
   _initForm() {
     this.form.firstName = this.args.user.firstName;
     this.form.lastName = this.args.user.lastName;

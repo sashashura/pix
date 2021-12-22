@@ -39,25 +39,23 @@
         @value={{this.form.lastName}}
       />
     </div>
-    {{#if this.canModifyEmail}}
-      <div class="form-field col-md-4">
-        <label for="email" class="form-field__label">
-          <abbr title="obligatoire" class="mandatory-mark" aria-hidden="true">*</abbr>
-          Adresse e-mail :
-        </label>
-        {{#if (v-get this.form "email" "isInvalid")}}
-          <div class="form-field__error" aria-label="Message d'erreur du champ email">
-            {{v-get this.form "email" "message"}}
-          </div>
-        {{/if}}
-        <Input
-          id="email"
-          @type="email"
-          class="form-control user-edit-form__email {{if (v-get this.form "email" "isInvalid") "is-invalid"}}"
-          @value={{this.form.email}}
-        />
-      </div>
-    {{/if}}
+    <div class="form-field col-md-4">
+      <label for="email" class="form-field__label">
+        <abbr title="obligatoire" class="mandatory-mark" aria-hidden="true">*</abbr>
+        Adresse e-mail :
+      </label>
+      {{#if (v-get this.form "email" "isInvalid")}}
+        <div class="form-field__error" aria-label="Message d'erreur du champ email">
+          {{v-get this.form "email" "message"}}
+        </div>
+      {{/if}}
+      <Input
+        id="email"
+        @type="email"
+        class="form-control user-edit-form__email {{if (v-get this.form "email" "isInvalid") "is-invalid"}}"
+        @value={{this.form.email}}
+      />
+    </div>
     {{#if @user.username}}
       <div class="form-field col-md-4">
         <label for="username" class="form-field__label">
