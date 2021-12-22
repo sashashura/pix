@@ -1,0 +1,1 @@
+../mon-pix/ember-cli-build.js

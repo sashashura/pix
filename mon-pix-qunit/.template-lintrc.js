@@ -1,0 +1,1 @@
+../mon-pix/.template-lintrc.js

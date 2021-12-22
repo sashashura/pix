@@ -1,0 +1,1 @@
+../mon-pix/.eslintrc.js
