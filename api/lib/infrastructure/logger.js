@@ -8,7 +8,7 @@ const nullDestination = {
 let transport;
 
 if (settings.logging.logForHumans) {
-  const omitDay = 'h:MM:ss';
+  const omitDay = 'HH:MM:ss';
 
   transport = {
     target: 'pino-pretty',
