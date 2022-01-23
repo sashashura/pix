@@ -11,6 +11,7 @@ const whiteList = [
   ...require('./whitelist/foreign-key-to-id'),
   ...require('./whitelist/library-tables'),
   ...require('./whitelist/default-varchar-length'),
+  ...require('./whitelist/missing-foreign-keys'),
 ];
 
 const errorLevel = {
@@ -23,6 +24,7 @@ const errorLevel = {
   'column-name-casing': ['error'],
   'foreign-key-to-id': ['error'],
   'default-varchar-length': ['error'],
+  'missing-foreign-key': ['error']
 }
 
 const rules = {
