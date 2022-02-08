@@ -13,6 +13,9 @@ plugins:
   - knex
 
 rules:
+  max-params:
+    - error
+    - 5
   no-console: error
   mocha/no-hooks-for-single-case: off
   no-sync: error
