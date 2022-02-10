@@ -1,3 +1,5 @@
+/*eslint eslint-comments/disable-enable-pair: [error, {allowWholeFile: true}] */
+/* eslint-disable node/no-restricted-require*/
 const dependencies = {
   accountRecoveryDemandRepository: require('../../infrastructure/repositories/account-recovery-demand-repository'),
   algorithmDataFetcherService: require('../../domain/services/algorithm-methods/data-fetcher'),
