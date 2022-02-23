@@ -1,6 +1,7 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { click, render } from '@ember/test-helpers';
+import { render as renderScreen } from '@1024pix/ember-testing-library';
 import hbs from 'htmlbars-inline-precompile';
 import sinon from 'sinon';
 import EmberObject from '@ember/object';
@@ -139,7 +140,7 @@ module('Integration | Component | certifications/candidate-edit-modal', function
     });
 
     module('when candidate birth information are of type foreign country', function () {
-      test('it should init the form with expected informations for type foreign country', async function (assert) {
+      test.only('it should init the form with expected informations for type foreign country', async function (assert) {
         // given
         this.candidate = run(() =>
           store.createRecord('certification', {
@@ -159,14 +160,14 @@ module('Integration | Component | certifications/candidate-edit-modal', function
         ];
 
         // when
-        await render(
+        const screen = await renderScreen(
           hbs`<Certifications::CandidateEditModal @isDisplayed={{true}} @candidate={{this.candidate}} @countries={{this.countries}} />`
         );
 
         // then
         assert.dom('#birth-insee-code').doesNotExist();
         assert.dom('#birth-postal-code').doesNotExist();
-        assert.dom('#birth-country > option[selected]').hasText('DANEMARK');
+        assert.dom(screen.getByText('FRANCE')).exists();
         assert.dom('#birth-city').hasValue('Copenhague');
       });
     });
