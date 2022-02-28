@@ -180,6 +180,120 @@ module('Integration | Component | certification-candidate-details-modal', functi
     });
   });
 
+  module('when @shouldDisplayPaymentOptions is true', function () {
+    test('it shows candidate details with payement options', async function (assert) {
+      // given
+      const store = this.owner.lookup('service:store');
+      const candidate = store.createRecord('certification-candidate', {
+        firstName: 'Jean-Paul',
+        lastName: 'Candidat',
+        birthCity: 'Eu',
+        birthCountry: 'France',
+        email: 'jeanpauldeu@pix.fr',
+        resultRecipientEmail: 'suric@animal.fr',
+        externalId: '12345',
+        birthdate: '2000-12-25',
+        extraTimePercentage: 0.1,
+        birthInseeCode: 76255,
+        birthPostalCode: 76260,
+        sex: 'F',
+        complementaryCertifications: [],
+        billingMode: 'Prépayé',
+        prepaymentCode: 'prep123',
+      });
+
+      const closeModalStub = sinon.stub();
+      this.set('closeModal', closeModalStub);
+      this.set('candidate', candidate);
+      this.set('displayComplementaryCertification', false);
+      this.set('shouldDisplayPaymentOptions', true);
+
+      // when
+      await render(hbs`
+      <CertificationCandidateDetailsModal
+        @closeModal={{this.closeModal}}
+        @candidate={{this.candidate}}
+        @displayComplementaryCertification={{this.displayComplementaryCertification}}
+        @shouldDisplayPaymentOptions={{this.shouldDisplayPaymentOptions}}
+      />
+    `);
+
+      // then
+      assert.contains('Détail du candidat');
+      assert.contains('Jean-Paul');
+      assert.contains('Candidat');
+      assert.contains('Eu');
+      assert.contains('76260');
+      assert.contains('76255');
+      assert.contains('Femme');
+      assert.contains('France');
+      assert.contains('jeanpauldeu@pix.fr');
+      assert.contains('suric@animal.fr');
+      assert.contains('12345');
+      assert.contains('25/12/2000');
+      assert.contains('10 %');
+      assert.contains('Prépayé');
+      assert.contains('prep123');
+    });
+  });
+
+  module('when @shouldDisplayPaymentOptions is false', function () {
+    test('it shows candidate details without payement options', async function (assert) {
+      // given
+      const store = this.owner.lookup('service:store');
+      const candidate = store.createRecord('certification-candidate', {
+        firstName: 'Jean-Paul',
+        lastName: 'Candidat',
+        birthCity: 'Eu',
+        birthCountry: 'France',
+        email: 'jeanpauldeu@pix.fr',
+        resultRecipientEmail: 'suric@animal.fr',
+        externalId: '12345',
+        birthdate: '2000-12-25',
+        extraTimePercentage: 0.1,
+        birthInseeCode: 76255,
+        birthPostalCode: 76260,
+        sex: 'F',
+        complementaryCertifications: [],
+        billingMode: 'Prépayé',
+        prepaymentCode: 'prep123',
+      });
+
+      const closeModalStub = sinon.stub();
+      this.set('closeModal', closeModalStub);
+      this.set('candidate', candidate);
+      this.set('displayComplementaryCertification', false);
+      this.set('shouldDisplayPaymentOptions', false);
+
+      // when
+      await render(hbs`
+      <CertificationCandidateDetailsModal
+        @closeModal={{this.closeModal}}
+        @candidate={{this.candidate}}
+        @displayComplementaryCertification={{this.displayComplementaryCertification}}
+        @shouldDisplayPaymentOptions={{this.shouldDisplayPaymentOptions}}
+      />
+    `);
+
+      // then
+      assert.contains('Détail du candidat');
+      assert.contains('Jean-Paul');
+      assert.contains('Candidat');
+      assert.contains('Eu');
+      assert.contains('76260');
+      assert.contains('76255');
+      assert.contains('Femme');
+      assert.contains('France');
+      assert.contains('jeanpauldeu@pix.fr');
+      assert.contains('suric@animal.fr');
+      assert.contains('12345');
+      assert.contains('25/12/2000');
+      assert.contains('10 %');
+      assert.notContains('Prépayé');
+      assert.notContains('prep123');
+    });
+  });
+
   module('when top close button is clicked', () => {
     test('it closes candidate details modal', async function (assert) {
       // given
