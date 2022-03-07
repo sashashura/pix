@@ -14,3 +14,7 @@ services:
     container_name: pix-api-redis
     ports:
       - '${PIX_CACHE_PORT:-6379}:6379'
+
+  steampipe:
+    build: steampipe
+    command: service start --foreground

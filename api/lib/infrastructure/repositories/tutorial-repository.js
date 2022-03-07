@@ -8,6 +8,8 @@ const TutorialWithUserSavedTutorial = require('../../domain/models/TutorialWithU
 const { FRENCH_FRANCE } = require('../../domain/constants').LOCALE;
 const knowledgeElementRepository = require('./knowledge-element-repository');
 const skillRepository = require('./skill-repository');
+const { knex } = require('../bookshelf');
+const KnowledgeElement = require('../../domain/models/KnowledgeElement');
 
 module.exports = {
   async findByRecordIdsForCurrentUser({ ids, userId, locale }) {
@@ -51,12 +53,29 @@ module.exports = {
   },
 
   async findRecommendedByUserId({ userId, locale = FRENCH_FRANCE } = {}) {
-    const invalidatedKnowledgeElements = await knowledgeElementRepository.findInvalidatedAndDirectByUserId(userId);
-    const skills = await skillRepository.findOperativeByIds(invalidatedKnowledgeElements.map(({ skillId }) => skillId));
+    const results = await knex('knowledge-elements')
+      .select('learningcontent.tutorials.*')
+      .join('learningcontent.skills', 'learningcontent.skills.id', '=', 'knowledge-elements.skillId')
+      .join(
+        'learningcontent.skills_tutorials',
+        'learningcontent.skills_tutorials.skillId',
+        '=',
+        'learningcontent.skills.id'
+      )
+      .join(
+        'learningcontent.tutorials',
+        'learningcontent.tutorials.id',
+        '=',
+        'learningcontent.skills_tutorials.tutorialId'
+      )
+      .where({
+        'knowledge-elements.userId': userId,
+        'knowledge-elements.status': KnowledgeElement.StatusType.INVALIDATED,
+        'knowledge-elements.source': KnowledgeElement.SourceType.DIRECT,
+      })
+      .whereIn('learningcontent.skills.status', ['actif', 'archivé']);
 
-    const tutorialsIds = skills.flatMap((skill) => skill.tutorialIds);
-
-    return _findByRecordIds({ ids: tutorialsIds, locale });
+    return results.map(_toDomain);
   },
 };
 
