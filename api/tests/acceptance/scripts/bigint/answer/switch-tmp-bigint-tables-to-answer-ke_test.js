@@ -23,6 +23,8 @@ const DatabaseBuilder = require('../../../../../db/database-builder/database-bui
 const databaseBuilder = new DatabaseBuilder({ knex });
 
 describe('#switchTmpBigintTablesToAnswerKeTables', function () {
+  let answerIdInsertedBeforeSwitch;
+
   beforeEach(async function () {
     // given
     await knex.raw('DROP TABLE IF EXISTS "bigint-migration-settings"');
@@ -51,8 +53,26 @@ describe('#switchTmpBigintTablesToAnswerKeTables', function () {
     await databaseBuilder.commit();
 
     await copyNewlyInsertedRowsToAnswerIdTmpBigintTables();
+
+    const { id: assessmentId3 } = databaseBuilder.factory.buildAssessment();
+    const { id: firstAnswerId3 } = databaseBuilder.factory.buildAnswer({ assessmentId3 });
+    databaseBuilder.factory.buildKnowledgeElement({ assessmentId: assessmentId3, answerId: firstAnswerId3 });
+    const { id: secondAnswerId3 } = databaseBuilder.factory.buildAnswer({ assessmentId3 });
+    databaseBuilder.factory.buildKnowledgeElement({ assessmentId: assessmentId3, answerId: secondAnswerId3 });
+    await databaseBuilder.commit();
     await copyAnswerKeDataInsertedBeforeTrigger();
 
+    [answerIdInsertedBeforeSwitch] = await knex('answers')
+      .insert({
+        value: 'Some value for answer',
+        result: 'Some result for answer',
+        challengeId: 'rec123ABC',
+        createdAt: new Date('2020-01-01'),
+        updatedAt: new Date('2020-01-02'),
+        resultDetails: 'Some result details for answer.',
+        timeSpent: 30,
+      })
+      .returning('id');
     // when
     await switchTmpBigintTablesToAnswerKeTables();
   });
@@ -69,35 +89,36 @@ describe('#switchTmpBigintTablesToAnswerKeTables', function () {
     expect(triggersByTable).to.be.empty;
   });
 
-  it('should rename PK constraints', async function () {
-    // then
-    const { rows: primaryKeyAnswersBigintColumn } = await knex.raw(
-      `SELECT ccu.column_name, ccu.constraint_name
+  describe('should mention base table name (instead of temporary table name)', function () {
+    it('in PK constraints', async function () {
+      // then
+      const { rows: primaryKeyAnswersBigintColumn } = await knex.raw(
+        `SELECT ccu.column_name, ccu.constraint_name
        FROM pg_constraint pgc
         JOIN pg_namespace nsp ON nsp.oid = pgc.connamespace
         JOIN pg_class  cls     ON pgc.conrelid = cls.oid
         JOIN information_schema.constraint_column_usage ccu ON pgc.conname = ccu.constraint_name AND nsp.nspname = ccu.constraint_schema
         WHERE pgc.contype = 'p' AND ccu.table_name = 'answers'`
-    );
-    expect(primaryKeyAnswersBigintColumn).to.deep.equal([{ column_name: 'id', constraint_name: 'answers_pkey' }]);
+      );
+      expect(primaryKeyAnswersBigintColumn).to.deep.equal([{ column_name: 'id', constraint_name: 'answers_pkey' }]);
 
-    const { rows: primaryKeyKnowledgeElementsBigintColumn } = await knex.raw(
-      `SELECT ccu.column_name, ccu.constraint_name
+      const { rows: primaryKeyKnowledgeElementsBigintColumn } = await knex.raw(
+        `SELECT ccu.column_name, ccu.constraint_name
        FROM pg_constraint pgc
         JOIN pg_namespace nsp ON nsp.oid = pgc.connamespace
         JOIN pg_class  cls     ON pgc.conrelid = cls.oid
         JOIN information_schema.constraint_column_usage ccu ON pgc.conname = ccu.constraint_name AND nsp.nspname = ccu.constraint_schema
         WHERE pgc.contype = 'p' AND ccu.table_name = 'knowledge-elements'`
-    );
-    expect(primaryKeyKnowledgeElementsBigintColumn).to.deep.equal([
-      { column_name: 'id', constraint_name: 'knowledge-elements_pkey' },
-    ]);
-  });
+      );
+      expect(primaryKeyKnowledgeElementsBigintColumn).to.deep.equal([
+        { column_name: 'id', constraint_name: 'knowledge-elements_pkey' },
+      ]);
+    });
 
-  it('should rename FK constraints', async function () {
-    // then
-    const { rows: foreignKeysAnswersBigintColumns } = await knex.raw(
-      `SELECT
+    it('in FK constraints', async function () {
+      // then
+      const { rows: foreignKeysAnswersBigintColumns } = await knex.raw(
+        `SELECT
           kcu.column_name  AS referencing_column_name,
           ccu.table_name   AS referenced_table_name,
           ccu.column_name  AS referenced_column_name,
@@ -118,18 +139,18 @@ describe('#switchTmpBigintTablesToAnswerKeTables', function () {
         AND tc.table_name = 'answers'
       ORDER BY kcu.column_name
         `
-    );
-    expect(foreignKeysAnswersBigintColumns).to.deep.equal([
-      {
-        referenced_column_name: 'id',
-        referenced_table_name: 'assessments',
-        referencing_column_name: 'assessmentId',
-        constraint_name: 'answers_assessmentid_foreign',
-      },
-    ]);
+      );
+      expect(foreignKeysAnswersBigintColumns).to.deep.equal([
+        {
+          referenced_column_name: 'id',
+          referenced_table_name: 'assessments',
+          referencing_column_name: 'assessmentId',
+          constraint_name: 'answers_assessmentid_foreign',
+        },
+      ]);
 
-    const { rows: foreignKeysKnowledgeElementsBigintColumns } = await knex.raw(
-      `SELECT
+      const { rows: foreignKeysKnowledgeElementsBigintColumns } = await knex.raw(
+        `SELECT
           kcu.column_name  AS referencing_column_name,
           ccu.table_name   AS referenced_table_name,
           ccu.column_name  AS referenced_column_name,
@@ -150,33 +171,33 @@ describe('#switchTmpBigintTablesToAnswerKeTables', function () {
         AND tc.table_name = 'knowledge-elements'
       ORDER BY kcu.column_name
         `
-    );
-    expect(foreignKeysKnowledgeElementsBigintColumns).to.deep.equal([
-      {
-        referenced_column_name: 'id',
-        referenced_table_name: 'answers',
-        referencing_column_name: 'answerId',
-        constraint_name: 'knowledge_elements_answerid_foreign',
-      },
-      {
-        referenced_column_name: 'id',
-        referenced_table_name: 'assessments',
-        referencing_column_name: 'assessmentId',
-        constraint_name: 'knowledge_elements_assessmentid_foreign',
-      },
-      {
-        referenced_column_name: 'id',
-        referenced_table_name: 'users',
-        referencing_column_name: 'userId',
-        constraint_name: 'knowledge_elements_userid_foreign',
-      },
-    ]);
-  });
+      );
+      expect(foreignKeysKnowledgeElementsBigintColumns).to.deep.equal([
+        {
+          referenced_column_name: 'id',
+          referenced_table_name: 'answers',
+          referencing_column_name: 'answerId',
+          constraint_name: 'knowledge_elements_answerid_foreign',
+        },
+        {
+          referenced_column_name: 'id',
+          referenced_table_name: 'assessments',
+          referencing_column_name: 'assessmentId',
+          constraint_name: 'knowledge_elements_assessmentid_foreign',
+        },
+        {
+          referenced_column_name: 'id',
+          referenced_table_name: 'users',
+          referencing_column_name: 'userId',
+          constraint_name: 'knowledge_elements_userid_foreign',
+        },
+      ]);
+    });
 
-  it('should rename indexes', async function () {
-    // then
-    const { rows: indexAnswersBigintColumns } = await knex.raw(
-      `SELECT
+    it('in indexes', async function () {
+      // then
+      const { rows: indexAnswersBigintColumns } = await knex.raw(
+        `SELECT
            cls.relname,
            a.attname,
            am.amname index_type
@@ -187,22 +208,22 @@ describe('#switchTmpBigintTablesToAnswerKeTables', function () {
             INNER JOIN pg_attribute a ON a.attrelid = cls.oid
         WHERE tab.relname = 'answers'
         ORDER BY a.attname`
-    );
-    expect(indexAnswersBigintColumns).to.deep.equal([
-      {
-        attname: 'assessmentId',
-        index_type: 'btree',
-        relname: 'answers_assessmentid_index',
-      },
-      {
-        attname: 'id',
-        index_type: 'btree',
-        relname: 'answers_pkey',
-      },
-    ]);
+      );
+      expect(indexAnswersBigintColumns).to.deep.equal([
+        {
+          attname: 'assessmentId',
+          index_type: 'btree',
+          relname: 'answers_assessmentid_index',
+        },
+        {
+          attname: 'id',
+          index_type: 'btree',
+          relname: 'answers_pkey',
+        },
+      ]);
 
-    const { rows: indexKnowledgeElementsBigintColumns } = await knex.raw(
-      `SELECT
+      const { rows: indexKnowledgeElementsBigintColumns } = await knex.raw(
+        `SELECT
            cls.relname,
            a.attname,
            am.amname index_type
@@ -213,24 +234,63 @@ describe('#switchTmpBigintTablesToAnswerKeTables', function () {
             INNER JOIN pg_attribute a ON a.attrelid = cls.oid
         WHERE tab.relname = 'knowledge-elements'
         ORDER BY a.attname`
+      );
+      expect(indexKnowledgeElementsBigintColumns).to.deep.equal([
+        {
+          attname: 'assessmentId',
+          index_type: 'btree',
+          relname: 'knowledge_elements_assessmentid_index',
+        },
+        {
+          attname: 'id',
+          index_type: 'btree',
+          relname: 'knowledge-elements_pkey',
+        },
+        {
+          attname: 'userId',
+          index_type: 'btree',
+          relname: 'knowledge_elements_userid_index',
+        },
+      ]);
+    });
+  });
+
+  it('should insert answer with an id bigger than the maximum integer type value', async function () {
+    // when
+    const maxValueBigIntType = '9223372036854775807';
+    const { id: assessmentId } = databaseBuilder.factory.buildAssessment();
+    const { id: answerId } = databaseBuilder.factory.buildAnswer({ id: maxValueBigIntType, assessmentId });
+    databaseBuilder.factory.buildKnowledgeElement({ assessmentId, answerId });
+    await databaseBuilder.commit();
+
+    // then
+    expect(answerId).to.be.equal(maxValueBigIntType);
+  });
+
+  it('should change type of answer sequence from integer to bigint', async function () {
+    // then
+    const { rows: sequenceDataType } = await knex.raw(
+      `SELECT data_type FROM information_schema.sequences WHERE sequence_name = 'answers_id_seq'`
     );
-    expect(indexKnowledgeElementsBigintColumns).to.deep.equal([
-      {
-        attname: 'assessmentId',
-        index_type: 'btree',
-        relname: 'knowledge_elements_assessmentid_index',
-      },
-      {
-        attname: 'id',
-        index_type: 'btree',
-        relname: 'knowledge-elements_pkey',
-      },
-      {
-        attname: 'userId',
-        index_type: 'btree',
-        relname: 'knowledge_elements_userid_index',
-      },
-    ]);
+    expect(sequenceDataType[0]['data_type']).to.equal('bigint');
+  });
+
+  it('should sequence are correctly reassigned', async function () {
+    // when
+    const [answerIdInsertedAfterSwitch] = await knex('answers')
+      .insert({
+        value: 'Some value for answer',
+        result: 'Some result for answer',
+        challengeId: 'rec123ABC',
+        createdAt: new Date('2020-01-01'),
+        updatedAt: new Date('2020-01-02'),
+        resultDetails: 'Some result details for answer.',
+        timeSpent: 30,
+      })
+      .returning('id');
+
+    // then
+    expect(answerIdInsertedAfterSwitch).to.equal(answerIdInsertedBeforeSwitch + 1);
   });
 
   afterEach(async function () {

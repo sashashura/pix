@@ -9,6 +9,9 @@ const switchTmpBigintTablesToAnswerKeTables = async () => {
   await knex.transaction(async (trx) => {
     logger.debug('Start switch answer and Ke tmp bigint tables');
 
+    await knex.raw(`LOCK TABLE "answers" IN ACCESS EXCLUSIVE MODE`).transacting(trx);
+    await knex.raw(`LOCK TABLE "knowledge-elements" IN ACCESS EXCLUSIVE MODE;`).transacting(trx);
+
     await knex.raw('DROP TRIGGER IF EXISTS "trg_answers" on "answers"').transacting(trx);
     await knex.raw('DROP TRIGGER IF EXISTS "trg_knowledge-elements" on "knowledge-elements"').transacting(trx);
     await knex.raw('DROP FUNCTION IF EXISTS "insert_answers_in_answers_bigint"').transacting(trx);
