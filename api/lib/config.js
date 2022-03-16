@@ -19,6 +19,12 @@ function isBooleanFeatureEnabledElseDefault(environmentVariable, defaultValue) {
   return environmentVariable === 'true' ? true : defaultValue;
 }
 
+function _getBanners(vars) {
+  if (vars.BANNER_MON_PIX_TYPE && vars.BANNER_MON_PIX_MESSAGE) {
+
+  }
+}
+
 function _getNumber(numberAsString, defaultIntNumber) {
   const number = parseInt(numberAsString, 10);
   return isNaN(number) ? defaultIntNumber : number;
@@ -176,6 +182,22 @@ module.exports = (function () {
       ),
       isCertificationBillingEnabled: isFeatureEnabled(process.env.FT_CERTIFICATION_BILLING),
       isNewTutorialsPageEnabled: isFeatureEnabled(process.env.FT_NEW_TUTORIALS_PAGE),
+    },
+
+    banners: {
+      _getBanners(process.env),
+      certif: {
+        type: process.env.BANNER_CERTIF_TYPE,
+        message: process.env.BANNER_CERTIF_MESSAGE,
+      },
+      orga: {
+        type: process.env.BANNER_ORGA_TYPE,
+        message: process.env.BANNER_ORGA_MESSAGE,
+      },
+      monPix: {
+        type: process.env.BANNER_MON_PIX_TYPE,
+        message: process.env.BANNER_MON_PIX_MESSAGE,
+      },
     },
 
     infra: {
