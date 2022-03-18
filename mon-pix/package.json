@@ -121,7 +121,7 @@
     "p-queue": "^6.6.2",
     "pix-ui": "https://github.com/1024pix/pix-ui/tarball/v10.0.0",
     "prettier": "^2.6.0",
-    "sass": "^1.38.0",
+    "sass": "^1.49.9",
     "showdown": "^1.9.1",
     "stylelint": "^13.13.1",
     "stylelint-config-standard": "^22.0.0",
