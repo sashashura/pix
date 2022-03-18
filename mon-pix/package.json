@@ -122,7 +122,7 @@
     "pix-ui": "https://github.com/1024pix/pix-ui/tarball/v10.0.0",
     "prettier": "^2.6.0",
     "sass": "^1.49.9",
-    "showdown": "^1.9.1",
+    "showdown": "^2.0.3",
     "stylelint": "^13.13.1",
     "stylelint-config-standard": "^22.0.0",
     "uuid": "^8.3.2",
