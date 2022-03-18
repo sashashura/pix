@@ -41,7 +41,7 @@
   "devDependencies": {
     "@ember/jquery": "^2.0.0",
     "@ember/optional-features": "^2.0.0",
-    "@ember/render-modifiers": "^1.0.2",
+    "@ember/render-modifiers": "^2.0.4",
     "@formatjs/intl-getcanonicallocales": "^1.7.3",
     "@formatjs/intl-locale": "^2.4.36",
     "@formatjs/intl-pluralrules": "^4.1.2",
@@ -127,6 +127,5 @@
     "stylelint-config-standard": "^22.0.0",
     "uuid": "^8.3.2",
     "xss": "^1.0.9"
-  },
-  "dependencies": {}
+  }
 }
