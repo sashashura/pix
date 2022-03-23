@@ -42,6 +42,9 @@ describe('Unit | Domain | Use Cases | correct-answer-then-update-assessment', fu
   const flashAlgorithmService = { getEstimatedLevelAndErrorRate: () => undefined };
   const algorithmDataFetcherService = { fetchForFlashLevelEstimation: () => undefined };
   const nowDate = new Date('2021-03-11T11:00:04Z');
+  const logger = {
+    warn: () => undefined,
+  };
   // TODO: Fix this the next time the file is edited.
   // eslint-disable-next-line mocha/no-setup-in-describe
   nowDate.setMilliseconds(1);
@@ -62,6 +65,7 @@ describe('Unit | Domain | Use Cases | correct-answer-then-update-assessment', fu
     sinon.stub(dateUtils, 'getNowDate');
     sinon.stub(flashAlgorithmService, 'getEstimatedLevelAndErrorRate');
     sinon.stub(algorithmDataFetcherService, 'fetchForFlashLevelEstimation');
+    sinon.stub(logger, 'warn');
 
     const challengeId = 'oneChallengeId';
     assessment = domainBuilder.buildAssessment({ userId, lastQuestionDate: nowDate });
@@ -843,6 +847,47 @@ describe('Unit | Domain | Use Cases | correct-answer-then-update-assessment', fu
         expectedAnswer.timeSpent = 0;
         expect(answerRepository.saveWithKnowledgeElements).to.be.calledWith(expectedAnswer);
       });
+    });
+  });
+
+  context('when the challenge is not focused', function () {
+    let focusedOutAnswer;
+    let assessment;
+    let answerSaved;
+
+    beforeEach(function () {
+      // Given
+      focusedOutAnswer = domainBuilder.buildAnswer({ isFocusedOut: true });
+      const nonFocusedChallenge = domainBuilder.buildChallenge({
+        id: focusedOutAnswer.challengeId,
+        validator,
+        focused: false,
+      });
+      challengeRepository.get.resolves(nonFocusedChallenge);
+      assessment = domainBuilder.buildAssessment({
+        userId,
+        lastQuestionDate: new Date('2021-03-11T11:00:00Z'),
+      });
+      assessment.type = Assessment.types.CERTIFICATION;
+      assessmentRepository.get.resolves(assessment);
+      answerRepository.findByChallengeAndAssessment
+        .withArgs({ assessmentId: assessment.id, challengeId: nonFocusedChallenge.id })
+        .resolves(true);
+      answerSaved = domainBuilder.buildAnswer(focusedOutAnswer);
+      answerRepository.saveWithKnowledgeElements.resolves(answerSaved);
+    });
+
+    it('should not return focused out answer', async function () {
+      // When
+      const { result } = await correctAnswerThenUpdateAssessment({
+        answer: focusedOutAnswer,
+        userId,
+        ...dependencies,
+      });
+
+      // Then
+      expect(result).not.to.equal(AnswerStatus.FOCUSEDOUT);
+      expect(result).to.deep.equal(AnswerStatus.OK);
     });
   });
 });
