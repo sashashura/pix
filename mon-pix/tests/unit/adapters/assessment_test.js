@@ -10,7 +10,6 @@ describe('Unit | Adapters | assessment', function () {
 
   beforeEach(function () {
     adapter = this.owner.lookup('adapter:assessment');
-    adapter.ajax = sinon.stub().resolves();
   });
 
   describe('#urlForUpdateRecord', () => {
