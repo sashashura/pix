@@ -149,6 +149,7 @@ const dependencies = {
   userRepository: require('../../infrastructure/repositories/user-repository'),
   userService: require('../../domain/services/user-service'),
   userTutorialRepository: require('../../infrastructure/repositories/user-tutorial-repository'),
+  userSettingsRepository: require('../../infrastructure/repositories/user-settings-repository'),
   verifyCertificateCodeService: require('../../domain/services/verify-certificate-code-service'),
 };
 
@@ -397,6 +398,8 @@ module.exports = injectDependencies(
     updateUserDetailsForAdministration: require('./update-user-details-for-administration'),
     updateUserEmailWithValidation: require('./update-user-email-with-validation'),
     updateUserPassword: require('./update-user-password'),
+    updateUserColor: require('./update-user-color'),
+    getUserSettings: require('./get-user-settings'),
   },
   dependencies
 );
