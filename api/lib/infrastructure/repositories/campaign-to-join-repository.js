@@ -51,6 +51,11 @@ module.exports = {
         JOIN tags ON "organization-tags"."tagId" = "tags".id
         WHERE "tags"."name" = 'POLE EMPLOI' AND "organization-tags"."organizationId" = "organizations".id) as "organizationIsPoleEmploi"`)
       )
+      .select(
+        knex.raw(`EXISTS(SELECT true FROM "organization-tags"
+        JOIN tags ON "organization-tags"."tagId" = "tags".id
+        WHERE "tags"."name" = 'CNAV' AND "organization-tags"."organizationId" = "organizations".id) as "organizationIsCnav"`)
+      )
       .join('organizations', 'organizations.id', 'campaigns.organizationId')
       .leftJoin('target-profiles', 'target-profiles.id', 'campaigns.targetProfileId')
       .leftJoin('organization-tags', 'organization-tags.organizationId', 'organizations.id')

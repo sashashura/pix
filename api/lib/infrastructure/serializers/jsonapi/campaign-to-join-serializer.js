@@ -19,6 +19,7 @@ module.exports = {
         'organizationType',
         'organizationLogoUrl',
         'organizationIsPoleEmploi',
+        'organizationIsCnav',
         'organizationShowNPS',
         'organizationFormNPSUrl',
         'targetProfileName',

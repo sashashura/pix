@@ -143,6 +143,44 @@ describe('Integration | Repository | CampaignToJoin', function () {
       });
     });
 
+    context('when the organization of the campaign has the CNAV tag', function () {
+      it('should return true for organizationIsCnav', async function () {
+        // given
+        const code = 'LAURA456';
+        const organization = databaseBuilder.factory.buildOrganization();
+        databaseBuilder.factory.buildCampaign({ code, organizationId: organization.id });
+        databaseBuilder.factory.buildOrganizationTag({
+          organizationId: organization.id,
+          tagId: databaseBuilder.factory.buildTag({ name: 'CNAV' }).id,
+        });
+        await databaseBuilder.commit();
+
+        // when
+        const actualCampaign = await campaignToJoinRepository.getByCode(code);
+
+        // then
+        expect(actualCampaign).to.be.instanceOf(CampaignToJoin);
+        expect(actualCampaign.organizationIsCnav).to.be.true;
+      });
+    });
+
+    context('when the organization of the campaign does not have the CNAV tag', function () {
+      it('should return false for organizationIsCnav', async function () {
+        // given
+        const code = 'LAURA456';
+        const organization = databaseBuilder.factory.buildOrganization();
+        databaseBuilder.factory.buildCampaign({ code, organizationId: organization.id });
+        await databaseBuilder.commit();
+
+        // when
+        const actualCampaign = await campaignToJoinRepository.getByCode(code);
+
+        // then
+        expect(actualCampaign).to.be.instanceOf(CampaignToJoin);
+        expect(actualCampaign.organizationIsCnav).to.be.false;
+      });
+    });
+
     it('should throw a NotFoundError when no campaign exists with given code', async function () {
       // given
       const code = 'LAURA123';

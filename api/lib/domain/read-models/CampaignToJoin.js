@@ -19,6 +19,7 @@ class CampaignToJoin {
     organizationLogoUrl,
     organizationIsManagingStudents,
     organizationIsPoleEmploi,
+    organizationIsCnav,
     organizationShowNPS,
     organizationFormNPSUrl,
     targetProfileName,
@@ -47,6 +48,7 @@ class CampaignToJoin {
     this.organizationType = organizationType;
     this.organizationLogoUrl = organizationLogoUrl;
     this.organizationIsPoleEmploi = organizationIsPoleEmploi;
+    this.organizationIsCnav = organizationIsCnav;
     this.organizationShowNPS = organizationShowNPS;
     this.organizationFormNPSUrl = organizationFormNPSUrl;
     this.targetProfileName = targetProfileName;
