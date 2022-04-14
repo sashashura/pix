@@ -19,6 +19,9 @@ export default class AccessRoute extends Route.extend(SecuredRouteMixin) {
     if (this._shouldVisitPoleEmploiLoginPage(campaign)) {
       this.session.set('attemptedTransition', transition);
       return this.replaceWith('login-pe');
+    } else if (this._shouldVisitCnavLoginPage(campaign)) {
+      this.session.set('attemptedTransition', transition);
+      return this.replaceWith('login-cnav');
     } else if (this._shouldLoginToAccessSCORestrictedCampaign(campaign)) {
       this.authenticationRoute = 'campaigns.join.student-sco';
     } else if (this._shouldJoinFromMediacentre(campaign)) {
@@ -63,6 +66,11 @@ export default class AccessRoute extends Route.extend(SecuredRouteMixin) {
   _shouldVisitPoleEmploiLoginPage(campaign) {
     const isUserLoggedInPoleEmploi = get(this.session, 'data.authenticated.source') === 'pole_emploi_connect';
     return campaign.organizationIsPoleEmploi && !isUserLoggedInPoleEmploi;
+  }
+
+  _shouldVisitCnavLoginPage(campaign) {
+    const isUserLoggedInCnav = get(this.session, 'data.authenticated.source') === 'cnav';
+    return campaign.organizationIsCnav && !isUserLoggedInCnav;
   }
 
   _shouldJoinFromMediacentre(campaign) {

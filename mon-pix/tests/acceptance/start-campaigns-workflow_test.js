@@ -809,6 +809,99 @@ describe('Acceptance | Campaigns | Start Campaigns workflow', function () {
         });
       });
 
+      context('When campaign belongs to Cnav organization', function () {
+        let replaceLocationStub;
+
+        beforeEach(function () {
+          replaceLocationStub = sinon.stub().resolves();
+          this.owner.register(
+            'service:location',
+            Service.extend({
+              replace: replaceLocationStub,
+            })
+          );
+          campaign = server.create('campaign', { organizationIsCnav: true });
+        });
+
+        context('When user is logged in with Cnav', function () {
+          beforeEach(function () {
+            const session = currentSession();
+            session.set('data.authenticated.source', 'cnav');
+          });
+
+          it('should redirect to landing page', async function () {
+            // given
+            await visit('/campagnes');
+
+            // when
+            await fillIn('#campaign-code', campaign.code);
+            await clickByLabel('Commencer');
+
+            // then
+            expect(currentURL()).to.equal(`/campagnes/${campaign.code}/presentation`);
+          });
+
+          it('should begin campaign participation', async function () {
+            // given
+            await visit('/campagnes');
+            await fillIn('#campaign-code', campaign.code);
+            await clickByLabel('Commencer');
+
+            // when
+            await clickByLabel('Je commence');
+
+            // then
+            expect(currentURL()).to.equal(`/campagnes/${campaign.code}/evaluation/didacticiel`);
+          });
+        });
+
+        context('When user is logged in with another authentication method', function () {
+          it('should redirect to landing page', async function () {
+            // given
+            await visit('/campagnes');
+
+            // when
+            await fillIn('#campaign-code', campaign.code);
+            await clickByLabel('Commencer');
+
+            // then
+            expect(currentURL()).to.equal(`/campagnes/${campaign.code}/presentation`);
+          });
+
+          it('should redirect to Cnav authentication form when landing page has been seen', async function () {
+            // given
+            await visit(`/campagnes/${campaign.code}`);
+
+            // when
+            await clickByLabel('Je commence');
+
+            // then
+            sinon.assert.called(replaceLocationStub);
+            expect(currentURL()).to.equal('/connexion-cnav');
+          });
+
+          it('should begin campaign participation once user is authenticated', async function () {
+            // given
+            const state = 'state';
+
+            const session = currentSession();
+            session.set('isAuthenticated', true);
+            session.set('data.state', state);
+            session.set('data.nextURL', `/campagnes/${campaign.code}/acces`);
+            const data = {};
+            data[campaign.code] = { landingPageShown: true };
+            sessionStorage.setItem('campaigns', JSON.stringify(data));
+
+            // when
+            await visit(`/connexion-cnav?code=test&state=${state}`);
+
+            // then
+            sinon.assert.notCalled(replaceLocationStub);
+            expect(currentURL()).to.equal(`/campagnes/${campaign.code}/evaluation/didacticiel`);
+          });
+        });
+      });
+
       context('When campaign has external id', function () {
         context('When participant external id is not set in the url', function () {
           beforeEach(async function () {

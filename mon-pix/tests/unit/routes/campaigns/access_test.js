@@ -66,6 +66,20 @@ describe('Unit | Route | Access', function () {
       });
     });
 
+    context('when campaign belongs to Cnav and user is not connected with Cnav', function () {
+      it('should override authentication route with login-cnav', async function () {
+        // given
+        route.session.data.externalUser = 'some external user';
+        campaign.organizationIsCnav = true;
+
+        // when
+        await route.beforeModel({ from: 'campaigns.campaign-landing-page' });
+
+        // then
+        sinon.assert.calledWith(route.replaceWith, 'login-cnav');
+      });
+    });
+
     context(
       'when campaign is SCO restricted and user is neither authenticated from Pix nor a user from an external platform',
       function () {
