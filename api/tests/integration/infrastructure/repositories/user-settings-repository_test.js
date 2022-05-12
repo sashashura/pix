@@ -2,7 +2,7 @@ const { expect, databaseBuilder, domainBuilder, knex, catchErr } = require('../.
 const userSettingsRepository = require('../../../../lib/infrastructure/repositories/user-settings-repository');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 
-describe('Integration | Repository | user-settings-repository', function () {
+describe.only('Integration | Repository | user-settings-repository', function () {
   afterEach(function () {
     return knex('user-settings').delete();
   });
@@ -21,7 +21,7 @@ describe('Integration | Repository | user-settings-repository', function () {
       expect(userSettings.id).to.equal(expectedUserSettingsId);
     });
 
-    it('should return null if user does not have user settings', async function () {
+    it('should throw an error if user does not have user settings', async function () {
       // given
       const userId = databaseBuilder.factory.buildUser().id;
       const otherUserId = databaseBuilder.factory.buildUser().id;
