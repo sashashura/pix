@@ -1,6 +1,6 @@
 const databaseBuffer = require('../database-buffer');
 const buildOrganization = require('./build-organization');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 
 const buildOrganizationPlace = function buildOrganizationPlace({
   id = databaseBuffer.getNextId(),

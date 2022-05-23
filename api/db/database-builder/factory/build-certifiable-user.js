@@ -1,4 +1,4 @@
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const buildAssessment = require('./build-assessment');
 const buildAnswer = require('./build-answer');
 const buildKnowledgeElement = require('./build-knowledge-element');

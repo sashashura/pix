@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const databaseBuffer = require('../database-buffer');
 const buildCertificationCenter = require('./build-certification-center');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 
 module.exports = function buildCertificationCenterMembership({
   id = databaseBuffer.getNextId(),

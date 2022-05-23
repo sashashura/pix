@@ -1,5 +1,5 @@
 const buildCertificationCourse = require('./build-certification-course');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const databaseBuffer = require('../database-buffer');
 const Assessment = require('../../../lib/domain/models/Assessment');
 const _ = require('lodash');

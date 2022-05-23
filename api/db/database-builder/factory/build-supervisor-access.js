@@ -1,6 +1,6 @@
 const databaseBuffer = require('../database-buffer');
 const _ = require('lodash');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const buildSession = require('./build-session');
 
 module.exports = function buildSupervisorAccess({

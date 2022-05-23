@@ -1,5 +1,5 @@
 const buildAssessment = require('./build-assessment');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const databaseBuffer = require('../database-buffer');
 const AssessmentResult = require('../../../lib/domain/models/AssessmentResult');
 const _ = require('lodash');

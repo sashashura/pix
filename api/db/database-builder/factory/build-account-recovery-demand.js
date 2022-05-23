@@ -1,6 +1,6 @@
 const databaseBuffer = require('../database-buffer');
 const buildOrganizationLearner = require('./build-organization-learner');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 
 module.exports = function buildAccountRecoveryDemand({
   id = databaseBuffer.getNextId(),

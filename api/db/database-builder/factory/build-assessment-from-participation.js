@@ -1,5 +1,5 @@
 const buildAssessment = require('./build-assessment');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const buildCampaignParticipation = require('./build-campaign-participation');
 const buildOrganizationLearner = require('./build-organization-learner');
 

@@ -1,5 +1,5 @@
 const buildCampaignParticipation = require('./build-campaign-participation');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const buildAuthenticationMethod = require('./build-authentication-method');
 const databaseBuffer = require('../database-buffer');
 const _ = require('lodash');

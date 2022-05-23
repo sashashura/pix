@@ -58,7 +58,7 @@ module.exports = {
   buildTargetProfileSkill: require('./build-target-profile-skill'),
   buildTargetProfileShare: require('./build-target-profile-share'),
   buildTutorialEvaluation: require('./build-tutorial-evaluation'),
-  buildUser: require('./build-user'),
+  buildUser: require('./build-user').buildUser,
   buildUserOrgaSettings: require('./build-user-orga-settings'),
   buildUserSavedTutorial: require('./build-user-saved-tutorial'),
   campaignParticipationOverviewFactory: require('./campaign-participation-overview-factory'),

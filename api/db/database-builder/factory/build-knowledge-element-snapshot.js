@@ -1,5 +1,5 @@
 const buildKnowledgeElement = require('./build-knowledge-element');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const databaseBuffer = require('../database-buffer');
 const _ = require('lodash');
 

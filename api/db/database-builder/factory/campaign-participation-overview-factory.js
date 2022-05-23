@@ -3,7 +3,7 @@ const buildCampaign = require('./build-campaign');
 const buildCampaignParticipation = require('./build-campaign-participation');
 const buildTargetProfileSkill = require('./build-target-profile-skill');
 const buildTargetProfile = require('./build-target-profile');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const Assessment = require('../../../lib/domain/models/Assessment');
 const CampaignParticipationStatuses = require('../../../lib/domain/models/CampaignParticipationStatuses');
 

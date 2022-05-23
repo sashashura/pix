@@ -1,5 +1,5 @@
 const databaseBuffer = require('../database-buffer');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const buildOrganization = require('./build-organization');
 const _ = require('lodash');
 

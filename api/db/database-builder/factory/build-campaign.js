@@ -1,6 +1,6 @@
 const buildOrganization = require('./build-organization');
 const buildTargetProfile = require('./build-target-profile');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const Campaign = require('../../../lib/domain/models/Campaign');
 const Assessment = require('../../../lib/domain/models/Assessment');
 const databaseBuffer = require('../database-buffer');

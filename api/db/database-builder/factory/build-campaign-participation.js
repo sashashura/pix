@@ -1,5 +1,5 @@
 const buildCampaign = require('./build-campaign');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const buildOrganizationLearner = require('./build-organization-learner');
 const databaseBuffer = require('../database-buffer');
 const CampaignParticipationStatuses = require('../../../lib/domain/models/CampaignParticipationStatuses');

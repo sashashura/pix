@@ -1,6 +1,6 @@
 const isUndefined = require('lodash/isUndefined');
 const databaseBuffer = require('../database-buffer');
-const buildUser = require('./build-user');
+const { buildUser } = require('./build-user');
 const AuthenticationMethod = require('../../../lib/domain/models/AuthenticationMethod');
 const encrypt = require('../../../lib/domain/services/encryption-service');
 
