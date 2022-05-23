@@ -5,7 +5,6 @@ const PIX_CERTIF_ID = 202;
 const DEFAULT_PASSWORD = 'pix123';
 
 function usersBuilder({ databaseBuilder }) {
-
   databaseBuilder.factory.buildUser.withRawPassword({
     id: 1,
     firstName: 'Pix',
@@ -13,6 +12,7 @@ function usersBuilder({ databaseBuilder }) {
     email: 'userpix1@example.net',
     rawPassword: DEFAULT_PASSWORD,
     cgu: true,
+    hairs: true,
   });
 
   databaseBuilder.factory.buildUser.withRawPassword({
