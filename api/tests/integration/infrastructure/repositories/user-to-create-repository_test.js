@@ -2,7 +2,7 @@ const { expect, knex, databaseBuilder, catchErr } = require('../../../test-helpe
 
 const { AlreadyRegisteredUsernameError } = require('../../../../lib/domain/errors');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const UserToCreateRepository = require('../../../../lib/infrastructure/repositories/user-to-create-repository');
 const UserToCreate = require('../../../../lib/domain/models/UserToCreate');
 

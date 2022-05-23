@@ -1,6 +1,6 @@
 const { expect, catchErr } = require('../../../test-helper');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const { EntityValidationError } = require('../../../../lib/domain/errors');
 
 const userValidator = require('../../../../lib/domain/validators/user-validator');

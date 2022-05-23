@@ -1,7 +1,7 @@
 const { expect, databaseBuilder } = require('../../../test-helper');
 const bookshelfToDomainConverter = require('../../../../lib/infrastructure/utils/bookshelf-to-domain-converter');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const Membership = require('../../../../lib/domain/models/Membership');
 const TargetProfile = require('../../../../lib/domain/models/TargetProfile');
 const KnowledgeElement = require('../../../../lib/domain/models/KnowledgeElement');

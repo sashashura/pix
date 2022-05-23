@@ -1,6 +1,6 @@
 const { sinon, expect, domainBuilder, hFake } = require('../../../test-helper');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const AuthenticationMethod = require('../../../../lib/domain/models/AuthenticationMethod');
 const queryParamsUtils = require('../../../../lib/infrastructure/utils/query-params-utils');
 const encryptionService = require('../../../../lib/domain/services/encryption-service');

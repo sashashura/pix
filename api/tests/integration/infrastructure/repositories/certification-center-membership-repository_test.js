@@ -6,7 +6,7 @@ const { expect, knex, databaseBuilder, catchErr, sinon } = require('../../../tes
 const BookshelfCertificationCenterMembership = require('../../../../lib/infrastructure/orm-models/CertificationCenterMembership');
 const CertificationCenter = require('../../../../lib/domain/models/CertificationCenter');
 const CertificationCenterMembership = require('../../../../lib/domain/models/CertificationCenterMembership');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 const {
   CertificationCenterMembershipDisableError,

@@ -1,6 +1,6 @@
 const { catchErr, expect, sinon } = require('../../../test-helper');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const {
   PasswordResetDemandNotFoundError,
   UserNotAuthorizedToUpdatePasswordError,

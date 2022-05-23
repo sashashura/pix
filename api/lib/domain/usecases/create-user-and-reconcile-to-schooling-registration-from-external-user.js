@@ -1,5 +1,5 @@
 const { CampaignCodeError, ObjectValidationError } = require('../errors');
-const User = require('../models/User');
+const { User } = require('../models/User');
 const AuthenticationMethod = require('../models/AuthenticationMethod');
 const { STUDENT_RECONCILIATION_ERRORS } = require('../constants');
 

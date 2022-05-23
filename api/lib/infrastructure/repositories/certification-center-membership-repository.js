@@ -8,7 +8,7 @@ const {
 } = require('../../domain/errors');
 const { knex } = require('../../../db/knex-database-connection');
 const CertificationCenter = require('../../domain/models/CertificationCenter');
-const User = require('../../domain/models/User');
+const { User } = require('../../domain/models/User');
 const CertificationCenterMembership = require('../../domain/models/CertificationCenterMembership');
 
 function _toDomain(certificationCenterMembershipDTO) {

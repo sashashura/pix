@@ -4,7 +4,7 @@ const DomainTransaction = require('../DomainTransaction');
 
 const { AlreadyRegisteredUsernameError } = require('../../domain/errors');
 
-const User = require('../../domain/models/User');
+const { User } = require('../../domain/models/User');
 
 module.exports = {
   async create({ user, domainTransaction = DomainTransaction.emptyTransaction() }) {

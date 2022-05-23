@@ -7,7 +7,7 @@ const {
 } = require('../../../../lib/domain/errors');
 
 const PoleEmploiTokens = require('../../../../lib/domain/models/PoleEmploiTokens');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 const settings = require('../../../../lib/config');
 const httpAgent = require('../../../../lib/infrastructure/http/http-agent');

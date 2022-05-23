@@ -1,6 +1,6 @@
 const { expect } = require('../../../../test-helper');
 
-const User = require('../../../../../lib/domain/models/User');
+const { User } = require('../../../../../lib/domain/models/User');
 const serializer = require('../../../../../lib/infrastructure/serializers/jsonapi/user-serializer');
 
 describe('Unit | Serializer | JSONAPI | user-serializer', function () {

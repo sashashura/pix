@@ -8,7 +8,7 @@ const {
   SchoolingRegistrationAlreadyLinkedToUserError,
 } = require('../errors');
 
-const User = require('../models/User');
+const { User } = require('../models/User');
 
 const passwordValidator = require('../validators/password-validator');
 const userValidator = require('../validators/user-validator');

@@ -1,7 +1,7 @@
 const BookshelfMembership = require('../orm-models/Membership');
 const { MembershipCreationError, MembershipUpdateError, NotFoundError } = require('../../domain/errors');
 const Membership = require('../../domain/models/Membership');
-const User = require('../../domain/models/User');
+const { User } = require('../../domain/models/User');
 const Organization = require('../../domain/models/Organization');
 const bookshelfUtils = require('../utils/knex-utils');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');

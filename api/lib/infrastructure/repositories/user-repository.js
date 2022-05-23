@@ -13,7 +13,7 @@ const {
   UserNotFoundError,
 } = require('../../domain/errors');
 const { ROLES } = require('../../domain/constants').PIX_ADMIN;
-const User = require('../../domain/models/User');
+const { User } = require('../../domain/models/User');
 const UserDetailsForAdmin = require('../../domain/models/UserDetailsForAdmin');
 const Membership = require('../../domain/models/Membership');
 const CertificationCenter = require('../../domain/models/CertificationCenter');

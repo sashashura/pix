@@ -1,7 +1,7 @@
 const { expect } = require('../../../../test-helper');
 
 const UserWithActivity = require('../../../../../lib/domain/read-models/UserWithActivity');
-const User = require('../../../../../lib/domain/models/User');
+const { User } = require('../../../../../lib/domain/models/User');
 const serializer = require('../../../../../lib/infrastructure/serializers/jsonapi/user-with-activity-serializer');
 
 describe('Unit | Serializer | JSONAPI | user-with-activity-serializer', function () {

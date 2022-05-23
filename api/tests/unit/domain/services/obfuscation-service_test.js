@@ -1,7 +1,7 @@
 const { expect, sinon, domainBuilder, catchErr } = require('../../../test-helper');
 const obfuscationService = require('../../../../lib/domain/services/obfuscation-service');
 const authenticationMethodRepository = require('../../../../lib/infrastructure/repositories/authentication-method-repository');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const AuthenticationMethod = require('../../../../lib/domain/models/AuthenticationMethod');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 

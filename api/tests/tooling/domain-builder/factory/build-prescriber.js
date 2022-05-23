@@ -1,6 +1,6 @@
 const Membership = require('../../../../lib/domain/models/Membership');
 const Organization = require('../../../../lib/domain/models/Organization');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const UserOrgaSettings = require('../../../../lib/domain/models/UserOrgaSettings');
 const Prescriber = require('../../../../lib/domain/read-models/Prescriber');
 

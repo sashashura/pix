@@ -1,6 +1,6 @@
 const { expect, sinon, domainBuilder } = require('../../../test-helper');
 const getUserWithMemberships = require('../../../../lib/domain/usecases/get-user-with-memberships');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 describe('Unit | UseCase | get-user-with-memberships', function () {
   let userRepository;

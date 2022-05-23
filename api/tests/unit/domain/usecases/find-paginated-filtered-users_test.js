@@ -1,6 +1,6 @@
 const { expect, sinon } = require('../../../test-helper');
 const usecases = require('../../../../lib/domain/usecases');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 describe('Unit | UseCase | find-paginated-filtered-users', function () {
   it('should search users with filtering and pagination', async function () {

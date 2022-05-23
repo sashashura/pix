@@ -1,4 +1,4 @@
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 const buildMembership = require('./build-membership');
 const buildAdminMember = require('./build-admin-member');

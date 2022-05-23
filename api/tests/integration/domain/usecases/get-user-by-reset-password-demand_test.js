@@ -5,7 +5,7 @@ const tokenService = require('../../../../lib/domain/services/token-service');
 
 const userRepository = require('../../../../lib/infrastructure/repositories/user-repository');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const {
   InvalidTemporaryKeyError,
   PasswordResetDemandNotFoundError,

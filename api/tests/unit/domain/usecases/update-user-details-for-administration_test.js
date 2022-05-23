@@ -4,7 +4,7 @@ const {
   AlreadyRegisteredEmailError,
   AlreadyRegisteredUsernameError,
 } = require('../../../../lib/domain/errors');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 const updateUserDetailsForAdministration = require('../../../../lib/domain/usecases/update-user-details-for-administration');
 

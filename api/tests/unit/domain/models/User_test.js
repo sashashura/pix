@@ -1,6 +1,6 @@
 const { expect, domainBuilder } = require('../../../test-helper');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 describe('Unit | Domain | Models | User', function () {
   describe('constructor', function () {

@@ -5,7 +5,7 @@ const { AlreadyRegisteredEmailError, EntityValidationError } = require('../../..
 const passwordValidator = require('../../../../lib/domain/validators/password-validator');
 const userValidator = require('../../../../lib/domain/validators/user-validator');
 
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 const createUser = require('../../../../lib/domain/usecases/create-user');
 

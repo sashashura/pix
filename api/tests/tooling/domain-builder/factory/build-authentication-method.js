@@ -1,7 +1,7 @@
 const isUndefined = require('lodash/isUndefined');
 
 const encrypt = require('../../../../lib/domain/services/encryption-service');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 const AuthenticationMethod = require('../../../../lib/domain/models/AuthenticationMethod');
 
 function _buildUser() {

@@ -1,7 +1,7 @@
 const { expect, sinon, domainBuilder, catchErr } = require('../../../test-helper');
 
 const authenticateUser = require('../../../../lib/domain/usecases/authenticate-user');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 const {
   UserNotFoundError,

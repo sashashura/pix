@@ -4,7 +4,7 @@ const { expect, sinon, domainBuilder, catchErr } = require('../../../test-helper
 
 const AuthenticationMethod = require('../../../../lib/domain/models/AuthenticationMethod');
 const PoleEmploiTokens = require('../../../../lib/domain/models/PoleEmploiTokens');
-const User = require('../../../../lib/domain/models/User');
+const { User } = require('../../../../lib/domain/models/User');
 
 const { UnexpectedOidcStateError, UnexpectedUserAccountError } = require('../../../../lib/domain/errors');
 const DomainTransaction = require('../../../../lib/infrastructure/DomainTransaction');

@@ -4,7 +4,7 @@ const updateUserForAccountRecovery = require('../../../../../lib/domain/usecases
 const AuthenticationMethod = require('../../../../../lib/domain/models/AuthenticationMethod');
 const DomainTransaction = require('../../../../../lib/infrastructure/DomainTransaction');
 
-const User = require('../../../../../lib/domain/models/User');
+const { User } = require('../../../../../lib/domain/models/User');
 
 describe('Unit | Usecases | update-user-for-account-recovery', function () {
   let userRepository,
