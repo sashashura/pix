@@ -1,3 +1,5 @@
+import { buildUser } from '../../database-builder/factory/build-user';
+
 const PIX_SUPER_ADMIN_ID = 199;
 const PIX_SUPPORT_ID = 200;
 const PIX_METIER_ID = 201;
@@ -5,17 +7,17 @@ const PIX_CERTIF_ID = 202;
 const DEFAULT_PASSWORD = 'pix123';
 
 function usersBuilder({ databaseBuilder }) {
-  databaseBuilder.factory.buildUser.withRawPassword({
+  buildUser.withRawPassword({
     id: 1,
     firstName: 'Pix',
     lastName: 'Aile',
     email: 'userpix1@example.net',
+    hasHairs:true,
     rawPassword: DEFAULT_PASSWORD,
     cgu: true,
-    hairs: true,
   });
 
-  databaseBuilder.factory.buildUser.withRawPassword({
+  buildUser.withRawPassword({
     id: PIX_SUPER_ADMIN_ID,
     firstName: 'Super',
     lastName: 'Admin',
@@ -23,7 +25,7 @@ function usersBuilder({ databaseBuilder }) {
     rawPassword: DEFAULT_PASSWORD,
   });
 
-  databaseBuilder.factory.buildUser.withRawPassword({
+  buildUser.withRawPassword({
     id: PIX_SUPPORT_ID,
     firstName: 'Pix',
     lastName: 'Support',
@@ -32,7 +34,7 @@ function usersBuilder({ databaseBuilder }) {
     cgu: true,
   });
 
-  databaseBuilder.factory.buildUser.withRawPassword({
+  buildUser.withRawPassword({
     id: PIX_METIER_ID,
     firstName: 'Pix',
     lastName: 'Métier',
@@ -40,7 +42,7 @@ function usersBuilder({ databaseBuilder }) {
     rawPassword: DEFAULT_PASSWORD,
   });
 
-  databaseBuilder.factory.buildUser.withRawPassword({
+  buildUser.withRawPassword({
     id: PIX_CERTIF_ID,
     firstName: 'Pix',
     lastName: 'Certif',
@@ -48,7 +50,7 @@ function usersBuilder({ databaseBuilder }) {
     rawPassword: DEFAULT_PASSWORD,
   });
 
-  databaseBuilder.factory.buildUser.withRawPassword({
+  buildUser.withRawPassword({
     id: 10,
     firstName: 'Lance',
     lastName: 'Low',

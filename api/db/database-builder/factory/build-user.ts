@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { UserInsertAttributes } from './../../../lib/domain/models/User';
 const isNil = require('lodash/isNil');
 const isUndefined = require('lodash/isUndefined');
 
@@ -47,31 +50,33 @@ function _buildPixAuthenticationMethod({
   });
 }
 
-const buildUser = function buildUser({
-  id = databaseBuffer.getNextId(),
-  firstName = 'Billy',
-  lastName = 'TheKid',
-  email,
-  username = `${firstName}.${lastName}.${id}`,
-  cgu = true,
-  lang = 'fr',
-  lastTermsOfServiceValidatedAt = null,
-  lastPixOrgaTermsOfServiceValidatedAt = null,
-  lastPixCertifTermsOfServiceValidatedAt = null,
-  mustValidateTermsOfService = false,
-  pixOrgaTermsOfServiceAccepted = false,
-  pixCertifTermsOfServiceAccepted = false,
-  hasSeenAssessmentInstructions = false,
-  hasSeenNewDashboardInfo = false,
-  hasSeenFocusedChallengeTooltip = false,
-  hasSeenOtherChallengesTooltip = false,
-  isAnonymous = false,
-  createdAt = new Date(),
-  updatedAt = new Date(),
-} = {}) {
+export const buildUser = function buildUser(
+  {
+    id = databaseBuffer.getNextId(),
+    firstName = 'Billy',
+    lastName = 'TheKid',
+    email,
+    username = `${firstName}.${lastName}.${id}`,
+    cgu = true,
+    lang = 'fr',
+    lastTermsOfServiceValidatedAt = null,
+    lastPixOrgaTermsOfServiceValidatedAt = null,
+    lastPixCertifTermsOfServiceValidatedAt = null,
+    mustValidateTermsOfService = false,
+    pixOrgaTermsOfServiceAccepted = false,
+    pixCertifTermsOfServiceAccepted = false,
+    hasSeenAssessmentInstructions = false,
+    hasSeenNewDashboardInfo = false,
+    hasSeenFocusedChallengeTooltip = false,
+    hasSeenOtherChallengesTooltip = false,
+    isAnonymous = false,
+    createdAt = new Date(),
+    updatedAt = new Date(),
+  }: UserInsertAttributes = {} as unknown as UserInsertAttributes
+) {
   email = isUndefined(email) ? `${firstName}.${lastName}${id}@example.net`.toLowerCase() : email || null;
 
-  const values = {
+  const values: Partial<UserInsertAttributes> = {
     id,
     firstName,
     lastName,
@@ -100,26 +105,36 @@ const buildUser = function buildUser({
   });
 };
 
-buildUser.withRawPassword = function buildUserWithRawPassword({
-  id = databaseBuffer.getNextId(),
-  firstName = 'Billy',
-  lastName = 'TheKid',
-  email,
-  username,
-  cgu = true,
-  lang = 'fr',
-  lastTermsOfServiceValidatedAt,
-  lastPixOrgaTermsOfServiceValidatedAt = null,
-  lastPixCertifTermsOfServiceValidatedAt = null,
-  mustValidateTermsOfService = false,
-  pixOrgaTermsOfServiceAccepted = false,
-  pixCertifTermsOfServiceAccepted = false,
-  hasSeenAssessmentInstructions = false,
-  createdAt = new Date(),
-  updatedAt = new Date(),
-  rawPassword = DEFAULT_PASSWORD,
-  shouldChangePassword = false,
-} = {}) {
+type RawPasswordAttributes = {
+  rawPassword: unknown;
+  shouldChangePassword: boolean;
+};
+
+type UserWithRawPasswordAttributes = UserInsertAttributes & RawPasswordAttributes;
+
+buildUser.withRawPassword = function buildUserWithRawPassword(
+  {
+    id = databaseBuffer.getNextId(),
+    firstName = 'Billy',
+    lastName = 'TheKid',
+    email,
+    username,
+    cgu = true,
+    lang = 'fr',
+    lastTermsOfServiceValidatedAt,
+    lastPixOrgaTermsOfServiceValidatedAt = null,
+    lastPixCertifTermsOfServiceValidatedAt = null,
+    mustValidateTermsOfService = false,
+    pixOrgaTermsOfServiceAccepted = false,
+    pixCertifTermsOfServiceAccepted = false,
+    hasSeenAssessmentInstructions = false,
+    createdAt = new Date(),
+    updatedAt = new Date(),
+    rawPassword = DEFAULT_PASSWORD,
+    shouldChangePassword = false,
+    hasHairs = false,
+  }: Partial<UserWithRawPasswordAttributes> = {} as UserWithRawPasswordAttributes
+) {
   email = isUndefined(email) ? `${firstName}.${lastName}${id}@example.net`.toLowerCase() : email || null;
 
   const values = {
@@ -139,6 +154,7 @@ buildUser.withRawPassword = function buildUserWithRawPassword({
     hasSeenAssessmentInstructions,
     createdAt,
     updatedAt,
+    hasHairs,
   };
 
   const user = databaseBuffer.pushInsertable({
@@ -326,5 +342,3 @@ buildUser.withCertificationCenterMembership = function buildUserWithCertificatio
 
   return user;
 };
-
-module.exports = buildUser;
