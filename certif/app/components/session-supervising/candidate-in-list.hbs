@@ -2,6 +2,7 @@
   {{#if this.isCheckboxToBeDisplayed}}
     <PixInput
       @id={{concat "candidate-checkbox-" @candidate.id}}
+      @ariaLabel="{{@candidate.lastName}} {{@candidate.firstName}}"
       class="session-supervising-candidate-in-list__checkbox"
       type="checkbox"
       checked={{@candidate.authorizedToStart}}
