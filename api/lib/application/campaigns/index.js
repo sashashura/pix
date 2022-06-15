@@ -116,10 +116,11 @@ exports.register = async function (server) {
         pre: [
           {
             method: (request, h) =>
-              securityPreHandlers.userHasAtLeastOneAccessOf([securityPreHandlers.checkUserHasRoleSuperAdmin])(
-                request,
-                h
-              ),
+              securityPreHandlers.userHasAtLeastOneAccessOf([
+                securityPreHandlers.checkUserHasRoleSuperAdmin,
+                securityPreHandlers.checkUserHasRoleSupport,
+                securityPreHandlers.checkUserHasRoleMetier,
+              ])(request, h),
             assign: 'hasAuthorizationToAccessAdminScope',
           },
         ],
@@ -132,10 +133,12 @@ exports.register = async function (server) {
               type: 'campaigns',
               attributes: {
                 name: Joi.string().empty(Joi.string().regex(/^\s*$/)).required(),
-                title: Joi.string(),
+                title: Joi.string().required().allow(null),
+                'custom-landing-page-text': Joi.string().required().allow(null).max(5000),
                 'custom-result-page-text': Joi.string().required().allow(null),
                 'custom-result-page-button-text': Joi.string().required().allow(null),
                 'custom-result-page-button-url': Joi.string().required().allow(null),
+                'multiple-sendings': Joi.boolean().required(),
               },
             },
           }),
