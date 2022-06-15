@@ -1,5 +1,6 @@
 const { expect, HttpTestServer, sinon } = require('../../../test-helper');
 const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
+const adminUpdateCampaignValidator = require('../../../../lib/application/campaigns/admin-update-campaign-validation');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 const moduleUnderTest = require('../../../../lib/application/campaigns');
 const campaignController = require('../../../../lib/application/campaigns/campaign-controller');
@@ -150,7 +151,7 @@ describe('Unit | Application | Router | campaign-router ', function () {
     });
   });
 
-  describe('PATCH /api/admin/campaigns/{id}', function () {
+  describe.only('PATCH /api/admin/campaigns/{id}', function () {
     it('should return 204', async function () {
       // given
       sinon
@@ -162,6 +163,7 @@ describe('Unit | Application | Router | campaign-router ', function () {
       sinon
         .stub(campaignManagementController, 'updateCampaignDetailsManagement')
         .callsFake((request, h) => h.response('ok').code(204));
+      sinon.stub(adminUpdateCampaignValidator, 'validate').returns(true);
       const httpTestServer = new HttpTestServer();
       await httpTestServer.register(moduleUnderTest);
       const payload = {
@@ -183,80 +185,8 @@ describe('Unit | Application | Router | campaign-router ', function () {
       const response = await httpTestServer.request('PATCH', '/api/admin/campaigns/1', payload);
 
       // then
+      expect(adminUpdateCampaignValidator.validate).to.have.been.called;
       expect(response.statusCode).to.equal(204);
-    });
-
-    it('should return 400 with an invalid campaign id', async function () {
-      // given
-      const httpTestServer = new HttpTestServer();
-      await httpTestServer.register(moduleUnderTest);
-
-      // when
-      const response = await httpTestServer.request('PATCH', '/api/admin/campaigns/invalid');
-
-      // then
-      expect(response.statusCode).to.equal(400);
-    });
-
-    it('should return 400 when name is null', async function () {
-      // given
-      const httpTestServer = new HttpTestServer();
-      await httpTestServer.register(moduleUnderTest);
-      const payload = {
-        data: {
-          type: 'campaigns',
-          attributes: {
-            name: null,
-          },
-        },
-      };
-
-      // when
-      const response = await httpTestServer.request('PATCH', '/api/admin/campaigns/1', payload);
-
-      // then
-      expect(response.statusCode).to.equal(400);
-    });
-
-    it('should return 400 when name is empty', async function () {
-      // given
-      const httpTestServer = new HttpTestServer();
-      await httpTestServer.register(moduleUnderTest);
-      const payload = {
-        data: {
-          type: 'campaigns',
-          attributes: {
-            name: '',
-          },
-        },
-      };
-
-      // when
-      const response = await httpTestServer.request('PATCH', '/api/admin/campaigns/1', payload);
-
-      // then
-      expect(response.statusCode).to.equal(400);
-    });
-
-    it('should return 400 when title is empty', async function () {
-      // given
-      const httpTestServer = new HttpTestServer();
-      await httpTestServer.register(moduleUnderTest);
-      const payload = {
-        data: {
-          type: 'campaigns',
-          attributes: {
-            name: 'name',
-            title: '',
-          },
-        },
-      };
-
-      // when
-      const response = await httpTestServer.request('PATCH', '/api/admin/campaigns/1', payload);
-
-      // then
-      expect(response.statusCode).to.equal(400);
     });
 
     it('returns forbidden access if admin member has CERTIF role', async function () {

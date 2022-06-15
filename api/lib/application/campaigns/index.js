@@ -5,6 +5,7 @@ const campaignStatsController = require('./campaign-stats-controller');
 const securityPreHandlers = require('../security-pre-handlers');
 const identifiersType = require('../../domain/types/identifiers-type');
 const CampaignParticipationStatuses = require('../../domain/models/CampaignParticipationStatuses');
+const adminUpdateCampaignValidator = require('./admin-update-campaign-validation');
 
 const campaignParticipationStatuses = Object.values(CampaignParticipationStatuses);
 
@@ -123,29 +124,8 @@ exports.register = async function (server) {
               ])(request, h),
             assign: 'hasAuthorizationToAccessAdminScope',
           },
+          { method: adminUpdateCampaignValidator.validate },
         ],
-        validate: {
-          params: Joi.object({
-            id: identifiersType.campaignId,
-          }),
-          payload: Joi.object({
-            data: {
-              type: 'campaigns',
-              attributes: {
-                name: Joi.string().empty(Joi.string().regex(/^\s*$/)).required(),
-                title: Joi.string().required().allow(null),
-                'custom-landing-page-text': Joi.string().required().allow(null).max(5000),
-                'custom-result-page-text': Joi.string().required().allow(null),
-                'custom-result-page-button-text': Joi.string().required().allow(null),
-                'custom-result-page-button-url': Joi.string().required().allow(null),
-                'multiple-sendings': Joi.boolean().required(),
-              },
-            },
-          }),
-          options: {
-            allowUnknown: true,
-          },
-        },
         handler: campaignManagementController.updateCampaignDetailsManagement,
         tags: ['api', 'campaign', 'admin'],
         notes: [
