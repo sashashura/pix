@@ -6,6 +6,7 @@ const securityPreHandlers = require('../security-pre-handlers');
 const identifiersType = require('../../domain/types/identifiers-type');
 const CampaignParticipationStatuses = require('../../domain/models/CampaignParticipationStatuses');
 const adminUpdateCampaignValidator = require('./admin-update-campaign-validation');
+const adminUpdateCampaignAccess = require('./admin-update-campaign-access');
 
 const campaignParticipationStatuses = Object.values(CampaignParticipationStatuses);
 
@@ -115,15 +116,7 @@ exports.register = async function (server) {
       path: '/api/admin/campaigns/{id}',
       config: {
         pre: [
-          {
-            method: (request, h) =>
-              securityPreHandlers.userHasAtLeastOneAccessOf([
-                securityPreHandlers.checkUserHasRoleSuperAdmin,
-                securityPreHandlers.checkUserHasRoleSupport,
-                securityPreHandlers.checkUserHasRoleMetier,
-              ])(request, h),
-            assign: 'hasAuthorizationToAccessAdminScope',
-          },
+          { method: (r) => adminUpdateCampaignAccess.isAllowed(r) },
           { method: adminUpdateCampaignValidator.validate },
         ],
         handler: campaignManagementController.updateCampaignDetailsManagement,

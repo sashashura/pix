@@ -1,6 +1,7 @@
 const { expect, HttpTestServer, sinon } = require('../../../test-helper');
 const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
 const adminUpdateCampaignValidator = require('../../../../lib/application/campaigns/admin-update-campaign-validation');
+const adminUpdateCampaignAccess = require('../../../../lib/application/campaigns/admin-update-campaign-access');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 const moduleUnderTest = require('../../../../lib/application/campaigns');
 const campaignController = require('../../../../lib/application/campaigns/campaign-controller');
@@ -151,78 +152,24 @@ describe('Unit | Application | Router | campaign-router ', function () {
     });
   });
 
-  describe.only('PATCH /api/admin/campaigns/{id}', function () {
+  describe('PATCH /api/admin/campaigns/{id}', function () {
     it('should return 204', async function () {
       // given
-      sinon
-        .stub(securityPreHandlers, 'checkUserHasRoleCertif')
-        .callsFake((request, h) => h.response({ errors: new Error('forbidden') }).code(403));
-      sinon.stub(securityPreHandlers, 'checkUserHasRoleSuperAdmin').callsFake((request, h) => h.response(true));
-      sinon.stub(securityPreHandlers, 'checkUserHasRoleSupport').callsFake((request, h) => h.response(true));
-      sinon.stub(securityPreHandlers, 'checkUserHasRoleMetier').callsFake((request, h) => h.response(true));
+
+      sinon.stub(adminUpdateCampaignAccess, 'isAllowed').returns(true);
+      sinon.stub(adminUpdateCampaignValidator, 'validate').returns(true);
       sinon
         .stub(campaignManagementController, 'updateCampaignDetailsManagement')
-        .callsFake((request, h) => h.response('ok').code(204));
-      sinon.stub(adminUpdateCampaignValidator, 'validate').returns(true);
-      const httpTestServer = new HttpTestServer();
-      await httpTestServer.register(moduleUnderTest);
-      const payload = {
-        data: {
-          type: 'campaigns',
-          attributes: {
-            name: 'name',
-            title: 'title',
-            'custom-landing-page-text': null,
-            'custom-result-page-text': null,
-            'custom-result-page-button-text': null,
-            'custom-result-page-button-url': null,
-            'multiple-sendings': false,
-          },
-        },
-      };
+        .callsFake((request, h) => h.response('ok').code(200));
 
       // when
-      const response = await httpTestServer.request('PATCH', '/api/admin/campaigns/1', payload);
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+      await httpTestServer.request('PATCH', '/api/admin/campaigns/1', {});
 
       // then
+      expect(adminUpdateCampaignAccess.isAllowed).to.have.been.called;
       expect(adminUpdateCampaignValidator.validate).to.have.been.called;
-      expect(response.statusCode).to.equal(204);
-    });
-
-    it('returns forbidden access if admin member has CERTIF role', async function () {
-      // given
-      sinon.stub(securityPreHandlers, 'checkUserHasRoleCertif').callsFake((request, h) => h.response(true));
-      sinon
-        .stub(securityPreHandlers, 'checkUserHasRoleSuperAdmin')
-        .callsFake((request, h) => h.response({ errors: new Error('forbidden') }).code(403));
-      sinon
-        .stub(securityPreHandlers, 'checkUserHasRoleSupport')
-        .callsFake((request, h) => h.response({ errors: new Error('forbidden') }).code(403));
-      sinon
-        .stub(securityPreHandlers, 'checkUserHasRoleMetier')
-        .callsFake((request, h) => h.response({ errors: new Error('forbidden') }).code(403));
-      const httpTestServer = new HttpTestServer();
-      await httpTestServer.register(moduleUnderTest);
-      const payload = {
-        data: {
-          type: 'campaigns',
-          attributes: {
-            name: 'name',
-            title: 'title',
-            'custom-landing-page-text': null,
-            'custom-result-page-text': null,
-            'custom-result-page-button-text': null,
-            'custom-result-page-button-url': null,
-            'multiple-sendings': false,
-          },
-        },
-      };
-
-      // when
-      const response = await httpTestServer.request('PATCH', '/api/admin/campaigns/1', payload);
-
-      // then
-      expect(response.statusCode).to.equal(403);
     });
   });
 
