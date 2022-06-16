@@ -7,6 +7,7 @@ const identifiersType = require('../../domain/types/identifiers-type');
 const CampaignParticipationStatuses = require('../../domain/models/CampaignParticipationStatuses');
 const adminUpdateCampaignValidator = require('./admin-update-campaign-validation');
 const adminUpdateCampaignAccess = require('./admin-update-campaign-access');
+const caseModule = require('../change-case');
 
 const campaignParticipationStatuses = Object.values(CampaignParticipationStatuses);
 
@@ -118,6 +119,7 @@ exports.register = async function (server) {
         pre: [
           { method: (r) => adminUpdateCampaignAccess.isAllowed(r) },
           { method: adminUpdateCampaignValidator.validate },
+          { method: caseModule.changeCase, assign: 'parameters' },
         ],
         handler: campaignManagementController.updateCampaignDetailsManagement,
         tags: ['api', 'campaign', 'admin'],

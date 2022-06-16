@@ -25,8 +25,7 @@ module.exports = {
 
   async updateCampaignDetailsManagement(request, h) {
     const campaignId = request.params.id;
-
-    const campaignDetailsManagement = await commonDeserializer.deserialize(request.payload);
+    const campaignDetailsManagement = request.pre.parameters.payload.data.attributes;
     await usecases.updateCampaignDetailsManagement({
       campaignId,
       ...campaignDetailsManagement,

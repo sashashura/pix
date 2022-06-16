@@ -2,6 +2,7 @@ const { expect, HttpTestServer, sinon } = require('../../../test-helper');
 const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
 const adminUpdateCampaignValidator = require('../../../../lib/application/campaigns/admin-update-campaign-validation');
 const adminUpdateCampaignAccess = require('../../../../lib/application/campaigns/admin-update-campaign-access');
+const caseModule = require('../../../../lib/application/change-case');
 const { NotFoundError } = require('../../../../lib/domain/errors');
 const moduleUnderTest = require('../../../../lib/application/campaigns');
 const campaignController = require('../../../../lib/application/campaigns/campaign-controller');
@@ -158,6 +159,7 @@ describe('Unit | Application | Router | campaign-router ', function () {
 
       sinon.stub(adminUpdateCampaignAccess, 'isAllowed').returns(true);
       sinon.stub(adminUpdateCampaignValidator, 'validate').returns(true);
+      sinon.stub(caseModule, 'changeCase').returns(true);
       sinon
         .stub(campaignManagementController, 'updateCampaignDetailsManagement')
         .callsFake((request, h) => h.response('ok').code(200));
@@ -170,6 +172,7 @@ describe('Unit | Application | Router | campaign-router ', function () {
       // then
       expect(adminUpdateCampaignAccess.isAllowed).to.have.been.called;
       expect(adminUpdateCampaignValidator.validate).to.have.been.called;
+      expect(caseModule.changeCase).to.have.been.called;
     });
   });
 
