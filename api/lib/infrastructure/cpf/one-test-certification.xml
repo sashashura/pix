@@ -1,0 +1,33 @@
+<cpf:passageCertification>
+  <cpf:idTechnique>certification-courses.id</cpf:idTechnique>
+  <cpf:obtentionCertification>PAR_SCORING</cpf:obtentionCertification>
+  <cpf:donneeCertifiee>true</cpf:donneeCertifiee>
+  <cpf:dateDebutValidite>certification-courses.publishedAt</cpf:dateDebutValidite>
+  <cpf:dateFinValidite>nill</cpf:dateFinValidite>
+  <cpf:presenceNiveauLangueEuro>false</cpf:presenceNiveauLangueEuro>
+  <cpf:presenceNiveauNumeriqueEuro>true</cpf:presenceNiveauNumeriqueEuro>
+  <cpf:scoring>assessment-results.pixScore</cpf:scoring>
+  <cpf:mentionValidee>nill</cpf:mentionValidee>
+  <cpf:modalitesInscription>
+    <cpf:modaliteAcces>CANDIDAT_LIBRE</cpf:modaliteAcces>
+  </cpf:modalitesInscription>
+  <cpf:identificationTitulaire>
+    <cpf:titulaire>
+      <cpf:nomNaissance>certification-courses.lastName</cpf:nomNaissance>
+      <cpf:nomUsage>nill</cpf:nomUsage>
+      <cpf:prenom1>certification-courses.firstName</cpf:prenom1>
+      <cpf:anneeNaissance>certification-courses.birthDate</cpf:anneeNaissance>
+      <cpf:moisNaissance>certification-courses.birthDate</cpf:moisNaissance>
+      <cpf:jourNaissance>certification-courses.birthDate</cpf:jourNaissance>
+      <cpf:sexe>certification-candidates.sex</cpf:sexe>
+      <cpf:codeCommuneNaissance>
+        <cpf:codeInseeNaissance>
+          <cpf:codeInsee>certification-courses.birthINSEECode</cpf:codeInsee>
+        </cpf:codeInseeNaissance>
+        <cpf:codePostalNaissance>
+          <cpf:codePostal>certification-courses.birthPostalCode</cpf:codePostal>
+        </cpf:codePostalNaissance>
+      </cpf:codeCommuneNaissance>
+    </cpf:titulaire>
+  </cpf:identificationTitulaire>
+</cpf:passageCertification>
