@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cpf:flux xmlns:cpf="urn:cdc:cpf:pc5:schema:1.0.0">
-  <cpf:idFlux>6e3c7378-bda4-497a-9bd6-dc203f903ed9</cpf:idFlux>
+  <cpf:idFlux>6e3c7378-bda4-497a-9bd6-dc203f903ed0</cpf:idFlux>
   <cpf:horodatage>2020-12-18T14:24:12+01:00</cpf:horodatage>
   <cpf:emetteur>
     <cpf:idClient>AB123CDE</cpf:idClient>
@@ -15,34 +15,31 @@
             <cpf:natureDeposant>CERTIFICATEUR</cpf:natureDeposant>
             <cpf:passageCertifications>
               <cpf:passageCertification>
-              <cpf:idTechnique>certification-courses.id</cpf:idTechnique>
+              <cpf:idTechnique>0</cpf:idTechnique>
               <cpf:obtentionCertification>PAR_SCORING</cpf:obtentionCertification>
               <cpf:donneeCertifiee>true</cpf:donneeCertifiee>
-              <cpf:dateDebutValidite>certification-courses.publishedAt</cpf:dateDebutValidite>
-              <cpf:dateFinValidite>nill</cpf:dateFinValidite>
+              <cpf:dateDebutValidite>2020-12-18</cpf:dateDebutValidite>
+              <cpf:dateFinValidite>"nill"</cpf:dateFinValidite>
               <cpf:presenceNiveauLangueEuro>false</cpf:presenceNiveauLangueEuro>
               <cpf:presenceNiveauNumeriqueEuro>true</cpf:presenceNiveauNumeriqueEuro>
-              <cpf:scoring>assessment-results.pixScore</cpf:scoring>
-              <cpf:mentionValidee>nill</cpf:mentionValidee>
+              <cpf:scoring>512</cpf:scoring>
+              <cpf:mentionValidee>"nill"</cpf:mentionValidee>
               <cpf:modalitesInscription>
                 <cpf:modaliteAcces>CANDIDAT_LIBRE</cpf:modaliteAcces>
               </cpf:modalitesInscription>
               <cpf:identificationTitulaire>
                 <cpf:titulaire>
-                  <cpf:nomNaissance>certification-courses.lastName</cpf:nomNaissance>
+                  <cpf:nomNaissance>Dupont</cpf:nomNaissance>
                   <cpf:nomUsage>nill</cpf:nomUsage>
-                  <cpf:prenom1>certification-courses.firstName</cpf:prenom1>
-                  <cpf:anneeNaissance>certification-courses.birthDate</cpf:anneeNaissance>
-                  <cpf:moisNaissance>certification-courses.birthDate</cpf:moisNaissance>
-                  <cpf:jourNaissance>certification-courses.birthDate</cpf:jourNaissance>
-                  <cpf:sexe>certification-candidates.sex</cpf:sexe>
+                  <cpf:prenom1>John</cpf:prenom1>
+                  <cpf:anneeNaissance>1987</cpf:anneeNaissance>
+                  <cpf:moisNaissance>09</cpf:moisNaissance>
+                  <cpf:jourNaissance>01</cpf:jourNaissance>
+                  <cpf:sexe>F</cpf:sexe>
                   <cpf:codeCommuneNaissance>
                     <cpf:codeInseeNaissance>
-                      <cpf:codeInsee>certification-courses.birthINSEECode</cpf:codeInsee>
+                      <cpf:codeInsee>75101</cpf:codeInsee>
                     </cpf:codeInseeNaissance>
-                    <cpf:codePostalNaissance>
-                      <cpf:codePostal>certification-courses.birthPostalCode</cpf:codePostal>
-                    </cpf:codePostalNaissance>
                   </cpf:codeCommuneNaissance>
                 </cpf:titulaire>
               </cpf:identificationTitulaire>
