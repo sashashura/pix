@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cpf:flux xmlns:cpf="urn:cdc:cpf:pc5:schema:1.0.0">
+<cpf:flux xmlns:cpf="urn:cdc:cpf:pc5:schema:1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <cpf:idFlux>6e3c7378-bda4-497a-9bd6-dc203f903ed0</cpf:idFlux>
   <cpf:horodatage>2020-12-18T14:24:12+01:00</cpf:horodatage>
   <cpf:emetteur>
@@ -19,11 +19,11 @@
               <cpf:obtentionCertification>PAR_SCORING</cpf:obtentionCertification>
               <cpf:donneeCertifiee>true</cpf:donneeCertifiee>
               <cpf:dateDebutValidite>2020-12-18</cpf:dateDebutValidite>
-              <cpf:dateFinValidite>"nill"</cpf:dateFinValidite>
+              <cpf:dateFinValidite xsi:nil="true"></cpf:dateFinValidite>
               <cpf:presenceNiveauLangueEuro>false</cpf:presenceNiveauLangueEuro>
               <cpf:presenceNiveauNumeriqueEuro>true</cpf:presenceNiveauNumeriqueEuro>
               <cpf:scoring>512</cpf:scoring>
-              <cpf:mentionValidee>"nill"</cpf:mentionValidee>
+              <cpf:mentionValidee xsi:nil="true"></cpf:mentionValidee>
               <cpf:modalitesInscription>
                 <cpf:modaliteAcces>CANDIDAT_LIBRE</cpf:modaliteAcces>
               </cpf:modalitesInscription>
