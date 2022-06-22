@@ -36,7 +36,6 @@ module.exports = async function authenticateUser({
   source,
   username,
   refreshTokenService,
-  tokenService,
   pixAuthenticationService,
   tokenService,
   userRepository,

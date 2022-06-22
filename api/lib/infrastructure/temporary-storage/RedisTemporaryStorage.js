@@ -15,10 +15,11 @@ class RedisTemporaryStorage extends TemporaryStorage {
     return new RedisClient(redisUrl, { name: 'temporary-storage', prefix: 'temporary-storage:' });
   }
 
-  async save({ key, value, expirationDelaySeconds }) {
+  async save({ key, value, expirationDelaySeconds, keepTimeToLive }) {
     const storageKey = trim(key) || RedisTemporaryStorage.generateKey();
 
     const objectAsString = JSON.stringify(value);
+    if (keepTimeToLive) expirationDelaySeconds = await this._client.ttl(storageKey);
     await this._client.set(storageKey, objectAsString, EXPIRATION_PARAMETER, expirationDelaySeconds);
     return storageKey;
   }

@@ -8,8 +8,9 @@ class InMemoryTemporaryStorage extends TemporaryStorage {
     this._client = new NodeCache();
   }
 
-  save({ key, value, expirationDelaySeconds }) {
+  save({ key, value, expirationDelaySeconds, keepTimeToLive }) {
     const storageKey = trim(key) || InMemoryTemporaryStorage.generateKey();
+    if (keepTimeToLive) expirationDelaySeconds = this._client.getTtl(storageKey);
     this._client.set(storageKey, value, expirationDelaySeconds);
     return storageKey;
   }

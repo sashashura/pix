@@ -8,33 +8,99 @@ function _prefixForUser(userId) {
   return `${userId}:`;
 }
 
-async function createRefreshTokenFromUserId({ userId, source }) {
-  const expirationDelaySeconds = settings.authentication.refreshTokenLifespanMs / 1000;
-  const token = `${_prefixForUser(userId)}${uuidv4()}`;
-  return await temporaryStorage.save({
-    key: token,
-    value: { type: 'refresh_token', userId, source },
-    expirationDelaySeconds,
-  });
+const refreshTokenExpression = /^([^:]+:[^:]+)(:(.*))?$/;
+
+function _parseRefreshToken(refreshToken) {
+  const result = refreshTokenExpression.exec(refreshToken);
+  if (!result) throw new InvalidRefreshTokenError();
+  const [, token, , childToken] = result;
+  return { token, childToken };
 }
 
-async function createAccessTokenFromRefreshToken({ refreshToken }) {
-  const { userId, source } = (await temporaryStorage.get(refreshToken)) || {};
-  if (!userId) throw new UnauthorizedError('Refresh token is invalid', 'INVALID_REFRESH_TOKEN');
-  return tokenService.createAccessTokenFromUser(userId, source);
+async function createRefreshTokenFromUserId({ userId, source }) {
+  const token = `${_prefixForUser(userId)}${uuidv4()}`;
+  const expirationDelaySeconds = settings.authentication.refreshTokenLifespanMs / 1000;
+  const tokenInfo = { type: 'refresh_token', userId, source };
+
+  if (!settings.authentication.isRefreshTokenRotationEnabled) {
+    return await temporaryStorage.save({
+      key: token,
+      value: tokenInfo,
+      expirationDelaySeconds,
+    });
+  }
+
+  tokenInfo.childToken = uuidv4();
+
+  await temporaryStorage.save({
+    key: token,
+    value: tokenInfo,
+    expirationDelaySeconds,
+  });
+
+  return `${token}:${tokenInfo.childToken}`;
+}
+
+async function refreshAccessToken({ refreshToken }) {
+  const { token, childToken } = _parseRefreshToken(refreshToken);
+  const tokenInfo = await temporaryStorage.get(token);
+  if (!tokenInfo) throw new InvalidRefreshTokenError();
+
+  if (childToken !== tokenInfo.childToken) {
+    await temporaryStorage.delete(token);
+    throw new InvalidRefreshTokenError();
+  }
+
+  const { userId, source } = tokenInfo;
+
+  const { accessToken, expirationDelaySeconds } = tokenService.createAccessTokenFromUser(userId, source);
+
+  if (!settings.authentication.isRefreshTokenRotationEnabled) {
+    // Downgrading from RTR to no RTR (remove childToken)
+    if (tokenInfo.childToken) {
+      const { childToken: _, ...newTokenInfo } = tokenInfo;
+      await temporaryStorage.save({
+        key: token,
+        value: newTokenInfo,
+        keepTimeToLive: true,
+      });
+    }
+
+    return { accessToken, expirationDelaySeconds, refreshToken: token };
+  }
+
+  const newTokenInfo = {
+    ...tokenInfo,
+    childToken: uuidv4(),
+  };
+
+  await temporaryStorage.save({
+    key: token,
+    value: newTokenInfo,
+    keepTimeToLive: true,
+  });
+
+  return { accessToken, expirationDelaySeconds, refreshToken: `${token}:${newTokenInfo.childToken}` };
 }
 
 async function revokeRefreshToken({ refreshToken }) {
-  await temporaryStorage.delete(refreshToken);
+  const { token } = _parseRefreshToken(refreshToken);
+  await temporaryStorage.delete(token);
 }
 
 async function revokeRefreshTokensForUserId({ userId }) {
   await temporaryStorage.deleteByPrefix(_prefixForUser(userId));
 }
 
+class InvalidRefreshTokenError extends UnauthorizedError {
+  constructor() {
+    super('Refresh token is invalid', 'INVALID_REFRESH_TOKEN');
+  }
+}
+
 module.exports = {
   createRefreshTokenFromUserId,
-  createAccessTokenFromRefreshToken,
+  refreshAccessToken,
   revokeRefreshToken,
   revokeRefreshTokensForUserId,
 

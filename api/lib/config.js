@@ -111,6 +111,7 @@ module.exports = (function () {
       tokenForCampaignResultLifespan: '1h',
       tokenForStudentReconciliationLifespan: '1h',
       passwordResetTokenLifespan: '1h',
+      isRefreshTokenRotationEnabled: isFeatureEnabled(process.env.REFRESH_TOKEN_ROTATION_ENABLED),
     },
 
     apiManager: {

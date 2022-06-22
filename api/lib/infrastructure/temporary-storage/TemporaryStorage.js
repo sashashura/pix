@@ -5,8 +5,8 @@ class TemporaryStorage {
     return uuidv4();
   }
 
-  async save(/* { key, value, expirationDelaySeconds } */) {
-    throw new Error('Method #save({ key, value, expirationDelaySeconds }) must be overridden');
+  async save(/* { key, value, expirationDelaySeconds, keepTimeToLive } */) {
+    throw new Error('Method #save({ key, value, expirationDelaySeconds, keepTimeToLive }) must be overridden');
   }
 
   async get(/* key */) {
