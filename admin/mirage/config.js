@@ -154,6 +154,9 @@ export default function () {
   this.post('/admin/target-profiles/:id/badges', createBadge);
 
   this.post('/admin/stages', createStage);
+  this.get('/admin/stages/:id', (schema, request) => {
+    return schema.stages.find(request.params.id);
+  });
 
   this.get('/admin/certifications/:id');
 
