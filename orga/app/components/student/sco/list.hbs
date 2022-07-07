@@ -73,7 +73,7 @@
           <tr aria-label={{t "pages.students-sco.table.row-title"}}>
             <td class="ellipsis" title={{student.lastName}}>{{student.lastName}}</td>
             <td class="ellipsis" title={{student.firstName}}>{{student.firstName}}</td>
-            <td class="table__column--center">{{moment-format student.birthdate "DD/MM/YYYY" allow-empty=true}}</td>
+            <td class="table__column--center">{{dayjs-format student.birthdate "DD/MM/YYYY" allow-empty=true}}</td>
             <td class="ellipsis">{{student.division}}</td>
             <td class="list-students-page__authentication-methods">
               {{#each student.authenticationMethods as |authenticationMethod|}}
@@ -82,7 +82,7 @@
             </td>
             <td class="table__column--right">{{student.participationCount}}</td>
             <td class="table__column--center">
-              {{moment-format student.lastParticipationDate "DD/MM/YYYY" allow-empty=true}}
+              {{dayjs-format student.lastParticipationDate "DD/MM/YYYY" allow-empty=true}}
             </td>
             <td class="list-students-page__actions hide-on-mobile">
               {{#if student.isStudentAssociated}}

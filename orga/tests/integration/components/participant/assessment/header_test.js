@@ -4,7 +4,7 @@ import { setupIntl, t } from 'ember-intl/test-support';
 import { render } from '@1024pix/ember-testing-library';
 import hbs from 'htmlbars-inline-precompile';
 
-module('Integration | Component | Participant::Assessment::Header', function (hooks) {
+module.only('Integration | Component | Participant::Assessment::Header', function (hooks) {
   setupIntlRenderingTest(hooks);
   setupIntl(hooks);
 
@@ -28,12 +28,14 @@ module('Integration | Component | Participant::Assessment::Header', function (ho
   });
 
   test('it displays campaign participation creation date', async function (assert) {
-    this.participation = { createdAt: '2020-01-01' };
+    this.participation = { createdAt: '2020-02-01' };
     this.campaign = {};
 
     await render(hbs`<Participant::Assessment::Header @participation={{participation}} @campaign={{campaign}} />`);
 
-    assert.contains('01 janv. 2020');
+    await this.pauseTest()
+
+    assert.contains('01 Jan 2020');
   });
 
   test('it displays campaign participation progression', async function (assert) {
