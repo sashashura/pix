@@ -17,22 +17,43 @@ const checkUserIsMemberOfCertificationCenterSessionUsecase = require('./usecases
 const checkAuthorizationToManageCampaignUsecase = require('./usecases/checkAuthorizationToManageCampaign');
 const certificationIssueReportRepository = require('../infrastructure/repositories/certification-issue-report-repository');
 const Organization = require('../../lib/domain/models/Organization');
-const { ForbiddenAccess } = require('../..//lib/domain/errors');
-const apps = require('../..//lib/domain/constants');
+const { ForbiddenAccess } = require('../../lib/domain/errors');
+const apps = require('../../lib/domain/constants');
 
 const JSONAPIError = require('jsonapi-serializer').Error;
 const has = require('lodash/has');
 
-function _replyForbiddenError(h) {
+function _replyForbiddenError(h, meta) {
   const errorHttpStatusCode = 403;
 
   const jsonApiError = new JSONAPIError({
     code: errorHttpStatusCode,
     title: 'Forbidden access',
     detail: 'Missing or insufficient permissions.',
+    meta,
   });
 
   return h.response(jsonApiError).code(errorHttpStatusCode).takeover();
+}
+
+const meta = apps.PIX_ADMIN.NOT_ALLOWED_CODE;
+
+const _containsAdminMembersAccessErrors = (response) =>
+  response?.source?.errors &&
+  response.source?.errors[0] &&
+  response.source?.errors[0].meta === 'SECURITY_PREHANDLER_NOT_ALLOWED';
+
+function adminMemberHasAtLeastOneAccessOf(securityChecks) {
+  return async (request, h) => {
+    const responses = await bluebird.map(securityChecks, (securityCheck) => securityCheck(request, h));
+    const hasAccess = responses.some((response) => !response.source?.errors);
+    const adminMemberHasNoAccess = responses.every(_containsAdminMembersAccessErrors);
+
+    if (adminMemberHasNoAccess && !hasAccess) {
+      return _replyForbiddenError(h, meta);
+    }
+    return hasAccess ? hasAccess : _replyForbiddenError(h);
+  };
 }
 
 async function checkAdminMemberHasRoleSuperAdmin(request, h) {
@@ -45,11 +66,11 @@ async function checkAdminMemberHasRoleSuperAdmin(request, h) {
   try {
     const hasRoleSuperAdmin = await checkAdminMemberHasRoleSuperAdminUseCase.execute(userId);
     if (!hasRoleSuperAdmin) {
-      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG);
+      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG, apps.PIX_ADMIN.NOT_ALLOWED_CODE);
     }
     return h.response(true);
   } catch (e) {
-    return _replyForbiddenError(h);
+    return _replyForbiddenError(h, meta);
   }
 }
 
@@ -63,11 +84,11 @@ async function checkAdminMemberHasRoleCertif(request, h) {
   try {
     const hasRoleCertif = await checkAdminMemberHasRoleCertifUseCase.execute(userId);
     if (!hasRoleCertif) {
-      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG);
+      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG, apps.PIX_ADMIN.NOT_ALLOWED_CODE);
     }
     return h.response(true);
   } catch (e) {
-    return _replyForbiddenError(h);
+    return _replyForbiddenError(h, meta);
   }
 }
 
@@ -81,11 +102,11 @@ async function checkAdminMemberHasRoleSupport(request, h) {
   try {
     const hasRoleSupport = await checkAdminMemberHasRoleSupportUseCase.execute(userId);
     if (!hasRoleSupport) {
-      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG);
+      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG, apps.PIX_ADMIN.NOT_ALLOWED_CODE);
     }
     return h.response(true);
   } catch (e) {
-    return _replyForbiddenError(h);
+    return _replyForbiddenError(h, meta);
   }
 }
 
@@ -99,11 +120,11 @@ async function checkAdminMemberHasRoleMetier(request, h) {
   try {
     const hasRoleMetier = await checkAdminMemberHasRoleMetierUseCase.execute(userId);
     if (!hasRoleMetier) {
-      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG);
+      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG, apps.PIX_ADMIN.NOT_ALLOWED_CODE);
     }
     return h.response(true);
   } catch (e) {
-    return _replyForbiddenError(h);
+    return _replyForbiddenError(h, meta);
   }
 }
 
@@ -334,14 +355,6 @@ async function checkAuthorizationToManageCampaign(request, h) {
 
   if (isAdminOrOwnerOfTheCampaign) return h.response(true);
   return _replyForbiddenError(h);
-}
-
-function adminMemberHasAtLeastOneAccessOf(securityChecks) {
-  return async (request, h) => {
-    const responses = await bluebird.map(securityChecks, (securityCheck) => securityCheck(request, h));
-    const hasAccess = responses.some((response) => !response.source?.errors);
-    return hasAccess ? hasAccess : _replyForbiddenError(h);
-  };
 }
 
 async function checkUserOwnsCertificationCourse(request, h) {

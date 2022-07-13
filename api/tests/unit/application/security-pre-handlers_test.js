@@ -585,11 +585,13 @@ describe('Unit | Application | SecurityPreHandlers', function () {
   describe('#adminMemberHasAtLeastOneAccessOf', function () {
     let belongsToOrganizationStub;
     let hasRoleSuperAdminStub;
+    let hasRoleCertifStub;
     let request;
 
     beforeEach(function () {
       belongsToOrganizationStub = sinon.stub(securityPreHandlers, 'checkUserBelongsToOrganization');
       hasRoleSuperAdminStub = sinon.stub(securityPreHandlers, 'checkAdminMemberHasRoleSuperAdmin');
+      hasRoleCertifStub = sinon.stub(checkAdminMemberHasRoleCertifUseCase, 'execute');
       request = {
         auth: {
           credentials: {
@@ -605,12 +607,14 @@ describe('Unit | Application | SecurityPreHandlers', function () {
       it('should authorize access to resource when the user is authenticated and belongs to organization', async function () {
         // given
         belongsToOrganizationStub.callsFake((request, h) => h.response(true));
+        hasRoleCertifStub.callsFake((request, h) => h.response(true));
         hasRoleSuperAdminStub.callsFake((request, h) => h.response({ errors: new Error('forbidden') }).code(403));
 
         // when
         const response = await securityPreHandlers.adminMemberHasAtLeastOneAccessOf([
           belongsToOrganizationStub,
           hasRoleSuperAdminStub,
+          hasRoleCertifStub,
         ])(request, hFake);
 
         // then
@@ -649,21 +653,72 @@ describe('Unit | Application | SecurityPreHandlers', function () {
     });
 
     context('Error cases', function () {
-      it('should forbid resource access when user does not belong to organization nor has role Super Admin', async function () {
-        // given
-        belongsToOrganizationStub.callsFake((request, h) => h.response({ errors: new Error('forbidden') }).code(403));
-        hasRoleSuperAdminStub.callsFake((request, h) => h.response({ errors: new Error('forbidden') }).code(403));
+      const jsonApiError403WithMeta = {
+        errors: [
+          {
+            code: 403,
+            title: 'Forbidden access',
+            meta: 'SECURITY_PREHANDLER_NOT_ALLOWED',
+            detail: 'Missing or insufficient permissions.',
+          },
+        ],
+      };
 
-        // when
-        const response = await securityPreHandlers.adminMemberHasAtLeastOneAccessOf([
-          belongsToOrganizationStub,
-          hasRoleSuperAdminStub,
-        ])(request, hFake);
+      context('when the user is authenticated and is admin member', function () {
+        it('should forbid resource access when admin member has no role Super Admin or certif', async function () {
+          // given
+          hasRoleSuperAdminStub.callsFake((request, h) => h.response({ errors: jsonApiError403WithMeta }).code(403));
+          hasRoleCertifStub.callsFake((request, h) => h.response({ errors: jsonApiError403WithMeta }).code(403));
 
-        // then
-        expect(response.statusCode).to.equal(403);
-        expect(response.isTakeOver).to.be.true;
+          // when
+          const response = await securityPreHandlers.adminMemberHasAtLeastOneAccessOf([
+            hasRoleSuperAdminStub,
+            hasRoleCertifStub,
+          ])(request, hFake);
+
+          // then
+          expect(response.statusCode).to.equal(403);
+          expect(response.source.errors).to.deep.equal([
+            {
+              code: 403,
+              detail: 'Missing or insufficient permissions.',
+              title: 'Forbidden access',
+            },
+          ]);
+          expect(response.isTakeOver).to.be.true;
+        });
       });
+
+      context(
+        'when the user is authenticated and belongs to organization or is admin member with Super Admin role',
+        function () {
+          it('should forbidd access to resource and throw error without meta', async function () {
+            // given
+
+            belongsToOrganizationStub.callsFake((request, h) =>
+              h.response({ errors: new Error('forbidden') }).code(403)
+            );
+            hasRoleSuperAdminStub.callsFake((request, h) => h.response({ errors: jsonApiError403WithMeta }).code(403));
+
+            // when
+            const response = await securityPreHandlers.adminMemberHasAtLeastOneAccessOf([
+              belongsToOrganizationStub,
+              hasRoleSuperAdminStub,
+            ])(request, hFake);
+
+            // then
+            expect(response.statusCode).to.equal(403);
+            expect(response.isTakeOver).to.be.true;
+            expect(response.source.errors).to.deep.equal([
+              {
+                code: 403,
+                detail: 'Missing or insufficient permissions.',
+                title: 'Forbidden access',
+              },
+            ]);
+          });
+        }
+      );
     });
   });
 

@@ -13,11 +13,115 @@ describe('Acceptance | Application | SecurityPreHandlers', function () {
       },
     ],
   };
+  const jsonApiError403WithMeta = {
+    errors: [
+      {
+        code: 403,
+        title: 'Forbidden access',
+        meta: 'SECURITY_PREHANDLER_NOT_ALLOWED',
+        detail: 'Missing or insufficient permissions.',
+      },
+    ],
+  };
 
   let server;
 
   beforeEach(async function () {
     server = await createServer();
+  });
+
+  describe('#adminMemberHasAtLeastOneAccessOf', function () {
+    let userId;
+    let organizationId;
+    let options;
+
+    beforeEach(async function () {
+      userId = databaseBuilder.factory.buildUser().id;
+      organizationId = databaseBuilder.factory.buildOrganization().id;
+
+      options = {
+        method: 'GET',
+        url: `/api/organizations/${organizationId}/memberships`,
+        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
+      };
+
+      await databaseBuilder.commit();
+    });
+
+    describe('with mixed security prehandlers, some for admin scope and others not', function () {
+      it('should be in success when user is in the organization', async function () {
+        // given
+        databaseBuilder.factory.buildMembership({ userId, organizationId, disabledAt: null });
+        await databaseBuilder.commit();
+
+        // when
+        const response = await server.inject(options);
+
+        // then
+        expect(response.statusCode).to.equal(200);
+      });
+
+      it('should be in success when user is not in the organization but is SUPERADMIN', async function () {
+        // given
+        databaseBuilder.factory.buildPixAdminRole({ userId, role: 'SUPER_ADMIN' });
+        await databaseBuilder.commit();
+
+        // when
+        const response = await server.inject(options);
+
+        // then
+        expect(response.statusCode).to.equal(200);
+      });
+
+      it('should return a well formed JSON API error when user is neither in the organization nor SUPERADMIN', async function () {
+        // given
+        databaseBuilder.factory.buildPixAdminRole({ userId, role: 'SUPER_ADMIN', disabledAt: new Date() });
+        await databaseBuilder.commit();
+
+        // when
+        const response = await server.inject(options);
+
+        // then
+        expect(response.statusCode).to.equal(403);
+        expect(response.result).to.deep.equal(jsonApiError403);
+      });
+    });
+
+    describe('with only admin members security prehandlers', function () {
+      it('should return a well formed JSON API error with meta when user is not authorized', async function () {
+        // given
+        const options = {
+          method: 'POST',
+          url: '/api/admin/assessment-results',
+          headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
+        };
+
+        // when
+        const response = await server.inject(options);
+
+        // then
+        expect(response.statusCode).to.equal(403);
+        expect(response.result).to.deep.equal(jsonApiError403WithMeta);
+      });
+
+      it('should be in success when admin member is SUPERADMIN', async function () {
+        // given
+        databaseBuilder.factory.buildPixAdminRole({ userId, role: 'SUPER_ADMIN' });
+        await databaseBuilder.commit();
+
+        const options = {
+          method: 'GET',
+          url: '/api/admin/organizations',
+          headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
+        };
+
+        // when
+        const response = await server.inject(options);
+
+        // then
+        expect(response.statusCode).to.equal(200);
+      });
+    });
   });
 
   describe('#checkAdminMemberHasRoleSuperAdmin', function () {
@@ -34,7 +138,7 @@ describe('Acceptance | Application | SecurityPreHandlers', function () {
 
       // then
       expect(response.statusCode).to.equal(403);
-      expect(response.result).to.deep.equal(jsonApiError403);
+      expect(response.result).to.deep.equal(jsonApiError403WithMeta);
     });
   });
 
@@ -292,35 +396,19 @@ describe('Acceptance | Application | SecurityPreHandlers', function () {
     });
   });
 
-  describe('#adminMemberHasAtLeastOneAccessOf', function () {
-    let userId;
-    let organizationId;
-    let options;
+  describe('#checkUserBelongsToOrganization', function () {
+    it('should return a well formed JSON API error when user is in the orga, but membership is disabled', async function () {
+      // given
+      const userId = databaseBuilder.factory.buildUser().id;
+      const organizationId = databaseBuilder.factory.buildOrganization().id;
 
-    beforeEach(async function () {
-      userId = databaseBuilder.factory.buildUser().id;
-      organizationId = databaseBuilder.factory.buildOrganization().id;
-
-      options = {
+      const options = {
         method: 'GET',
         url: `/api/organizations/${organizationId}/memberships`,
         headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
       };
 
       await databaseBuilder.commit();
-    });
-
-    it('should return a well formed JSON API error when user is neither in the organization nor SUPERADMIN', async function () {
-      // when
-      const response = await server.inject(options);
-
-      // then
-      expect(response.statusCode).to.equal(403);
-      expect(response.result).to.deep.equal(jsonApiError403);
-    });
-
-    it('should return a well formed JSON API error when user is in the orga, but membership is disabled', async function () {
-      // given
       databaseBuilder.factory.buildMembership({ userId, organizationId, disabledAt: new Date() });
       await databaseBuilder.commit();
 

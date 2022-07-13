@@ -39,6 +39,8 @@ module.exports = {
       METIER: 'METIER',
       CERTIF: 'CERTIF',
     },
+    FORBIDDEN_ACCES_CODE: 'SCOPE_ADMIN_FORBIDDEN_ACCESS',
+    NOT_ALLOWED_CODE: 'SECURITY_PREHANDLER_NOT_ALLOWED',
   },
   PIX_CERTIF: {
     SCOPE: 'pix-certif',
@@ -49,6 +51,11 @@ module.exports = {
     ENGLISH_SPOKEN: 'en',
     FRENCH_FRANCE: 'fr-fr',
     FRENCH_SPOKEN: 'fr',
+  },
+
+  SOURCE: {
+    CNAV: 'cnav',
+    POLE_EMPLOI: 'pole_emploi_connect',
   },
 
   IDENTITY_PROVIDER: {
