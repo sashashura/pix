@@ -230,7 +230,7 @@ function _mapToHttpError(error) {
     return new HttpErrors.UnauthorizedError(error.message);
   }
   if (error instanceof DomainErrors.ForbiddenAccess) {
-    return new HttpErrors.ForbiddenError(error.message);
+    return new HttpErrors.ForbiddenError(error.message, error.code);
   }
   if (error instanceof DomainErrors.MembershipCreationError) {
     return new HttpErrors.BadRequestError(error.message);

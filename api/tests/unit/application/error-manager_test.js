@@ -8,6 +8,7 @@ const {
   AlreadyRegisteredUsernameError,
   AuthenticationKeyExpired,
   EntityValidationError,
+  ForbiddenAccess,
   InvalidExternalAPIResponseError,
   MissingOrInvalidCredentialsError,
   UnexpectedUserAccountError,
@@ -439,7 +440,7 @@ describe('Unit | Application | ErrorManager', function () {
       expect(HttpErrors.ConflictError).to.have.been.calledWithExactly(error.message);
     });
 
-    it('should instantiate UnprocessableEntityError when AdminMemberError', async function () {
+    it('should instantiate UnprocessableEntityError with custom code and message when AdminMemberError', async function () {
       // given
       const error = new AdminMemberError('fake message', 'FAKE_ERROR_CODE');
       sinon.stub(HttpErrors, 'UnprocessableEntityError');
@@ -450,6 +451,38 @@ describe('Unit | Application | ErrorManager', function () {
 
       // then
       expect(HttpErrors.UnprocessableEntityError).to.have.been.calledWithExactly(error.message, error.code);
+    });
+
+    describe('ForbiddenAccess', function () {
+      describe('when no message or code is provided', function () {
+        it('should instantiate ForbiddenError with default code and message when ForbiddenAccess', async function () {
+          // given
+          //const error = new ForbiddenAccess('fake message', 'FAKE_ERROR_CODE');
+          const error = new ForbiddenAccess();
+          sinon.stub(HttpErrors, 'ForbiddenError');
+          const params = { request: {}, h: hFake, error };
+
+          // when
+          await handle(params.request, params.h, params.error);
+
+          // then
+          expect(HttpErrors.ForbiddenError).to.have.been.calledWithExactly('Accès non autorisé.', 'FORBIDDEN_ACCESS');
+        });
+      });
+      describe('when a message and a code are provided', function () {
+        it('should instantiate ForbiddenError with custom code and message when ForbiddenAccess', async function () {
+          // given
+          const error = new ForbiddenAccess('fake message', 'FAKE_ERROR_CODE');
+          sinon.stub(HttpErrors, 'ForbiddenError');
+          const params = { request: {}, h: hFake, error };
+
+          // when
+          await handle(params.request, params.h, params.error);
+
+          // then
+          expect(HttpErrors.ForbiddenError).to.have.been.calledWithExactly('fake message', 'FAKE_ERROR_CODE');
+        });
+      });
     });
   });
 });
