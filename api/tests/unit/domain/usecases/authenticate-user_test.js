@@ -84,7 +84,8 @@ describe('Unit | Application | UseCase | authenticate-user', function () {
 
         // then
         expect(error).to.be.an.instanceOf(ForbiddenAccess);
-        expect(error.message).to.be.equal(appMessages.PIX_ADMIN.NOT_ALLOWED_MSG);
+        expect(error.message).to.be.equal("Vous n'avez pas les droits pour vous connecter.");
+        expect(error.code).to.be.equal('SCOPE_ADMIN_FORBIDDEN_ACCESS');
       });
 
       it('should throw an error when user has a role but admin membership is disabled', async function () {
@@ -117,7 +118,8 @@ describe('Unit | Application | UseCase | authenticate-user', function () {
 
         // then
         expect(error).to.be.an.instanceOf(ForbiddenAccess);
-        expect(error.message).to.be.equal(appMessages.PIX_ADMIN.NOT_ALLOWED_MSG);
+        expect(error.message).to.be.equal("Vous n'avez pas les droits pour vous connecter.");
+        expect(error.code).to.be.equal('SCOPE_ADMIN_FORBIDDEN_ACCESS');
       });
 
       it('should resolve a valid JWT access token when admin member is not disabled and has a valid role', async function () {

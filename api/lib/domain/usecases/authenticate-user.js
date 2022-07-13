@@ -17,7 +17,7 @@ async function _checkUserAccessScope(scope, user, adminMemberRepository) {
   if (scope === apps.PIX_ADMIN.SCOPE) {
     const adminMember = await adminMemberRepository.get({ userId: user.id });
     if (!adminMember?.hasAccessToAdminScope) {
-      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG);
+      throw new ForbiddenAccess(apps.PIX_ADMIN.NOT_ALLOWED_MSG, apps.PIX_ADMIN.FORBIDDEN_ACCES_CODE);
     }
   }
 
