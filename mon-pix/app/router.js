@@ -106,6 +106,7 @@ Router.map(function () {
     this.route('resume', { path: '/evaluer' });
   });
 
+  this.route('login-oidc', { path: '/connexion/:idp_name' });
   this.route('terms-of-service', { path: '/cgu' });
   this.route('login-pole-emploi', { path: '/connexion-pole-emploi' });
   this.route('terms-of-service-pole-emploi', { path: '/cgu-pole-emploi' });
