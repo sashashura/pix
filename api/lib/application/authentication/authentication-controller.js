@@ -62,6 +62,26 @@ module.exports = {
     }
   },
 
+  async authenticateFwbUser(request) {
+    const { code, redirect_uri: redirectUri, state_sent: stateSent, state_received: stateReceived } = request.payload;
+
+    const result = await usecases.authenticateFwbUser({
+      code,
+      redirectUri,
+      stateReceived,
+      stateSent,
+    });
+
+    if (result.isAuthenticationComplete) {
+      return { access_token: result.pixAccessToken };
+    } else {
+      const message = "L'utilisateur n'a pas de compte Pix";
+      const responseCode = 'SHOULD_VALIDATE_CGU';
+      const meta = { authenticationKey: result.authenticationKey };
+      throw new UnauthorizedError(message, responseCode, meta);
+    }
+  },
+
   async authenticateExternalUser(request, h) {
     const {
       username,

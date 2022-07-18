@@ -6,6 +6,7 @@ const identityProviders = {
   GAR: 'GAR',
   POLE_EMPLOI: 'POLE_EMPLOI',
   CNAV: 'CNAV',
+  FWB: 'FWB',
 };
 
 class PixAuthenticationComplement {

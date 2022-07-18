@@ -215,6 +215,27 @@ exports.register = async (server) => {
         tags: ['api', 'CNAV'],
       },
     },
+    {
+      method: 'POST',
+      path: '/api/fwb/token',
+      config: {
+        auth: false,
+        payload: {
+          allow: 'application/x-www-form-urlencoded',
+        },
+        validate: {
+          payload: Joi.object().required().keys({
+            code: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            state_sent: Joi.string().required(),
+            state_received: Joi.string().required(),
+          }),
+        },
+        handler: AuthenticationController.authenticateFwbUser,
+        notes: ["Cette route reçoit l'authentication code de la FWB et renvoie un access token Pix."],
+        tags: ['api', 'FWB'],
+      },
+    },
   ]);
 };
 

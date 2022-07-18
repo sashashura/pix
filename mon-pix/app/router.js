@@ -111,6 +111,8 @@ Router.map(function () {
   this.route('terms-of-service-pole-emploi', { path: '/cgu-pole-emploi' });
   this.route('login-cnav', { path: '/connexion-cnav' });
   this.route('terms-of-service-cnav', { path: '/cgu-cnav' });
+  this.route('login-fwb', { path: '/connexion-fwb' });
+  this.route('terms-of-service-fwb', { path: '/cgu-fwb' });
 
   this.route('sitemap', { path: '/plan-du-site' });
   // XXX: this route is used for any request that did not match any of the previous routes. SHOULD ALWAYS BE THE LAST ONE
