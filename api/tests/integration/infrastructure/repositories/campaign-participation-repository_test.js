@@ -732,6 +732,18 @@ describe('Integration | Repository | Campaign Participation', function () {
       expect(updatedCampaignParticipation.participantExternalId).to.equals('Laura');
     });
 
+    it('should increment the campaign sharedParticipationsCount column', async function () {
+      // given
+      campaignParticipation.sharedAt = new Date();
+
+      // when
+      await campaignParticipationRepository.updateWithSnapshot(campaignParticipation);
+
+      // then
+      const campaign = await knex('campaigns').where({ id: campaignParticipation.campaignId }).first();
+      expect(campaign.sharedParticipationsCount).to.equal(1);
+    });
+
     it('should save a snapshot', async function () {
       // given
       campaignParticipation.sharedAt = new Date();

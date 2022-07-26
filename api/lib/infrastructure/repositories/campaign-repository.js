@@ -3,6 +3,7 @@ const BookshelfCampaign = require('../orm-models/Campaign');
 const { NotFoundError } = require('../../domain/errors');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
 const { knex } = require('../../../db/knex-database-connection');
+const DomainTransaction = require('../DomainTransaction');
 
 module.exports = {
   isCodeAvailable(code) {
@@ -115,5 +116,15 @@ module.exports = {
 
     if (!campaign) return null;
     return campaign.id;
+  },
+
+  incrementParticipationsCount(id, domainTransaction = DomainTransaction.emptyTransaction()) {
+    const knexConn = domainTransaction.knexTransaction || knex;
+    return knexConn('campaigns').where({ id }).increment('participationsCount', 1);
+  },
+
+  incrementSharedParticipationsCount(id, domainTransaction = DomainTransaction.emptyTransaction()) {
+    const knexConn = domainTransaction.knexTransaction || knex;
+    return knexConn('campaigns').where({ id }).increment('sharedParticipationsCount', 1);
   },
 };

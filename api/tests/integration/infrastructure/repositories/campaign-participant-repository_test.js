@@ -47,6 +47,11 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
       const [campaignParticipationId] = await knex('campaign-participations').pluck('id');
 
       expect(id).to.equal(campaignParticipationId);
+
+      const campaign = await knex('campaigns')
+        .where({ id: campaignParticipant.campaignParticipation.campaignId })
+        .first();
+      expect(campaign.participationsCount).to.equal(1);
     });
 
     context('when the campaign is profile collection', function () {
@@ -226,6 +231,7 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
         //GIVEN
         const campaign = databaseBuilder.factory.buildCampaign({
           multipleSendings: true,
+          participationsCount: 1,
         });
         const { id: previousCampaignParticipationForUserId } = databaseBuilder.factory.buildCampaignParticipation({
           userId: userIdentity.id,
@@ -265,6 +271,11 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
           .first();
 
         expect(campaignParticipation.isImproved).to.deep.equal(true);
+
+        const updatedCampaign = await knex('campaigns')
+          .where({ id: campaignParticipant.campaignParticipation.campaignId })
+          .first();
+        expect(updatedCampaign.participationsCount).to.equal(1);
       });
 
       it('does not update participation for other user or campaign', async function () {

@@ -27,6 +27,8 @@ module.exports = function buildCampaign({
   customResultPageButtonText = null,
   customResultPageButtonUrl = null,
   multipleSendings = false,
+  participationsCount = 0,
+  sharedParticipationsCount = 0,
   assessmentMethod,
 } = {}) {
   if (type === CampaignTypes.ASSESSMENT && !assessmentMethod) {
@@ -61,6 +63,8 @@ module.exports = function buildCampaign({
     customResultPageButtonText,
     customResultPageButtonUrl,
     multipleSendings,
+    participationsCount,
+    sharedParticipationsCount,
     assessmentMethod,
   };
   return databaseBuffer.pushInsertable({
