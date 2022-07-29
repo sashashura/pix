@@ -1,0 +1,93 @@
+
+version: '3'
+
+services:
+  baseImageEmber:
+    build: 
+      context: ./
+      dockerfile: ./dockerfiles/Dockerfile.node-16.14-ember
+    image: pix/nodebase-ember:latest
+    command: "exit 0"
+
+  postgres:
+    image: postgres:13.3-alpine
+    container_name: pix-api-postgres
+    ports:
+      - '${PIX_DATABASE_PORT:-5432}:5432'
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  redis:
+    image: redis:5.0.7-alpine
+    container_name: pix-api-redis
+    ports:
+      - '${PIX_CACHE_PORT:-6379}:6379'
+
+  api:
+    image: pix/api
+    depends_on:
+      - baseImageEmber
+      - postgres
+      - redis 
+    build: 
+      dockerfile: ../docker/dockerfiles/Dockerfile.hapi-build
+      context: ../api/
+    volumes:
+      - ./env_file:/code/.env 
+    ports:
+      - "3000:80"
+
+
+  orga:
+    image: pix/orga
+    depends_on:
+      - api
+      - baseImageEmber
+    build: 
+      dockerfile: ../docker/dockerfiles/Dockerfile.ember-build
+      context: ../orga
+    ports:
+      - "4201:80"
+    volumes:
+      - ./dockerfiles/config/ember-nginx.conf:/etc/nginx/conf.d/default.conf
+
+  admin:
+    image: pix/admin
+    depends_on:
+      - api
+      - baseImageEmber
+    build: 
+      dockerfile: ../docker/dockerfiles/Dockerfile.ember-build
+      context: ../admin/
+    ports:
+      - "4202:80"
+    volumes:
+      - ./dockerfiles/config/ember-nginx.conf:/etc/nginx/conf.d/default.conf
+
+  certif:
+    image: pix/certif
+    depends_on:
+      - api
+      - baseImageEmber
+    build: 
+      dockerfile: ../docker/dockerfiles/Dockerfile.ember-build
+      context: ../certif/
+    ports:
+      - "4203:80"
+    volumes:
+      - ./dockerfiles/config/ember-nginx.conf:/etc/nginx/conf.d/default.conf
+
+  mon-pix:
+    image: pix/mon-pix
+    depends_on:
+      - baseImageEmber
+      - api
+    build: 
+      dockerfile: ../docker/dockerfiles/Dockerfile.ember-build
+      context: ../mon-pix/
+    ports:
+      - "4200:80"
+    volumes:
+      - ./dockerfiles/config/ember-nginx.conf:/etc/nginx/conf.d/default.conf

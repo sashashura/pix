@@ -1,0 +1,25 @@
+FROM pix/nodebase-ember:latest as dev 
+
+
+
+WORKDIR /code
+COPY . . 
+
+
+RUN npm ci
+
+CMD [ "npm", "run", "start:watch" ]
+
+
+FROM dev as builder
+ENV BUILD_ENV=dev
+
+RUN ember build --env $BUILD_ENV
+
+
+
+FROM nginx:latest as production
+
+
+COPY --from=builder /code/dist/ /usr/share/nginx/html/
+ 
