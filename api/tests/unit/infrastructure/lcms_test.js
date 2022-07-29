@@ -7,12 +7,14 @@ describe('Unit | Infrastructure | LCMS', function () {
     it('calls LCMS API to get learning content latest release', async function () {
       // given
       const lcmsCall = nock('https://lcms-test.pix.fr/api')
-        .get('/releases/latest')
+        .get('/releases/latest?locale=fr-fr')
         .matchHeader('Authorization', 'Bearer test-api-key')
         .reply(200);
 
+      const locale = 'fr-fr';
+
       // when
-      await lcms.getLatestRelease();
+      await lcms.getLatestRelease(locale);
 
       // then
       expect(lcmsCall.isDone()).to.equal(true);

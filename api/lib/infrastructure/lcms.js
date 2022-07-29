@@ -3,10 +3,11 @@ const httpAgent = require('./http/http-agent');
 const { lcms } = require('../config');
 
 module.exports = {
-  async getLatestRelease() {
+  async getLatestRelease(locale) {
     const response = await httpAgent.get({
       url: lcms.url + '/releases/latest',
       headers: { Authorization: `Bearer ${lcms.apiKey}` },
+      params: { locale },
     });
     return response.data.content;
   },
