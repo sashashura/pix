@@ -102,14 +102,15 @@ describe('Unit | Infrastructure | http | http-agent', function () {
       const url = 'someUrl';
       const payload = 'somePayload';
       const headers = { a: 'someHeaderInfo' };
+      const params = { locale: 'fr-fr' };
       const axiosResponse = {
         data: Symbol('data'),
         status: 'someStatus',
       };
-      sinon.stub(axios, 'get').withArgs(url, { data: payload, headers }).resolves(axiosResponse);
+      sinon.stub(axios, 'get').withArgs(url, { data: payload, headers, params }).resolves(axiosResponse);
 
       // when
-      const actualResponse = await get({ url, payload, headers });
+      const actualResponse = await get({ url, payload, headers, params });
 
       // then
       expect(actualResponse).to.deep.equal({

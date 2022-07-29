@@ -54,11 +54,11 @@ module.exports = {
       });
     }
   },
-  async get({ url, payload, headers }) {
+  async get({ url, payload, headers, params }) {
     const startTime = performance.now();
     let responseTime = null;
     try {
-      const config = { data: payload, headers };
+      const config = { data: payload, headers, params };
       const httpResponse = await axios.get(url, config);
       responseTime = performance.now() - startTime;
       logInfoWithCorrelationIds({
