@@ -6,6 +6,7 @@ const cache = require('../../../../../lib/infrastructure/caches/learning-content
 
 describe('Unit | Infrastructure | Datasource | Learning Content | datasource', function () {
   let someDatasource;
+  const locale = 'fr-fr';
 
   beforeEach(function () {
     sinon.stub(cache, 'get');
@@ -29,12 +30,13 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
             { id: 'rec2', property: 'value2' },
           ],
         };
-        sinon.stub(lcms, 'getLatestRelease').resolves(learningContent);
+
+        sinon.stub(lcms, 'getLatestRelease').withArgs(locale).resolves(learningContent);
       });
 
       it('should fetch a single record from LCMS API (or its cached copy)', async function () {
         // when
-        const record = await someDatasource.get('rec1');
+        const record = await someDatasource.get({ id: 'rec1', locale });
 
         // then
         expect(record).to.deep.equal({ id: 'rec1', property: 'value1' });
@@ -45,7 +47,7 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
         const unboundGet = someDatasource.get;
 
         // when
-        const record = await unboundGet('rec1');
+        const record = await unboundGet({ id: 'rec1', locale });
 
         // then
         expect(record).to.deep.equal({ id: 'rec1', property: 'value1' });
@@ -53,7 +55,7 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
 
       it('should be cachable', async function () {
         // when
-        await someDatasource.get('rec1');
+        await someDatasource.get({ id: 'rec1', locale });
 
         // then
         expect(cache.get).to.have.been.called;
@@ -69,10 +71,10 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
             { id: 'rec2', property: 'value2' },
           ],
         };
-        sinon.stub(lcms, 'getLatestRelease').resolves(learningContent);
+        sinon.stub(lcms, 'getLatestRelease').withArgs(locale).resolves(learningContent);
 
         // when
-        const promise = someDatasource.get('UNKNOWN_RECORD_ID');
+        const promise = someDatasource.get({ id: 'UNKNOWN_RECORD_ID', locale });
 
         // then
         return expect(promise).to.have.been.rejectedWith(LearningContentResourceNotFound);
@@ -81,10 +83,10 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
       it('should dispatch error in case of generic error', function () {
         // given
         const err = new Error();
-        sinon.stub(lcms, 'getLatestRelease').rejects(err);
+        sinon.stub(lcms, 'getLatestRelease').withArgs(locale).rejects(err);
 
         // when
-        const promise = someDatasource.get('rec1');
+        const promise = someDatasource.get({ id: 'rec1', locale });
 
         // then
         return expect(promise).to.have.been.rejectedWith(err);
@@ -105,12 +107,12 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
           { id: 'rec3', property: 'value3' },
         ],
       };
-      sinon.stub(lcms, 'getLatestRelease').resolves(learningContent);
+      sinon.stub(lcms, 'getLatestRelease').withArgs(locale).resolves(learningContent);
     });
 
     it('should fetch all records from LCMS API corresponfing to the ids passed', async function () {
       // when
-      const result = await someDatasource.getMany(['rec1', 'rec2']);
+      const result = await someDatasource.getMany({ ids: ['rec1', 'rec2'], locale });
 
       // then
       expect(result).to.deep.equal([
@@ -121,7 +123,7 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
 
     it('should throw an LearningContentResourceNotFound if no record was found', function () {
       // when
-      const promise = someDatasource.getMany(['UNKNOWN_RECORD_ID']);
+      const promise = someDatasource.getMany({ ids: ['UNKNOWN_RECORD_ID'], locale });
 
       // then
       return expect(promise).to.have.been.rejectedWith(LearningContentResourceNotFound);
@@ -140,12 +142,12 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
           { id: 'rec2', property: 'value2' },
         ],
       };
-      sinon.stub(lcms, 'getLatestRelease').resolves(learningContent);
+      sinon.stub(lcms, 'getLatestRelease').withArgs(locale).resolves(learningContent);
     });
 
     it('should fetch all the records of a given type from LCMS API (or its cached copy)', async function () {
       // when
-      const learningContentModelObjects = await someDatasource.list();
+      const learningContentModelObjects = await someDatasource.list({ locale });
 
       // then
       expect(learningContentModelObjects).to.deep.equal(learningContent.learningContentModel);
@@ -156,7 +158,7 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
       const unboundList = someDatasource.list;
 
       // when
-      const learningContentModelObjects = await unboundList();
+      const learningContentModelObjects = await unboundList({ locale });
 
       // then
       expect(learningContentModelObjects).to.deep.equal(learningContent.learningContentModel);
@@ -164,7 +166,7 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
 
     it('should be cachable', async function () {
       // when
-      await someDatasource.list();
+      await someDatasource.list({ locale });
 
       // then
       expect(cache.get).to.have.been.called;
@@ -183,12 +185,12 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
           { id: 'rec2', property: 'value2' },
         ],
       };
-      sinon.stub(lcms, 'getLatestRelease').resolves(learningContent);
+      sinon.stub(lcms, 'getLatestRelease').withArgs(locale).resolves(learningContent);
     });
 
     it('should load all the learning content table content in the cache (and return them)', async function () {
       // when
-      const results = await dataSource.refreshLearningContentCacheRecords();
+      const results = await dataSource.refreshLearningContentCacheRecords({ locale });
 
       // then
       expect(results).to.equal(learningContent);
@@ -196,7 +198,7 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
 
     it('should preload cache', async function () {
       // when
-      await dataSource.refreshLearningContentCacheRecords();
+      await dataSource.refreshLearningContentCacheRecords({ locale });
 
       // then
       expect(cache.set).to.have.been.calledWith(learningContent);
@@ -218,7 +220,7 @@ describe('Unit | Infrastructure | Datasource | Learning Content | datasource', f
       sinon.stub(cache, 'set').callsFake((value) => value);
 
       // when
-      const entry = await someDatasource.refreshLearningContentCacheRecord('rec1', record);
+      const entry = await someDatasource.refreshLearningContentCacheRecord({ id: 'rec1', newEntry: record, locale });
 
       // then
       expect(entry).to.deep.equal({
