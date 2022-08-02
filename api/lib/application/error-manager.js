@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const { knex } = require('knex');
 const JSONAPIError = require('jsonapi-serializer').Error;
 const HttpErrors = require('./http-errors');
 const DomainErrors = require('../domain/errors');
@@ -59,6 +60,9 @@ function _formatInvalidAttribute(locale, { attribute, message }) {
 function _mapToHttpError(error) {
   if (error instanceof HttpErrors.BaseHttpError) {
     return error;
+  }
+  if (error instanceof knex.KnexTimeoutError) {
+    return new HttpErrors.ServiceUnavailableError(error.message);
   }
   if (error instanceof DomainErrors.AccountRecoveryDemandExpired) {
     return new HttpErrors.UnauthorizedError(error.message);

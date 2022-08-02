@@ -1,11 +1,12 @@
 const errorManager = require('./error-manager');
 const { BaseHttpError, UnauthorizedError } = require('./http-errors');
 const { DomainError } = require('../domain/errors');
+const { knex } = require('knex');
 
 function handleDomainAndHttpErrors(request, h) {
   const response = request.response;
 
-  if (response instanceof DomainError || response instanceof BaseHttpError) {
+  if (response instanceof DomainError || response instanceof BaseHttpError || response instanceof knex.KnexTimeoutError) {
     return errorManager.handle(request, h, response);
   }
 

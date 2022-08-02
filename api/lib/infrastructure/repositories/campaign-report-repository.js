@@ -97,7 +97,7 @@ module.exports = {
   },
 
   async findPaginatedFilteredByOrganizationId({ organizationId, filter, page, userId }) {
-    const query = knex('campaigns')
+    const query = knexWithTimeout(knex => knex('campaigns')
       .distinct('campaigns.id')
       .select(
         'campaigns.*',
@@ -115,7 +115,7 @@ module.exports = {
       .leftJoin('campaign-participations', 'campaign-participations.campaignId', 'campaigns.id')
       .where('campaigns.organizationId', organizationId)
       .modify(_setSearchFiltersForQueryBuilder, filter, userId)
-      .orderBy('campaigns.createdAt', 'DESC');
+      .orderBy('campaigns.createdAt', 'DESC'));
 
     const { results, pagination } = await fetchPage(query, page);
     const atLeastOneCampaign = await knex('campaigns').select('id').where({ organizationId }).first(1);
@@ -125,3 +125,7 @@ module.exports = {
     return { models: campaignReports, meta: { ...pagination, hasCampaigns } };
   },
 };
+
+function knexWithTimeout(query) {
+  return query(knex).timeout(1, { cancel: true });
+}
