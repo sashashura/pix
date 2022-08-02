@@ -5,7 +5,11 @@ const redisMonitor = require('../../infrastructure/utils/redis-monitor');
 const { knex } = require('../../../db/knex-database-connection');
 
 module.exports = {
-  get(request) {
+  async get(request) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
+
     return {
       name: packageJSON.name,
       version: packageJSON.version,

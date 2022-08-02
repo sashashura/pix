@@ -9,6 +9,7 @@ exports.register = async function (server) {
         auth: false,
         handler: healthcheckController.get,
         tags: ['api'],
+        timeout: { server: false },
       },
     },
     {

@@ -53,6 +53,7 @@ const createBareServer = function () {
       response: {
         emptyStatusCode: 204,
       },
+      timeout: { server: 1 },
     },
     port: config.port,
     router: {
