@@ -6,13 +6,19 @@ import Controller from '@ember/controller';
 // eslint-disable-next-line ember/no-computed-properties-in-native-classes
 import { action, computed } from '@ember/object';
 
+const DEFAULT_PAGE_NUMBER = 1;
 export default class ListController extends Controller {
   @service notifications;
   @service store;
   @service accessControl;
 
+  @tracked pageNumber = DEFAULT_PAGE_NUMBER;
+  @tracked pageSize = 10;
+
   @tracked displayConfirm = false;
   @tracked confirmMessage = null;
+
+  queryParams = ['pageNumber', 'pageSize', 'id', 'name', 'type', 'externalId'];
 
   @computed('model.juryCertificationSummaries.@each.status')
   get canPublish() {
