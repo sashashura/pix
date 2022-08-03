@@ -1,13 +1,14 @@
 const _ = require('lodash');
-const { knex } = require('../bookshelf');
+const { fetchPage } = require('../utils/knex-utils');
+const { knex } = require('../../../db/knex-database-connection');
 const JuryCertificationSummary = require('../../domain/read-models/JuryCertificationSummary');
 const CertificationIssueReport = require('../../domain/models/CertificationIssueReport');
 const ComplementaryCertificationCourseResult = require('../../domain/models/ComplementaryCertificationCourseResult');
 const Assessment = require('../../domain/models/Assessment');
 
 module.exports = {
-  async findBySessionId(sessionId) {
-    const juryCertificationSummaryRows = await knex
+  async findBySessionId({ page = {}, sessionId }) {
+    const query = knex
       .select('certification-courses.*', 'assessment-results.pixScore')
       .select({
         assessmentResultStatus: 'assessment-results.status',
@@ -37,18 +38,21 @@ module.exports = {
       .orderBy('lastName', 'ASC')
       .orderBy('firstName', 'ASC');
 
-    const certificationCourseIds = juryCertificationSummaryRows.map((row) => row.id);
+    const { results, pagination } = await fetchPage(query, page);
+
+    const certificationCourseIds = results.map((row) => row.id);
     const certificationIssueReportRows = await knex('certification-issue-reports').whereIn(
       'certificationCourseId',
       certificationCourseIds
     );
 
-    const juryCertificationSummaryDTOs = _buildJuryCertificationSummaryDTOs(
-      juryCertificationSummaryRows,
-      certificationIssueReportRows
-    );
+    const juryCertificationSummaryDTOs = _buildJuryCertificationSummaryDTOs(results , certificationIssueReportRows);
 
-    return _.map(juryCertificationSummaryDTOs, _toDomain);
+    const juryCertificationSummaries = _.map(juryCertificationSummaryDTOs, _toDomain)
+    return {
+      pagination,
+      juryCertificationSummaries,
+    };
   },
 };
 

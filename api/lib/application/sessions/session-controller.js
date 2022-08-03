@@ -148,10 +148,14 @@ module.exports = {
 
   async getJuryCertificationSummaries(request) {
     const sessionId = request.params.id;
+    const { page } = queryParamsUtils.extractParameters(request.query);
 
-    const juryCertificationSummaries = await juryCertificationSummaryRepository.findBySessionId(sessionId);
+    const { juryCertificationSummaries, pagination } = await juryCertificationSummaryRepository.findBySessionId({
+      sessionId,
+      page,
+    });
 
-    return juryCertificationSummarySerializer.serialize(juryCertificationSummaries);
+    return juryCertificationSummarySerializer.serialize(juryCertificationSummaries, pagination);
   },
 
   async generateSessionResultsDownloadLink(request, h) {
