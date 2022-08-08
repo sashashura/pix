@@ -18,26 +18,28 @@ export default class OidcAuthenticator extends BaseAuthenticator {
       method: 'POST',
       headers: {
         Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     };
-    let serverTokenEndpoint;
+    const host = `${ENV.APP.API_HOST}/api/oidc/`;
+    let hostSlug, bodyObject;
+    const identity_provider = IdentityProviders[identityProviderSlug]?.code;
 
     if (authenticationKey) {
-      serverTokenEndpoint = `${ENV.APP.API_HOST}/api/${identityProviderSlug}/users?authentication-key=${authenticationKey}`;
+      hostSlug = 'users';
+      bodyObject = {
+        identity_provider,
+        authentication_key: authenticationKey,
+      };
     } else {
-      serverTokenEndpoint = `${ENV.APP.API_HOST}/api/oidc/token`;
-      const bodyObject = {
-        identity_provider: IdentityProviders[identityProviderSlug]?.code,
+      hostSlug = 'token';
+      bodyObject = {
+        identity_provider,
         code,
         redirect_uri: redirectUri,
         state_sent: this.session.data.state,
         state_received: state,
       };
-
-      request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      request.body = Object.keys(bodyObject)
-        .map((k) => `${k}=${encodeURIComponent(bodyObject[k])}`)
-        .join('&');
 
       if (this.session.isAuthenticated) {
         const accessToken = this.session.get('data.authenticated.access_token');
@@ -46,7 +48,11 @@ export default class OidcAuthenticator extends BaseAuthenticator {
       }
     }
 
-    const response = await fetch(serverTokenEndpoint, request);
+    request.body = Object.keys(bodyObject)
+      .map((k) => `${k}=${encodeURIComponent(bodyObject[k])}`)
+      .join('&');
+
+    const response = await fetch(host + hostSlug, request);
 
     const data = await response.json();
     if (!response.ok) {

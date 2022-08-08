@@ -9,17 +9,12 @@ describe('Unit | Authenticator | oidc', function () {
   setupTest();
 
   describe('#authenticate', function () {
+    let request;
     const userId = 1;
     const source = 'source';
     const logoutUrlUuid = 'uuid';
     const identityProviderCode = 'CNAV';
     const identityProviderSlug = 'cnav';
-    const request = {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-      },
-    };
     const accessToken =
       'aaa.' +
       btoa(`{
@@ -32,6 +27,12 @@ describe('Unit | Authenticator | oidc', function () {
       '.bbb';
 
     beforeEach(function () {
+      request = {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+        },
+      };
       sinon.stub(fetch, 'default').resolves({
         json: sinon.stub().resolves({ access_token: accessToken, logout_url_uuid: logoutUrlUuid }),
         ok: true,
@@ -50,11 +51,9 @@ describe('Unit | Authenticator | oidc', function () {
       const token = await authenticator.authenticate({ identityProviderSlug, authenticationKey: 'key' });
 
       // then
-      sinon.assert.calledWith(
-        fetch.default,
-        `http://localhost:3000/api/${identityProviderSlug}/users?authentication-key=key`,
-        request
-      );
+      request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      request.body = `identity_provider=${identityProviderCode}&authentication_key=key`;
+      sinon.assert.calledWith(fetch.default, `http://localhost:3000/api/oidc/users`, request);
       expect(token).to.deep.equal({
         access_token: accessToken,
         logout_url_uuid: logoutUrlUuid,
