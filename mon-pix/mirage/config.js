@@ -108,7 +108,7 @@ export default function () {
   this.get('/oidc/redirect-logout-url', () => {
     return {
       redirectLogoutUrl:
-        'http://identity_provider_base_url/deconnexion?id_token_hint=ID_TOKEN&redirect_uri=http%3A%2F%2Flocalhost.fr%3A4200%2Fconnexion',
+        'http://identity_provider_base_url/deconnexion?redirect_uri=http%3A%2F%2Flocalhost.fr%3A4200%2Fconnexion',
     };
   });
 }
