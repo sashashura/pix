@@ -4,6 +4,8 @@ const oidcController = require('../../../../../lib/application/authentication/oi
 const usecases = require('../../../../../lib/domain/usecases');
 const settings = require('../../../../../lib/config');
 const { UnauthorizedError } = require('../../../../../lib/application/http-errors');
+const authenticationRegistry = require('../../../../../lib/domain/services/authentication/authentication-service-registry');
+const userRepository = require('../../../../../lib/infrastructure/repositories/user-repository');
 
 describe('Unit | Application | Controller | Authentication | OIDC', function () {
   const identityProvider = 'OIDC';
@@ -225,6 +227,42 @@ describe('Unit | Application | Controller | Authentication | OIDC', function () 
         stateSent,
         oidcAuthenticationService,
       });
+    });
+  });
+
+  describe('#createUser', function () {
+    it('should save the last logged date and return access token and logout url UUID', async function () {
+      // given
+      const request = {
+        payload: {
+          identity_provider: identityProvider,
+          authentication_key: 'abcde',
+        },
+      };
+      const userId = 7;
+      const idToken = 1;
+      const accessToken = 'access.token';
+      sinon
+        .stub(usecases, 'createOidcUser')
+        .withArgs({ authenticationKey: 'abcde', identityProvider })
+        .resolves({ userId, idToken });
+      const createAccessTokenStub = sinon.stub();
+      const saveIdTokenStub = sinon.stub();
+      sinon.stub(authenticationRegistry, 'lookupAuthenticationService').withArgs(identityProvider).returns({
+        createAccessToken: createAccessTokenStub,
+        saveIdToken: saveIdTokenStub,
+      });
+      createAccessTokenStub.withArgs(userId).returns(accessToken);
+      sinon.stub(userRepository, 'updateLastLoggedAt');
+      saveIdTokenStub.withArgs({ idToken, userId }).resolves('uuid');
+
+      // when
+      const result = await oidcController.createUser(request, hFake);
+
+      //then
+      expect(userRepository.updateLastLoggedAt).to.have.been.calledWith({ userId: 7 });
+      expect(result.source.access_token).to.equal(accessToken);
+      expect(result.source.logout_url_uuid).to.equal('uuid');
     });
   });
 });

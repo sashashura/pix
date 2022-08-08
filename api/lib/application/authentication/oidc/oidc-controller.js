@@ -5,6 +5,7 @@ const AuthenticationMethod = require('../../../domain/models/AuthenticationMetho
 const usecases = require('../../../domain/usecases');
 const { UnauthorizedError } = require('../../http-errors');
 const config = require('../../../config');
+const userRepository = require('../../../infrastructure/repositories/user-repository');
 
 module.exports = {
   async getRedirectLogoutUrl(request, h) {
@@ -63,5 +64,18 @@ module.exports = {
       const meta = { authenticationKey: result.authenticationKey };
       throw new UnauthorizedError(message, responseCode, meta);
     }
+  },
+
+  async createUser(request, h) {
+    const { identity_provider: identityProvider, authentication_key: authenticationKey } = request.payload;
+
+    const { userId, idToken } = await usecases.createOidcUser({ authenticationKey, identityProvider });
+    const oidcAuthenticationService = authenticationRegistry.lookupAuthenticationService(identityProvider);
+    const accessToken = oidcAuthenticationService.createAccessToken(userId);
+    const logoutUrlUUID = await oidcAuthenticationService.saveIdToken({ idToken, userId });
+    await userRepository.updateLastLoggedAt({ userId });
+
+    const response = { access_token: accessToken, logout_url_uuid: logoutUrlUUID };
+    return h.response(response).code(200);
   },
 };
