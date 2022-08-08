@@ -65,7 +65,29 @@ exports.register = async (server) => {
           "- Cette route permet de récupérer un token pour un utilisateur provenant d'un partenaire.\n" +
             "- Elle retournera également un access token Pix correspondant à l'utilisateur.",
         ],
-        tags: ['api', 'SSO', 'oidc'],
+        tags: ['api', 'authentication', 'oidc'],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/api/oidc/users',
+      config: {
+        auth: false,
+        payload: {
+          allow: 'application/x-www-form-urlencoded',
+        },
+        validate: {
+          payload: Joi.object().required().keys({
+            identity_provider: Joi.string().required(),
+            authentication_key: Joi.string().required(),
+          }),
+        },
+        handler: oidcController.createUser,
+        notes: [
+          "'- Cette route permet de créer un compte Pix pour un utilisateur provenant d'un partenaire.\n'" +
+            "- Elle retournera un access token Pix correspondant à l'utilisateur.",
+        ],
+        tags: ['api', 'oidc', 'authentication'],
       },
     },
   ]);
