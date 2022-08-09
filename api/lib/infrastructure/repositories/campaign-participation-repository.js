@@ -96,8 +96,18 @@ module.exports = {
   },
 
   async updateWithSnapshot(campaignParticipation, domainTransaction = DomainTransaction.emptyTransaction()) {
-    const isRetrying = await this.isRetrying({ campaignParticipationId: campaignParticipation.id });
-    if (!isRetrying) {
+    const knexConn = domainTransaction.knexTransaction || knex;
+    const hasAlreadyShared = await knexConn
+      .from('campaign-participations')
+      .where({
+        campaignId: campaignParticipation.campaignId,
+        userId: campaignParticipation.userId,
+        isImproved: true,
+      })
+      .whereNotNull('sharedAt')
+      .whereNull('deletedAt')
+      .first();
+    if (!hasAlreadyShared) {
       await campaignRepository.incrementSharedParticipationsCount(campaignParticipation.campaignId, domainTransaction);
     }
 
