@@ -96,8 +96,12 @@ module.exports = {
   },
 
   async updateWithSnapshot(campaignParticipation, domainTransaction = DomainTransaction.emptyTransaction()) {
+    const isRetrying = await this.isRetrying({ campaignParticipationId: campaignParticipation.id });
+    if (!isRetrying) {
+      await campaignRepository.incrementSharedParticipationsCount(campaignParticipation.campaignId, domainTransaction);
+    }
+
     await this.update(campaignParticipation, domainTransaction);
-    await campaignRepository.incrementSharedParticipationsCount(campaignParticipation.campaignId, domainTransaction);
 
     const knowledgeElements = await knowledgeElementRepository.findUniqByUserId({
       userId: campaignParticipation.userId,

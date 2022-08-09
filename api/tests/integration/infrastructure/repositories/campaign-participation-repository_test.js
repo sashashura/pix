@@ -744,6 +744,26 @@ describe('Integration | Repository | Campaign Participation', function () {
       expect(campaign.sharedParticipationsCount).to.equal(1);
     });
 
+    it('should not increment the campaign sharedParticipationsCount columns when the user is improving', async function () {
+      // given
+      databaseBuilder.factory.buildCampaignParticipation({
+        campaignId: campaignParticipation.campaignId,
+        userId: campaignParticipation.userId,
+        organizationLearnerId: campaignParticipation.organizationLearnerId,
+        isImproved: true,
+      });
+      await databaseBuilder.commit();
+      campaignParticipation.sharedAt = new Date();
+      await knex('campaigns').where({ id: campaignParticipation.campaignId }).increment('sharedParticipationsCount', 1);
+
+      // when
+      await campaignParticipationRepository.updateWithSnapshot(campaignParticipation);
+
+      // then
+      const campaign = await knex('campaigns').where({ id: campaignParticipation.campaignId }).first();
+      expect(campaign.sharedParticipationsCount).to.equal(1);
+    });
+
     it('should save a snapshot', async function () {
       // given
       campaignParticipation.sharedAt = new Date();
