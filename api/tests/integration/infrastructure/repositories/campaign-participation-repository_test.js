@@ -1361,7 +1361,7 @@ describe('Integration | Repository | Campaign Participation', function () {
     });
   });
 
-  describe('#delete', function () {
+  describe('#markAsDeleted', function () {
     it('should update the campaign-participations with deletedAt and deletedBy attributes', async function () {
       const ownerId = databaseBuilder.factory.buildUser().id;
       const { id: campaignId } = databaseBuilder.factory.buildCampaign({ ownerId });
@@ -1373,7 +1373,7 @@ describe('Integration | Repository | Campaign Participation', function () {
       campaignParticipation.deletedBy = ownerId;
 
       await DomainTransaction.execute((domainTransaction) => {
-        return campaignParticipationRepository.delete({
+        return campaignParticipationRepository.markAsDeleted({
           id: campaignParticipation.id,
           deletedAt: campaignParticipation.deletedAt,
           deletedBy: campaignParticipation.deletedBy,
