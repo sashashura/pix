@@ -119,12 +119,23 @@ module.exports = {
   },
 
   incrementParticipationsCount(id, domainTransaction = DomainTransaction.emptyTransaction()) {
-    const knexConn = domainTransaction.knexTransaction || knex;
-    return knexConn('campaigns').where({ id }).increment('participationsCount', 1);
+    return incrementField(id, 'participationsCount', 1, domainTransaction);
+  },
+
+  decrementParticipationsCount(id, domainTransaction = DomainTransaction.emptyTransaction()) {
+    return incrementField(id, 'participationsCount', -1, domainTransaction);
   },
 
   incrementSharedParticipationsCount(id, domainTransaction = DomainTransaction.emptyTransaction()) {
-    const knexConn = domainTransaction.knexTransaction || knex;
-    return knexConn('campaigns').where({ id }).increment('sharedParticipationsCount', 1);
+    return incrementField(id, 'sharedParticipationsCount', 1, domainTransaction);
+  },
+
+  decrementSharedParticipationsCount(id, domainTransaction = DomainTransaction.emptyTransaction()) {
+    return incrementField(id, 'sharedParticipationsCount', -1, domainTransaction);
   },
 };
+
+function incrementField(id, field, value, domainTransaction = DomainTransaction.emptyTransaction()) {
+  const knexConn = domainTransaction.knexTransaction || knex;
+  return knexConn('campaigns').where({ id }).increment(field, value);
+}

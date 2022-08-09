@@ -1,6 +1,7 @@
 const pick = require('lodash/pick');
 const CampaignParticipant = require('../../domain/models/CampaignParticipant');
 const CampaignToStartParticipation = require('../../domain/models/CampaignToStartParticipation');
+const CampaignParticipationStatuses = require('../../domain/models/CampaignParticipationStatuses');
 const { AlreadyExistingCampaignParticipationError, NotFoundError } = require('../../domain/errors');
 const skillDatasource = require('../datasources/learning-content/skill-datasource');
 const { knex } = require('../../../db/knex-database-connection');
