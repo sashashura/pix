@@ -91,7 +91,7 @@ async function get({ userId, campaignId, domainTransaction }) {
 
   const organizationLearner = await _getOrganizationLearner(campaignId, userId, domainTransaction);
 
-  const previousCampaignParticipationForUser = await _findpreviousCampaignParticipationForUser(
+  const previousCampaignParticipationForUser = await _findPreviousCampaignParticipationForUser(
     campaignId,
     userId,
     domainTransaction
@@ -171,7 +171,7 @@ async function _getOrganizationLearner(campaignId, userId, domainTransaction) {
   return organizationLearner;
 }
 
-async function _findpreviousCampaignParticipationForUser(campaignId, userId, domainTransaction) {
+async function _findPreviousCampaignParticipationForUser(campaignId, userId, domainTransaction) {
   const campaignParticipationAttributes = await domainTransaction
     .knexTransaction('campaign-participations')
     .select('id', 'participantExternalId', 'validatedSkillsCount', 'status', 'deletedAt')
