@@ -1,0 +1,77 @@
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'expect'.
+const { expect, knex, databaseBuilder, generateValidRequestAuthorizationHeader } = require('../../../test-helper');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'createServ... Remove this comment to see the full error message
+const createServer = require('../../../../server');
+
+// @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+describe('Acceptance | Controller | session-controller-post', function () {
+  let server: $TSFixMe;
+
+  // @ts-expect-error TS(2304): Cannot find name 'beforeEach'.
+  beforeEach(async function () {
+    server = await createServer();
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('POST /sessions', function () {
+    let options: $TSFixMe;
+
+    // @ts-expect-error TS(2304): Cannot find name 'beforeEach'.
+    beforeEach(function () {
+      const userId = databaseBuilder.factory.buildUser().id;
+      const certificationCenterId = databaseBuilder.factory.buildCertificationCenter({ name: 'Tour Gamma' }).id;
+      databaseBuilder.factory.buildCertificationCenterMembership({ userId, certificationCenterId });
+      options = {
+        method: 'POST',
+        url: '/api/sessions',
+        payload: {
+          data: {
+            type: 'sessions',
+            attributes: {
+              'certification-center-id': certificationCenterId,
+              address: 'Nice',
+              date: '2017-12-08',
+              description: '',
+              examiner: 'Michel Essentiel',
+              room: '28D',
+              time: '14:30',
+            },
+          },
+        },
+        headers: { authorization: generateValidRequestAuthorizationHeader(userId) },
+      };
+      return databaseBuilder.commit();
+    });
+
+    // @ts-expect-error TS(2304): Cannot find name 'afterEach'.
+    afterEach(function () {
+      return knex('sessions').delete();
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return an OK status after saving in database', async function () {
+      // when
+      const response = await server.inject(options);
+
+      // then
+      const sessions = await knex('sessions').select();
+      expect(response.statusCode).to.equal(200);
+      expect(sessions).to.have.lengthOf(1);
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+    describe('Resource access management', function () {
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should respond with a 401 - unauthorized access - if user is not authenticated', async function () {
+        // given
+        options.headers.authorization = 'invalid.access.token';
+
+        // when
+        const response = await server.inject(options);
+
+        // then
+        expect(response.statusCode).to.equal(401);
+      });
+    });
+  });
+});

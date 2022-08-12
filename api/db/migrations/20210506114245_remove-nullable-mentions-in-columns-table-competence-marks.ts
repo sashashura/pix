@@ -1,0 +1,15 @@
+// @ts-expect-error TS(2304): Cannot find name 'exports'.
+exports.up = async function (knex: $TSFixMe) {
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "competenceId" SET NOT NULL');
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "assessmentResultId" SET NOT NULL');
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "level" SET NOT NULL');
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "score" SET NOT NULL');
+};
+
+// @ts-expect-error TS(2304): Cannot find name 'exports'.
+exports.down = async function (knex: $TSFixMe) {
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "competenceId" DROP NOT NULL');
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "assessmentResultId" DROP NOT NULL');
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "level" DROP NOT NULL');
+  await knex.raw('ALTER TABLE "competence-marks" ALTER COLUMN "score" DROP NOT NULL');
+};

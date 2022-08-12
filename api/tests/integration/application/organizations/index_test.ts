@@ -1,0 +1,578 @@
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'expect'.
+const { expect, sinon, HttpTestServer } = require('../../../test-helper');
+
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'securityPr... Remove this comment to see the full error message
+const securityPreHandlers = require('../../../../lib/application/security-pre-handlers');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'organizati... Remove this comment to see the full error message
+const organizationController = require('../../../../lib/application/organizations/organization-controller');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'moduleUnde... Remove this comment to see the full error message
+const moduleUnderTest = require('../../../../lib/application/organizations');
+
+// @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+describe('Integration | Application | Organizations | Routes', function () {
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('POST /api/admin/organizations', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should exist', async function () {
+      // given
+      const method = 'POST';
+      const url = '/api/admin/organizations';
+
+      sinon.stub(securityPreHandlers, 'adminMemberHasAtLeastOneAccessOf').returns(() => true);
+      sinon.stub(organizationController, 'create').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/admin/organizations', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should exist', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/admin/organizations';
+
+      sinon.stub(securityPreHandlers, 'adminMemberHasAtLeastOneAccessOf').returns(() => true);
+      sinon.stub(organizationController, 'findPaginatedFilteredOrganizations').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+    });
+
+    // @ts-expect-error TS(2304): Cannot find name 'context'.
+    context('Error cases', function () {
+      // @ts-expect-error TS(2304): Cannot find name 'context'.
+      context('when user is not allowed to access resource', function () {
+        // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+        it('should resolve a 403 HTTP response', async function () {
+          // given
+          const method = 'GET';
+          const url = '/api/admin/organizations';
+
+          sinon
+            .stub(securityPreHandlers, 'adminMemberHasAtLeastOneAccessOf')
+            .returns((request: $TSFixMe, h: $TSFixMe) => h.response().code(403).takeover());
+          sinon.stub(organizationController, 'findPaginatedFilteredOrganizations').returns('ok');
+          const httpTestServer = new HttpTestServer();
+          await httpTestServer.register(moduleUnderTest);
+
+          // when
+          const response = await httpTestServer.request(method, url);
+
+          // then
+          expect(response.statusCode).to.equal(403);
+        });
+      });
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('POST /api/admin/organizations/:id/archive', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should call the controller to archive the organization', async function () {
+      // given
+      const method = 'POST';
+      const url = '/api/admin/organizations/1/archive';
+
+      sinon.stub(securityPreHandlers, 'adminMemberHasAtLeastOneAccessOf').returns(() => true);
+      sinon.stub(organizationController, 'archiveOrganization').callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ok').code(204));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(204);
+      expect(organizationController.archiveOrganization).to.have.been.calledOnce;
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/admin/organizations/:id/places', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should call the controller to archive the organization', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/admin/organizations/1/places';
+
+      sinon.stub(securityPreHandlers, 'checkAdminMemberHasRoleSuperAdmin').callsFake((request: $TSFixMe, h: $TSFixMe) => h.response(true));
+      sinon
+        .stub(organizationController, 'findOrganizationPlacesLot')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ok').code(200));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.findOrganizationPlacesLot).to.have.been.calledOnce;
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/admin/organizations/:id/invitations', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should exist', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/admin/organizations/1/invitations';
+
+      sinon.stub(securityPreHandlers, 'adminMemberHasAtLeastOneAccessOf').returns(() => true);
+      sinon.stub(organizationController, 'findPendingInvitations').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.findPendingInvitations).to.have.been.calledOnce;
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('DELETE /api/admin/organizations/:organizationId/invitations/:organizationInvitationId', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return an HTTP status code 204', async function () {
+      // given
+      const method = 'DELETE';
+      const url = '/api/admin/organizations/1/invitations/1';
+
+      sinon.stub(securityPreHandlers, 'adminMemberHasAtLeastOneAccessOf').returns(() => true);
+      sinon
+        .stub(organizationController, 'cancelOrganizationInvitation')
+        .returns((request: $TSFixMe, h: $TSFixMe) => h.response().code(204));
+
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const { statusCode } = await httpTestServer.request(method, url);
+
+      // then
+      expect(statusCode).to.equal(204);
+      expect(organizationController.cancelOrganizationInvitation).to.have.been.calledOnce;
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('POST /api/admin/organizations/:id/target-profiles', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should resolve with a 204 status code', async function () {
+      // given
+      const method = 'POST';
+      const url = '/api/admin/organizations/1/target-profiles';
+      const payload = {
+        data: {
+          type: 'target-profile-shares',
+          attributes: {
+            'target-profiles-to-attach': [1, 2],
+          },
+        },
+      };
+
+      sinon.stub(securityPreHandlers, 'adminMemberHasAtLeastOneAccessOf').returns(() => true);
+      sinon.stub(organizationController, 'attachTargetProfiles').callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ok').code(204));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url, payload);
+
+      // then
+      expect(response.statusCode).to.equal(204);
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/organizations/:id/campaigns', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should call the organization controller to get the campaigns', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/organizations/1/campaigns';
+
+      sinon.stub(securityPreHandlers, 'checkUserBelongsToOrganization').callsFake((request: $TSFixMe, h: $TSFixMe) => h.response(true));
+      sinon.stub(organizationController, 'findPaginatedFilteredCampaigns').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.findPaginatedFilteredCampaigns).to.have.been.calledOnce;
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('POST /api/organizations/:id/invitations', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should call the organization controller to send invitations', async function () {
+      // given
+      const method = 'POST';
+      const url = '/api/organizations/1/invitations';
+      const payload = {
+        data: {
+          type: 'organization-invitations',
+          attributes: {
+            email: 'member@organization.org',
+          },
+        },
+      };
+
+      sinon.stub(securityPreHandlers, 'checkUserIsAdminInOrganization').callsFake((request: $TSFixMe, h: $TSFixMe) => h.response(true));
+      sinon.stub(organizationController, 'sendInvitations').callsFake((request: $TSFixMe, h: $TSFixMe) => h.response().created());
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url, payload);
+
+      // then
+      expect(response.statusCode).to.equal(201);
+      expect(organizationController.sendInvitations).to.have.been.calledOnce;
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/organizations/:id/invitations', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should exist', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/organizations/1/invitations';
+
+      sinon.stub(securityPreHandlers, 'checkUserIsAdminInOrganization').callsFake((request: $TSFixMe, h: $TSFixMe) => h.response(true));
+      sinon.stub(organizationController, 'findPendingInvitations').returns('ok');
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.findPendingInvitations).to.have.been.calledOnce;
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/organizations/:id/students', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should call the organization controller to return students', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/organizations/1/students';
+
+      sinon
+        .stub(securityPreHandlers, 'checkUserBelongsToOrganizationManagingStudents')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response(true));
+      sinon
+        .stub(organizationController, 'findPaginatedFilteredOrganizationLearners')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ok').code(200));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.findPaginatedFilteredOrganizationLearners).to.have.been.calledOnce;
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+    describe('When parameters are not valid', function () {
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when page size is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/1/students?page[size]=blabla';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when page number is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/1/students?page[number]=blabla';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when id is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/wrongId/students';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/organizations/:id/sco-participants', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should call the organization controller to return sco participants', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/organizations/1/sco-participants';
+
+      sinon
+        .stub(securityPreHandlers, 'checkUserBelongsToScoOrganizationAndManagesStudents')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response(true));
+      sinon
+        .stub(organizationController, 'findPaginatedFilteredScoParticipants')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ok').code(200));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.findPaginatedFilteredScoParticipants).to.have.been.calledOnce;
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+    describe('When parameters are not valid', function () {
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when page size is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/1/sco-participants?page[size]=blabla';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when page number is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/1/sco-participants?page[number]=blabla';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when id is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/wrongId/sco-participants';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/organizations/:id/sup-participants', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should call the organization controller to return sup participants', async function () {
+      // given
+      const method = 'GET';
+      const url = '/api/organizations/1/sup-participants';
+
+      sinon
+        .stub(securityPreHandlers, 'checkUserBelongsToSupOrganizationAndManagesStudents')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response(true));
+      sinon
+        .stub(organizationController, 'findPaginatedFilteredSupParticipants')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ok').code(200));
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      // when
+      const response = await httpTestServer.request(method, url);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.findPaginatedFilteredSupParticipants).to.have.been.calledOnce;
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+    describe('When parameters are not valid', function () {
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when page size is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/1/sup-participants?page[size]=blabla';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when page number is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/1/sup-participants?page[number]=blabla';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should throw an error when id is invalid', async function () {
+        // given
+        const method = 'GET';
+        const url = '/api/organizations/wrongId/sup-participants';
+
+        const httpTestServer = new HttpTestServer();
+        await httpTestServer.register(moduleUnderTest);
+
+        // when
+        const response = await httpTestServer.request(method, url);
+
+        // then
+        expect(response.statusCode).to.equal(400);
+      });
+    });
+  });
+
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('GET /api/organizations/{id}/participants', function () {
+    const method = 'GET';
+    const url = '/api/organizations/1/participants';
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return HTTP code 200', async function () {
+      // given
+      sinon.stub(securityPreHandlers, 'checkUserBelongsToOrganization').returns(true);
+
+      sinon
+        .stub(organizationController, 'getPaginatedParticipantsForAnOrganization')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ok').code(200));
+
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      const payload = {
+        data: {
+          type: 'organization-invitations',
+          attributes: {
+            id: '1',
+          },
+        },
+      };
+
+      // when
+      const response = await httpTestServer.request(method, url, payload);
+
+      // then
+      expect(response.statusCode).to.equal(200);
+      expect(organizationController.getPaginatedParticipantsForAnOrganization).to.have.been.calledOnce;
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return HTTP code 400 when user not belongs to the organization', async function () {
+      //given
+      sinon
+        .stub(securityPreHandlers, 'checkUserBelongsToOrganization')
+        .callsFake((request: $TSFixMe, h: $TSFixMe) => h.response('ko').code(403).takeover());
+
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      const payload = {
+        data: {
+          type: 'organization-participants',
+          attributes: {
+            id: '1',
+          },
+        },
+      };
+
+      // when
+      const response = await httpTestServer.request(method, url, payload);
+
+      // then
+      expect(response.statusCode).to.equal(403);
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('returns an error 400 when the organization id is not valid', async function () {
+      const httpTestServer = new HttpTestServer();
+      await httpTestServer.register(moduleUnderTest);
+
+      const response = await httpTestServer.request('GET', `/api/organizations/ABC/participants`);
+
+      expect(response.statusCode).to.equal(400);
+    });
+  });
+});

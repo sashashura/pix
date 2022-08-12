@@ -1,0 +1,39 @@
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'TABLE_NAME... Remove this comment to see the full error message
+const TABLE_NAME = 'knowledge-elements';
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'COLUMN_NAM... Remove this comment to see the full error message
+const COLUMN_NAME = 'bigintId';
+const FAKE_VALUE_TO_COMPLY_WITH_NOT_NULL_CONSTRAINT_MANDATORY_FOR_FUTURE_PK = -1;
+
+// @ts-expect-error TS(2304): Cannot find name 'exports'.
+exports.up = async function (knex: $TSFixMe) {
+  await knex.schema.table(TABLE_NAME, function (table: $TSFixMe) {
+    table
+      .bigInteger(COLUMN_NAME)
+      .notNullable()
+      .defaultTo(FAKE_VALUE_TO_COMPLY_WITH_NOT_NULL_CONSTRAINT_MANDATORY_FOR_FUTURE_PK);
+  });
+
+  await knex.raw(`CREATE OR REPLACE FUNCTION copy_int_id_to_bigint_id()
+  RETURNS TRIGGER AS
+  $$
+  BEGIN
+    NEW."bigintId" = NEW.id::BIGINT;
+    RETURN NEW;
+  END
+  $$ LANGUAGE plpgsql;`);
+
+  await knex.raw(`CREATE TRIGGER "trg_knowledge-elements"
+  BEFORE INSERT ON "knowledge-elements"
+  FOR EACH ROW
+  EXECUTE FUNCTION copy_int_id_to_bigint_id();`);
+};
+
+// @ts-expect-error TS(2304): Cannot find name 'exports'.
+exports.down = async function (knex: $TSFixMe) {
+  await knex.raw('DROP TRIGGER "trg_knowledge-elements" ON "knowledge-elements"');
+  await knex.raw('DROP FUNCTION copy_int_id_to_bigint_id');
+
+  return knex.schema.table(TABLE_NAME, (table: $TSFixMe) => {
+    table.dropColumn(COLUMN_NAME);
+  });
+};

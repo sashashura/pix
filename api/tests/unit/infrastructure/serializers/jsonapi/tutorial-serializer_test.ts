@@ -1,0 +1,209 @@
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'expect'.
+const { expect, domainBuilder } = require('../../../../test-helper');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'serializer... Remove this comment to see the full error message
+const serializer = require('../../../../../lib/infrastructure/serializers/jsonapi/tutorial-serializer');
+
+// @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+describe('Unit | Serializer | JSONAPI | tutorial-serializer', function () {
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('#serialize', function () {
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return a serialized JSON data object', function () {
+      // given
+      const tutorialId = 123;
+
+      const skillId = 'rec123';
+
+      const tutorial = domainBuilder.buildTutorialForUser({
+        tutorial: domainBuilder.buildTutorial({ id: tutorialId }),
+        userTutorial: null,
+        skillId,
+      });
+
+      const expectedSerializedResult = {
+        data: {
+          id: tutorialId.toString(),
+          type: 'tutorials',
+          attributes: {
+            duration: '00:01:30',
+            format: 'video',
+            link: 'https://youtube.fr',
+            source: 'Youtube',
+            title: 'Savoir regarder des vidéos youtube.',
+            'skill-id': 'rec123',
+          },
+          relationships: {
+            'tutorial-evaluation': {
+              data: null,
+            },
+            'user-tutorial': {
+              data: null,
+            },
+          },
+        },
+      };
+
+      // when
+      const result = serializer.serialize(tutorial);
+
+      // then
+      expect(result).to.deep.equal(expectedSerializedResult);
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return a serialized JSON data object, enhanced by tube information', function () {
+      // given
+      const tutorialId = 123;
+
+      const tutorial = domainBuilder.buildTutorial({
+        id: tutorialId,
+      });
+      tutorial.tubeName = '@web';
+      tutorial.tubePracticalTitle = 'Tube Practical Title';
+      tutorial.tubePracticalDescription = 'Tube Practical Description';
+
+      tutorial.unknownAttribute = 'should not be in result';
+
+      const expectedSerializedResult = {
+        data: {
+          id: tutorialId.toString(),
+          type: 'tutorials',
+          attributes: {
+            duration: '00:01:30',
+            format: 'video',
+            link: 'https://youtube.fr',
+            source: 'Youtube',
+            title: 'Savoir regarder des vidéos youtube.',
+            'tube-name': '@web',
+            'tube-practical-description': 'Tube Practical Description',
+            'tube-practical-title': 'Tube Practical Title',
+          },
+        },
+      };
+
+      // when
+      const result = serializer.serialize(tutorial);
+
+      // then
+      expect(result).to.deep.equal(expectedSerializedResult);
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return a serialized JSON data object, with userSavedTutorial related to', function () {
+      // given
+      const userId = 456;
+      const tutorialId = 123;
+      const tutorialEvaluationId = `${userId}_${tutorialId}`;
+      const userTutorialId = `${userId}_${tutorialId}`;
+      const skillId = 'rec123';
+
+      const tutorial = domainBuilder.buildTutorialForUser({
+        tutorial: domainBuilder.buildTutorial({ id: tutorialId }),
+        tutorialEvaluation: { userId, id: tutorialEvaluationId, tutorialId },
+        userTutorial: { userId, id: userTutorialId, tutorialId },
+        skillId,
+      });
+
+      const expectedSerializedResult = {
+        data: {
+          id: tutorialId.toString(),
+          type: 'tutorials',
+          attributes: {
+            duration: '00:01:30',
+            format: 'video',
+            link: 'https://youtube.fr',
+            source: 'Youtube',
+            title: 'Savoir regarder des vidéos youtube.',
+            'skill-id': 'rec123',
+          },
+          relationships: {
+            'tutorial-evaluation': {
+              data: {
+                id: tutorialEvaluationId,
+                type: 'tutorialEvaluation',
+              },
+            },
+            'user-tutorial': {
+              data: {
+                id: userTutorialId,
+                type: 'user-tutorial',
+              },
+            },
+          },
+        },
+        included: [
+          {
+            attributes: {
+              id: tutorialEvaluationId,
+              'user-id': userId,
+              'tutorial-id': tutorialId,
+            },
+            id: tutorialEvaluationId,
+            type: 'tutorialEvaluation',
+          },
+          {
+            attributes: {
+              id: userTutorialId,
+              'user-id': userId,
+              'tutorial-id': tutorialId,
+            },
+            id: userTutorialId,
+            type: 'user-tutorial',
+          },
+        ],
+      };
+
+      // when
+      const result = serializer.serialize(tutorial);
+
+      // then
+      expect(result).to.deep.equal(expectedSerializedResult);
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return a serialized JSON data object with pagination', function () {
+      // given
+      const tutorialId = 123;
+
+      const tutorials = [
+        domainBuilder.buildTutorial({
+          id: tutorialId,
+        }),
+      ];
+      const pagination = {
+        page: 1,
+        pageSize: 10,
+        rowCount: 1,
+        pageCount: 1,
+      };
+
+      const expectedSerializedResult = {
+        data: [
+          {
+            id: tutorialId.toString(),
+            type: 'tutorials',
+            attributes: {
+              duration: '00:01:30',
+              format: 'video',
+              link: 'https://youtube.fr',
+              source: 'Youtube',
+              title: 'Savoir regarder des vidéos youtube.',
+            },
+          },
+        ],
+        meta: {
+          page: 1,
+          pageSize: 10,
+          rowCount: 1,
+          pageCount: 1,
+        },
+      };
+
+      // when
+      const result = serializer.serialize(tutorials, pagination);
+
+      // then
+      expect(result).to.deep.equal(expectedSerializedResult);
+    });
+  });
+});

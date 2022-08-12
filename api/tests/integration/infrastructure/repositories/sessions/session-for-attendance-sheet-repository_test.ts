@@ -1,0 +1,164 @@
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'databaseBu... Remove this comment to see the full error message
+const { databaseBuilder, expect, catchErr } = require('../../../../test-helper');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'NotFoundEr... Remove this comment to see the full error message
+const { NotFoundError } = require('../../../../../lib/domain/errors');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'sessionFor... Remove this comment to see the full error message
+const sessionForAttendanceSheetRepository = require('../../../../../lib/infrastructure/repositories/sessions/session-for-attendance-sheet-repository');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'SessionFor... Remove this comment to see the full error message
+const SessionForAttendanceSheet = require('../../../../../lib/domain/read-models/SessionForAttendanceSheet');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Certificat... Remove this comment to see the full error message
+const CertificationCandidateForAttendanceSheet = require('../../../../../lib/domain/read-models/CertificationCandidateForAttendanceSheet');
+
+// @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+describe('Integration | Repository | Session-for-attendance-sheet', function () {
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('#getWithCertificationCandidates', function () {
+    // @ts-expect-error TS(2304): Cannot find name 'context'.
+    context('when there are no organization learners', function () {
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should return session information with ordered candidates and no division', async function () {
+        // given
+        databaseBuilder.factory.buildOrganization({ type: 'SCO', externalId: 'EXT1234', isManagingStudents: true });
+        databaseBuilder.factory.buildOrganization({ type: 'SUP', externalId: 'EXT1234', isManagingStudents: false });
+        const certificationCenter = databaseBuilder.factory.buildCertificationCenter({
+          name: 'Tour Gamma',
+          type: 'SUP',
+          externalId: 'EXT1234',
+        });
+
+        const session = databaseBuilder.factory.buildSession({
+          id: 1234,
+          certificationCenter: 'Tour Gamma',
+          certificationCenterId: certificationCenter.id,
+          address: 'rue de Bercy',
+          room: 'Salle A',
+          examiner: 'Monsieur Examinateur',
+          date: '2018-02-23',
+          time: '12:00:00',
+        });
+
+        const candidate1 = databaseBuilder.factory.buildCertificationCandidate({
+          lastName: 'Jackson',
+          firstName: 'Michael',
+          sessionId: session.id,
+        });
+        const candidate2 = databaseBuilder.factory.buildCertificationCandidate({
+          lastName: 'Stardust',
+          firstName: 'Ziggy',
+          sessionId: session.id,
+        });
+        const candidate3 = databaseBuilder.factory.buildCertificationCandidate({
+          lastName: 'Jackson',
+          firstName: 'Janet',
+          sessionId: session.id,
+        });
+
+        await databaseBuilder.commit();
+
+        const expectedSessionValues = new SessionForAttendanceSheet({
+          id: 1234,
+          certificationCenterName: 'Tour Gamma',
+          address: 'rue de Bercy',
+          room: 'Salle A',
+          examiner: 'Monsieur Examinateur',
+          date: '2018-02-23',
+          time: '12:00:00',
+          certificationCenterType: 'SUP',
+          isOrganizationManagingStudents: false,
+          certificationCandidates: [
+            new CertificationCandidateForAttendanceSheet({ ...candidate3, division: null }),
+            new CertificationCandidateForAttendanceSheet({ ...candidate1, division: null }),
+            new CertificationCandidateForAttendanceSheet({ ...candidate2, division: null }),
+          ],
+        });
+
+        // when
+        const actualSession = await sessionForAttendanceSheetRepository.getWithCertificationCandidates(session.id);
+
+        // then
+        expect(actualSession).to.deepEqualInstance(expectedSessionValues);
+      });
+    });
+
+    // @ts-expect-error TS(2304): Cannot find name 'context'.
+    context('when there are organization learners', function () {
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should return session information with with ordered candidates and division', async function () {
+        // given
+        databaseBuilder.factory.buildOrganization({ type: 'SCO', externalId: 'EXT1234', isManagingStudents: true });
+        const certificationCenter = databaseBuilder.factory.buildCertificationCenter({
+          name: 'Tour Gamma',
+          type: 'SCO',
+          externalId: 'EXT1234',
+        });
+
+        const session = databaseBuilder.factory.buildSession({
+          id: 1234,
+          certificationCenter: 'Tour Gamma',
+          certificationCenterId: certificationCenter.id,
+          address: 'rue de Bercy',
+          room: 'Salle A',
+          examiner: 'Monsieur Examinateur',
+          date: '2018-02-23',
+          time: '12:00:00',
+        });
+
+        const organizationLearner1 = databaseBuilder.factory.buildOrganizationLearner({ division: '3b' });
+        const organizationLearner2 = databaseBuilder.factory.buildOrganizationLearner({ division: '3a' });
+        const organizationLearner3 = databaseBuilder.factory.buildOrganizationLearner({ division: '2c' });
+        const candidate1 = databaseBuilder.factory.buildCertificationCandidate({
+          lastName: 'Jackson',
+          firstName: 'Michael',
+          sessionId: session.id,
+          organizationLearnerId: organizationLearner1.id,
+        });
+        const candidate2 = databaseBuilder.factory.buildCertificationCandidate({
+          lastName: 'Stardust',
+          firstName: 'Ziggy',
+          sessionId: session.id,
+          organizationLearnerId: organizationLearner2.id,
+        });
+        const candidate3 = databaseBuilder.factory.buildCertificationCandidate({
+          lastName: 'Jackson',
+          firstName: 'Janet',
+          sessionId: session.id,
+          organizationLearnerId: organizationLearner3.id,
+        });
+        await databaseBuilder.commit();
+
+        const expectedSessionValues = new SessionForAttendanceSheet({
+          id: 1234,
+          certificationCenterName: 'Tour Gamma',
+          address: 'rue de Bercy',
+          room: 'Salle A',
+          examiner: 'Monsieur Examinateur',
+          date: '2018-02-23',
+          time: '12:00:00',
+          certificationCenterType: 'SCO',
+          isOrganizationManagingStudents: true,
+          certificationCandidates: [
+            new CertificationCandidateForAttendanceSheet({ ...candidate3, division: '2c' }),
+            new CertificationCandidateForAttendanceSheet({ ...candidate1, division: '3b' }),
+            new CertificationCandidateForAttendanceSheet({ ...candidate2, division: '3a' }),
+          ],
+        });
+
+        // when
+        const actualSession = await sessionForAttendanceSheetRepository.getWithCertificationCandidates(session.id);
+
+        // then
+        expect(actualSession).to.deepEqualInstance(expectedSessionValues);
+      });
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return a Not found error when no session was found', async function () {
+      // when
+      // @ts-expect-error TS(2554): Expected 2 arguments, but got 1.
+      const error = await catchErr(sessionForAttendanceSheetRepository.getWithCertificationCandidates)(12434354);
+
+      // then
+      expect(error).to.be.instanceOf(NotFoundError);
+    });
+  });
+});

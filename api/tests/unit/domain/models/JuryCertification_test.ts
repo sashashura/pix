@@ -1,0 +1,174 @@
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'expect'.
+const { expect, domainBuilder } = require('../../../test-helper');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'JuryCertif... Remove this comment to see the full error message
+const JuryCertification = require('../../../../lib/domain/models/JuryCertification');
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'PIX_EDU_FO... Remove this comment to see the full error message
+const { PIX_EDU_FORMATION_CONTINUE_1ER_DEGRE_AVANCE } = require('../../../../lib/domain/models/Badge').keys;
+// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'PIX_EMPLOI... Remove this comment to see the full error message
+const { PIX_EMPLOI_CLEA } = require('../../../../lib/domain/models/Badge').keys;
+
+// @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+describe('Unit | Domain | Models | JuryCertification', function () {
+  // @ts-expect-error TS(2582): Cannot find name 'describe'. Do you need to instal... Remove this comment to see the full error message
+  describe('#from', function () {
+    let juryCertificationBaseDTO: $TSFixMe;
+
+    // @ts-expect-error TS(2304): Cannot find name 'beforeEach'.
+    beforeEach(function () {
+      juryCertificationBaseDTO = {
+        certificationCourseId: 123,
+        sessionId: 456,
+        userId: 789,
+        assessmentId: 159,
+        firstName: 'James',
+        lastName: 'Watt',
+        birthdate: '1990-01-04',
+        birthplace: 'Somewhere',
+        sex: 'M',
+        birthCountry: 'ENGLAND',
+        birthINSEECode: '99124',
+        birthPostalCode: null,
+        createdAt: new Date('2020-02-20T10:30:00Z'),
+        completedAt: new Date('2020-02-20T11:00:00Z'),
+        isPublished: true,
+        assessmentResultStatus: 'rejected',
+        juryId: 1,
+        pixScore: 555,
+        commentForCandidate: 'coucou',
+        commentForOrganization: 'comment',
+        commentForJury: 'ça va',
+      };
+    });
+
+    // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+    it('should return an instance of JuryCertification', function () {
+      // given
+      const certificationIssueReport = domainBuilder.buildCertificationIssueReport({ id: 555 });
+      const juryCertificationDTO = {
+        ...juryCertificationBaseDTO,
+        isCancelled: false,
+      };
+      const certificationIssueReports = [certificationIssueReport];
+      const commonComplementaryCertificationCourseResults = [
+        domainBuilder.buildComplementaryCertificationCourseResultForJuryCertification({
+          partnerKey: PIX_EMPLOI_CLEA,
+          acquired: true,
+        }),
+      ];
+
+      const competenceMarkDTOs = [
+        {
+          id: 123,
+          score: 10,
+          level: 4,
+          area_code: '2',
+          competence_code: '2.3',
+          assessmentResultId: 753,
+          competenceId: 'recComp23',
+        },
+      ];
+
+      const complementaryCertificationCourseResultsWithExternal =
+        domainBuilder.buildComplementaryCertificationCourseResultForJuryCertificationWithExternal({
+          complementaryCertificationCourseId: 123,
+          pixPartnerKey: PIX_EDU_FORMATION_CONTINUE_1ER_DEGRE_AVANCE,
+          pixAcquired: true,
+          externalPartnerKey: PIX_EDU_FORMATION_CONTINUE_1ER_DEGRE_AVANCE,
+          externalAcquired: true,
+        });
+
+      // when
+      const juryCertification = JuryCertification.from({
+        juryCertificationDTO,
+        certificationIssueReports,
+        competenceMarkDTOs,
+        commonComplementaryCertificationCourseResults,
+        complementaryCertificationCourseResultsWithExternal,
+      });
+
+      // then
+      const expectedCompetenceMark = domainBuilder.buildCompetenceMark({
+        id: 123,
+        level: 4,
+        score: 10,
+        area_code: '2',
+        competence_code: '2.3',
+        competenceId: 'recComp23',
+        assessmentResultId: 753,
+      });
+      const expectedJuryCertification = domainBuilder.buildJuryCertification({
+        certificationCourseId: 123,
+        sessionId: 456,
+        userId: 789,
+        assessmentId: 159,
+        firstName: 'James',
+        lastName: 'Watt',
+        birthdate: '1990-01-04',
+        birthplace: 'Somewhere',
+        sex: 'M',
+        birthCountry: 'ENGLAND',
+        birthINSEECode: '99124',
+        birthPostalCode: null,
+        createdAt: new Date('2020-02-20T10:30:00Z'),
+        completedAt: new Date('2020-02-20T11:00:00Z'),
+        isPublished: true,
+        status: 'rejected',
+        juryId: 1,
+        pixScore: 555,
+        commentForCandidate: 'coucou',
+        commentForOrganization: 'comment',
+        commentForJury: 'ça va',
+        competenceMarks: [expectedCompetenceMark],
+        certificationIssueReports,
+        commonComplementaryCertificationCourseResults,
+        complementaryCertificationCourseResultsWithExternal,
+      });
+      expect(juryCertification).to.deepEqualInstance(expectedJuryCertification);
+    });
+
+    // @ts-expect-error TS(2304): Cannot find name 'context'.
+    context('status', function () {
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should return a cancelled juryCertification regardless of assessment result status if certif is cancelled', function () {
+        // given
+        const juryCertificationDTO = {
+          ...juryCertificationBaseDTO,
+          isCancelled: true,
+          assessmentResultStatus: 'WHATEVERIWANT',
+        };
+
+        // when
+        const juryCertification = JuryCertification.from({
+          juryCertificationDTO,
+          certificationIssueReports: [],
+          complementaryCertificationCourseResults: [],
+          competenceMarkDTOs: [],
+        });
+
+        // then
+        expect(juryCertification.status).to.equal('cancelled');
+      });
+
+      // @ts-expect-error TS(2582): Cannot find name 'it'. Do you need to install type... Remove this comment to see the full error message
+      it('should set the status of the juryCertification as the assessmentResultStatus otherwise', function () {
+        // given
+        const juryCertificationDTO = {
+          ...juryCertificationBaseDTO,
+          isCancelled: false,
+          assessmentResultStatus: 'WHATEVERIWANT',
+        };
+
+        // when
+        const juryCertification = JuryCertification.from({
+          juryCertificationDTO,
+          certificationIssueReports: [],
+          complementaryCertificationCourseResults: [],
+          competenceMarkDTOs: [],
+        });
+
+        // then
+        expect(juryCertification.status).to.equal('WHATEVERIWANT');
+      });
+    });
+  });
+});
