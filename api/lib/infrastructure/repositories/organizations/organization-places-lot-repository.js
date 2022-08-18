@@ -1,6 +1,6 @@
 const { knex } = require('../../../../db/knex-database-connection');
 const OrganizationPlacesLotManagement = require('../../../domain/read-models/OrganizationPlacesLotManagement');
-const { NotFoundError } = require('../../../domain/errors');
+const { NotFoundError, DeletedError } = require('../../../domain/errors');
 
 async function findByOrganizationId(organizationId) {
   const results = await knex('organization-places')
@@ -54,8 +54,19 @@ async function create(places) {
   return id;
 }
 
+async function softDelete({ id, deletedBy }) {
+  const result = await knex('organization-places')
+    .update({ deletedAt: new Date(), deletedBy })
+    .where({ id, deletedBy: null });
+
+  if (!result) {
+    throw new DeletedError('Organization places lot already deleted');
+  }
+}
+
 module.exports = {
   findByOrganizationId,
   get,
   create,
+  softDelete,
 };

@@ -1,10 +1,10 @@
-const { expect, databaseBuilder, catchErr } = require('../../../../test-helper');
+const { expect, databaseBuilder, catchErr, sinon } = require('../../../../test-helper');
 const { knex } = require('../../../../../db/knex-database-connection');
 const organizationPlacesLotRepository = require('../../../../../lib/infrastructure/repositories/organizations/organization-places-lot-repository');
 const OrganizationPlacesLotManagement = require('../../../../../lib/domain/read-models/OrganizationPlacesLotManagement');
 const OrganizationPlacesLot = require('../../../../../lib/domain/models/OrganizationPlacesLot');
 const categories = require('../../../../../lib/domain/constants/organization-places-categories');
-const { NotFoundError } = require('../../../../../lib/domain/errors');
+const { NotFoundError, DeletedError } = require('../../../../../lib/domain/errors');
 
 describe('Integration | Repository | Organization Place', function () {
   describe('#findByOrganizationId', function () {
@@ -236,6 +236,61 @@ describe('Integration | Repository | Organization Place', function () {
       // then
       const places = await knex('organization-places').where('id', createdOrganizationPlacesLotId).first();
       expect(places).to.deep.include(placesToSave);
+    });
+  });
+
+  describe('#softDelete', function () {
+    let clock;
+
+    beforeEach(function () {
+      clock = sinon.useFakeTimers({
+        now: Date.now(),
+        toFake: ['Date'],
+      });
+    });
+
+    afterEach(function () {
+      clock.restore();
+      return knex('organization-places').delete();
+    });
+
+    it('should mark place as deleted', async function () {
+      // given
+      const user = databaseBuilder.factory.buildUser.withRole({ firstName: 'Gareth', lastName: 'Edwards' });
+      const organizationPlace = databaseBuilder.factory.buildOrganizationPlace();
+
+      await databaseBuilder.commit();
+
+      // when
+      await organizationPlacesLotRepository.softDelete({
+        id: organizationPlace.id,
+        deletedBy: user.id,
+      });
+
+      // then
+      const places = await knex('organization-places').where('id', organizationPlace.id).first();
+      expect(places.deletedBy).to.equal(user.id);
+      expect(places.deletedAt).to.deep.equal(new Date());
+    });
+
+    it('should not mark place as deleted of already deleted place', async function () {
+      // given
+      const user = databaseBuilder.factory.buildUser.withRole({ firstName: 'Gareth', lastName: 'Edwards' });
+      const organizationPlace = databaseBuilder.factory.buildOrganizationPlace({
+        deletedAt: new Date('2021-01-01'),
+        deletedBy: user.id,
+      });
+
+      await databaseBuilder.commit();
+
+      // when
+      const error = await catchErr(organizationPlacesLotRepository.softDelete)({
+        id: organizationPlace.id,
+        deletedBy: user.id,
+      });
+
+      // then
+      expect(error).to.be.an.instanceOf(DeletedError);
     });
   });
 
