@@ -35,6 +35,7 @@
           <th scope="col">Statut</th>
           <th scope="col">Référence</th>
           <th scope="col">Créé par</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -56,6 +57,12 @@
             </td>
             <td>{{place.reference}}</td>
             <td>{{place.creatorFullName}}</td>
+            <td>
+               <PixButton
+              @size="small"
+              @backgroundColor="red"
+              @triggerAction={{fn @toggleDisplayDeletePlaceLot place}}><FaIcon @icon="trash" />&nbsp;Supprimer</PixButton>
+            </td>
           </tr>
         {{/each}}
       </tbody>

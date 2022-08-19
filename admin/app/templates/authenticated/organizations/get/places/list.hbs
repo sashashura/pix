@@ -3,4 +3,14 @@
   @places={{@model.places}}
   @organizationId={{@model.organization.id}}
   @placesCapacity={{@model.placesCapacity}}
+  @toggleDisplayDeletePlaceLot={{this.toggleDisplayModal}}
+/>
+
+<ConfirmPopup
+  @message={{this.message}}
+  @title="Supprimer un lot de place"
+  @submitTitle="Confirmer"
+  @confirm={{this.deleteOrganizationPlaceLot}}
+  @cancel={{this.toggleDisplayModal}}
+  @show={{this.displayModal}}
 />
