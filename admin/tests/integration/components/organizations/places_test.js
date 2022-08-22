@@ -1,4 +1,5 @@
 import { module, test } from 'qunit';
+import sinon from 'sinon';
 import { render } from '@1024pix/ember-testing-library';
 import { setupRenderingTest } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
@@ -8,10 +9,12 @@ module('Integration | Component | Organizations | places', function (hooks) {
 
   let store;
   let currentUser;
+  let toggleDisplayDeletePlaceLot;
 
   hooks.beforeEach(async function () {
     store = this.owner.lookup('service:store');
     currentUser = this.owner.lookup('service:currentUser');
+    toggleDisplayDeletePlaceLot = sinon.stub();
   });
 
   module('When user is superAdmin', function (hooks) {
@@ -23,8 +26,13 @@ module('Integration | Component | Organizations | places', function (hooks) {
       test('it should display button to add places', async function (assert) {
         //Given
         this.set('places', []);
+        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
+
         // when
-        const screen = await render(hbs`<Organizations::Places @places={{this.places}}/>`);
+        const screen = await render(
+          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+        );
+
         // then
         assert.dom(screen.getByText('Ajouter des places')).exists();
       });
@@ -34,9 +42,12 @@ module('Integration | Component | Organizations | places', function (hooks) {
       test('it should display title and no results text', async function (assert) {
         //Given
         this.set('places', []);
+        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
         // when
-        const screen = await render(hbs`<Organizations::Places @places={{this.places}}/>`);
+        const screen = await render(
+          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+        );
 
         // then
         assert.dom(screen.getByText('Historique des lots')).exists();
@@ -65,9 +76,12 @@ module('Integration | Component | Organizations | places', function (hooks) {
         });
 
         this.set('places', [places]);
+        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
         // when
-        const screen = await render(hbs`<Organizations::Places @places={{this.places}}/>`);
+        const screen = await render(
+          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+        );
 
         // then
         assert.dom(screen.queryByText('Aucun résultat')).doesNotExist();
@@ -100,8 +114,13 @@ module('Integration | Component | Organizations | places', function (hooks) {
       test('it should display button to add places', async function (assert) {
         //Given
         this.set('places', []);
+        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
+
         // when
-        const screen = await render(hbs`<Organizations::Places @places={{this.places}}/>`);
+        const screen = await render(
+          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+        );
+
         // then
         assert.dom(screen.queryByText('Ajouter des places')).doesNotExist();
       });
