@@ -14,8 +14,8 @@ export default class OrganizationPlaceAdapter extends ApplicationAdapter {
     return `${this.host}/${this.namespace}/organizations/${organizationId}/places`;
   }
 
-  urlForDeleteRecord({ adapterOptions }) {
-    const { organizationId, organizationPlaceId } = adapterOptions;
-    return `${this.host}/${this.namespace}/organizations/${organizationId}/places/${organizationPlaceId}`;
+  urlForDeleteRecord(id, modelName, { adapterOptions }) {
+    const { organizationId } = adapterOptions;
+    return `${this.host}/${this.namespace}/organizations/${organizationId}/places/${id}`;
   }
 }

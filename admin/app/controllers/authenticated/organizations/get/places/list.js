@@ -28,8 +28,7 @@ export default class List extends Controller {
   @action
   async deleteOrganizationPlaceLot() {
     await this.organizationPlace.deleteRecord();
-    await this.organizationPlace.save();
-    await this.model.places.reload();
+    await this.organizationPlace.save({ adapterOptions: { organizationId: this.model.organization.id } });
 
     this.displayModal = !this.displayModal;
   }
