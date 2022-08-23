@@ -20,7 +20,12 @@ module.exports = {
 
     const { event, campaignParticipation: campaignParticipationCreated } = await DomainTransaction.execute(
       async (domainTransaction) => {
-        const { event, campaignParticipation: campaignParticipationCreated } = await usecases.startCampaignParticipation({ campaignParticipation, userId, domainTransaction });
+        const { event, campaignParticipation: campaignParticipationCreated } =
+          await usecases.startCampaignParticipation({
+            campaignParticipation,
+            userId,
+            domainTransaction,
+          });
         await usecases.incrementCampaignParticipationCounter();
         return { event, campaignParticipation: campaignParticipationCreated };
       }
