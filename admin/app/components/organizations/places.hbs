@@ -58,11 +58,13 @@
             <td>{{place.reference}}</td>
             <td>{{place.creatorFullName}}</td>
             <td>
-              <PixButton
-                @size="small"
-                @backgroundColor="red"
-                @triggerAction={{fn @toggleDisplayDeletePlaceLot place}}
-              ><FaIcon @icon="trash" />&nbsp;Supprimer</PixButton>
+              {{#if this.accessControl.hasAccessToOrganizationPlacesActionsScope}}
+                <PixButton
+                  @size="small"
+                  @backgroundColor="red"
+                  @triggerAction={{fn @toggleDisplayDeletePlaceLot place}}
+                ><FaIcon @icon="trash" />&nbsp;Supprimer</PixButton>
+              {{/if}}
             </td>
           </tr>
         {{/each}}

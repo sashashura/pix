@@ -102,6 +102,31 @@ module('Integration | Component | Organizations | places', function (hooks) {
         assert.dom(screen.getByText(/Du: 31\/01\/1997/)).exists();
         assert.dom(screen.getByText(/Au: 31\/12\/2100/)).exists();
       });
+
+      test('it should display button to add places', async function (assert) {
+        // given
+        const places = store.createRecord('organizationPlace', {
+          count: 7777,
+          reference: 'FFVII',
+          category: 'FULL_RATE',
+          status: 'ACTIVE',
+          activationDate: '1997-01-31',
+          expirationDate: '2100-12-31',
+          createdAt: '1996-01-12',
+          creatorFullName: 'Hironobu Sakaguchi',
+        });
+
+        this.set('places', [places]);
+        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
+
+        // when
+        const screen = await render(
+          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+        );
+
+        // then
+        assert.dom(screen.getByText('Supprimer')).exists();
+      });
     });
   });
 
@@ -111,8 +136,8 @@ module('Integration | Component | Organizations | places', function (hooks) {
     });
 
     module('not display add places', function () {
-      test('it should display button to add places', async function (assert) {
-        //Given
+      test('it should not display button to add places', async function (assert) {
+        // given
         this.set('places', []);
         this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
@@ -123,6 +148,33 @@ module('Integration | Component | Organizations | places', function (hooks) {
 
         // then
         assert.dom(screen.queryByText('Ajouter des places')).doesNotExist();
+      });
+    });
+
+    module('not display delete places lot', function () {
+      test('it should not display button to delete places lot', async function (assert) {
+        // given
+        const places = store.createRecord('organizationPlace', {
+          count: 7777,
+          reference: 'FFVII',
+          category: 'FULL_RATE',
+          status: 'ACTIVE',
+          activationDate: '1997-01-31',
+          expirationDate: '2100-12-31',
+          createdAt: '1996-01-12',
+          creatorFullName: 'Hironobu Sakaguchi',
+        });
+
+        this.set('places', [places]);
+        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
+
+        // when
+        const screen = await render(
+          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+        );
+
+        // then
+        assert.dom(screen.queryByText('Supprimer')).doesNotExist();
       });
     });
   });
