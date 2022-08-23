@@ -187,23 +187,7 @@ async function _findpreviousCampaignParticipationForUser(campaignId, userId, dom
   };
 }
 
-async function deleteCampaignParticipations({ userId, campaignId, organizationLearnerId, domainTransaction }) {
-  const deletedAt = new Date();
-  const result = await domainTransaction
-    .knexTransaction('campaign-participations')
-    .where({ campaignId, organizationLearnerId })
-    .update({ deletedAt, deletedBy: userId })
-    .returning('status');
-
-  await campaignRepository.decrementParticipationsCount(campaignId, domainTransaction);
-
-  if (result.some(({ status }) => status === CampaignParticipationStatuses.SHARED)) {
-    await campaignRepository.decrementSharedParticipationsCount(campaignId, domainTransaction);
-  }
-}
-
 module.exports = {
   get,
   save,
-  delete: deleteCampaignParticipations,
 };

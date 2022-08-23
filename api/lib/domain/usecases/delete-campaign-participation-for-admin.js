@@ -1,24 +1,24 @@
+const bluebird = require('bluebird');
+
 module.exports = async function deleteCampaignParticipationForAdmin({
   userId,
   campaignParticipationId,
   domainTransaction,
   campaignRepository,
   campaignParticipationRepository,
-  campaignParticipantRepository,
 }) {
   const campaignId = await campaignRepository.getCampaignIdByCampaignParticipationId(campaignParticipationId);
 
-  const organizationLearnerId = await campaignParticipationRepository.getOrganizationLearnerIdFromCampaignParticipation(
-    {
+  const campaignParticipations =
+    await campaignParticipationRepository.getAllCampaignParticipationsInCampaignForASameLearner({
       campaignId,
       campaignParticipationId,
       domainTransaction,
-    }
-  );
-  await campaignParticipantRepository.delete({
-    userId,
-    campaignId,
-    organizationLearnerId,
-    domainTransaction,
+    });
+
+  await bluebird.mapSeries(campaignParticipations, async (campaignParticipation) => {
+    campaignParticipation.delete(userId);
+    const { id, deletedAt, deletedBy } = campaignParticipation;
+    await campaignParticipationRepository.delete({ id, deletedAt, deletedBy, domainTransaction });
   });
 };

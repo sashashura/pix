@@ -1,5 +1,6 @@
 const { expect, sinon, domainBuilder } = require('../../../test-helper');
 const { deleteCampaignParticipation } = require('../../../../lib/domain/usecases');
+const CampaignParticipation = require('../../../../lib/domain/models/CampaignParticipation');
 
 describe('Unit | UseCase | delete-campaign-participation', function () {
   //given
@@ -16,9 +17,7 @@ describe('Unit | UseCase | delete-campaign-participation', function () {
 
   it('should call repository method to delete a campaign participation', async function () {
     const campaignParticipationRepository = {
-      getOrganizationLearnerIdFromCampaignParticipation: sinon.stub(),
-    };
-    const campaignParticipantRepository = {
+      getAllCampaignParticipationsInCampaignForASameLearner: sinon.stub(),
       delete: sinon.stub(),
     };
     const campaignParticipationId = 1234;
@@ -27,13 +26,29 @@ describe('Unit | UseCase | delete-campaign-participation', function () {
     const ownerId = domainBuilder.buildUser().id;
     const organizationLearnerId = domainBuilder.buildOrganizationLearner().id;
 
-    await campaignParticipationRepository.getOrganizationLearnerIdFromCampaignParticipation
+    const campaignParticipation1 = new CampaignParticipation({
+      id: campaignParticipationId,
+      organizationLearnerId,
+      deletedAt: null,
+      deletedBy: null,
+      campaignId,
+    });
+
+    const campaignParticipation2 = new CampaignParticipation({
+      id: 1235,
+      deletedAt: null,
+      deletedBy: null,
+    });
+
+    const campaignParticipations = [campaignParticipation1, campaignParticipation2];
+
+    await campaignParticipationRepository.getAllCampaignParticipationsInCampaignForASameLearner
       .withArgs({
         campaignId,
         campaignParticipationId,
         domainTransaction,
       })
-      .resolves(organizationLearnerId);
+      .resolves(campaignParticipations);
 
     //when
     await deleteCampaignParticipation({
@@ -41,16 +56,23 @@ describe('Unit | UseCase | delete-campaign-participation', function () {
       campaignId,
       campaignParticipationId,
       campaignParticipationRepository,
-      campaignParticipantRepository,
       domainTransaction,
     });
 
     //then
-    expect(campaignParticipantRepository.delete).to.have.been.calledWith({
-      userId: ownerId,
-      campaignId,
-      organizationLearnerId,
-      domainTransaction,
+    expect(campaignParticipationRepository.delete).to.have.been.calledTwice;
+    campaignParticipations.forEach((campaignParticipation) => {
+      const deletedCampaignParticipation = new CampaignParticipation({
+        ...campaignParticipation,
+        deletedAt: now,
+        deletedBy: ownerId,
+      });
+      expect(campaignParticipationRepository.delete).to.have.been.calledWithExactly({
+        id: deletedCampaignParticipation.id,
+        deletedAt: deletedCampaignParticipation.deletedAt,
+        deletedBy: deletedCampaignParticipation.deletedBy,
+        domainTransaction,
+      });
     });
   });
 });

@@ -1,4 +1,4 @@
-const { expect, databaseBuilder, mockLearningContent, catchErr, sinon } = require('../../../test-helper');
+const { expect, databaseBuilder, mockLearningContent, catchErr } = require('../../../test-helper');
 const { knex } = require('../../../../db/knex-database-connection');
 const campaignParticipantRepository = require('../../../../lib/infrastructure/repositories/campaign-participant-repository');
 const CampaignParticipant = require('../../../../lib/domain/models/CampaignParticipant');
@@ -942,44 +942,6 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
 
       expect(error).to.be.an.instanceof(NotFoundError);
       expect(error.message).to.equal("La campagne d'id 12 n'existe pas ou son accès est restreint");
-    });
-  });
-
-  describe('#delete', function () {
-    let clock;
-
-    beforeEach(function () {
-      clock = sinon.useFakeTimers({
-        now: Date.now(),
-        toFake: ['Date'],
-      });
-    })
-
-    afterEach(function () {
-      clock.restore();
-    });
-
-    it('should remove the campaign participations from the campaign of the organization learner', async function () {
-      // given
-      const ownerId = databaseBuilder.factory.buildUser().id;
-      const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation();
-      await databaseBuilder.commit();
-
-      // when
-      await DomainTransaction.execute(async (domainTransaction) => {
-        await campaignParticipantRepository.delete({
-          userId: ownerId,
-          campaignId: campaignParticipation.campaignId,
-          organizationLearnerId: campaignParticipation.organizationLearnerId,
-          domainTransaction,
-        });
-      });
-
-      // then
-      const deletedCampaignParticipation = await knex('campaign-participations').first();
-
-      expect(deletedCampaignParticipation.deletedAt).to.deep.equal(new Date());
-      expect(deletedCampaignParticipation.deletedBy).to.deep.equal(ownerId);
     });
   });
 });

@@ -170,7 +170,11 @@ module.exports = {
     return mapToParticipationByStatus(row, campaignType);
   },
 
-  async getOrganizationLearnerIdFromCampaignParticipation({ campaignId, campaignParticipationId, domainTransaction }) {
+  async getAllCampaignParticipationsInCampaignForASameLearner({
+    campaignId,
+    campaignParticipationId,
+    domainTransaction,
+  }) {
     const knexConn = domainTransaction.knexTransaction;
     const result = await knexConn('campaign-participations')
       .select('organizationLearnerId')
@@ -183,29 +187,19 @@ module.exports = {
       );
     }
 
-    return result.organizationLearnerId;
-  },
-
-  async getAllCampaignParticipationsInCampaignForASameLearner({
-    campaignId,
-    campaignParticipationId,
-    domainTransaction,
-  }) {
-    const knexConn = domainTransaction.knexTransaction;
-    const organizationLearnerId = this.getOrganizationLearnerIdFromCampaignParticipation({
-      campaignId,
-      campaignParticipationId,
-      domainTransaction,
-    });
-
     const campaignParticipations = await knexConn('campaign-participations').where({
       campaignId,
-      organizationLearnerId,
+      organizationLearnerId: result.organizationLearnerId,
       deletedAt: null,
       deletedBy: null,
     });
 
     return campaignParticipations.map((campaignParticipation) => new CampaignParticipation(campaignParticipation));
+  },
+
+  async markAsDeleted({ id, deletedAt, deletedBy, domainTransaction }) {
+    const knexConn = domainTransaction.knexTransaction;
+    return await knexConn('campaign-participations').where({ id }).update({ deletedAt, deletedBy });
   },
 };
 

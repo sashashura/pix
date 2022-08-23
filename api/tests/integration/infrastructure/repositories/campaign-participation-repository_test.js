@@ -1360,4 +1360,31 @@ describe('Integration | Repository | Campaign Participation', function () {
       });
     });
   });
+
+  describe('#markAsDeleted', function () {
+    it('should update the campaign-participations with deletedAt and deletedBy attributes', async function () {
+      const ownerId = databaseBuilder.factory.buildUser().id;
+      const { id: campaignId } = databaseBuilder.factory.buildCampaign({ ownerId });
+      const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({ campaignId });
+
+      await databaseBuilder.commit();
+
+      campaignParticipation.deletedAt = new Date('2022-11-01T23:00:00Z');
+      campaignParticipation.deletedBy = ownerId;
+
+      await DomainTransaction.execute((domainTransaction) => {
+        return campaignParticipationRepository.markAsDeleted({
+          id: campaignParticipation.id,
+          deletedAt: campaignParticipation.deletedAt,
+          deletedBy: campaignParticipation.deletedBy,
+          domainTransaction,
+        });
+      });
+
+      const deletedCampaignParticipation = await knex('campaign-participations').first();
+
+      expect(deletedCampaignParticipation.deletedAt).to.deep.equal(new Date('2022-11-01T23:00:00Z'));
+      expect(deletedCampaignParticipation.deletedBy).to.deep.equal(ownerId);
+    });
+  });
 });
