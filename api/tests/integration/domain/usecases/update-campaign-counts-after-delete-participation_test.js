@@ -2,6 +2,9 @@ const { expect, databaseBuilder, knex } = require('../../../test-helper');
 const updateCampaignCountsAfterDeleteParticipation = require('../../../../lib/domain/usecases/update-campaign-counts-after-delete-participation');
 const campaignRepository = require('../../../../lib/infrastructure/repositories/campaign-repository');
 const DomainTransaction = require('../../../../lib/infrastructure/DomainTransaction');
+const CampaignParticipationStatuses = require('../../../../lib/domain/models/CampaignParticipationStatuses');
+
+const { STARTED, SHARED } = CampaignParticipationStatuses;
 
 describe('Integration | UseCase | update-campaign-counts-after-delete-participation', function () {
   context('when the deleted campaign participation was not shared', function () {
@@ -11,7 +14,7 @@ describe('Integration | UseCase | update-campaign-counts-after-delete-participat
       const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
         campaignId: campaign.id,
         deletedAt: new Date(),
-        sharedAt: null,
+        status: STARTED,
       });
       await databaseBuilder.commit();
 
@@ -39,7 +42,8 @@ describe('Integration | UseCase | update-campaign-counts-after-delete-participat
       const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
         campaignId: campaign.id,
         deletedAt: new Date(),
-        sharedAt: new Date(),
+        status: SHARED,
+        isImproved: false,
       });
       await databaseBuilder.commit();
 
@@ -48,6 +52,41 @@ describe('Integration | UseCase | update-campaign-counts-after-delete-participat
         await updateCampaignCountsAfterDeleteParticipation({
           campaignId: campaign.id,
           deletedCampaignParticipations: [campaignParticipation],
+          campaignRepository,
+          domainTransaction,
+        });
+      });
+
+      // then
+      const updatedCampaign = await knex('campaigns').where({ id: campaign.id }).first();
+      expect(updatedCampaign.participationsCount).to.equal(0);
+      expect(updatedCampaign.sharedParticipationsCount).to.equal(0);
+    });
+  });
+
+  context('when the deleted campaign participation was shared then improved', function () {
+    it('should decrement the campaign sharedParticipationsCount', async function () {
+      // given
+      const campaign = databaseBuilder.factory.buildCampaign({ participationsCount: 1, sharedParticipationsCount: 0 });
+      const sharedImprovedCampaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
+        campaignId: campaign.id,
+        deletedAt: new Date(),
+        status: SHARED,
+        isImproved: true,
+      });
+      const improvingCampaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
+        campaignId: campaign.id,
+        deletedAt: new Date(),
+        status: STARTED,
+        isImproved: false,
+      });
+      await databaseBuilder.commit();
+
+      // when
+      await DomainTransaction.execute(async (domainTransaction) => {
+        await updateCampaignCountsAfterDeleteParticipation({
+          campaignId: campaign.id,
+          deletedCampaignParticipations: [sharedImprovedCampaignParticipation, improvingCampaignParticipation],
           campaignRepository,
           domainTransaction,
         });

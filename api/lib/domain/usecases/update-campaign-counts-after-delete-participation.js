@@ -6,7 +6,10 @@ module.exports = async function updateCampaignCountsAfterDeleteParticipation({
 }) {
   await campaignRepository.decrementParticipationsCount(campaignId, domainTransaction);
 
-  if (deletedCampaignParticipations.some((campaignParticipation) => campaignParticipation.sharedAt)) {
+  const hasSharedParticipation = deletedCampaignParticipations.some(
+    (campaignParticipation) => campaignParticipation.sharedAt && !campaignParticipation.isImproved
+  );
+  if (hasSharedParticipation) {
     await campaignRepository.decrementSharedParticipationsCount(campaignId, domainTransaction);
   }
 };
