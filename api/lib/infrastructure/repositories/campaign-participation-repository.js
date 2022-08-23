@@ -197,7 +197,7 @@ module.exports = {
     return campaignParticipations.map((campaignParticipation) => new CampaignParticipation(campaignParticipation));
   },
 
-  async markAsDeleted({ id, deletedAt, deletedBy, domainTransaction }) {
+  async delete({ id, deletedAt, deletedBy, domainTransaction }) {
     const knexConn = domainTransaction.knexTransaction;
     return await knexConn('campaign-participations').where({ id }).update({ deletedAt, deletedBy });
   },
