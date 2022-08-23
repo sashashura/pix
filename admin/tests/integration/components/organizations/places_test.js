@@ -1,4 +1,5 @@
 import { module, test } from 'qunit';
+import { click } from '@ember/test-helpers';
 import sinon from 'sinon';
 import { render } from '@1024pix/ember-testing-library';
 import { setupRenderingTest } from 'ember-qunit';
@@ -126,6 +127,33 @@ module('Integration | Component | Organizations | places', function (hooks) {
 
         // then
         assert.dom(screen.getByText('Supprimer')).exists();
+      });
+
+      test('it should call toggleDisplayDeletePlaceLot', async function (assert) {
+        // given
+        const places = store.createRecord('organizationPlace', {
+          count: 7777,
+          reference: 'FFVII',
+          category: 'FULL_RATE',
+          status: 'ACTIVE',
+          activationDate: '1997-01-31',
+          expirationDate: '2100-12-31',
+          createdAt: '1996-01-12',
+          creatorFullName: 'Hironobu Sakaguchi',
+        });
+
+        this.set('places', [places]);
+        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
+
+        // when
+        const screen = await render(
+          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+        );
+        await click(screen.getByText('Supprimer'));
+
+        // then
+        sinon.assert.calledWith(toggleDisplayDeletePlaceLot, places);
+        assert.ok(true);
       });
     });
   });
