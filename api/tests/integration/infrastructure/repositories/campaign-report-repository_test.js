@@ -3,6 +3,9 @@ const { expect, databaseBuilder, catchErr, mockLearningContent } = require('../.
 const campaignReportRepository = require('../../../../lib/infrastructure/repositories/campaign-report-repository');
 const CampaignReport = require('../../../../lib/domain/read-models/CampaignReport');
 const { NotFoundError } = require('../../../../lib/domain/errors');
+const CampaignParticipationStatuses = require('../../../../lib/domain/models/CampaignParticipationStatuses');
+
+const { STARTED, SHARED } = CampaignParticipationStatuses;
 
 describe('Integration | Repository | Campaign-Report', function () {
   describe('#get', function () {
