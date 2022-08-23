@@ -116,4 +116,8 @@ module.exports = {
     if (!campaign) return null;
     return campaign.id;
   },
+
+  incrementParticipationsCount(id, domainTransaction) {
+    return domainTransaction.knexTransaction('campaigns').where({ id }).increment('participationsCount', 1);
+  },
 };

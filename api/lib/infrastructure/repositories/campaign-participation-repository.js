@@ -110,14 +110,15 @@ module.exports = {
     });
   },
 
-  async isRetrying({ campaignParticipationId }) {
-    const { id: campaignId, userId } = await knex('campaigns')
+  async isRetrying({ campaignParticipationId, domainTransaction = DomainTransaction.emptyTransaction() }) {
+    const knexConn = domainTransaction.knex || knex;
+    const { id: campaignId, userId } = await knexConn('campaigns')
       .select('campaigns.id', 'userId')
       .join('campaign-participations', 'campaigns.id', 'campaignId')
       .where({ 'campaign-participations.id': campaignParticipationId })
       .first();
 
-    const campaignParticipations = await knex('campaign-participations')
+    const campaignParticipations = await knexConn('campaign-participations')
       .select('sharedAt', 'isImproved')
       .where({ campaignId, userId });
 

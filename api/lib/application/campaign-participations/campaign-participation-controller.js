@@ -19,8 +19,10 @@ module.exports = {
     const campaignParticipation = await campaignParticipationSerializer.deserialize(request.payload);
 
     const { event, campaignParticipation: campaignParticipationCreated } = await DomainTransaction.execute(
-      (domainTransaction) => {
-        return usecases.startCampaignParticipation({ campaignParticipation, userId, domainTransaction });
+      async (domainTransaction) => {
+        const { event, campaignParticipation: campaignParticipationCreated } = await usecases.startCampaignParticipation({ campaignParticipation, userId, domainTransaction });
+        await usecases.incrementCampaignParticipationCounter();
+        return { event, campaignParticipation: campaignParticipationCreated };
       }
     );
 
