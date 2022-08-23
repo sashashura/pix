@@ -4,7 +4,6 @@ const CampaignToStartParticipation = require('../../domain/models/CampaignToStar
 const { AlreadyExistingCampaignParticipationError, NotFoundError } = require('../../domain/errors');
 const skillDatasource = require('../datasources/learning-content/skill-datasource');
 const { knex } = require('../../../db/knex-database-connection');
-const campaignRepository = require('./campaign-repository');
 
 async function save(campaignParticipant, domainTransaction) {
   if (campaignParticipant.organizationLearner) {
@@ -21,10 +20,7 @@ async function save(campaignParticipant, domainTransaction) {
       domainTransaction.knexTransaction
     );
   } else {
-    await campaignRepository.incrementParticipationsCount(
-      campaignParticipant.campaignParticipation.campaignId,
-      domainTransaction
-    );
+    await _incrementCampaignParticipantCounter(campaignParticipant.campaignParticipation.campaignId, domainTransaction.knexTransaction);
   }
   const campaignParticipationId = await _createNewCampaignParticipation(
     campaignParticipant.campaignParticipation,
@@ -35,15 +31,19 @@ async function save(campaignParticipant, domainTransaction) {
   return campaignParticipationId;
 }
 
+function _incrementCampaignParticipantCounter(campaignId, queryBuilder) {
+  return queryBuilder('campaigns').where({ id: campaignId }).increment('participationsCount', 1);
+}
+
 async function _createNewOrganizationLearner(organizationLearner, queryBuilder) {
   const [{ id }] = await queryBuilder('organization-learners')
-    .insert({
-      userId: organizationLearner.userId,
-      organizationId: organizationLearner.organizationId,
-      firstName: organizationLearner.firstName,
-      lastName: organizationLearner.lastName,
-    })
-    .returning('id');
+        .insert({
+          userId: organizationLearner.userId,
+          organizationId: organizationLearner.organizationId,
+          firstName: organizationLearner.firstName,
+          lastName: organizationLearner.lastName,
+        })
+        .returning('id');
   return id;
 }
 

@@ -5,7 +5,6 @@ const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-convert
 const { knex } = require('../../../db/knex-database-connection');
 const knowledgeElementRepository = require('./knowledge-element-repository');
 const knowledgeElementSnapshotRepository = require('./knowledge-element-snapshot-repository');
-const campaignRepository = require('./campaign-repository');
 const CampaignParticipation = require('../../domain/models/CampaignParticipation');
 const DomainTransaction = require('../DomainTransaction');
 const { NotFoundError } = require('../../domain/errors');
@@ -97,7 +96,6 @@ module.exports = {
 
   async updateWithSnapshot(campaignParticipation, domainTransaction = DomainTransaction.emptyTransaction()) {
     await this.update(campaignParticipation, domainTransaction);
-    await campaignRepository.incrementSharedParticipationsCount(campaignParticipation.campaignId, domainTransaction);
 
     const knowledgeElements = await knowledgeElementRepository.findUniqByUserId({
       userId: campaignParticipation.userId,
