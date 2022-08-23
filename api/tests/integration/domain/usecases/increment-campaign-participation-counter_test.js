@@ -34,15 +34,22 @@ describe('Integration | UseCase | increment-campaign-participation-counter', fun
         participationsCount: 1,
       });
       const user = databaseBuilder.factory.buildUser();
+      const organizationLearner = databaseBuilder.factory.buildOrganizationLearner({
+        organizationId: campaign.organizationId,
+        userId: user.id,
+      });
       databaseBuilder.factory.buildCampaignParticipation({
         userId: user.id,
         campaignId: campaign.id,
+        organizationLearnerId: organizationLearner.id,
         isImproved: true,
         sharedAt: new Date(),
       });
       const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
         userId: user.id,
         campaignId: campaign.id,
+        organizationLearnerId: organizationLearner.id,
+
         sharedAt: null,
       });
       await databaseBuilder.commit();
@@ -70,9 +77,14 @@ describe('Integration | UseCase | increment-campaign-participation-counter', fun
         participationsCount: 5,
       });
       const user = databaseBuilder.factory.buildUser();
+      const organizationLearner = databaseBuilder.factory.buildOrganizationLearner({
+        organizationId: campaign.organizationId,
+        userId: user.id,
+      });
       databaseBuilder.factory.buildCampaignParticipation({
         userId: user.id,
         campaignId: campaign.id,
+        organizationLearnerId: organizationLearner.id,
         isImproved: true,
         sharedAt: new Date(),
         deletedAt: new Date(),
@@ -80,6 +92,7 @@ describe('Integration | UseCase | increment-campaign-participation-counter', fun
       const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
         userId: user.id,
         campaignId: campaign.id,
+        organizationLearnerId: organizationLearner.id,
         sharedAt: null,
       });
       await databaseBuilder.commit();

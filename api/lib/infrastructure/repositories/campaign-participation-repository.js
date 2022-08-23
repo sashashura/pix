@@ -111,7 +111,7 @@ module.exports = {
   },
 
   async isRetrying({ campaignParticipationId, domainTransaction = DomainTransaction.emptyTransaction() }) {
-    const knexConn = domainTransaction.knex || knex;
+    const knexConn = domainTransaction.knexTransaction || knex;
     const { campaignId, userId } = await knexConn('campaign-participations')
       .select('campaignId', 'userId')
       .where({ id: campaignParticipationId })
@@ -169,15 +169,30 @@ module.exports = {
     campaignParticipationId,
     domainTransaction,
   }) {
-    const organizationLearnerId = await _getOrganizationLearnerFromCampaignParticipationId({ campaignParticipationId, campaignId, domainTransaction });
+    const organizationLearnerId = await _getOrganizationLearnerFromCampaignParticipationId({
+      campaignParticipationId,
+      campaignId,
+      domainTransaction,
+    });
 
+    return this.getAllCampaignParticipationsInCampaignForOrganizationLearnerId({
+      campaignId,
+      organizationLearnerId,
+      domainTransaction,
+    });
+  },
+
+  async getAllCampaignParticipationsInCampaignForOrganizationLearnerId({
+    campaignId,
+    organizationLearnerId,
+    domainTransaction,
+  }) {
     const campaignParticipations = await domainTransaction.knexTransaction('campaign-participations').where({
       campaignId,
       organizationLearnerId,
       deletedAt: null,
       deletedBy: null,
     });
-
     return campaignParticipations.map((campaignParticipation) => new CampaignParticipation(campaignParticipation));
   },
 
@@ -187,8 +202,13 @@ module.exports = {
   },
 };
 
-async function _getOrganizationLearnerFromCampaignParticipationId({ campaignParticipation, campaignId, domainTransaction }) {
-  const result = await domainTransaction.knexTransaction('campaign-participations')
+async function _getOrganizationLearnerFromCampaignParticipationId({
+  campaignParticipationId,
+  campaignId,
+  domainTransaction,
+}) {
+  const result = await domainTransaction
+    .knexTransaction('campaign-participations')
     .select('organizationLearnerId')
     .where({ id: campaignParticipationId, campaignId })
     .first();

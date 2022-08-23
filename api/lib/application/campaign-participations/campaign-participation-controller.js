@@ -26,7 +26,10 @@ module.exports = {
             userId,
             domainTransaction,
           });
-        await usecases.incrementCampaignParticipationCounter();
+        await usecases.incrementCampaignParticipationCounter({
+          campaignParticipation: campaignParticipationCreated,
+          domainTransaction,
+        });
         return { event, campaignParticipation: campaignParticipationCreated };
       }
     );

@@ -4,11 +4,14 @@ module.exports = async function incrementCampaignParticipationCounter({
   campaignRepository,
   campaignParticipationRepository,
 }) {
-  const isRetrying = await campaignParticipationRepository.isRetrying({
-    campaignParticipationId: campaignParticipation.id,
-    domainTransaction,
-  });
-  if (!isRetrying) {
+  const campaignParticipations =
+    await campaignParticipationRepository.getAllCampaignParticipationsInCampaignForOrganizationLearnerId({
+      campaignId: campaignParticipation.campaignId,
+      organizationLearnerId: campaignParticipation.organizationLearnerId,
+      domainTransaction,
+    });
+
+  if (campaignParticipations.length == 1) {
     return campaignRepository.incrementParticipationsCount(campaignParticipation.campaignId, domainTransaction);
   }
 };
