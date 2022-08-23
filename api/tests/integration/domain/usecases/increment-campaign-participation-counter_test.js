@@ -62,4 +62,41 @@ describe('Integration | UseCase | increment-campaign-participation-counter', fun
       expect(resultCampaign.participationsCount).to.equal(1);
     });
   });
+
+  context('when the user has deleted participations', function () {
+    it('should increment the campaign participationsCount', async function () {
+      // given
+      const campaign = databaseBuilder.factory.buildCampaign({
+        participationsCount: 5,
+      });
+      const user = databaseBuilder.factory.buildUser();
+      databaseBuilder.factory.buildCampaignParticipation({
+        userId: user.id,
+        campaignId: campaign.id,
+        isImproved: true,
+        sharedAt: new Date(),
+        deletedAt: new Date(),
+      });
+      const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
+        userId: user.id,
+        campaignId: campaign.id,
+        sharedAt: null,
+      });
+      await databaseBuilder.commit();
+
+      // when
+      await DomainTransaction.execute(async (domainTransaction) => {
+        await incrementCampaignParticipationCounter({
+          campaignParticipation,
+          campaignRepository,
+          campaignParticipationRepository,
+          domainTransaction,
+        });
+      });
+
+      // then
+      const resultCampaign = await knex('campaigns').where({ id: campaign.id }).first();
+      expect(resultCampaign.participationsCount).to.equal(6);
+    });
+  });
 });
