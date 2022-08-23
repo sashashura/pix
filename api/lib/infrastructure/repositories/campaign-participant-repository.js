@@ -6,54 +6,49 @@ const skillDatasource = require('../datasources/learning-content/skill-datasourc
 const { knex } = require('../../../db/knex-database-connection');
 
 async function save(campaignParticipant, domainTransaction) {
-  if (campaignParticipant.organizationLearner) {
-    const newlyCreatedOrganizationLearnerId = await _createNewOrganizationLearner(
-      campaignParticipant.organizationLearner,
-      domainTransaction.knexTransaction
-    );
+  const newlyCreatedOrganizationLearnerId = await _createNewOrganizationLearner(
+    campaignParticipant.organizationLearner,
+    domainTransaction.knexTransaction
+  );
+  if (newlyCreatedOrganizationLearnerId) {
     campaignParticipant.campaignParticipation.organizationLearnerId = newlyCreatedOrganizationLearnerId;
   }
 
-  if (campaignParticipant.previousCampaignParticipationForUser) {
-    await _updatePreviousParticipation(
-      campaignParticipant.previousCampaignParticipationForUser,
-      domainTransaction.knexTransaction
-    );
-  } else {
-    await _incrementCampaignParticipantCounter(campaignParticipant.campaignParticipation.campaignId, domainTransaction.knexTransaction);
-  }
-  const campaignParticipationId = await _createNewCampaignParticipation(
-    campaignParticipant.campaignParticipation,
+  await _updatePreviousParticipation(
+    campaignParticipant.previousCampaignParticipationForUser,
     domainTransaction.knexTransaction
   );
-
+  const campaignParticipationId = await _createNewCampaignParticipation(
+    domainTransaction.knexTransaction,
+    campaignParticipant.campaignParticipation
+  );
   await _createAssessment(campaignParticipant.assessment, campaignParticipationId, domainTransaction.knexTransaction);
   return campaignParticipationId;
 }
 
-function _incrementCampaignParticipantCounter(campaignId, queryBuilder) {
-  return queryBuilder('campaigns').where({ id: campaignId }).increment('participationsCount', 1);
-}
-
 async function _createNewOrganizationLearner(organizationLearner, queryBuilder) {
-  const [{ id }] = await queryBuilder('organization-learners')
-        .insert({
-          userId: organizationLearner.userId,
-          organizationId: organizationLearner.organizationId,
-          firstName: organizationLearner.firstName,
-          lastName: organizationLearner.lastName,
-        })
-        .returning('id');
-  return id;
+  if (organizationLearner) {
+    const [{ id }] = await queryBuilder('organization-learners')
+      .insert({
+        userId: organizationLearner.userId,
+        organizationId: organizationLearner.organizationId,
+        firstName: organizationLearner.firstName,
+        lastName: organizationLearner.lastName,
+      })
+      .returning('id');
+    return id;
+  }
 }
 
 async function _updatePreviousParticipation(campaignParticipation, queryBuilder) {
-  await queryBuilder('campaign-participations')
-    .update({ isImproved: campaignParticipation.isImproved })
-    .where({ id: campaignParticipation.id });
+  if (campaignParticipation) {
+    await queryBuilder('campaign-participations')
+      .update({ isImproved: campaignParticipation.isImproved })
+      .where({ id: campaignParticipation.id });
+  }
 }
 
-async function _createNewCampaignParticipation(campaignParticipation, queryBuilder) {
+async function _createNewCampaignParticipation(queryBuilder, campaignParticipation) {
   try {
     const [{ id }] = await queryBuilder('campaign-participations')
       .insert({
