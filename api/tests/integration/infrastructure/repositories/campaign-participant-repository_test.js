@@ -2,7 +2,6 @@ const { expect, databaseBuilder, mockLearningContent, catchErr, sinon } = requir
 const { knex } = require('../../../../db/knex-database-connection');
 const campaignParticipantRepository = require('../../../../lib/infrastructure/repositories/campaign-participant-repository');
 const CampaignParticipant = require('../../../../lib/domain/models/CampaignParticipant');
-const CampaignParticipationStatuses = require('../../../../lib/domain/models/CampaignParticipationStatuses');
 const CampaignToStartParticipation = require('../../../../lib/domain/models/CampaignToStartParticipation');
 const pick = require('lodash/pick');
 const { AlreadyExistingCampaignParticipationError, NotFoundError } = require('../../../../lib/domain/errors');
@@ -238,7 +237,7 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
           userId: userIdentity.id,
           campaignId: campaign.id,
           isImproved: false,
-          status: CampaignParticipationStatuses.SHARED,
+          status: 'SHARED',
         });
 
         await databaseBuilder.commit();
@@ -249,7 +248,7 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
           userIdentity,
           previousCampaignParticipationForUser: {
             id: previousCampaignParticipationForUserId,
-            status: CampaignParticipationStatuses.SHARED,
+            status: 'SHARED',
             validatedSkillsCount: 0,
           },
           organizationLearner: {
@@ -310,7 +309,7 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
           userIdentity,
           previousCampaignParticipationForUser: {
             id: previousCampaignParticipationForUserId,
-            status: CampaignParticipationStatuses.SHARED,
+            status: 'SHARED',
             validatedSkillsCount: 0,
           },
           organizationLearner: {
@@ -449,7 +448,7 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
           userIdentity,
           previousCampaignParticipationForUser: {
             id: previousCampaignParticipationForUserId,
-            status: CampaignParticipationStatuses.SHARED,
+            status: 'SHARED',
             validatedSkillsCount: 0,
           },
           organizationLearner: {
@@ -524,14 +523,14 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
           id: 10,
           participantExternalId: 'something',
           validatedSkillsCount: 1,
-          status: CampaignParticipationStatuses.SHARED,
+          status: 'SHARED',
           isDeleted: true,
         };
         databaseBuilder.factory.buildCampaignParticipation({
           id: 10,
           participantExternalId: 'something',
           validatedSkillsCount: 1,
-          status: CampaignParticipationStatuses.SHARED,
+          status: 'SHARED',
           deletedAt: new Date(),
           userId,
           campaignId: campaignToStartParticipation.id,
@@ -948,122 +947,39 @@ describe('Integration | Infrastructure | Repository | CampaignParticipant', func
 
   describe('#delete', function () {
     let clock;
-    let ownerId;
 
-    beforeEach(async function () {
+    beforeEach(function () {
       clock = sinon.useFakeTimers({
         now: Date.now(),
         toFake: ['Date'],
       });
-      ownerId = databaseBuilder.factory.buildUser().id;
-
-      await databaseBuilder.commit();
-    });
+    })
 
     afterEach(function () {
       clock.restore();
     });
 
-    context('with a shared campaign participation', function () {
-      let campaign;
-      let campaignParticipation;
+    it('should remove the campaign participations from the campaign of the organization learner', async function () {
+      // given
+      const ownerId = databaseBuilder.factory.buildUser().id;
+      const campaignParticipation = databaseBuilder.factory.buildCampaignParticipation();
+      await databaseBuilder.commit();
 
-      beforeEach(async function () {
-        campaign = databaseBuilder.factory.buildCampaign({
-          participationsCount: 1,
-          sharedParticipationsCount: 1,
+      // when
+      await DomainTransaction.execute(async (domainTransaction) => {
+        await campaignParticipantRepository.delete({
+          userId: ownerId,
+          campaignId: campaignParticipation.campaignId,
+          organizationLearnerId: campaignParticipation.organizationLearnerId,
+          domainTransaction,
         });
-        campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
-          campaignId: campaign.id,
-        });
-        await databaseBuilder.commit();
       });
 
-      it('should remove the campaign participations from the campaign of the organization learner', async function () {
-        // when
-        await DomainTransaction.execute(async (domainTransaction) => {
-          await campaignParticipantRepository.delete({
-            userId: ownerId,
-            campaignId: campaign.id,
-            organizationLearnerId: campaignParticipation.organizationLearnerId,
-            domainTransaction,
-          });
-        });
+      // then
+      const deletedCampaignParticipation = await knex('campaign-participations').first();
 
-        // then
-        const deletedCampaignParticipation = await knex('campaign-participations').first();
-
-        expect(deletedCampaignParticipation.deletedAt).to.deep.equal(new Date());
-        expect(deletedCampaignParticipation.deletedBy).to.deep.equal(ownerId);
-      });
-
-      it('decrement the campaign participationCount counter', async function () {
-        // when
-        await DomainTransaction.execute(async (domainTransaction) => {
-          await campaignParticipantRepository.delete({
-            userId: ownerId,
-            campaignId: campaign.id,
-            organizationLearnerId: campaignParticipation.organizationLearnerId,
-            domainTransaction,
-          });
-        });
-
-        // then
-        const campaignUpdated = await knex('campaigns').first();
-
-        expect(campaignUpdated.participationsCount).to.equal(0);
-      });
-
-      it('decrement the campaign sharedParticipationsCount counter', async function () {
-        // when
-        await DomainTransaction.execute(async (domainTransaction) => {
-          await campaignParticipantRepository.delete({
-            userId: ownerId,
-            campaignId: campaign.id,
-            organizationLearnerId: campaignParticipation.organizationLearnerId,
-            domainTransaction,
-          });
-        });
-
-        // then
-        const campaignUpdated = await knex('campaigns').first();
-
-        expect(campaignUpdated.sharedParticipationsCount).to.equal(0);
-      });
-    });
-
-    context('with no shared campaign participation', function () {
-      let campaign;
-      let campaignParticipation;
-
-      beforeEach(async function () {
-        campaign = databaseBuilder.factory.buildCampaign({
-          participationsCount: 1,
-          sharedParticipationsCount: 0,
-        });
-        campaignParticipation = databaseBuilder.factory.buildCampaignParticipation({
-          status: CampaignParticipationStatuses.STARTED,
-          campaignId: campaign.id,
-        });
-        await databaseBuilder.commit();
-      });
-
-      it('should not decrement the campaign sharedParticipationsCount counter ', async function () {
-        // when
-        await DomainTransaction.execute(async (domainTransaction) => {
-          await campaignParticipantRepository.delete({
-            userId: ownerId,
-            campaignId: campaign.id,
-            organizationLearnerId: campaignParticipation.organizationLearnerId,
-            domainTransaction,
-          });
-        });
-
-        // then
-        const campaignUpdated = await knex('campaigns').first();
-
-        expect(campaignUpdated.sharedParticipationsCount).to.equal(0);
-      });
+      expect(deletedCampaignParticipation.deletedAt).to.deep.equal(new Date());
+      expect(deletedCampaignParticipation.deletedBy).to.deep.equal(ownerId);
     });
   });
 });
