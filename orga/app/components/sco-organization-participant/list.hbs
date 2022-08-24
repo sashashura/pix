@@ -8,6 +8,7 @@
       <col />
       <col class="table__column--right" />
       <col class="table__column--center" />
+      <col class="table__column--center" />
       <col class="hide-on-mobile" />
     </colgroup>
     <thead>
@@ -26,6 +27,9 @@
         </Table::Header>
         <Table::Header @size="medium" @align="center">
           {{t "pages.sco-organization-participants.table.column.last-participation-date"}}
+        </Table::Header>
+        <Table::Header @size="medium" @align="center">
+          {{t "pages.sco-organization-participants.table.column.is-certifiable.label"}}
         </Table::Header>
         <Table::Header @size="small" class="hide-on-mobile" />
       </tr>
@@ -66,6 +70,7 @@
         <Table::Header class="table__column--right" />
         <Table::Header />
         <Table::Header />
+        <Table::Header />
       </tr>
     </thead>
 
@@ -94,6 +99,15 @@
                     @participationStatus={{student.participationStatus}}
                   />
                 </div>
+              {{/if}}
+            </td>
+            <td class="table__column--center">
+              {{#if student.isCertifiableNotAvailable}}
+                {{t "pages.sco-organization-participants.table.column.is-certifiable.not-available"}}
+              {{else if student.isCertifiable}}
+                <PixTag @color="green-light">{{t "pages.sco-organization-participants.table.column.is-certifiable.eligible"}}</PixTag>
+              {{else}}
+                <PixTag @color="yellow-light">{{t "pages.sco-organization-participants.table.column.is-certifiable.non-eligible"}}</PixTag>
               {{/if}}
             </td>
             <td class="organization-participant-list-page__actions hide-on-mobile">
