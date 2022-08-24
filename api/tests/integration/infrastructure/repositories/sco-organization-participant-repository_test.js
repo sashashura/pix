@@ -349,6 +349,40 @@ describe('Integration | Infrastructure | Repository | sco-organization-participa
         // then
         expect(_.map(data, 'firstName')).to.deep.equal(['Bar']);
       });
+
+      it('should return sco participants filtered by division', async function () {
+        const organizationId = databaseBuilder.factory.buildOrganization().id;
+        const campaignId = databaseBuilder.factory.buildCampaign({
+          organizationId,
+          type: CampaignTypes.PROFILES_COLLECTION,
+        }).id;
+        const organizationLearnerId1 = databaseBuilder.factory.buildOrganizationLearner({ organizationId }).id;
+        const organizationLearnerId2 = databaseBuilder.factory.buildOrganizationLearner({ organizationId }).id;
+
+        databaseBuilder.factory.buildCampaignParticipation({
+          campaignId,
+          organizationLearnerId: organizationLearnerId1,
+          status: CampaignParticipationStatuses.SHARED,
+          sharedAt: new Date('2022-01-01'),
+          isCertifiable: true,
+        });
+        databaseBuilder.factory.buildCampaignParticipation({
+          campaignId,
+          organizationLearnerId: organizationLearnerId2,
+          status: CampaignParticipationStatuses.SHARED,
+          sharedAt: new Date('2022-01-01'),
+          isCertifiable: false,
+        });
+        await databaseBuilder.commit();
+        const { data } = await scoOrganizationParticipantRepository.findPaginatedFilteredScoParticipants({
+          organizationId,
+          filter: { certifiable: true },
+        });
+
+        // then
+        expect(data.length).to.deep.equal(1);
+        expect(data[0].id).to.deep.equal(organizationLearnerId1);
+      });
     });
 
     describe('When sco participant is reconciled and authenticated by email (and/or) username', function () {

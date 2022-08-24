@@ -7,7 +7,7 @@ const ScoOrganizationParticipant = require('../../domain/read-models/ScoOrganiza
 const CampaignTypes = require('../../domain/models/CampaignTypes');
 const CampaignParticipationStatuses = require('../../domain/models/CampaignParticipationStatuses');
 
-function _setFilters(qb, { lastName, firstName, divisions, connexionType } = {}) {
+function _setFilters(qb, { lastName, firstName, divisions, connexionType, certifiable } = {}) {
   if (lastName) {
     qb.whereRaw('LOWER("organization-learners"."lastName") LIKE ?', `%${lastName.toLowerCase()}%`);
   }
@@ -29,6 +29,9 @@ function _setFilters(qb, { lastName, firstName, divisions, connexionType } = {})
   } else if (connexionType === 'mediacentre') {
     // we only retrieve GAR authentication method in join clause
     qb.whereRaw('"authentication-methods"."externalIdentifier" IS NOT NULL');
+  }
+  if (certifiable) {
+    qb.where({ 'subquery.isCertifiable': certifiable });
   }
 }
 
