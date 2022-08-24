@@ -380,6 +380,8 @@ describe('Acceptance | API | Campaign Controller', function () {
         organizationId: organization.id,
         targetProfileId: targetProfile.id,
       });
+      databaseBuilder.factory.buildCampaignSkill({ campaignId: campaign.id, skillId: 'recSkillId1' });
+      databaseBuilder.factory.buildCampaignSkill({ campaignId: campaign.id, skillId: 'recSkillId2' });
       databaseBuilder.factory.buildCampaignParticipation({ campaignId: campaign.id });
 
       await databaseBuilder.commit();

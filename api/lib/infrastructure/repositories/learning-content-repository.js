@@ -6,12 +6,12 @@ const tubeRepository = require('./tube-repository');
 const competenceRepository = require('./competence-repository');
 const LearningContent = require('../../domain/models/LearningContent');
 
-async function findLearningContentByCampaign(campaignId, locale) {
+async function findByCampaignId(campaignId, locale) {
   const skillIds = await knex('campaign_skills').where({ campaignId }).pluck('skillId');
 
-  const { skills, tubes, competences, areas } = await _getLearningContentBySkillIds(skillIds, locale);
+  const areas = await _getLearningContentBySkillIds(skillIds, locale);
 
-  return new LearningContent({ skills, tubes, competences, areas });
+  return new LearningContent(areas);
 }
 
 async function _getLearningContentBySkillIds(skillIds, locale) {
@@ -22,22 +22,35 @@ async function _getLearningContentBySkillIds(skillIds, locale) {
   const tubeIds = _.uniq(skills.map((skill) => skill.tubeId));
   const tubes = await tubeRepository.findActiveByRecordIds(tubeIds, locale);
 
+  tubes.forEach((tube) => {
+    tube.skills = skills.filter((skill) => {
+      return skill.tubeId === tube.id;
+    });
+  });
+
   const competenceIds = _.uniq(tubes.map((tube) => tube.competenceId));
   const competences = await competenceRepository.findByRecordIds({ competenceIds, locale });
+
+  competences.forEach((competence) => {
+    competence.tubes = tubes.filter((tube) => {
+      return tube.competenceId === competence.id;
+    });
+  });
 
   const areas = _.uniqBy(
     competences.map(({ area }) => area),
     'id'
   );
 
-  return {
-    skills,
-    tubes,
-    competences,
-    areas,
-  };
+  areas.forEach((area) => {
+    area.competences = competences.filter((competence) => {
+      return competence.area.id === area.id;
+    });
+  });
+
+  return areas;
 }
 
 module.exports = {
-  findLearningContentByCampaign,
+  findByCampaignId,
 };

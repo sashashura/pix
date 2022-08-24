@@ -8,12 +8,11 @@ class CampaignAnalysis {
     const maxSkillLevelInTargetProfile = targetProfileWithLearningContent.maxSkillDifficulty;
     this.campaignTubeRecommendations = targetProfileWithLearningContent.tubes.map((tube) => {
       const competence = targetProfileWithLearningContent.getCompetence(tube.competenceId);
-      const area = targetProfileWithLearningContent.getArea(competence.areaId);
       const tutorialIds = _.uniq(_.flatMap(tube.skills, 'tutorialIds'));
       const tubeTutorials = _.filter(tutorials, (tutorial) => tutorialIds.includes(tutorial.id));
       return new CampaignTubeRecommendation({
         campaignId: campaignId,
-        area,
+        area: competence.area,
         competence,
         tube,
         maxSkillLevelInTargetProfile,
@@ -71,7 +70,7 @@ class CampaignTubeRecommendation {
   }
 
   get tubeDescription() {
-    return this.tube.description;
+    return this.tube.practicalDescription;
   }
 
   get id() {

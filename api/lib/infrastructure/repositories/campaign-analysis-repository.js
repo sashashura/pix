@@ -9,14 +9,14 @@ const constants = require('../constants');
 const { SHARED } = CampaignParticipationStatuses;
 
 module.exports = {
-  async getCampaignAnalysis(campaignId, targetProfileWithLearningContent, tutorials) {
+  async getCampaignAnalysis(campaignId, learningContent, tutorials) {
     const userIdsAndSharedDates = await _getSharedParticipationsWithUserIdsAndDates(campaignId);
     const userIdsAndSharedDatesChunks = _.chunk(userIdsAndSharedDates, constants.CHUNK_SIZE_CAMPAIGN_RESULT_PROCESSING);
     const participantCount = userIdsAndSharedDates.length;
 
     const campaignAnalysis = new CampaignAnalysis({
       campaignId,
-      targetProfileWithLearningContent,
+      targetProfileWithLearningContent: learningContent, // FIXME TKT
       tutorials,
       participantCount,
     });
@@ -24,7 +24,7 @@ module.exports = {
     await bluebird.mapSeries(userIdsAndSharedDatesChunks, async (userIdsAndSharedDates) => {
       const knowledgeElementsByTube = await knowledgeElementRepository.findValidatedTargetedGroupedByTubes(
         Object.fromEntries(userIdsAndSharedDates),
-        targetProfileWithLearningContent
+        learningContent
       );
       campaignAnalysis.addToTubeRecommendations({ knowledgeElementsByTube });
     });
