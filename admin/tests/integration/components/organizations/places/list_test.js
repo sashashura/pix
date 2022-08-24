@@ -10,12 +10,12 @@ module('Integration | Component | Organizations | Places | List', function (hook
 
   let store;
   let currentUser;
-  let toggleDisplayDeletePlaceLot;
+  let onDelete;
 
   hooks.beforeEach(async function () {
     store = this.owner.lookup('service:store');
     currentUser = this.owner.lookup('service:currentUser');
-    toggleDisplayDeletePlaceLot = sinon.stub();
+    onDelete = sinon.stub();
   });
 
   module('When user is superAdmin', function (hooks) {
@@ -38,11 +38,11 @@ module('Integration | Component | Organizations | Places | List', function (hook
         });
 
         this.set('places', [places]);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
+        this.set('onDelete', onDelete);
 
         // when
         const screen = await render(
-          hbs`<Organizations::Places:List @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+          hbs`<Organizations::Places::List @places={{this.places}} @onDelete={{this.onDelete}}/>`
         );
 
         // then
@@ -65,7 +65,7 @@ module('Integration | Component | Organizations | Places | List', function (hook
         assert.dom(screen.getByText(/Au: 31\/12\/2100/)).exists();
       });
 
-      test('it should display button to add places', async function (assert) {
+      test('it should call onDelete', async function (assert) {
         // given
         const places = store.createRecord('organizationPlace', {
           count: 7777,
@@ -79,41 +79,16 @@ module('Integration | Component | Organizations | Places | List', function (hook
         });
 
         this.set('places', [places]);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
+        this.set('onDelete', onDelete);
 
         // when
         const screen = await render(
-          hbs`<Organizations::Places:List @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
-
-        // then
-        assert.dom(screen.getByText('Supprimer')).exists();
-      });
-
-      test('it should call toggleDisplayDeletePlaceLot', async function (assert) {
-        // given
-        const places = store.createRecord('organizationPlace', {
-          count: 7777,
-          reference: 'FFVII',
-          category: 'FULL_RATE',
-          status: 'ACTIVE',
-          activationDate: '1997-01-31',
-          expirationDate: '2100-12-31',
-          createdAt: '1996-01-12',
-          creatorFullName: 'Hironobu Sakaguchi',
-        });
-
-        this.set('places', [places]);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
-
-        // when
-        const screen = await render(
-          hbs`<Organizations::Places:List @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
+          hbs`<Organizations::Places::List @places={{this.places}} @onDelete={{this.onDelete}}/>`
         );
         await click(screen.getByText('Supprimer'));
 
         // then
-        sinon.assert.calledWith(toggleDisplayDeletePlaceLot, places);
+        sinon.assert.calledWith(onDelete, places);
         assert.ok(true);
       });
     });

@@ -1,6 +1,4 @@
 import { module, test } from 'qunit';
-import { click } from '@ember/test-helpers';
-import sinon from 'sinon';
 import { render } from '@1024pix/ember-testing-library';
 import { setupRenderingTest } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
@@ -10,12 +8,10 @@ module('Integration | Component | Organizations | Places', function (hooks) {
 
   let store;
   let currentUser;
-  let toggleDisplayDeletePlaceLot;
 
   hooks.beforeEach(async function () {
     store = this.owner.lookup('service:store');
     currentUser = this.owner.lookup('service:currentUser');
-    toggleDisplayDeletePlaceLot = sinon.stub();
   });
 
   module('When user is superAdmin', function (hooks) {
@@ -27,12 +23,9 @@ module('Integration | Component | Organizations | Places', function (hooks) {
       test('it should display button to add places', async function (assert) {
         //Given
         this.set('places', []);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
         // when
-        const screen = await render(
-          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
+        const screen = await render(hbs`<Organizations::Places @places={{this.places}} />`);
 
         // then
         assert.dom(screen.getByText('Ajouter des places')).exists();
@@ -43,12 +36,9 @@ module('Integration | Component | Organizations | Places', function (hooks) {
       test('it should display title and no results text', async function (assert) {
         //Given
         this.set('places', []);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
         // when
-        const screen = await render(
-          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
+        const screen = await render(hbs`<Organizations::Places @places={{this.places}} />`);
 
         // then
         assert.dom(screen.getByText('Historique des lots')).exists();
@@ -70,68 +60,13 @@ module('Integration | Component | Organizations | Places', function (hooks) {
         });
 
         this.set('places', [places]);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
         // when
-        const screen = await render(
-          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
+        const screen = await render(hbs`<Organizations::Places @places={{this.places}} />`);
 
         // then
         assert.dom(screen.queryByText('Aucun résultat')).doesNotExist();
         assert.dom(screen.getByText('7777')).exists();
-      });
-
-      test('it should display button to add places', async function (assert) {
-        // given
-        const places = store.createRecord('organizationPlace', {
-          count: 7777,
-          reference: 'FFVII',
-          category: 'FULL_RATE',
-          status: 'ACTIVE',
-          activationDate: '1997-01-31',
-          expirationDate: '2100-12-31',
-          createdAt: '1996-01-12',
-          creatorFullName: 'Hironobu Sakaguchi',
-        });
-
-        this.set('places', [places]);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
-
-        // when
-        const screen = await render(
-          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
-
-        // then
-        assert.dom(screen.getByText('Supprimer')).exists();
-      });
-
-      test('it should call toggleDisplayDeletePlaceLot', async function (assert) {
-        // given
-        const places = store.createRecord('organizationPlace', {
-          count: 7777,
-          reference: 'FFVII',
-          category: 'FULL_RATE',
-          status: 'ACTIVE',
-          activationDate: '1997-01-31',
-          expirationDate: '2100-12-31',
-          createdAt: '1996-01-12',
-          creatorFullName: 'Hironobu Sakaguchi',
-        });
-
-        this.set('places', [places]);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
-
-        // when
-        const screen = await render(
-          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
-        await click(screen.getByText('Supprimer'));
-
-        // then
-        sinon.assert.calledWith(toggleDisplayDeletePlaceLot, places);
-        assert.ok(true);
       });
     });
   });
@@ -145,12 +80,9 @@ module('Integration | Component | Organizations | Places', function (hooks) {
       test('it should not display button to add places', async function (assert) {
         // given
         this.set('places', []);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
         // when
-        const screen = await render(
-          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
+        const screen = await render(hbs`<Organizations::Places @places={{this.places}} />`);
 
         // then
         assert.dom(screen.queryByText('Ajouter des places')).doesNotExist();
@@ -172,12 +104,9 @@ module('Integration | Component | Organizations | Places', function (hooks) {
         });
 
         this.set('places', [places]);
-        this.set('toggleDisplayDeletePlaceLot', toggleDisplayDeletePlaceLot);
 
         // when
-        const screen = await render(
-          hbs`<Organizations::Places @places={{this.places}} @toggleDisplayDeletePlaceLot={{this.toggleDisplayDeletePlaceLot}}/>`
-        );
+        const screen = await render(hbs`<Organizations::Places @places={{this.places}} />`);
 
         // then
         assert.dom(screen.queryByText('Supprimer')).doesNotExist();
