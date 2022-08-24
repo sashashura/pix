@@ -1,8 +1,7 @@
 import { module, test } from 'qunit';
 import { click } from '@ember/test-helpers';
 import setupIntlRenderingTest from '../../../helpers/setup-intl-rendering';
-import { fillByLabel, clickByName } from '@1024pix/ember-testing-library';
-import { render } from '@1024pix/ember-testing-library';
+import { fillByLabel, clickByName, render } from '@1024pix/ember-testing-library';
 import Service from '@ember/service';
 import sinon from 'sinon';
 import hbs from 'htmlbars-inline-precompile';
@@ -88,6 +87,61 @@ module('Integration | Component | ScoOrganizationParticipant::List', function (h
         screen.getByLabelText(
           this.intl.t('pages.participants-list.latest-participation-information-tooltip.aria-label')
         )
+      )
+      .exists();
+  });
+
+  test('it should display participant as eligible for certification', async function (assert) {
+    // given
+    this.set('students', [
+      store.createRecord('sco-organization-participant', {
+        isCertifiable: true,
+      }),
+    ]);
+
+    // when
+    const screen = await render(hbs`<ScoOrganizationParticipant::List @students={{students}} @onFilter={{noop}}/>`);
+
+    // then
+    assert
+      .dom(screen.getByText(this.intl.t('pages.sco-organization-participants.table.column.is-certifiable.eligible')))
+      .exists();
+  });
+
+  test('it should display participant as non eligible for certification', async function (assert) {
+    // given
+    this.set('students', [
+      store.createRecord('sco-organization-participant', {
+        isCertifiable: false,
+      }),
+    ]);
+
+    // when
+    const screen = await render(hbs`<ScoOrganizationParticipant::List @students={{students}} @onFilter={{noop}}/>`);
+
+    // then
+    assert
+      .dom(
+        screen.getByText(this.intl.t('pages.sco-organization-participants.table.column.is-certifiable.non-eligible'))
+      )
+      .exists();
+  });
+
+  test('it should display participant with not available information about eligibility for certification', async function (assert) {
+    // given
+    this.set('students', [
+      store.createRecord('sco-organization-participant', {
+        isCertifiable: null,
+      }),
+    ]);
+
+    // when
+    const screen = await render(hbs`<ScoOrganizationParticipant::List @students={{students}} @onFilter={{noop}}/>`);
+
+    // then
+    assert
+      .dom(
+        screen.getByText(this.intl.t('pages.sco-organization-participants.table.column.is-certifiable.not-available'))
       )
       .exists();
   });
