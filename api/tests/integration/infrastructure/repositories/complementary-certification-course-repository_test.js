@@ -1,4 +1,4 @@
-const { expect, databaseBuilder } = require('../../../test-helper');
+const { expect, databaseBuilder, domainBuilder } = require('../../../test-helper');
 const complementaryCertificationCourseRepository = require('../../../../lib/infrastructure/repositories/complementary-certification-course-repository');
 const { PIX_PLUS_DROIT, PIX_PLUS_EDU_1ER_DEGRE } = require('../../../../lib/domain/models/ComplementaryCertification');
 
@@ -94,6 +94,71 @@ describe('Integration | Repository | complementary-certification-courses-reposit
 
         // then
         expect(hasPixPlusDroit).to.be.undefined;
+      });
+    });
+  });
+
+  describe('#findComplementaryCertificationCourses', function () {
+    it('returns the complementary certification courses', async function () {
+      // given
+      databaseBuilder.factory.buildComplementaryCertification({
+        id: 1,
+        label: 'Pix+ 1',
+        key: 'PIX_PLUS_1',
+      });
+      databaseBuilder.factory.buildComplementaryCertification({
+        id: 2,
+        label: 'Pix+ 2',
+        key: 'PIX_PLUS_2',
+      });
+      databaseBuilder.factory.buildCertificationCourse({ id: 99 });
+      databaseBuilder.factory.buildComplementaryCertificationCourse({
+        id: 999,
+        certificationCourseId: 99,
+        complementaryCertificationId: 2,
+      });
+      databaseBuilder.factory.buildComplementaryCertificationCourse({
+        id: 996,
+        certificationCourseId: 99,
+        complementaryCertificationId: 1,
+      });
+
+      await databaseBuilder.commit();
+
+      // when
+      const result = await complementaryCertificationCourseRepository.findComplementaryCertificationCourses({
+        certificationCourseId: 99,
+      });
+
+      // then
+      expect(result).to.deepEqualArray([
+        domainBuilder.buildComplementaryCertificationCourse({
+          id: 996,
+          certificationCourseId: 99,
+          complementaryCertificationId: 1,
+        }),
+        domainBuilder.buildComplementaryCertificationCourse({
+          id: 999,
+          certificationCourseId: 99,
+          complementaryCertificationId: 2,
+        }),
+      ]);
+    });
+
+    describe('when there is no complementary certification course', function () {
+      it('should return an empty list', async function () {
+        // given
+        databaseBuilder.factory.buildCertificationCourse({ id: 99 });
+
+        await databaseBuilder.commit();
+
+        // when
+        const result = await complementaryCertificationCourseRepository.findComplementaryCertificationCourses({
+          certificationCourseId: 99,
+        });
+
+        // then
+        expect(result).to.deep.equal([]);
       });
     });
   });

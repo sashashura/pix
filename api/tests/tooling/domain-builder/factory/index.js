@@ -65,6 +65,7 @@ module.exports = {
   buildCompetenceTree: require('./build-competence-tree'),
   buildComplementaryCertification: require('./build-complementary-certification'),
   buildComplementaryCertificationBadge: require('./build-complementary-certification-badge'),
+  buildComplementaryCertificationCourse: require('./build-complementary-certification-course'),
   buildComplementaryCertificationHabilitation: require('./build-complementary-certification-habilitation'),
   buildCountry: require('./build-country'),
   buildCourse: require('./build-course'),
