@@ -28,7 +28,7 @@ module('Integration | Component | ScoOrganizationParticipant::List', function (h
     this.owner.register('service:current-user', CurrentUserStub);
   });
 
-  test('it should display the table headers', async function (assert) {
+  test('it should display the filter banner', async function (assert) {
     // given
     this.set('students', []);
 
