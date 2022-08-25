@@ -848,6 +848,11 @@
           "login-method": {
             "aria-label": "Rechercher par méthode de connexion",
             "empty-option": "Tous"
+          },
+          "is-certifiable": {
+            "aria-label": "Rechercher par certifiabilité",
+            "label": "Rechercher par certifiabilité",
+            "empty-option": "Aucune valeur"
           }
         },
         "row-title": "Élève"

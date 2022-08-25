@@ -848,6 +848,11 @@
           "login-method": {
             "aria-label": "Search by log in method",
             "empty-option": "All"
+          },
+          "is-certifiable": {
+            "aria-label": "Search by certificability",
+            "label": "Search by certificability",
+            "empty-option": "No values"
           }
         },
         "row-title": "Student"

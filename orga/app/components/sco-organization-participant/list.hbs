@@ -69,7 +69,16 @@
         />
         <Table::Header class="table__column--right" />
         <Table::Header />
-        <Table::Header />
+        <Table::HeaderFilterMultiSelect
+          @field="certifiable"
+          @title={{t "pages.sco-organization-participants.table.column.is-certifiable.label"}}
+          @onSelect={{@onFilter}}
+          @options={{@certifiableOptions}}
+          @selectedOption={{@certifiableFilter}}
+          @placeholder={{t "pages.sco-organization-participants.table.column.is-certifiable.label"}}
+          @ariaLabel={{t "pages.sco-organization-participants.table.filter.is-certifiable.aria-label"}}
+          @emptyOptionLabel={{t "pages.sco-organization-participants.table.filter.is-certifiable.empty-option"}}
+        />
         <Table::Header />
       </tr>
     </thead>

@@ -16,6 +16,7 @@ export default class ListController extends Controller {
   @tracked lastName = null;
   @tracked firstName = null;
   @tracked divisions = [];
+  @tracked certifiable = [];
   @tracked connexionType = null;
   @tracked pageNumber = null;
   @tracked pageSize = null;
@@ -35,6 +36,19 @@ export default class ListController extends Controller {
     ];
   }
 
+  get certifiableOptions() {
+    return [
+      { value: true, label: this.intl.t('pages.sco-organization-participants.table.column.is-certifiable.eligible') },
+      {
+        value: false,
+        label: this.intl.t('pages.sco-organization-participants.table.column.is-certifiable.non-eligible'),
+      },
+      {
+        value: null,
+        label: this.intl.t('pages.sco-organization-participants.table.column.is-certifiable.not-available'),
+      },
+    ];
+  }
   @action
   async importStudents(files) {
     const adapter = this.store.adapterFor('students-import');
