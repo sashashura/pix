@@ -85,4 +85,24 @@ describe('Unit | Controller | frameworks-controller', function () {
       expect(frameworkAreasSerializer.serialize).to.have.been.calledWithExactly(areas);
     });
   });
+
+  describe('#getFrameworkAreasWithoutThematics', function () {
+    it('should fetch and return framework, serialized as JSONAPI', async function () {
+      // given
+      const frameworkId = 'frameworkId';
+      const request = {
+        params: {
+          id: frameworkId,
+        },
+      };
+
+      // when
+      const result = await frameworksController.getFrameworkAreasWithoutThematics(request);
+
+      // then
+      expect(result).to.equal(serializedAreas);
+      expect(usecases.getFrameworkAreas).to.have.been.calledWithExactly({ frameworkId });
+      expect(frameworkAreasSerializer.serialize).to.have.been.calledWithExactly(areas, { withoutThematics: true });
+    });
+  });
 });

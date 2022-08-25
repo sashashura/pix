@@ -71,6 +71,23 @@ exports.register = async function (server) {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/api/frameworks/{id}/areas',
+      config: {
+        handler: frameworkController.getFrameworkAreasWithoutThematics,
+        validate: {
+          params: Joi.object({
+            id: identifiersType.frameworkId,
+          }),
+        },
+        tags: ['api', 'framework'],
+        notes: [
+          'Cette route est restreinte aux utilisateurs authentifiés',
+          "Elle permet de récupérer tous les domaines d'un référentiel avec leurs compétences",
+        ],
+      },
+    },
   ]);
 };
 

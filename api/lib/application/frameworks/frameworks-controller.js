@@ -18,4 +18,9 @@ module.exports = {
     const framework = await usecases.getFrameworkAreas({ frameworkId });
     return frameworkAreasSerializer.serialize(framework);
   },
+  async getFrameworkAreasWithoutThematics(request) {
+    const frameworkId = request.params.id;
+    const framework = await usecases.getFrameworkAreas({ frameworkId });
+    return frameworkAreasSerializer.serialize(framework, { withoutThematics: true });
+  },
 };
