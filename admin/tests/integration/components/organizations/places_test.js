@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { render } from '@1024pix/ember-testing-library';
+import { render, clickByText } from '@1024pix/ember-testing-library';
 import { setupRenderingTest } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
@@ -67,6 +67,30 @@ module('Integration | Component | Organizations | Places', function (hooks) {
         // then
         assert.dom(screen.queryByText('Aucun résultat')).doesNotExist();
         assert.dom(screen.getByText('7777')).exists();
+      });
+
+      module('display delete places lot modal', function () {
+        test('it should not display button to delete places lot', async function (assert) {
+          // given
+          const places = store.createRecord('organizationPlace', {
+            count: 7777,
+            reference: 'FFVII',
+            category: 'FULL_RATE',
+            status: 'ACTIVE',
+            activationDate: '1997-01-31',
+            expirationDate: '2100-12-31',
+            createdAt: '1996-01-12',
+            creatorFullName: 'Hironobu Sakaguchi',
+          });
+          this.set('places', [places]);
+
+          // when
+          const screen = await render(hbs`<Organizations::Places @places={{this.places}} />`);
+          await clickByText('Supprimer');
+
+          // then
+          assert.dom(screen.getByText('Supprimer un lot de place')).exists();
+        });
       });
     });
   });
