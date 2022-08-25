@@ -3,6 +3,7 @@ import { render, clickByText } from '@1024pix/ember-testing-library';
 import { setupRenderingTest } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import sinon from 'sinon';
+import Service from '@ember/service';
 
 module('Integration | Component | Organizations | Places | Delete-modal', function (hooks) {
   setupRenderingTest(hooks);
@@ -12,10 +13,20 @@ module('Integration | Component | Organizations | Places | Delete-modal', functi
   let organizationId;
   let toggleDisplayModal;
   let showDisplayModal;
+  let notificationSuccessStub;
+  let notificationErrorStub;
 
   hooks.beforeEach(async function () {
-    store = this.owner.lookup('service:store');
+    notificationSuccessStub = sinon.stub();
+    notificationErrorStub = sinon.stub();
+    class NotificationsStub extends Service {
+      success = notificationSuccessStub;
+      error = notificationErrorStub;
+    }
 
+    this.owner.register('service:notifications', NotificationsStub);
+
+    store = this.owner.lookup('service:store');
     places = store.createRecord('organizationPlace', {
       count: 7777,
       reference: 'FFVII',
@@ -98,9 +109,38 @@ module('Integration | Component | Organizations | Places | Delete-modal', functi
       // then
       sinon.assert.calledOnce(places.deleteRecord);
       sinon.assert.calledWith(places.save, { adapterOptions: { organizationId } });
+      sinon.assert.calledOnce(notificationSuccessStub);
       sinon.assert.calledOnce(toggleDisplayModal);
 
-      sinon.assert.callOrder(places.deleteRecord, places.save, toggleDisplayModal)
+      sinon.assert.callOrder(places.deleteRecord, places.save, notificationSuccessStub, toggleDisplayModal);
+      assert.ok(true);
+    });
+
+    test('it should call error notification', async function (assert) {
+      // given
+      this.set('organizationId', organizationId);
+      this.set('places', places);
+      this.set('showDisplayModal', showDisplayModal);
+      this.set('toggleDisplayModal', toggleDisplayModal);
+
+      places.save.throws({ errors: [{ status: '422', title: 'Erreur inconnue' }] });
+
+      // when
+      await render(hbs`<Organizations::Places::DeleteModal
+        @organizationId={{this.organizationId}}
+        @organizationPlacesLot={{this.places}}
+        @show={{this.showDisplayModal}}
+        @toggle={{this.toggleDisplayModal}}
+        />`);
+      await clickByText('Confirmer');
+
+      // then
+      sinon.assert.calledOnce(places.deleteRecord);
+      sinon.assert.calledWith(places.save, { adapterOptions: { organizationId } });
+      sinon.assert.calledOnce(notificationErrorStub);
+      sinon.assert.calledOnce(toggleDisplayModal);
+
+      sinon.assert.callOrder(places.deleteRecord, places.save, notificationErrorStub, toggleDisplayModal);
       assert.ok(true);
     });
   });
