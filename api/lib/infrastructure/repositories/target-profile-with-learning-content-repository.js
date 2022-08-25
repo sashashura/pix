@@ -13,6 +13,7 @@ const skillDatasource = require('../datasources/learning-content/skill-datasourc
 const tubeDatasource = require('../datasources/learning-content/tube-datasource');
 const competenceDatasource = require('../datasources/learning-content/competence-datasource');
 const areaDatasource = require('../datasources/learning-content/area-datasource');
+const skillAdapter = require('../adapters/skill-adapter');
 const { NotFoundError, TargetProfileInvalidError } = require('../../domain/errors');
 const { FRENCH_FRANCE } = require('../../domain/constants').LOCALE;
 const { getTranslatedText } = require('../../domain/services/get-translated-text');
@@ -121,7 +122,8 @@ async function _getTargetedLearningContent(skillIds, locale) {
 async function _findTargetedSkills(skillIds) {
   const learningContentSkills = await skillDatasource.findOperativeByRecordIds(skillIds);
   return learningContentSkills.map((learningContentSkill) => {
-    return new TargetedSkill(learningContentSkill);
+    const skill = learningContentSkill ? skillAdapter.fromDatasourceObject(learningContentSkill) : null;
+    return new TargetedSkill(skill);
   });
 }
 

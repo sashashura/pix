@@ -2,6 +2,7 @@ const _ = require('lodash');
 const bluebird = require('bluebird');
 const BookshelfTargetProfile = require('../orm-models/TargetProfile');
 const skillDatasource = require('../datasources/learning-content/skill-datasource');
+const skillRepository = require('./skill-repository');
 const targetProfileAdapter = require('../adapters/target-profile-adapter');
 const bookshelfToDomainConverter = require('../utils/bookshelf-to-domain-converter');
 const { knex } = require('../../../db/knex-database-connection');
@@ -104,7 +105,7 @@ module.exports = {
       })
       .orderBy('threshold', 'ASC');
 
-    const skills = await skillDatasource.findOperativeByRecordIds(skillIds);
+    const skills = await skillRepository.findOperativeByIds(skillIds);
 
     return _toDomain({ targetProfileDTO, targetProfileSkillIds, targetProfileStages, skills });
   },
