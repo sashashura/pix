@@ -152,10 +152,8 @@ describe('Integration | Application | Organizations | organization-controller', 
         const response = await httpTestServer.request('GET', '/api/organizations/1234/memberships');
 
         // then
-        expect(response.result.included[0].type).to.equal('organizations');
-        expect(response.result.included[0].id).to.equal(`${membership.organization.id}`);
-        expect(response.result.included[1].type).to.equal('users');
-        expect(response.result.included[1].id).to.equal(`${membership.user.id}`);
+        expect(response.result.included[0].type).to.equal('users');
+        expect(response.result.included[0].id).to.equal(`${membership.user.id}`);
       });
     });
   });
