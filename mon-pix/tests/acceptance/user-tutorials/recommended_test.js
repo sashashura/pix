@@ -30,6 +30,21 @@ describe('Acceptance | User-tutorials-v2 | Recommended', function () {
       expect(find('.pix-pagination__navigation').textContent).to.contain('Page 1 / 10');
     });
 
+    describe('when a tutorial is not already saved', function () {
+      it('should saved it when user click on save button', async function () {
+        // given
+        server.createList('tutorial', 1);
+        await visit('/mes-tutos/recommandes');
+
+        // when
+        await click(find('[aria-label="Enregistrer dans ma liste de tutos"]'));
+
+        // then
+        expect(findAll('.tutorial-card-v2')).to.be.lengthOf(1);
+        expect(find('[aria-label="Retirer de ma liste de tutos"]')).to.exist;
+      });
+    });
+
     describe('when a tutorial is saved', function () {
       it('should not remove it from the list when clicking on the remove button', async function () {
         // given
@@ -37,7 +52,7 @@ describe('Acceptance | User-tutorials-v2 | Recommended', function () {
         await visit('/mes-tutos/recommandes');
 
         // when
-        await click(find('[aria-label="Marquer ce tuto comme utile"]'));
+        await click(find('[aria-label="Retirer de ma liste de tutos"]'));
 
         // then
         expect(findAll('.tutorial-card-v2')).to.be.lengthOf(1);
